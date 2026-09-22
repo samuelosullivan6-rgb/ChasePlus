@@ -232,3 +232,8 @@ byte-identical files.
 AI tools (Claude) were used for code cleanup, refactoring and review, and
 to build the chart script. Changes were checked against the invariant
 tests above and by comparing outputs before and after on the same data.
+
+## License
+
+Code is released under the MIT License (see `LICENSE`). Statcast data is
+the property of MLB Advanced Media and is not covered by this license.
