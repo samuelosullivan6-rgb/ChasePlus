@@ -25,13 +25,13 @@ venv/
 # Regenerable data, not source.
 #
 # data/raw/*.parquet is a straight pybaseball/Statcast download
-# (regenerate with `python 02_download_baseline.py`); the raw
+# (regenerate with `python 01_download_baseline.py`); the raw
 # season files alone run several hundred MB, well past what's
 # reasonable to push to GitHub without Git LFS.
 #
 # data/cleaned/*.parquet is derived from data/raw (regenerate with
-# `python 03_build_chase_dataset.py` and `python
-# BuildRunValueTables.py`); baseline_chase_pitches.parquet alone is
+# `python 02_build_chase_dataset.py` and `python
+# 03_build_run_value_tables.py`); baseline_chase_pitches.parquet alone is
 # ~140MB, over GitHub's 100MB hard file-size limit.
 #
 # results/*.csv and results/*.png are kept out of this list on

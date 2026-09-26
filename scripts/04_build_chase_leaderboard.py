@@ -52,7 +52,7 @@ DESIGN CHOICES
     an unfinished season). There is no chase-count floor, because it would
     only ever remove the hitters best at not chasing.
   - Out-of-zone pitches from plate appearances with no run value (almost
-    all walk-off half innings, excluded by BuildRunValueTables.py) are
+    all walk-off half innings, excluded by 03_build_run_value_tables.py) are
     dropped rather than priced at zero. Those plate appearances still
     count in each hitter's PA total (about 0.4% of PAs).
   - Every hitter-season is shrunk toward its season's mean
@@ -73,14 +73,25 @@ Outputs: results/chase_cost_leaderboard_<season>.csv (one per season)
 Console output (presentation only; calculations, checks and saved files
 are identical in every mode, and warnings/errors always print):
 
-    python scripts/buildchaseleaderboard.py                season summary,
+    python scripts/04_build_chase_leaderboard.py                season summary,
         leaderboards, rank comparison, warnings, saved files
-    python scripts/buildchaseleaderboard.py --diagnostics  + numerical
+    python scripts/04_build_chase_leaderboard.py --diagnostics  + numerical
         diagnostic tables
-    python scripts/buildchaseleaderboard.py --verbose      + explanations
+    python scripts/04_build_chase_leaderboard.py --verbose      + explanations
         and progress messages
 
-check_chase_invariants.py reads several settings below with the ast
+xChase+ (a second run, not a display mode):
+
+    python scripts/04_build_chase_leaderboard.py --expected-contact
+
+prices every chase put in play at its expected value from Savant's xwOBA
+instead of the plate appearance's actual run value. Everything else (takes,
+whiffs, fouls, the called-strike model, baselines, floors, shrinkage,
+Chase+ scaling) is the same code. Its outputs go to results/xchase/ and
+data/cleaned/xchase_costs_by_pitch.parquet, so the Chase+ files are never
+touched. 09_build_xchase_comparison.py then lines the two runs up.
+
+07_check_chase_invariants.py reads several settings below with the ast
 module. Keep them as plain top-level NAME = <literal> assignments.
 """
 
@@ -107,15 +118,19 @@ from sklearn.preprocessing import SplineTransformer, StandardScaler
 # (or raise) and show in every mode.
 # --------------------------------------------------
 
-def parse_display_level():
-    """0 = concise (default), 1 = --diagnostics, 2 = --verbose."""
+def parse_command_line():
+    """
+    Returns (display level, expected contact). Display level: 0 = concise
+    (default), 1 = --diagnostics, 2 = --verbose.
+    """
 
     parser = argparse.ArgumentParser(
         description=(
             "Build the per-season chase cost leaderboards and Chase+. "
-            "The flags only change what is printed: every calculation, "
-            "check and saved file is the same in all modes, and warnings "
-            "always print."
+            "--diagnostics and --verbose only change what is printed: "
+            "every calculation, check and saved file is the same in all "
+            "modes, and warnings always print. --expected-contact is "
+            "different: it builds xChase+ into results/xchase/."
         )
     )
     parser.add_argument(
@@ -131,19 +146,27 @@ def parse_display_level():
         help="everything in --diagnostics plus detailed explanations and "
              "progress messages (wins if both flags are given)",
     )
+    parser.add_argument(
+        "--expected-contact",
+        action="store_true",
+        help="xChase+: price chases put in play at their expected value "
+             "from Savant's xwOBA instead of the actual result, and write "
+             "everything to results/xchase/ instead of results/",
+    )
 
     arguments = parser.parse_args()
 
     if arguments.verbose:
-        return 2
+        level = 2
+    elif arguments.diagnostics:
+        level = 1
+    else:
+        level = 0
 
-    if arguments.diagnostics:
-        return 1
-
-    return 0
+    return level, arguments.expected_contact
 
 
-DISPLAY_LEVEL = parse_display_level()
+DISPLAY_LEVEL, EXPECTED_CONTACT = parse_command_line()
 
 
 def show_diagnostic(*values):
@@ -266,6 +289,11 @@ OUT_OF_FOLD_GAP_SHARE_OF_OPTIMISM = 0.25
 # Calibration cells more than this many standard errors off are flagged.
 CALIBRATION_Z_WARNING = 3.0
 
+# xChase+ only (--expected-contact): a warning prints if more than this
+# share of a season's chases put in play have no xwOBA (those keep their
+# actual value).
+MISSING_XWOBA_WARNING_SHARE = 0.01
+
 
 # --------------------------------------------------
 # FILE LOCATIONS
@@ -295,20 +323,30 @@ EVENT_VALUE_FILE = RESULTS_DIR / "run_value_by_event.csv"
 # career table (the same hitters added up over the seasons they qualified).
 SEASON_LEADERBOARD_NAME = "chase_cost_leaderboard_{season}.csv"
 
-OUTPUT_BY_SEASON = RESULTS_DIR / "chase_cost_leaderboard_by_season.csv"
-OUTPUT_CAREER = RESULTS_DIR / "chase_cost_leaderboard.csv"
-OUTPUT_PITCH_COSTS = CLEAN_DIR / "chase_costs_by_pitch.parquet"
+# The xChase+ run writes the same files under results/xchase/ (the inputs
+# above still come from results/), so it can never overwrite Chase+.
+if EXPECTED_CONTACT:
+    OUTPUT_DIR = RESULTS_DIR / "xchase"
+    OUTPUT_PITCH_COSTS = CLEAN_DIR / "xchase_costs_by_pitch.parquet"
+else:
+    OUTPUT_DIR = RESULTS_DIR
+    OUTPUT_PITCH_COSTS = CLEAN_DIR / "chase_costs_by_pitch.parquet"
+
+OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+
+OUTPUT_BY_SEASON = OUTPUT_DIR / "chase_cost_leaderboard_by_season.csv"
+OUTPUT_CAREER = OUTPUT_DIR / "chase_cost_leaderboard.csv"
 
 # Diagnostic tables: the called-strike model on takes it never saw, and
 # the Chase+ scale for each season.
-OUTPUT_CALLED_STRIKE_CHECK = RESULTS_DIR / "called_strike_model_check.csv"
-OUTPUT_CHASE_PLUS_SCALE = RESULTS_DIR / "chase_plus_league_scale.csv"
+OUTPUT_CALLED_STRIKE_CHECK = OUTPUT_DIR / "called_strike_model_check.csv"
+OUTPUT_CHASE_PLUS_SCALE = OUTPUT_DIR / "chase_plus_league_scale.csv"
 
 
 def fingerprint_of(paths):
     """
     Short hash of the given files (names and contents). Written into the
-    diagnostic tables so check_chase_invariants.py can tell whether the
+    diagnostic tables so 07_check_chase_invariants.py can tell whether the
     results on disk came from the current script and data.
     """
 
@@ -345,6 +383,12 @@ if DISPLAY_LEVEL == 0:
     print(
         "Chase leaderboard (concise output; add --diagnostics or --verbose "
         "for more)"
+    )
+
+if EXPECTED_CONTACT:
+    print(
+        "xChase+ run (--expected-contact): chases put in play are priced "
+        "from xwOBA. Writing to results/xchase/."
     )
 
 show_detail(f"Run fingerprint (this script + the files it reads): {RUN_FINGERPRINT}")
@@ -426,6 +470,11 @@ wanted_pitch_columns = [
     "sz_top",
     "sz_bot",
 ]
+
+# Only the xChase+ run reads xwOBA, so the Chase+ run loads exactly what
+# it always has.
+if EXPECTED_CONTACT:
+    wanted_pitch_columns.append("estimated_woba_using_speedangle")
 
 df = pd.read_parquet(PITCH_FILE, columns=wanted_pitch_columns)
 
@@ -1026,7 +1075,13 @@ def calibration_check_row(year, check_name, group, row):
 
 called_strike_check_rows = []
 
-if RUN_OUT_OF_FOLD_CHECK:
+# The called-strike model is identical in the xChase+ run, so this check
+# gives the same numbers there. It still runs, so results/xchase/ has
+# every file results/ has (07_check_chase_invariants.py --expected-contact
+# reads it).
+run_out_of_fold_check = RUN_OUT_OF_FOLD_CHECK
+
+if run_out_of_fold_check:
 
     show_diagnostic_header(
         "CALLED-STRIKE MODEL ON TAKES IT NEVER SAW (out of fold, by game)"
@@ -1404,6 +1459,128 @@ opportunities.loc[is_foul, "value_if_swung"] = (
 opportunities.loc[is_in_play, "value_if_swung"] = (
     opportunities.loc[is_in_play, "plate_appearance_value"]
 )
+
+
+# --------------------------------------------------
+# xChase+ ONLY: WHAT THE CONTACT SHOULD HAVE PRODUCED
+#
+# With --expected-contact, a chase put in play is priced by how it was hit
+# rather than where it landed. Within each season, the actual plate
+# appearance value of the chases put in play is fit as a straight line in
+# Savant's xwOBA:
+#
+#   expected in-play value = intercept + slope * xwOBA
+#
+# and the fitted line replaces the actual value. The slope is 1 / wOBA
+# scale in this project's own RE24 units (published scales are about
+# 1.2-1.25), so there is no outside constant to keep up to date.
+#
+# Least squares with an intercept makes the fitted values average exactly
+# to the actual ones, so each season's league chase cost, and with it the
+# Chase+ scale, is the same as the Chase+ run. Only which hitters got the
+# runs moves.
+#
+# The fitted line is context neutral, like the takes, so errors, fielder's
+# choices and double plays are averaged in rather than charged to the
+# hitter. Chase+ minus xChase+ is contact luck plus the base-out context
+# of those plate appearances.
+#
+# Balls in play with no xwOBA (bunts, untracked balls) keep their actual
+# value and are counted.
+# --------------------------------------------------
+
+if EXPECTED_CONTACT:
+
+    opportunities["xwoba"] = pd.to_numeric(
+        opportunities["estimated_woba_using_speedangle"],
+        errors="coerce"
+    )
+
+    xwoba_fit_rows = []
+
+    for season in sorted(opportunities["game_year"].unique()):
+
+        in_season = (opportunities["game_year"] == season).to_numpy()
+
+        season_in_play = is_in_play.to_numpy() & in_season
+
+        has_xwoba = (
+            season_in_play
+            & opportunities["xwoba"].notna().to_numpy()
+        )
+
+        in_play_count = int(season_in_play.sum())
+        missing_count = in_play_count - int(has_xwoba.sum())
+
+        if has_xwoba.sum() < 1000:
+            raise RuntimeError(
+                f"{season}: only {int(has_xwoba.sum()):,} chases put in "
+                "play have an xwOBA. Rebuild the cleaned data with "
+                "02_build_chase_dataset.py so it keeps "
+                "estimated_woba_using_speedangle."
+            )
+
+        season_xwoba = opportunities.loc[has_xwoba, "xwoba"].to_numpy()
+        season_actual = (
+            opportunities.loc[has_xwoba, "plate_appearance_value"]
+            .to_numpy()
+        )
+
+        slope, intercept = np.polyfit(season_xwoba, season_actual, 1)
+
+        if slope <= 0:
+            raise RuntimeError(
+                f"{season}: the xwOBA line has a slope of {slope:.4f}. "
+                "More xwOBA has to mean more runs; check the column."
+            )
+
+        fitted = intercept + slope * season_xwoba
+
+        opportunities.loc[has_xwoba, "value_if_swung"] = fitted
+
+        xwoba_fit_rows.append({
+            "game_year": int(season),
+            "chases_in_play": in_play_count,
+            "without_xwoba": missing_count,
+            "intercept": intercept,
+            "slope": slope,
+            "implied_woba_scale": 1 / slope,
+            "r_squared": np.corrcoef(season_xwoba, season_actual)[0, 1] ** 2,
+            "actual_mean": season_actual.mean(),
+            "fitted_mean": fitted.mean(),
+        })
+
+        if missing_count > MISSING_XWOBA_WARNING_SHARE * in_play_count:
+            print()
+            print(
+                f"WARNING: {season}: {missing_count:,} of "
+                f"{in_play_count:,} chases put in play have no xwOBA "
+                f"({missing_count / in_play_count:.1%}). They keep their "
+                "actual value."
+            )
+
+    xwoba_fit = pd.DataFrame(xwoba_fit_rows)
+
+    # Least squares guarantees this. If it fails, the fit is wired wrong.
+    if not np.allclose(
+        xwoba_fit["actual_mean"],
+        xwoba_fit["fitted_mean"],
+        rtol=0,
+        atol=1e-9
+    ):
+        raise RuntimeError(
+            "The xwOBA fit does not preserve the average in-play value."
+        )
+
+    show_diagnostic_header("xChase+: IN-PLAY CHASES PRICED FROM xwOBA")
+    show_diagnostic()
+    show_diagnostic(xwoba_fit.round(4).to_string(index=False))
+    show_detail()
+    show_detail(
+        "implied_woba_scale is 1 / slope. r_squared is how much of the "
+        "actual in-play value xwOBA explains; the rest is what xChase+ "
+        "treats as luck and context."
+    )
 
 
 # --------------------------------------------------
@@ -3222,6 +3399,23 @@ output_columns = [
     if column in qualified.columns
 ]
 
+def columns_for_saving(table):
+    """
+    In the xChase+ run the Chase+ columns are saved as xChase+ columns
+    (chase_plus -> xchase_plus, chase_plus_se -> xchase_plus_se, ...), so a
+    file from results/xchase/ can never be mistaken for a Chase+ file.
+    Everything above this point still uses the chase_plus names; only the
+    saved files change. The Chase+ run saves the names unchanged.
+    """
+
+    if not EXPECTED_CONTACT:
+        return table
+
+    return table.rename(
+        columns=lambda name: name.replace("chase_plus", "xchase_plus")
+    )
+
+
 by_season_table = (
     qualified[output_columns]
     .sort_values(
@@ -3230,20 +3424,19 @@ by_season_table = (
     )
 )
 
-by_season_table.to_csv(OUTPUT_BY_SEASON, index=False)
+columns_for_saving(by_season_table).to_csv(OUTPUT_BY_SEASON, index=False)
 
 written_files = [OUTPUT_BY_SEASON]
 
 for season in seasons:
 
-    season_file = RESULTS_DIR / SEASON_LEADERBOARD_NAME.format(
+    season_file = OUTPUT_DIR / SEASON_LEADERBOARD_NAME.format(
         season=int(season)
     )
 
-    (
+    columns_for_saving(
         by_season_table[by_season_table["game_year"] == season]
-        .to_csv(season_file, index=False)
-    )
+    ).to_csv(season_file, index=False)
 
     written_files.append(season_file)
 
@@ -3282,11 +3475,10 @@ career_columns = [
     if column in career.columns
 ]
 
-(
+columns_for_saving(
     career[career_columns]
     .sort_values("runs_saved_shrunk", ascending=False)
-    .to_csv(OUTPUT_CAREER, index=False)
-)
+).to_csv(OUTPUT_CAREER, index=False)
 
 written_files.append(OUTPUT_CAREER)
 
@@ -3320,8 +3512,8 @@ written_files.append(OUTPUT_PITCH_COSTS)
 
 # These two are written last and carry the run fingerprint, so a results
 # folder can be checked against the current script and data
-# (check_chase_invariants.py does that).
-chase_plus_scale.assign(run_fingerprint=RUN_FINGERPRINT).to_csv(
+# (07_check_chase_invariants.py does that).
+columns_for_saving(chase_plus_scale).assign(run_fingerprint=RUN_FINGERPRINT).to_csv(
     OUTPUT_CHASE_PLUS_SCALE,
     index=False
 )

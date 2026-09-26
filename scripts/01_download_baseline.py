@@ -7,7 +7,7 @@ unless they look truncated. A manifest of every chunk is written to
 data/raw/download_manifest.csv.
 
 The script stops with an error if any date range could not be downloaded,
-so 03_build_chase_dataset.py is never run on a dataset with holes in it.
+so 02_build_chase_dataset.py is never run on a dataset with holes in it.
 """
 
 import time

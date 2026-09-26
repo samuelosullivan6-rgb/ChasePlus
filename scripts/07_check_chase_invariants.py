@@ -1,21 +1,25 @@
 """
 Invariant checks for the chase leaderboard outputs.
 
-Checks what has to be true if every part of buildchaseleaderboard.py agrees
+Checks what has to be true if every part of 04_build_chase_leaderboard.py agrees
 with every other part. It only reads what that script wrote (plus the
 cleaned pitch file for plate appearance counts), and rebuilds the key
 numbers from the pitch level instead of trusting the leaderboard's own
 arithmetic.
 
-    python scripts/check_chase_invariants.py           run all checks
-    python scripts/check_chase_invariants.py --rerun   also rerun the
+    python scripts/07_check_chase_invariants.py           run all checks
+    python scripts/07_check_chase_invariants.py --rerun   also rerun the
         leaderboard script and check it writes byte-identical files
+    python scripts/07_check_chase_invariants.py --expected-contact
+        the same checks on the xChase+ run (results/xchase/ and
+        data/cleaned/xchase_costs_by_pitch.parquet); add --rerun too to
+        rerun 04_build_chase_leaderboard.py --expected-contact
 
 Every check is a plain function named test_..., so pytest can collect this
 file too, but pytest is not required.
 
 The settings (floors, the cost-per-chase minimum, bucket names, ...) are
-read straight out of buildchaseleaderboard.py with the ast module, so the
+read straight out of 04_build_chase_leaderboard.py with the ast module, so the
 two files can never disagree about the rules.
 """
 
@@ -38,22 +42,50 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 CLEAN_DIR = PROJECT_DIR / "data" / "cleaned"
 RESULTS_DIR = PROJECT_DIR / "results"
 
-LEADERBOARD_SCRIPT = SCRIPT_DIR / "buildchaseleaderboard.py"
+LEADERBOARD_SCRIPT = SCRIPT_DIR / "04_build_chase_leaderboard.py"
 
-PITCH_COSTS = CLEAN_DIR / "chase_costs_by_pitch.parquet"
+# Which run to check. The xChase+ run keeps its outputs in results/xchase/
+# and its pitch table in xchase_costs_by_pitch.parquet; the run value
+# tables and the cleaned pitch file are shared by both runs.
+EXPECTED_CONTACT = "--expected-contact" in sys.argv
+
+if EXPECTED_CONTACT:
+    OUTPUT_DIR = RESULTS_DIR / "xchase"
+    PITCH_COSTS = CLEAN_DIR / "xchase_costs_by_pitch.parquet"
+else:
+    OUTPUT_DIR = RESULTS_DIR
+    PITCH_COSTS = CLEAN_DIR / "chase_costs_by_pitch.parquet"
+
 PITCH_FILE = CLEAN_DIR / "baseline_chase_pitches.parquet"
 PA_VALUE_FILE = CLEAN_DIR / "plate_appearance_run_values.parquet"
-HITTER_VALUE = RESULTS_DIR / "hitter_value_leaderboard.csv"
-RELIABILITY = RESULTS_DIR / "chase_value_reliability.csv"
-BY_SEASON = RESULTS_DIR / "chase_cost_leaderboard_by_season.csv"
-CAREER = RESULTS_DIR / "chase_cost_leaderboard.csv"
-SCALE = RESULTS_DIR / "chase_plus_league_scale.csv"
-CALLED_STRIKE_CHECK = RESULTS_DIR / "called_strike_model_check.csv"
+HITTER_VALUE = OUTPUT_DIR / "hitter_value_leaderboard.csv"
+RELIABILITY = OUTPUT_DIR / "chase_value_reliability.csv"
+BY_SEASON = OUTPUT_DIR / "chase_cost_leaderboard_by_season.csv"
+CAREER = OUTPUT_DIR / "chase_cost_leaderboard.csv"
+SCALE = OUTPUT_DIR / "chase_plus_league_scale.csv"
+CALLED_STRIKE_CHECK = OUTPUT_DIR / "called_strike_model_check.csv"
 COUNT_VALUES = RESULTS_DIR / "run_value_by_count.csv"
 EVENT_VALUES = RESULTS_DIR / "run_value_by_event.csv"
 
 # Floating point slack for "equal"
 TOLERANCE = 1e-8
+
+
+def read_results(path):
+    """
+    Read a results CSV. The xChase+ run saves its Chase+ columns as
+    xchase_plus, xchase_plus_se, ...; they are read back under the
+    chase_plus names so every check below works on either run.
+    """
+
+    table = pd.read_csv(path)
+
+    if EXPECTED_CONTACT:
+        table = table.rename(
+            columns=lambda name: name.replace("xchase_plus", "chase_plus")
+        )
+
+    return table
 
 
 def read_settings(names):
@@ -133,13 +165,13 @@ def plate_appearances():
 
 def by_season():
     if "by_season" not in _cache:
-        _cache["by_season"] = pd.read_csv(BY_SEASON)
+        _cache["by_season"] = read_results(BY_SEASON)
     return _cache["by_season"]
 
 
 def career():
     if "career" not in _cache:
-        _cache["career"] = pd.read_csv(CAREER)
+        _cache["career"] = read_results(CAREER)
     return _cache["career"]
 
 
@@ -220,7 +252,7 @@ def dersimonian_laird(effects, standard_errors):
 
 
 def fingerprint_of(paths):
-    """Same hash buildchaseleaderboard.py writes into its diagnostic tables."""
+    """Same hash 04_build_chase_leaderboard.py writes into its diagnostic tables."""
 
     digest = hashlib.sha256()
 
@@ -360,7 +392,7 @@ def test_league_average_chase_plus_is_100():
         average = np.average(season["chase_plus_raw"], weights=season["plate_appearances"])
         assert abs(average - 100) < 1e-6, f"{year}: league Chase+ is {average}"
 
-    scale_file = pd.read_csv(SCALE)
+    scale_file = read_results(SCALE)
     assert (scale_file["league_average_chase_plus"] - 100).abs().max() < 1e-6, (
         "the scale file does not report a league Chase+ of 100"
     )
@@ -550,13 +582,13 @@ def test_keys_are_unique_and_tables_agree():
         "career and season tables have different hitters"
     )
 
-    scale_counts = pd.read_csv(SCALE).set_index("game_year")["qualified"]
+    scale_counts = read_results(SCALE).set_index("game_year")["qualified"]
     assert (scale_counts == board.groupby("game_year").size()).all(), (
         "the scale file counts a different number of qualified hitters"
     )
 
     if HITTER_VALUE.exists():
-        offense = pd.read_csv(HITTER_VALUE)
+        offense = read_results(HITTER_VALUE)
         assert not offense.duplicated(["batter", "game_year"]).any(), (
             "a hitter-season appears twice in hitter_value_leaderboard.csv"
         )
@@ -570,7 +602,7 @@ def test_outputs_match_this_script_and_data():
     scale_prints = set(pd.read_csv(SCALE)["run_fingerprint"])
     assert scale_prints == {current}, (
         "the results were not written by the current script and data "
-        "-- rerun buildchaseleaderboard.py"
+        "-- rerun 04_build_chase_leaderboard.py"
     )
 
     if SETTINGS["RUN_OUT_OF_FOLD_CHECK"]:
@@ -613,7 +645,7 @@ def test_per_season_files_match_the_stacked_file():
 
     pieces = pd.concat(
         [
-            pd.read_csv(RESULTS_DIR / f"chase_cost_leaderboard_{int(year)}.csv")
+            read_results(OUTPUT_DIR / f"chase_cost_leaderboard_{int(year)}.csv")
             for year in sorted(stacked["game_year"].unique())
         ],
         ignore_index=True
@@ -650,6 +682,29 @@ def test_one_season_careers_match_their_season():
         assert close(merged[f"{column}_career"], merged[f"{column}_season"]), f"{column} differs"
 
 
+def test_column_names_match_the_run():
+    """
+    Chase+ files use chase_plus names, xChase+ files xchase_plus names, so
+    the two can't be mixed up. (Read raw here, without read_results.)
+    """
+
+    for path in [BY_SEASON, CAREER, SCALE, HITTER_VALUE]:
+        if not path.exists():
+            continue
+
+        columns = pd.read_csv(path, nrows=0).columns
+        plus_columns = [name for name in columns if "chase_plus" in name]
+
+        # "xchase_plus" can sit anywhere in a name (qualified_mean_xchase_plus)
+        if EXPECTED_CONTACT:
+            wrong = [name for name in plus_columns if "xchase_plus" not in name]
+        else:
+            wrong = [name for name in plus_columns if "xchase_plus" in name]
+
+        assert plus_columns, f"{path.name} has no Chase+ columns at all"
+        assert not wrong, f"{path.name} has columns from the other run: {wrong}"
+
+
 def test_downstream_files_match_the_leaderboard():
     """
     The fingerprint only covers the leaderboard script's own files, so the
@@ -659,23 +714,23 @@ def test_downstream_files_match_the_leaderboard():
     board = by_season()
 
     assert HITTER_VALUE.exists(), (
-        "hitter_value_leaderboard.csv is missing -- rerun BuildHitterValueLeaderboard.py"
+        "hitter_value_leaderboard.csv is missing -- rerun 05_build_hitter_value_leaderboard.py"
     )
     assert RELIABILITY.exists(), (
-        "chase_value_reliability.csv is missing -- rerun BuildChaseReliability.py"
+        "chase_value_reliability.csv is missing -- rerun 06_build_chase_reliability.py"
     )
 
-    offense = pd.read_csv(HITTER_VALUE)
+    offense = read_results(HITTER_VALUE)
     joined = offense.merge(board, on=["batter", "game_year"], how="inner", suffixes=("", "_board"))
     with_chase = offense["runs_saved_shrunk"].notna().sum()
     assert len(joined) == len(board) == with_chase, (
         "hitter_value_leaderboard.csv does not carry exactly the qualified chase hitter-seasons "
-        "-- rerun BuildHitterValueLeaderboard.py"
+        "-- rerun 05_build_hitter_value_leaderboard.py"
     )
     for column in ["chase_rate", "chases", "cost_per_chase", "cost_per_chase_se", "runs_saved_shrunk",
                    "chase_plus", "runs_saved_vs_anchor_shrunk"]:
         assert close(joined[column], joined[f"{column}_board"]), (
-            f"hitter_value_leaderboard.csv has a stale {column} -- rerun BuildHitterValueLeaderboard.py"
+            f"hitter_value_leaderboard.csv has a stale {column} -- rerun 05_build_hitter_value_leaderboard.py"
         )
 
     pairs = pd.read_csv(RELIABILITY)
@@ -684,7 +739,7 @@ def test_downstream_files_match_the_leaderboard():
     expected_pairs = {(a, b) for a, b in zip(seasons, seasons[1:])}
     assert set(zip(pairs["first_season"], pairs["second_season"])) == expected_pairs, (
         "chase_value_reliability.csv does not cover every pair of consecutive seasons "
-        "-- rerun BuildChaseReliability.py"
+        "-- rerun 06_build_chase_reliability.py"
     )
 
     for _, row in pairs.iterrows():
@@ -692,28 +747,28 @@ def test_downstream_files_match_the_leaderboard():
         second = board[board["game_year"] == row["second_season"]]
         both = first.merge(second, on="batter", suffixes=("_1", "_2"))
         assert len(both) == row["hitters"], (
-            "chase_value_reliability.csv has a stale hitter count -- rerun BuildChaseReliability.py"
+            "chase_value_reliability.csv has a stale hitter count -- rerun 06_build_chase_reliability.py"
         )
         value_r = both["runs_saved_per_600_pa_1"].corr(both["runs_saved_per_600_pa_2"])
         rate_r = both["chase_rate_1"].corr(both["chase_rate_2"])
         assert abs(value_r - row["value_correlation"]) < 1e-9, (
-            "chase_value_reliability.csv is stale -- rerun BuildChaseReliability.py"
+            "chase_value_reliability.csv is stale -- rerun 06_build_chase_reliability.py"
         )
         assert abs(rate_r - row["chase_rate_correlation"]) < 1e-9, (
-            "chase_value_reliability.csv is stale -- rerun BuildChaseReliability.py"
+            "chase_value_reliability.csv is stale -- rerun 06_build_chase_reliability.py"
         )
         value_rho = both["runs_saved_per_600_pa_1"].corr(
             both["runs_saved_per_600_pa_2"], method="spearman"
         )
         assert abs(value_rho - row["value_spearman"]) < 1e-9, (
             "chase_value_reliability.csv has a stale value_spearman "
-            "-- rerun BuildChaseReliability.py"
+            "-- rerun 06_build_chase_reliability.py"
         )
         # Spearman-Brown for twice the data, the way the script writes it
         projected = value_r if value_r <= 0 else 2 * value_r / (1 + value_r)
         assert abs(projected - row["value_projected_two_seasons"]) < 1e-9, (
             "chase_value_reliability.csv has a stale value_projected_two_seasons "
-            "-- rerun BuildChaseReliability.py"
+            "-- rerun 06_build_chase_reliability.py"
         )
 
 
@@ -817,7 +872,7 @@ OUTPUTS_TO_HASH = [
     SCALE,
     CALLED_STRIKE_CHECK,
     PITCH_COSTS,
-] + sorted(RESULTS_DIR.glob("chase_cost_leaderboard_20*.csv"))
+] + sorted(OUTPUT_DIR.glob("chase_cost_leaderboard_20*.csv"))
 
 
 def fingerprint():
@@ -832,7 +887,12 @@ def fingerprint():
 
 def rerun_is_identical():
     before = fingerprint()
-    subprocess.run([sys.executable, str(LEADERBOARD_SCRIPT)], check=True, stdout=subprocess.DEVNULL)
+    command = [sys.executable, str(LEADERBOARD_SCRIPT)]
+
+    if EXPECTED_CONTACT:
+        command.append("--expected-contact")
+
+    subprocess.run(command, check=True, stdout=subprocess.DEVNULL)
     after = fingerprint()
     changed = [name for name in before if before[name] != after.get(name)]
     assert not changed, f"a rerun changed {changed}"
@@ -853,6 +913,10 @@ if __name__ == "__main__":
 
     if "--rerun" in sys.argv:
         checks.append(("rerun_is_identical", rerun_is_identical))
+
+    if EXPECTED_CONTACT:
+        print("Checking the xChase+ run (results/xchase/).")
+        print()
 
     failures = 0
 

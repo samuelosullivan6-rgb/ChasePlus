@@ -24,8 +24,13 @@ Inputs:  results/chase_cost_leaderboard_by_season.csv
          data/cleaned/chase_costs_by_pitch.parquet (count chart only; that
          chart is skipped if the file is missing)
 Outputs: results/figures/*.png
+
+With --expected-contact it draws the same charts and tables for xChase+:
+inputs come from results/xchase/ and xchase_costs_by_pitch.parquet, the
+charts go to results/xchase/figures/, and the labels say xChase+.
 """
 
+import argparse
 from pathlib import Path
 
 import numpy as np
@@ -50,12 +55,32 @@ PROJECT_DIR = Path(__file__).resolve().parent
 if not (PROJECT_DIR / "data").exists():
     PROJECT_DIR = PROJECT_DIR.parent
 
-RESULTS_DIR = PROJECT_DIR / "results"
+parser = argparse.ArgumentParser(
+    description="README charts and tables for Chase+ (or xChase+)."
+)
+parser.add_argument(
+    "--expected-contact",
+    action="store_true",
+    help="draw the xChase+ versions from results/xchase/ into "
+         "results/xchase/figures/",
+)
+arguments = parser.parse_args()
+
+EXPECTED_CONTACT = arguments.expected_contact
+
+if EXPECTED_CONTACT:
+    RESULTS_DIR = PROJECT_DIR / "results" / "xchase"
+    PITCH_COST_FILE = PROJECT_DIR / "data" / "cleaned" / "xchase_costs_by_pitch.parquet"
+    STAT_NAME = "xChase+"
+else:
+    RESULTS_DIR = PROJECT_DIR / "results"
+    PITCH_COST_FILE = PROJECT_DIR / "data" / "cleaned" / "chase_costs_by_pitch.parquet"
+    STAT_NAME = "Chase+"
+
 FIGURE_DIR = RESULTS_DIR / "figures"
 
 BY_SEASON_FILE = RESULTS_DIR / "chase_cost_leaderboard_by_season.csv"
 RELIABILITY_FILE = RESULTS_DIR / "chase_value_reliability.csv"
-PITCH_COST_FILE = PROJECT_DIR / "data" / "cleaned" / "chase_costs_by_pitch.parquet"
 
 TOP_AND_BOTTOM = 5
 
@@ -186,11 +211,38 @@ def readable_ink(hex_color):
 
 if not BY_SEASON_FILE.exists():
     raise RuntimeError(
-        f"{BY_SEASON_FILE} is not there. Run buildchaseleaderboard.py first."
+        f"{BY_SEASON_FILE} is not there. Run 04_build_chase_leaderboard.py first"
+        + (" with --expected-contact." if EXPECTED_CONTACT else ".")
     )
 
 by_season = pd.read_csv(BY_SEASON_FILE)
+
+# The xChase+ run saves its columns as xchase_plus, ...; the charts below
+# use the chase_plus names for either run.
+if EXPECTED_CONTACT:
+    by_season = by_season.rename(
+        columns=lambda name: name.replace("xchase_plus", "chase_plus")
+    )
+
 by_season["label"] = player_labels(by_season)
+
+# For xChase+ the leaders chart also marks each hitter's Chase+ (what
+# actually happened), so the gap between the two is visible.
+actual_chase_plus = {}
+
+if EXPECTED_CONTACT:
+
+    chase_plus_file = PROJECT_DIR / "results" / "chase_cost_leaderboard_by_season.csv"
+
+    if chase_plus_file.exists():
+        actual = pd.read_csv(chase_plus_file)
+        for _, row in actual.iterrows():
+            actual_chase_plus[(row["batter"], row["game_year"])] = row["chase_plus"]
+    else:
+        print(
+            "No Chase+ leaderboard in results/, so the leaders chart will "
+            "not mark Chase+. Run 04_build_chase_leaderboard.py to add it."
+        )
 
 seasons = sorted(int(season) for season in by_season["game_year"].unique())
 latest_season = seasons[-1]
@@ -293,8 +345,9 @@ if PITCH_COST_FILE.exists():
             f"A chase on {int(dearest['balls'])}-{int(dearest['strikes'])} "
             f"costs {spread:.1f}× one on "
             f"{int(cheapest['balls'])}-{int(cheapest['strikes'])}",
-            "Average runs lost per chase, by count (2024-2026 combined).\n"
-            "Small figures: ±1 standard error of that average.",
+            "Average runs lost per chase, by count (2024-2026 combined)"
+            + (", balls in play priced from xwOBA" if EXPECTED_CONTACT else "")
+            + ".\nSmall figures: ±1 standard error of that average.",
             theme,
         )
 
@@ -304,7 +357,7 @@ else:
 
     print(
         f"Skipping the count chart: {PITCH_COST_FILE.name} is not in "
-        "data/cleaned/ (run buildchaseleaderboard.py to create it)."
+        "data/cleaned/ (run 04_build_chase_leaderboard.py to create it)."
     )
 
 
@@ -379,12 +432,29 @@ for mode, theme in THEMES.items():
             axis.scatter(estimate, position, s=58, color=color,
                          edgecolor=theme["surface"], linewidth=1.6, zorder=3)
 
+            # xChase+ only: the hitter's Chase+ as a hollow ring on the
+            # same row, joined to the dot by a thin line
+            label_start = estimate + spread + 3.5
+            key = (row["batter"], row["game_year"])
+
+            if key in actual_chase_plus:
+                actual_value = actual_chase_plus[key]
+                # drawn under the xChase+ dot, so the dot stays visible
+                # when the two are close
+                axis.plot([estimate, actual_value], [position, position],
+                          color=theme["ink_secondary"], linewidth=0.8, zorder=2.4)
+                axis.scatter(actual_value, position, s=46,
+                             facecolor=theme["surface"],
+                             edgecolor=theme["ink_secondary"], linewidth=1.3,
+                             zorder=2.5)
+                label_start = max(label_start, actual_value + 3.5)
+
             # value label past the end of the band
-            axis.text(estimate + spread + 3.5, position, f"{estimate:.0f}",
+            axis.text(label_start, position, f"{estimate:.0f}",
                       ha="left", va="center", fontsize=9,
                       fontweight="bold", color=theme["ink"])
             label_width = 2.1 * len(f"{estimate:.0f}")
-            axis.text(estimate + spread + 3.5 + label_width + 1.2, position,
+            axis.text(label_start + label_width + 1.2, position,
                       f"±{spread:.0f}", ha="left", va="center",
                       fontsize=7.5, color=theme["muted"])
 
@@ -399,11 +469,11 @@ for mode, theme in THEMES.items():
             loc="left", fontsize=10.5, fontweight="bold", pad=6
         )
 
-    axes[-1].set_xlabel("Chase+  (100 = league average; higher = fewer runs lost to chasing)")
+    axes[-1].set_xlabel(f"{STAT_NAME}  (100 = league average; higher = fewer runs lost to chasing)")
 
     add_titles(
         figure,
-        "Chase+ leaders and trailers, season by season",
+        f"{STAT_NAME} leaders and trailers, season by season",
         "Top 5 (blue) and bottom 5 (red) qualified hitters.",
         theme,
     )
@@ -412,14 +482,24 @@ for mode, theme in THEMES.items():
     handles = [
         plt.Line2D([], [], marker="o", linestyle="none", markersize=7,
                    color=theme["ink_secondary"],
-                   markeredgecolor=theme["surface"], label="Chase+ estimate"),
+                   markeredgecolor=theme["surface"], label=f"{STAT_NAME} estimate"),
         plt.Line2D([], [], color=theme["ink_secondary"], alpha=min(theme["band_alpha"] + 0.1, 1),
                    linewidth=7, solid_capstyle="round",
                    label="±1 SD uncertainty (after shrinkage)"),
         plt.Line2D([], [], color=theme["ink_secondary"], linewidth=1,
                    label="League average (100)"),
     ]
-    figure.legend(handles=handles, loc="upper left", ncol=3,
+
+    if actual_chase_plus:
+        handles.append(
+            plt.Line2D([], [], marker="o", linestyle="none", markersize=6.5,
+                       markerfacecolor=theme["surface"],
+                       markeredgecolor=theme["ink_secondary"],
+                       markeredgewidth=1.3, label="Chase+ (actual results)")
+        )
+
+    figure.legend(handles=handles, loc="upper left",
+                  ncol=4 if actual_chase_plus else 3,
                   bbox_to_anchor=(0.005, 0.925), fontsize=8.5,
                   handlelength=1.6, columnspacing=1.4)
 
@@ -523,21 +603,21 @@ for mode, theme in THEMES.items():
                       va="center", fontsize=8.5, color=theme["ink"])
 
     axis.set_xlabel("Chase rate (% of out-of-zone pitches swung at)")
-    axis.set_ylabel("Chase+")
+    axis.set_ylabel(STAT_NAME)
     clean_axes(axis, keep_left=False)
 
     add_titles(
         figure,
-        f"Where chase rate and Chase+ disagree most ({latest_season})",
+        f"Where chase rate and {STAT_NAME} disagree most ({latest_season})",
         "Each dot is a qualified hitter. Highlighted: the five biggest gaps between\n"
-        "chase-rate rank and Chase+ rank, in each direction.",
+        f"chase-rate rank and {STAT_NAME} rank, in each direction.",
         theme,
     )
 
     handles = [
         plt.Line2D([], [], marker="o", linestyle="none", markersize=7,
                    color=theme["better"], markeredgecolor=theme["surface"],
-                   label="Ranked better by Chase+"),
+                   label=f"Ranked better by {STAT_NAME}"),
         plt.Line2D([], [], marker="o", linestyle="none", markersize=7,
                    color=theme["other"], markeredgecolor=theme["surface"],
                    label="Ranked better by chase rate"),
@@ -545,7 +625,7 @@ for mode, theme in THEMES.items():
                    linewidth=6, solid_capstyle="round",
                    label="±1 SD uncertainty (after shrinkage)"),
         plt.Line2D([], [], color=theme["muted"], linewidth=1.5,
-                   label="Typical Chase+ for that chase rate"),
+                   label=f"Typical {STAT_NAME} for that chase rate"),
         plt.Line2D([], [], color=theme["ink_secondary"], linewidth=1,
                    label="League average (100)"),
     ]
@@ -559,7 +639,7 @@ for mode, theme in THEMES.items():
 # --------------------------------------------------
 # CHART 4: DOES CHASE VALUE REPEAT?
 #
-# The same pairing as BuildChaseReliability.py: unshrunk runs saved per
+# The same pairing as 06_build_chase_reliability.py: unshrunk runs saved per
 # 600 PA for hitters qualified in both seasons. Solid line = least-squares
 # fit; pale band = its 95% confidence band. r is shown with a 95% interval
 # (Fisher z).
@@ -631,14 +711,14 @@ for mode, theme in THEMES.items():
         rate_r = np.corrcoef(paired["chase_rate_first"],
                              paired["chase_rate_second"])[0, 1]
 
-        # the figure must agree with what BuildChaseReliability.py saved
+        # the figure must agree with what 06_build_chase_reliability.py saved
         if recorded is not None and (first_season, second_season) in recorded.index:
             saved_r = recorded.loc[(first_season, second_season), "value_correlation"]
             if abs(saved_r - value_r) > 1e-9:
                 print(
                     f"WARNING: {first_season}-{second_season} correlation "
                     f"{value_r:.4f} differs from chase_value_reliability.csv "
-                    f"({saved_r:.4f}). Rerun BuildChaseReliability.py."
+                    f"({saved_r:.4f}). Rerun 06_build_chase_reliability.py."
                 )
 
         low_r, high_r = correlation_interval(value_r, len(paired))
@@ -680,7 +760,8 @@ for mode, theme in THEMES.items():
 
     add_titles(
         figure,
-        "Chase value carries over from one season to the next",
+        "Chase value carries over from one season to the next"
+        + (" (xChase+)" if EXPECTED_CONTACT else ""),
         "Hitters qualified in both seasons (runs saved before shrinkage). "
         "Plain chase rate repeats more strongly.",
         theme,
@@ -711,11 +792,19 @@ def markdown_rows(table, start_rank, step):
     lines = []
     rank = start_rank
     for _, row in table.iterrows():
-        lines.append(
+        line = (
             f"| {rank} | {row['label']} | {int(row['plate_appearances'])} "
             f"| {row['chase_rate']:.1f}% | {row['runs_saved_shrunk']:+.1f} "
             f"| **{row['chase_plus']:.0f}** ± {row['chase_plus_posterior_sd']:.0f} |"
         )
+
+        # xChase+: add the hitter's Chase+ and the luck between them
+        key = (row["batter"], row["game_year"])
+        if key in actual_chase_plus:
+            actual_value = actual_chase_plus[key]
+            line += f" {actual_value:.0f} | {actual_value - row['chase_plus']:+.0f} |"
+
+        lines.append(line)
         rank += step
     return lines
 
@@ -733,11 +822,15 @@ for season in seasons:
     print()
     print(f"**{season}** ({count} qualified hitters)")
     print()
-    print("| Rank | Player | PA | Chase% | Runs saved / 600 PA | Chase+ ± 1 SD |")
-    print("|---:|---|---:|---:|---:|---|")
+    if actual_chase_plus:
+        print(f"| Rank | Player | PA | Chase% | Runs saved / 600 PA | {STAT_NAME} ± 1 SD | Chase+ | Luck |")
+        print("|---:|---|---:|---:|---:|---|---:|---:|")
+    else:
+        print(f"| Rank | Player | PA | Chase% | Runs saved / 600 PA | {STAT_NAME} ± 1 SD |")
+        print("|---:|---|---:|---:|---:|---|")
     for line in markdown_rows(one_season.head(TOP_AND_BOTTOM), 1, 1):
         print(line)
-    print("| | ... | | | | |")
+    print("| | ... | | | | | | |" if actual_chase_plus else "| | ... | | | | |")
     for line in markdown_rows(one_season.tail(TOP_AND_BOTTOM),
                               count - TOP_AND_BOTTOM + 1, 1):
         print(line)

@@ -25,8 +25,14 @@ Inputs:  data/cleaned/plate_appearance_run_values.parquet
          results/run_value_by_event.csv
          results/chase_cost_leaderboard_by_season.csv (optional)
 Output:  results/hitter_value_leaderboard.csv
+
+With --expected-contact the chase columns come from the xChase+ run
+instead: it reads results/xchase/chase_cost_leaderboard_by_season.csv and
+writes results/xchase/hitter_value_leaderboard.csv. The offense side is
+the same either way.
 """
 
+import argparse
 from pathlib import Path
 
 import numpy as np
@@ -66,13 +72,43 @@ RESULTS_DIR = PROJECT_DIR / "results"
 
 RESULTS_DIR.mkdir(parents=True, exist_ok=True)
 
+parser = argparse.ArgumentParser(
+    description="Total offense per hitter-season, next to chase value."
+)
+parser.add_argument(
+    "--expected-contact",
+    action="store_true",
+    help="take the chase columns from the xChase+ run and write to "
+         "results/xchase/",
+)
+arguments = parser.parse_args()
+
+EXPECTED_CONTACT = arguments.expected_contact
+
+# The offense inputs are shared. Only the chase leaderboard and the output
+# move to results/xchase/ for xChase+.
+if EXPECTED_CONTACT:
+    CHASE_DIR = RESULTS_DIR / "xchase"
+else:
+    CHASE_DIR = RESULTS_DIR
+
 PA_VALUE_FILE = CLEAN_DIR / "plate_appearance_run_values.parquet"
 EVENT_VALUE_FILE = RESULTS_DIR / "run_value_by_event.csv"
 CHASE_LEADERBOARD_FILE = (
-    RESULTS_DIR / "chase_cost_leaderboard_by_season.csv"
+    CHASE_DIR / "chase_cost_leaderboard_by_season.csv"
 )
 
-OUTPUT_FILE = RESULTS_DIR / "hitter_value_leaderboard.csv"
+OUTPUT_FILE = CHASE_DIR / "hitter_value_leaderboard.csv"
+
+if EXPECTED_CONTACT and not CHASE_LEADERBOARD_FILE.exists():
+    raise RuntimeError(
+        f"{CHASE_LEADERBOARD_FILE} is not there. Run "
+        "04_build_chase_leaderboard.py --expected-contact first."
+    )
+
+if EXPECTED_CONTACT:
+    print("xChase+ run (--expected-contact): chase columns come from "
+          "results/xchase/, output goes there too.")
 
 
 # --------------------------------------------------
@@ -409,6 +445,13 @@ if CHASE_LEADERBOARD_FILE.exists():
 
     chase = pd.read_csv(CHASE_LEADERBOARD_FILE)
 
+    # The xChase+ run saves its columns as xchase_plus, ...; use the
+    # chase_plus names inside this script and rename them back on saving.
+    if EXPECTED_CONTACT:
+        chase = chase.rename(
+            columns=lambda name: name.replace("xchase_plus", "chase_plus")
+        )
+
 else:
 
     chase = None
@@ -416,7 +459,7 @@ else:
     print()
     print(
         f"No per-season chase leaderboard found at "
-        f"{CHASE_LEADERBOARD_FILE}. Run buildchaseleaderboard.py "
+        f"{CHASE_LEADERBOARD_FILE}. Run 04_build_chase_leaderboard.py "
         f"to get the chase sections."
     )
 
@@ -675,7 +718,7 @@ if len(correlation_rows) > 0:
         "CAVEAT: this is not a fully independent check. "
         "runs_saved_shrunk and neutral_runs_per_600_pa are both "
         "built on the same run-expectancy and event-value tables "
-        "from BuildRunValueTables.py, so part of the correlation "
+        "from 03_build_run_value_tables.py, so part of the correlation "
         "above is shared plumbing, not two independently-measured "
         "quantities happening to agree. It is still informative "
         "-- chase rate is built on nothing shared with offense at "
@@ -711,6 +754,11 @@ if chase is not None:
 else:
 
     output_table = qualified
+
+if EXPECTED_CONTACT:
+    output_table = output_table.rename(
+        columns=lambda name: name.replace("chase_plus", "xchase_plus")
+    )
 
 (
     output_table

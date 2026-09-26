@@ -22,8 +22,12 @@ Design choices:
 Input:   results/chase_cost_leaderboard_by_season.csv
 Outputs: results/chase_value_reliability.csv
          results/chase_value_reliability.png
+
+With --expected-contact it does the same for xChase+: it reads and writes
+results/xchase/ instead of results/.
 """
 
+import argparse
 from pathlib import Path
 
 import numpy as np
@@ -46,7 +50,24 @@ PROJECT_DIR = Path(__file__).resolve().parent
 if not (PROJECT_DIR / "data").exists():
     PROJECT_DIR = PROJECT_DIR.parent
 
-RESULTS_DIR = PROJECT_DIR / "results"
+parser = argparse.ArgumentParser(
+    description="Year-to-year repeatability of chase value (Chase+ or xChase+)."
+)
+parser.add_argument(
+    "--expected-contact",
+    action="store_true",
+    help="use the xChase+ run: read and write results/xchase/",
+)
+arguments = parser.parse_args()
+
+EXPECTED_CONTACT = arguments.expected_contact
+
+if EXPECTED_CONTACT:
+    RESULTS_DIR = PROJECT_DIR / "results" / "xchase"
+    STAT_NAME = "xChase+"
+else:
+    RESULTS_DIR = PROJECT_DIR / "results"
+    STAT_NAME = "Chase+"
 
 RESULTS_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -60,16 +81,17 @@ OUTPUT_FIGURE = RESULTS_DIR / "chase_value_reliability.png"
 # LOAD
 #
 # One row per qualified hitter-season, already filtered and priced
-# upstream, so this script and buildchaseleaderboard.py always agree on
+# upstream, so this script and 04_build_chase_leaderboard.py always agree on
 # who qualifies.
 # --------------------------------------------------
 
-print("Loading the per-season leaderboard...")
+print(f"Loading the per-season {STAT_NAME} leaderboard...")
 
 if not BY_SEASON_FILE.exists():
     raise RuntimeError(
         f"{BY_SEASON_FILE} is not there. Run "
-        "buildchaseleaderboard.py first."
+        "04_build_chase_leaderboard.py first (with --expected-contact for "
+        "xChase+)."
     )
 
 by_season = pd.read_csv(BY_SEASON_FILE)
@@ -219,7 +241,7 @@ for first_season, second_season in season_pairs:
 if len(pair_rows) == 0:
     raise RuntimeError(
         "No season pair had enough hitters in common. Lower the "
-        "per-season floors in buildchaseleaderboard.py, or check "
+        "per-season floors in 04_build_chase_leaderboard.py, or check "
         "the data."
     )
 
@@ -373,7 +395,9 @@ for index, row in enumerate(pair_rows):
     axis.spines["right"].set_visible(False)
 
 figure.suptitle(
-    "Does a hitter's chase value repeat from one season to the next?",
+    f"Does a hitter's chase value ({STAT_NAME}) repeat from one season to the next?"
+    if EXPECTED_CONTACT
+    else "Does a hitter's chase value repeat from one season to the next?",
     fontsize=14,
     y=1.02
 )

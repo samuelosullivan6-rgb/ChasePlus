@@ -40,7 +40,7 @@ OUTPUT_FILE = CLEAN_DIR / "baseline_chase_pitches.parquet"
 # SEASONS AND COLUMNS
 # --------------------------------------------------
 
-# Keep in sync with SEASONS in 02_download_baseline.py. This is set by
+# Keep in sync with SEASONS in 01_download_baseline.py. This is set by
 # hand on purpose: data/raw/ can hold stray files (an old manual download,
 # a test pull) that should not become in-scope just by being on disk.
 SEASONS_TO_KEEP = [2024, 2025, 2026]
@@ -94,9 +94,14 @@ wanted_columns = [
     "on_2b",
     "on_3b",
 
-    # run and win expectancy changes (used by BuildRunValueTables.py)
+    # run and win expectancy changes (used by 03_build_run_value_tables.py)
     "delta_home_win_exp",
     "delta_run_exp",
+
+    # Savant's expected wOBA from exit velocity and launch angle, only
+    # filled on balls in play. Used by 04_build_chase_leaderboard.py
+    # --expected-contact (xChase+).
+    "estimated_woba_using_speedangle",
 ]
 
 
@@ -481,7 +486,7 @@ print(pitch_summary.head(15))
 
 
 # --------------------------------------------------
-# CHECK delta_home_win_exp FOR BuildRunValueTables.py
+# CHECK delta_home_win_exp FOR 03_build_run_value_tables.py
 #
 # This column should only be nonzero on the pitch that ends a plate
 # appearance; every other pitch should have exactly 0 (not NaN).
