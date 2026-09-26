@@ -313,17 +313,24 @@ def test_called_strike_rate_never_rises_with_distance():
 
 
 def test_taking_a_pitch_is_always_worth_more_after_a_ball():
-    counts = pd.read_csv(COUNT_VALUES)
-    events = pd.read_csv(EVENT_VALUES)
-    value = {(int(r.balls), int(r.strikes)): float(r.run_value) for r in counts.itertuples()}
-    walk = float(events.loc[events["event"] == "walk", "run_value"].iloc[0])
-    strikeout = float(events.loc[events["event"] == "strikeout", "run_value"].iloc[0])
+    all_counts = pd.read_csv(COUNT_VALUES)
+    all_events = pd.read_csv(EVENT_VALUES)
 
-    for balls in range(4):
-        for strikes in range(3):
-            after_ball = walk if balls == 3 else value[(balls + 1, strikes)]
-            after_strike = strikeout if strikes == 2 else value[(balls, strikes + 1)]
-            assert after_strike < after_ball, f"{balls}-{strikes}: a strike is not worse than a ball"
+    # the run value tables are per season, so check each season's own
+    for season in sorted(all_counts["game_year"].unique()):
+        counts = all_counts[all_counts["game_year"] == season]
+        events = all_events[all_events["game_year"] == season]
+        value = {(int(r.balls), int(r.strikes)): float(r.run_value) for r in counts.itertuples()}
+        walk = float(events.loc[events["event"] == "walk", "run_value"].iloc[0])
+        strikeout = float(events.loc[events["event"] == "strikeout", "run_value"].iloc[0])
+
+        for balls in range(4):
+            for strikes in range(3):
+                after_ball = walk if balls == 3 else value[(balls + 1, strikes)]
+                after_strike = strikeout if strikes == 2 else value[(balls, strikes + 1)]
+                assert after_strike < after_ball, (
+                    f"{season} {balls}-{strikes}: a strike is not worse than a ball"
+                )
 
 
 def test_runs_saved_add_to_zero_each_season():

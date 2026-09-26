@@ -257,11 +257,12 @@ event_values = pd.read_csv(EVENT_VALUE_FILE)
 # outcome, so a home run is worth the same whatever the base-out state.
 # --------------------------------------------------
 
+# Per season: the run value tables are built one season at a time.
 pa = pa.merge(
-    event_values[["event", "run_value"]].rename(
+    event_values[["game_year", "event", "run_value"]].rename(
         columns={"run_value": "neutral_value"}
     ),
-    on="event",
+    on=["game_year", "event"],
     how="left"
 )
 

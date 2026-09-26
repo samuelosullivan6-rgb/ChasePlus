@@ -345,7 +345,7 @@ if PITCH_COST_FILE.exists():
             f"A chase on {int(dearest['balls'])}-{int(dearest['strikes'])} "
             f"costs {spread:.1f}× one on "
             f"{int(cheapest['balls'])}-{int(cheapest['strikes'])}",
-            "Average runs lost per chase, by count (2024-2026 combined)"
+            f"Average runs lost per chase, by count ({seasons[0]}-{seasons[-1]} combined)"
             + (", balls in play priced from xwOBA" if EXPECTED_CONTACT else "")
             + ".\nSmall figures: ±1 standard error of that average.",
             theme,

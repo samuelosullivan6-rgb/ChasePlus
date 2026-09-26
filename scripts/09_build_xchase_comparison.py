@@ -27,17 +27,16 @@ Inputs:  results/chase_cost_leaderboard_by_season.csv
          results/xchase/chase_plus_league_scale.csv
          data/cleaned/chase_costs_by_pitch.parquet
          data/cleaned/xchase_costs_by_pitch.parquet
-         data/cleaned/baseline_chase_pitches.parquet (descriptions only)
-         results/hitter_value_leaderboard.csv
-         results/xchase/hitter_value_leaderboard.csv (offense test only;
-         skipped if either is missing)
+         data/cleaned/baseline_chase_pitches.parquet (descriptions, and
+         wOBA / xwOBA per plate appearance for the offense tests)
 Outputs: results/xchase/xchase_comparison_<season>.csv (one per season)
          results/xchase/xchase_comparison_by_season.csv
          results/xchase/xchase_reliability.csv
          results/xchase/xchase_leaderboard_<season>.csv (one per season)
          results/xchase/xchase_leaderboard_by_season.csv
          results/xchase/regression_candidates.csv
-         results/xchase/xchase_offense_correlation.csv
+         results/xchase/offense_same_season.csv
+         results/xchase/offense_next_season.csv
 
 The xChase+ run saves its columns as xchase_plus, xchase_plus_se, ...
 (the Chase+ run keeps chase_plus), so they are read under those names.
@@ -82,9 +81,6 @@ X_PITCHES = CLEAN_DIR / "xchase_costs_by_pitch.parquet"
 
 PITCH_FILE = CLEAN_DIR / "baseline_chase_pitches.parquet"
 
-CHASE_OFFENSE = RESULTS_DIR / "hitter_value_leaderboard.csv"
-X_OFFENSE = XCHASE_DIR / "hitter_value_leaderboard.csv"
-
 OUTPUT_BY_SEASON = XCHASE_DIR / "xchase_comparison_by_season.csv"
 SEASON_FILE_NAME = "xchase_comparison_{season}.csv"
 OUTPUT_RELIABILITY = XCHASE_DIR / "xchase_reliability.csv"
@@ -92,7 +88,8 @@ OUTPUT_RELIABILITY = XCHASE_DIR / "xchase_reliability.csv"
 OUTPUT_LEADERBOARD = XCHASE_DIR / "xchase_leaderboard_by_season.csv"
 LEADERBOARD_FILE_NAME = "xchase_leaderboard_{season}.csv"
 OUTPUT_CANDIDATES = XCHASE_DIR / "regression_candidates.csv"
-OUTPUT_OFFENSE = XCHASE_DIR / "xchase_offense_correlation.csv"
+OUTPUT_SAME_SEASON = XCHASE_DIR / "offense_same_season.csv"
+OUTPUT_NEXT_SEASON = XCHASE_DIR / "offense_next_season.csv"
 
 # A hitter goes on the regression candidates list when his luck is at
 # least this many standard errors from zero.
@@ -660,91 +657,215 @@ for season in seasons:
 
 
 # --------------------------------------------------
-# WHICH ONE TRACKS TOTAL OFFENSE?
+# OFFENSE: wOBA AND xwOBA PER HITTER-SEASON
 #
-# Correlation of Chase+, xChase+ and chase rate with each hitter's total
-# offense (runs_per_600_shrunk from 05_build_hitter_value_leaderboard.py), one
-# season at a time.
+# Built from the plate appearances in the cleaned pitch file (the last
+# pitch of each PA carries woba_value and woba_denom). xwOBA swaps a ball
+# in play's actual woba_value for Savant's estimate from exit velocity and
+# launch angle; walks, HBP and strikeouts keep their actual value.
 #
-# Not a fair race for Chase+: its balls in play are priced from the same
-# plate appearance results that make up offense, so part of its
-# correlation is the same runs counted twice. xChase+ prices those balls
-# in play from xwOBA, so less of that overlap is left in it.
+# Two versions:
+#   - all plate appearances (next-season target, and this season's
+#     control)
+#   - without the PAs that ended on a chase put in play. Those batted balls
+#     are inside Chase+ (actual result) and xChase+ (xwOBA), so leaving
+#     them in would put the same numbers on both sides of a same-season
+#     correlation.
 # --------------------------------------------------
 
-if CHASE_OFFENSE.exists() and X_OFFENSE.exists():
+plate_appearances = pd.read_parquet(
+    PITCH_FILE,
+    columns=["batter", "game_year", "description", "is_chase",
+             "woba_value", "woba_denom", "estimated_woba_using_speedangle"]
+)
 
-    chase_offense = pd.read_csv(CHASE_OFFENSE)
-    x_offense = pd.read_csv(X_OFFENSE)
+plate_appearances = plate_appearances[plate_appearances["woba_denom"] > 0].copy()
 
-    if not np.allclose(
-        chase_offense["runs_per_600_shrunk"],
-        x_offense["runs_per_600_shrunk"],
-        rtol=0,
-        atol=1e-9
-    ):
-        raise RuntimeError(
-            "The two hitter_value_leaderboard.csv files disagree on "
-            "offense. Rerun 05_build_hitter_value_leaderboard.py with and "
-            "without --expected-contact."
+in_play = plate_appearances["description"] == "hit_into_play"
+has_estimate = plate_appearances["estimated_woba_using_speedangle"].notna()
+
+plate_appearances["xwoba_value"] = np.where(
+    in_play & has_estimate,
+    plate_appearances["estimated_woba_using_speedangle"],
+    plate_appearances["woba_value"]
+)
+
+plate_appearances["chased_in_play"] = in_play & (plate_appearances["is_chase"] == 1)
+
+
+def woba_by_hitter(table, suffix):
+    """wOBA and xwOBA per (batter, game_year) from PA-level values."""
+
+    totals = (
+        table
+        .groupby(["batter", "game_year"])[["woba_value", "xwoba_value", "woba_denom"]]
+        .sum()
+    )
+
+    return pd.DataFrame({
+        f"woba{suffix}": totals["woba_value"] / totals["woba_denom"],
+        f"xwoba{suffix}": totals["xwoba_value"] / totals["woba_denom"],
+    }).reset_index()
+
+
+offense = woba_by_hitter(plate_appearances, "").merge(
+    woba_by_hitter(
+        plate_appearances[~plate_appearances["chased_in_play"]],
+        "_without_chased_in_play"
+    ),
+    on=["batter", "game_year"],
+    how="left"
+)
+
+hitters = full_comparison[
+    ["batter", "player", "game_year", "chase_rate", "chase_plus", "xchase_plus"]
+].merge(offense, on=["batter", "game_year"], how="left")
+
+if hitters["xwoba"].isna().any():
+    raise RuntimeError("Some qualified hitter-seasons have no plate appearances.")
+
+
+# --------------------------------------------------
+# SAME SEASON: like against like
+#
+# Chase+ (actual results) against wOBA, xChase+ (expected) against xwOBA,
+# both without the chased balls in play.
+# --------------------------------------------------
+
+same_season_rows = []
+
+for season in seasons:
+
+    one = hitters[hitters["game_year"] == season]
+
+    same_season_rows.append({
+        "game_year": int(season),
+        "hitters": len(one),
+        "chase_plus_vs_woba": one["chase_plus"].corr(one["woba_without_chased_in_play"]),
+        "xchase_plus_vs_xwoba": one["xchase_plus"].corr(one["xwoba_without_chased_in_play"]),
+        "chase_rate_vs_woba": one["chase_rate"].corr(one["woba_without_chased_in_play"]),
+        "chase_rate_vs_xwoba": one["chase_rate"].corr(one["xwoba_without_chased_in_play"]),
+    })
+
+same_season = pd.DataFrame(same_season_rows)
+same_season.to_csv(OUTPUT_SAME_SEASON, index=False)
+written_files.append(OUTPUT_SAME_SEASON)
+
+
+# --------------------------------------------------
+# NEXT SEASON: does it tell you anything about next year's xwOBA?
+#
+# For hitters qualified in both seasons, next season's xwOBA (all PAs)
+# regressed on this season's xwOBA and chase rate, then again with the
+# chase stat added. The gain in R^2 is what the chase stat knows about
+# next year that this year's xwOBA and chase rate don't.
+#
+# "all pairs" stacks every pair of seasons with a separate intercept per
+# pair, so a league-wide change between seasons can't count as a signal.
+# --------------------------------------------------
+
+def fit(target, predictors):
+    """Least squares. Returns R^2, coefficients and their standard errors."""
+
+    design = np.column_stack([np.ones(len(target))] + predictors)
+    coefficients, _, _, _ = np.linalg.lstsq(design, target, rcond=None)
+
+    residuals = target - design @ coefficients
+    r_squared = 1 - residuals.var() / target.var()
+
+    degrees_of_freedom = len(target) - design.shape[1]
+    residual_variance = residuals @ residuals / degrees_of_freedom
+    covariance = residual_variance * np.linalg.inv(design.T @ design)
+
+    return r_squared, coefficients, np.sqrt(np.diag(covariance))
+
+
+def next_season_test(paired, label):
+    """One row per chase stat: plain r, R^2 without and with it, and its t."""
+
+    target = paired["xwoba_next"].to_numpy()
+    controls = [
+        paired["xwoba"].to_numpy(),
+        paired["chase_rate"].to_numpy(),
+    ]
+
+    # one intercept per season pair (the first pair is the baseline)
+    pair_codes = pd.factorize(paired["pair"])[0]
+    for code in range(1, pair_codes.max() + 1):
+        controls.append((pair_codes == code).astype(float))
+
+    base_r_squared, _, _ = fit(target, controls)
+
+    rows = []
+
+    for column, name in [("xchase_plus", "xChase+"), ("chase_plus", "Chase+")]:
+
+        r_squared, coefficients, errors = fit(
+            target, controls + [paired[column].to_numpy()]
         )
 
-    offense_rows = []
-
-    for season in seasons:
-
-        one_season = chase_offense[
-            (chase_offense["game_year"] == season)
-            & chase_offense["chase_plus"].notna()
-        ][["batter", "runs_per_600_shrunk", "chase_rate", "chase_plus"]]
-
-        one_season = one_season.merge(
-            x_offense[x_offense["game_year"] == season][["batter", "xchase_plus"]],
-            on="batter",
-            how="inner"
-        )
-
-        offense_rows.append({
-            "game_year": int(season),
-            "hitters": len(one_season),
-            "chase_plus_vs_offense": one_season["chase_plus"].corr(
-                one_season["runs_per_600_shrunk"]
-            ),
-            "xchase_plus_vs_offense": one_season["xchase_plus"].corr(
-                one_season["runs_per_600_shrunk"]
-            ),
-            "chase_rate_vs_offense": one_season["chase_rate"].corr(
-                one_season["runs_per_600_shrunk"]
-            ),
+        rows.append({
+            "seasons": label,
+            "hitters": len(paired),
+            "stat": name,
+            "r_with_next_xwoba": paired[column].corr(paired["xwoba_next"]),
+            "r_squared_without": base_r_squared,
+            "r_squared_with": r_squared,
+            "r_squared_gain": r_squared - base_r_squared,
+            # xwOBA points (thousandths) per 10 points of the chase stat
+            "next_xwoba_per_10_points": 10000 * coefficients[-1],
+            "t_value": coefficients[-1] / errors[-1],
         })
 
-    offense_table = pd.DataFrame(offense_rows)
+    return rows
 
-    offense_table.to_csv(OUTPUT_OFFENSE, index=False)
 
-    written_files.append(OUTPUT_OFFENSE)
+pairs = []
 
-    print()
-    print("=" * 78)
-    print("WHICH ONE TRACKS TOTAL OFFENSE (correlation with runs per 600 PA, shrunk)")
-    print("=" * 78)
-    print()
-    print(offense_table.round(3).to_string(index=False))
-    print()
-    print(
-        "Chase+ has a head start here: its balls in play are priced from "
-        "the same results that make up offense. xChase+ removes most of "
-        "that overlap, so a lower number for it is expected and is not by "
-        "itself a point against it."
+for first_season, second_season in zip(seasons[:-1], seasons[1:]):
+
+    first = hitters[hitters["game_year"] == first_season]
+    second = hitters[hitters["game_year"] == second_season][["batter", "xwoba"]]
+
+    paired = first.merge(
+        second.rename(columns={"xwoba": "xwoba_next"}),
+        on="batter"
     )
+    paired["pair"] = f"{int(first_season)}-{int(second_season)}"
+    pairs.append(paired)
 
-else:
+next_season_rows = []
 
-    print()
-    print(
-        "Skipping the offense test: run 05_build_hitter_value_leaderboard.py "
-        "with and without --expected-contact first."
-    )
+for paired in pairs:
+    next_season_rows += next_season_test(paired, paired["pair"].iloc[0])
+
+if len(pairs) > 1:
+    next_season_rows += next_season_test(pd.concat(pairs, ignore_index=True), "all pairs")
+
+next_season = pd.DataFrame(next_season_rows)
+next_season.to_csv(OUTPUT_NEXT_SEASON, index=False)
+written_files.append(OUTPUT_NEXT_SEASON)
+
+print()
+print("=" * 78)
+print("SAME SEASON: Chase+ vs wOBA, xChase+ vs xwOBA (without chased balls in play)")
+print("=" * 78)
+print()
+print(same_season.round(3).to_string(index=False))
+
+print()
+print("=" * 78)
+print("NEXT SEASON'S xwOBA, beyond this season's xwOBA and chase rate")
+print("=" * 78)
+print()
+print(next_season.round(4).to_string(index=False))
+print()
+print(
+    "r_squared_gain is what the chase stat adds. next_xwoba_per_10_points "
+    "is in xwOBA points (.001) per 10 points of the stat. |t| above about "
+    "2 is unlikely to be noise."
+)
+
 
 print()
 print(f"Done. Saved under {PROJECT_DIR}:")

@@ -36,6 +36,9 @@ MANIFEST_FILE = RAW_DIR / "download_manifest.csv"
 # 2025 opened with the Tokyo Series on March 18 (regular season), so the
 # 2024 and 2025 windows start on March 15.
 SEASONS = {
+    2021: ("2021-03-15", "2021-11-03"),
+    2022: ("2022-03-15", "2022-11-06"),
+    2023: ("2023-03-15", "2023-11-03"),
     2024: ("2024-03-15", "2024-11-03"),
     2025: ("2025-03-15", "2025-11-03"),
     2026: ("2026-03-20", "2026-11-03"),

@@ -43,7 +43,7 @@ OUTPUT_FILE = CLEAN_DIR / "baseline_chase_pitches.parquet"
 # Keep in sync with SEASONS in 01_download_baseline.py. This is set by
 # hand on purpose: data/raw/ can hold stray files (an old manual download,
 # a test pull) that should not become in-scope just by being on disk.
-SEASONS_TO_KEEP = [2024, 2025, 2026]
+SEASONS_TO_KEEP = [2021, 2022, 2023, 2024, 2025, 2026]
 
 # The raw files have 110+ columns; only these are loaded.
 wanted_columns = [
@@ -102,6 +102,12 @@ wanted_columns = [
     # filled on balls in play. Used by 04_build_chase_leaderboard.py
     # --expected-contact (xChase+).
     "estimated_woba_using_speedangle",
+
+    # wOBA value and denominator on the last pitch of each plate
+    # appearance. Used by 09_build_xchase_comparison.py for each hitter's
+    # season wOBA and xwOBA.
+    "woba_value",
+    "woba_denom",
 ]
 
 

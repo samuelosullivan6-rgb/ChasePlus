@@ -14,6 +14,11 @@ built on the one before:
      that passed through each of the twelve counts, using table 2. This is
      the table the leaderboard uses.
 
+All three tables are built separately for each season, like everything
+else in the pipeline, so each season is priced in its own run environment
+and adding or removing a season never changes another season's numbers.
+Every output has a game_year column.
+
 Each table is printed next to published reference values so a broken step
 shows up immediately, before anything is built on it.
 
@@ -424,7 +429,7 @@ if negative_runs > 0:
 
 base_out = (
     plate_appearances
-    .groupby(["base_state", "outs_when_up"])
+    .groupby(["game_year", "base_state", "outs_when_up"])
     .agg(
         occurrences=("runs_rest_of_inning", "size"),
         run_expectancy=("runs_rest_of_inning", "mean")
@@ -434,48 +439,58 @@ base_out = (
 
 thin_cells = base_out[base_out["occurrences"] < MINIMUM_CELL_SIZE]
 
+seasons = sorted(int(season) for season in plate_appearances["game_year"].unique())
+
 print()
 print("=" * 78)
-print("TABLE 1: BASE-OUT RUN EXPECTANCY")
+print("TABLE 1: BASE-OUT RUN EXPECTANCY (one table per season)")
 print("=" * 78)
 
-base_out_display = (
-    base_out
-    .pivot(
-        index="base_state",
-        columns="outs_when_up",
-        values="run_expectancy"
+for season in seasons:
+
+    base_out_display = (
+        base_out[base_out["game_year"] == season]
+        .pivot(
+            index="base_state",
+            columns="outs_when_up",
+            values="run_expectancy"
+        )
+        .reindex(BASE_STATE_ORDER)
     )
-    .reindex(BASE_STATE_ORDER)
-)
 
-print()
-print(base_out_display.round(3).to_string())
-
-# Every row must fall as outs are added, and every column must rise as
-# runners are added.
-falls_with_outs = (
-    base_out_display
-    .diff(axis=1)
-    .iloc[:, 1:] < 0
-).all().all()
-
-rises_with_runners = (
-    base_out_display
-    .diff(axis=0)
-    .iloc[1:, :] > 0
-).all().all()
-
-print()
-print(f"Falls as outs are added:    {falls_with_outs}")
-print(f"Rises as runners are added: {rises_with_runners}")
-
-if not (falls_with_outs and rises_with_runners):
     print()
-    print(
-        "WARNING: one of those is False. The half-inning logic is "
-        "wrong and nothing below this point is usable."
+    print(season)
+    print(base_out_display.round(3).to_string())
+
+    # Every row must fall as outs are added, and every column must rise
+    # as runners are added.
+    falls_with_outs = (
+        base_out_display
+        .diff(axis=1)
+        .iloc[:, 1:] < 0
+    ).all().all()
+
+    # Adding a runner can only raise run expectancy: 1__ < 12_ and
+    # 12_ < 123, for example. Two states that aren't one inside the other
+    # (__3 against 12_) have no required order, and close ones can flip
+    # from season to season, so only runner-added pairs are compared.
+    rises_with_runners = all(
+        (base_out_display.loc[more] > base_out_display.loc[fewer]).all()
+        for fewer in BASE_STATE_ORDER
+        for more in BASE_STATE_ORDER
+        if fewer != more
+        and all(m != "_" for f, m in zip(fewer, more) if f != "_")
     )
+
+    print(f"Falls as outs are added:    {falls_with_outs}")
+    print(f"Rises as runners are added: {rises_with_runners}")
+
+    if not (falls_with_outs and rises_with_runners):
+        print()
+        print(
+            f"WARNING: {season}: one of those is False. The half-inning "
+            "logic is wrong and nothing below this point is usable."
+        )
 
 print()
 print("VALIDATION")
@@ -512,14 +527,16 @@ base_out.to_csv(OUTPUT_BASE_OUT, index=False)
 # run expectancy is zero.
 # --------------------------------------------------
 
+# Each plate appearance is valued with its own season's table.
 run_expectancy_lookup = (
     base_out
-    .set_index(["base_state", "outs_when_up"])["run_expectancy"]
+    .set_index(["game_year", "base_state", "outs_when_up"])["run_expectancy"]
 )
 
 plate_appearances["run_expectancy_before"] = (
     pd.MultiIndex.from_arrays(
         [
+            plate_appearances["game_year"],
             plate_appearances["base_state"],
             plate_appearances["outs_when_up"]
         ]
@@ -553,26 +570,33 @@ plate_appearances["run_value"] = (
 
 event_values = (
     plate_appearances
-    .groupby("event")
+    .groupby(["game_year", "event"])
     .agg(
         occurrences=("run_value", "size"),
         run_value=("run_value", "mean")
     )
     .reset_index()
-    .sort_values("occurrences", ascending=False)
+    .sort_values(["game_year", "occurrences"], ascending=[True, False])
 )
 
 print()
 print("=" * 78)
-print("TABLE 2: RUN VALUE BY OUTCOME")
+print("TABLE 2: RUN VALUE BY OUTCOME (one column per season)")
 print("=" * 78)
+
+# The 20 most common outcomes, one column per season
+common_events = (
+    event_values.groupby("event")["occurrences"].sum()
+    .sort_values(ascending=False).head(20).index
+)
 
 print()
 print(
     event_values
-    .head(20)
+    .pivot(index="event", columns="game_year", values="run_value")
+    .reindex(common_events)
     .round(4)
-    .to_string(index=False)
+    .to_string()
 )
 
 print()
@@ -597,31 +621,42 @@ validation_bands = {
     "strikeout": (-0.28, -0.26),
 }
 
-for event_name, (low, high) in validation_bands.items():
+for season in seasons:
 
-    match = event_values[event_values["event"] == event_name]
+    for event_name, (low, high) in validation_bands.items():
 
-    if len(match) != 1:
-        continue
+        match = event_values[
+            (event_values["game_year"] == season)
+            & (event_values["event"] == event_name)
+        ]
 
-    value = float(match["run_value"].iloc[0])
+        if len(match) != 1:
+            continue
 
-    if not (low - 0.02 <= value <= high + 0.02):
-        print(
-            f"  WARNING: {event_name} run value ({value:+.4f}) is "
-            f"well outside the {low:+.2f} to {high:+.2f} target "
-            "band. Check the RE24 arithmetic before trusting "
-            "table 3."
-        )
+        value = float(match["run_value"].iloc[0])
 
-# The average plate appearance should be worth about zero runs, which is
-# what makes these values "above average" rather than raw.
-mean_value = plate_appearances["run_value"].mean()
+        if not (low - 0.02 <= value <= high + 0.02):
+            print(
+                f"  WARNING: {season} {event_name} run value "
+                f"({value:+.4f}) is well outside the {low:+.2f} to "
+                f"{high:+.2f} target band. Check the RE24 arithmetic "
+                "before trusting table 3."
+            )
 
+# The average plate appearance should be worth about zero runs in every
+# season, which is what makes these values "above average" rather than
+# raw.
 print()
-print(f"Mean run value across all plate appearances: {mean_value:+.5f}")
+print("Mean run value across all plate appearances, by season:")
+
+for season in seasons:
+    mean_value = plate_appearances.loc[
+        plate_appearances["game_year"] == season, "run_value"
+    ].mean()
+    print(f"  {season}: {mean_value:+.5f}")
+
 print(
-    "  This should sit very close to zero. A number far from zero "
+    "  These should sit very close to zero. A number far from zero "
     "means the state-after logic is misaligned somewhere."
 )
 
@@ -646,7 +681,7 @@ pitch_counts = df[
 
 pitch_counts = pitch_counts.merge(
     plate_appearances[
-        ["game_pk", "at_bat_number", "run_value"]
+        ["game_pk", "at_bat_number", "game_year", "run_value"]
     ],
     on=["game_pk", "at_bat_number"],
     how="inner"
@@ -654,7 +689,7 @@ pitch_counts = pitch_counts.merge(
 
 count_values = (
     pitch_counts
-    .groupby("count_state")
+    .groupby(["game_year", "count_state"])
     .agg(
         occurrences=("run_value", "size"),
         run_value=("run_value", "mean")
@@ -670,24 +705,26 @@ count_values["strikes"] = (
     count_values["count_state"].str[-1].astype(int)
 )
 
-count_values = count_values.sort_values(["balls", "strikes"])
+count_values = count_values.sort_values(["game_year", "balls", "strikes"])
 
 print()
 print("=" * 78)
-print("TABLE 3: RUN VALUE BY COUNT")
+print("TABLE 3: RUN VALUE BY COUNT (one table per season)")
 print("=" * 78)
 
-print()
-print(
-    count_values
-    .pivot(
-        index="balls",
-        columns="strikes",
-        values="run_value"
+for season in seasons:
+    print()
+    print(season)
+    print(
+        count_values[count_values["game_year"] == season]
+        .pivot(
+            index="balls",
+            columns="strikes",
+            values="run_value"
+        )
+        .round(4)
+        .to_string()
     )
-    .round(4)
-    .to_string()
-)
 
 print()
 print("VALIDATION")
@@ -702,20 +739,24 @@ print(
     "through it and the average plate appearance is worth nothing."
 )
 
-zero_zero = count_values[
-    count_values["count_state"] == "0-0"
-]["run_value"]
+print()
 
-if len(zero_zero) == 1:
+for season in seasons:
 
-    print()
-    print(f"  0-0 came out at {float(zero_zero.iloc[0]):+.5f}")
+    zero_zero = count_values[
+        (count_values["game_year"] == season)
+        & (count_values["count_state"] == "0-0")
+    ]["run_value"]
 
-    if abs(float(zero_zero.iloc[0])) > 0.01:
-        print(
-            "  WARNING: that is too far from zero. Something is "
-            "wrong with the plate-appearance join."
-        )
+    if len(zero_zero) == 1:
+
+        print(f"  {season}: 0-0 came out at {float(zero_zero.iloc[0]):+.5f}")
+
+        if abs(float(zero_zero.iloc[0])) > 0.01:
+            print(
+                "  WARNING: that is too far from zero. Something is "
+                "wrong with the plate-appearance join."
+            )
 
 count_values.to_csv(OUTPUT_COUNT_VALUES, index=False)
 
@@ -728,17 +769,21 @@ count_values.to_csv(OUTPUT_COUNT_VALUES, index=False)
 # inspection only; nothing here is saved.
 # --------------------------------------------------
 
+# (season, balls, strikes) -> run value of standing at that count
 count_lookup = (
     count_values
-    .set_index(["balls", "strikes"])["run_value"]
+    .set_index(["game_year", "balls", "strikes"])["run_value"]
     .to_dict()
 )
 
 
-def terminal_event_value(event_name):
+def terminal_event_value(season, event_name):
     """Run value of a walk or strikeout from table 2, or NaN if missing."""
 
-    event_row = event_values[event_values["event"] == event_name]
+    event_row = event_values[
+        (event_values["game_year"] == season)
+        & (event_values["event"] == event_name)
+    ]
 
     if len(event_row) == 1:
         return float(event_row["run_value"].iloc[0])
@@ -751,34 +796,37 @@ print("=" * 78)
 print("WHAT ONE PITCH IS WORTH, BY COUNT")
 print("=" * 78)
 
-print()
-print("count   ball gains   strike costs")
+for season in seasons:
 
-for balls in range(4):
+    print()
+    print(season)
+    print("count   ball gains   strike costs")
 
-    for strikes in range(3):
+    for balls in range(4):
 
-        current = count_lookup.get((balls, strikes))
+        for strikes in range(3):
 
-        if current is None:
-            continue
+            current = count_lookup.get((season, balls, strikes))
 
-        after_ball = count_lookup.get((balls + 1, strikes))
-        after_strike = count_lookup.get((balls, strikes + 1))
+            if current is None:
+                continue
 
-        # A fourth ball is a walk and a third strike is a strikeout, so
-        # those come from the event table instead of the count table.
-        if after_ball is None:
-            after_ball = terminal_event_value("walk")
+            after_ball = count_lookup.get((season, balls + 1, strikes))
+            after_strike = count_lookup.get((season, balls, strikes + 1))
 
-        if after_strike is None:
-            after_strike = terminal_event_value("strikeout")
+            # A fourth ball is a walk and a third strike is a strikeout,
+            # so those come from the event table instead.
+            if after_ball is None:
+                after_ball = terminal_event_value(season, "walk")
 
-        print(
-            f"{balls}-{strikes}     "
-            f"{after_ball - current:+.4f}      "
-            f"{after_strike - current:+.4f}"
-        )
+            if after_strike is None:
+                after_strike = terminal_event_value(season, "strikeout")
+
+            print(
+                f"{balls}-{strikes}     "
+                f"{after_ball - current:+.4f}      "
+                f"{after_strike - current:+.4f}"
+            )
 
 print()
 print(
@@ -832,7 +880,7 @@ if "delta_run_exp" in df.columns:
 
     statcast_values = (
         check
-        .groupby(["balls", "strikes", "pitch_result"])
+        .groupby(["game_year", "balls", "strikes", "pitch_result"])
         .agg(
             pitches=("delta_run_exp", "size"),
             statcast_value=("delta_run_exp", "mean")
@@ -845,18 +893,19 @@ if "delta_run_exp" in df.columns:
 
     for _, row in statcast_values.iterrows():
 
+        season = int(row["game_year"])
         balls = int(row["balls"])
         strikes = int(row["strikes"])
 
-        current = count_lookup.get((balls, strikes))
+        current = count_lookup.get((season, balls, strikes))
 
         if current is None:
             continue
 
         if row["pitch_result"] == "ball":
-            after = count_lookup.get((balls + 1, strikes))
+            after = count_lookup.get((season, balls + 1, strikes))
         else:
-            after = count_lookup.get((balls, strikes + 1))
+            after = count_lookup.get((season, balls, strikes + 1))
 
         # Walks and strikeouts leave the count table
         if after is None:
@@ -864,6 +913,7 @@ if "delta_run_exp" in df.columns:
 
         implied_rows.append(
             {
+                "game_year": season,
                 "balls": balls,
                 "strikes": strikes,
                 "pitch_result": row["pitch_result"],
@@ -883,7 +933,7 @@ if "delta_run_exp" in df.columns:
         )
 
         comparison = comparison.sort_values(
-            ["pitch_result", "balls", "strikes"]
+            ["game_year", "pitch_result", "balls", "strikes"]
         )
 
         print()

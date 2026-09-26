@@ -237,8 +237,9 @@ CHASE_COUNT_WARNING_BELOW = 50
 PRORATE_FLOORS_BY_SEASON_LENGTH = True
 
 # The season every other season is re-priced against for
-# runs_saved_vs_anchor. None means the earliest season in the data.
-ANCHOR_SEASON = None
+# runs_saved_vs_anchor. None means the earliest season in the data. Set to
+# 2024 so adding earlier seasons doesn't move the yardstick.
+ANCHOR_SEASON = 2024
 
 # Distance-outside-the-zone buckets (feet). They define the league
 # baseline cells (season x count x bucket) and are used for reporting.
@@ -398,45 +399,58 @@ show_detail("Loading run value tables...")
 count_values = pd.read_csv(COUNT_VALUE_FILE)
 event_values = pd.read_csv(EVENT_VALUE_FILE)
 
+# The run value tables are per season (03_build_run_value_tables.py), so
+# every lookup below is keyed by season too: each pitch is priced in its
+# own season's run environment.
 count_value_lookup = {
-    (int(row["balls"]), int(row["strikes"])): float(row["run_value"])
+    (int(row["game_year"]), int(row["balls"]), int(row["strikes"])):
+        float(row["run_value"])
     for _, row in count_values.iterrows()
 }
 
 
-def event_value(event_name):
-    """Run value of a terminal outcome, from the event table."""
+def event_value(season, event_name):
+    """Run value of a terminal outcome in one season, from the event table."""
 
-    match = event_values[event_values["event"] == event_name]
+    match = event_values[
+        (event_values["game_year"] == season)
+        & (event_values["event"] == event_name)
+    ]
 
     if len(match) != 1:
         raise RuntimeError(
-            f"Could not find a single run value for '{event_name}'."
+            f"Could not find a single {season} run value for '{event_name}'."
         )
 
     return float(match["run_value"].iloc[0])
 
 
-WALK_VALUE = event_value("walk")
-STRIKEOUT_VALUE = event_value("strikeout")
+run_value_seasons = sorted(int(season) for season in count_values["game_year"].unique())
 
-show_diagnostic(f"Walk value:      {WALK_VALUE:+.4f}")
-show_diagnostic(f"Strikeout value: {STRIKEOUT_VALUE:+.4f}")
+WALK_VALUE = {season: event_value(season, "walk") for season in run_value_seasons}
+STRIKEOUT_VALUE = {season: event_value(season, "strikeout") for season in run_value_seasons}
+
+for season in run_value_seasons:
+    show_diagnostic(
+        f"{season}: walk value {WALK_VALUE[season]:+.4f}, "
+        f"strikeout value {STRIKEOUT_VALUE[season]:+.4f}"
+    )
 
 
-def value_at_count(balls, strikes):
+def value_at_count(season, balls, strikes):
     """
-    Run value of standing at this count. A fourth ball is a walk and a
-    third strike is a strikeout, so those come from the event table.
+    Run value of standing at this count in this season. A fourth ball is a
+    walk and a third strike is a strikeout, so those come from the event
+    table.
     """
 
     if balls >= 4:
-        return WALK_VALUE
+        return WALK_VALUE[season]
 
     if strikes >= 3:
-        return STRIKEOUT_VALUE
+        return STRIKEOUT_VALUE[season]
 
-    return count_value_lookup[(balls, strikes)]
+    return count_value_lookup[(season, balls, strikes)]
 
 
 # --------------------------------------------------
@@ -1390,16 +1404,18 @@ else:
 # --------------------------------------------------
 
 ball_value = np.array([
-    value_at_count(balls + 1, strikes)
-    for balls, strikes in zip(
+    value_at_count(season, balls + 1, strikes)
+    for season, balls, strikes in zip(
+        opportunities["game_year"].astype(int),
         opportunities["balls"],
         opportunities["strikes"]
     )
 ])
 
 called_strike_value = np.array([
-    value_at_count(balls, strikes + 1)
-    for balls, strikes in zip(
+    value_at_count(season, balls, strikes + 1)
+    for season, balls, strikes in zip(
+        opportunities["game_year"].astype(int),
         opportunities["balls"],
         opportunities["strikes"]
     )
@@ -1432,8 +1448,9 @@ in_play_descriptions = {
 
 # A foul with two strikes leaves the count where it was
 foul_value = np.array([
-    value_at_count(balls, min(strikes + 1, 2))
-    for balls, strikes in zip(
+    value_at_count(season, balls, min(strikes + 1, 2))
+    for season, balls, strikes in zip(
+        opportunities["game_year"].astype(int),
         opportunities["balls"],
         opportunities["strikes"]
     )
