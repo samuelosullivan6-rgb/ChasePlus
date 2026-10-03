@@ -19,7 +19,7 @@ play can't top them on noise alone).
 
 Inputs:  results/xchase/xchase_comparison_by_season.csv
          results/xchase/xchase_reliability.csv
-         results/chase_value_reliability.csv (chase rate row)
+         results/chase/chase_value_reliability.csv (chase rate row)
 Outputs: results/xchase/figures/chase_plus_vs_xchase_plus.png
          results/xchase/figures/chase_plus_vs_xchase_plus_dark.png
          results/xchase/figures/reliability_chase_vs_xchase.png
@@ -47,12 +47,12 @@ if not (PROJECT_DIR / "data").exists():
     PROJECT_DIR = PROJECT_DIR.parent
 
 RESULTS_DIR = PROJECT_DIR / "results"
-# With the other xChase+ charts, not the Chase+ ones in results/figures/.
+# With the other xChase+ charts, not the Chase+ ones in results/chase/figures/.
 FIGURE_DIR = RESULTS_DIR / "xchase" / "figures"
 
 COMPARISON_FILE = RESULTS_DIR / "xchase" / "xchase_comparison_by_season.csv"
 X_RELIABILITY_FILE = RESULTS_DIR / "xchase" / "xchase_reliability.csv"
-CHASE_RELIABILITY_FILE = RESULTS_DIR / "chase_value_reliability.csv"
+CHASE_RELIABILITY_FILE = RESULTS_DIR / "chase" / "chase_value_reliability.csv"
 
 # How many hitters are highlighted on each side of the line.
 HIGHLIGHT_COUNT = 5
@@ -326,17 +326,10 @@ for mode, theme in THEMES.items():
 #
 # Year-to-year correlation for hitters qualified in both seasons (unshrunk
 # values, as in 06_build_chase_reliability.py and 09_build_xchase_comparison.py).
-# One row per measure, one dot per pair of seasons. Pale bar = 95%
-# interval for the correlation (Fisher z).
+# One row per measure. Small dots: each pair of seasons. Big dot and
+# number: the average across pairs (Fisher z, weighted by hitters). Pale
+# bar: the range across pairs.
 # --------------------------------------------------
-
-def correlation_interval(r, n):
-    """95% interval for a Pearson correlation, via Fisher's z."""
-
-    z = np.arctanh(r)
-    half_width = 1.96 / np.sqrt(n - 3)
-    return np.tanh(z - half_width), np.tanh(z + half_width)
-
 
 if X_RELIABILITY_FILE.exists() and CHASE_RELIABILITY_FILE.exists():
 
@@ -367,10 +360,15 @@ if X_RELIABILITY_FILE.exists() and CHASE_RELIABILITY_FILE.exists():
         ("luck_r", "Luck (Chase+ minus xChase+)"),
     ]
 
-    pair_labels = [
-        f"{int(row.first_season)} to {int(row.second_season)}"
-        for row in reliability.itertuples()
-    ]
+    pair_count = len(reliability)
+    first_season = int(reliability["first_season"].min())
+    last_season = int(reliability["second_season"].max())
+
+    def average_correlation(values, hitters):
+        """Average of correlations through Fisher's z, weighted by n - 3."""
+
+        weights = hitters - 3
+        return np.tanh(np.sum(weights * np.arctanh(values)) / np.sum(weights))
 
     for mode, theme in THEMES.items():
 
@@ -382,30 +380,30 @@ if X_RELIABILITY_FILE.exists() and CHASE_RELIABILITY_FILE.exists():
         axis.grid(axis="x", zorder=0)
         axis.axvline(0, color=theme["ink_secondary"], linewidth=1, zorder=1)
 
-        pair_count = len(reliability)
-        offsets = np.linspace(-0.14, 0.14, pair_count) if pair_count > 1 else [0.0]
+        dot_color = theme["pair_colors"][-1]
 
         for row_number, (column, label) in enumerate(measures):
 
-            for pair_number, (_, pair) in enumerate(reliability.iterrows()):
+            values = reliability[column].to_numpy()
+            average = average_correlation(values, reliability["paired_hitters"].to_numpy())
 
-                r = pair[column]
-                low, high = correlation_interval(r, pair["paired_hitters"])
-                y_position = row_number + offsets[pair_number]
-                color = theme["pair_colors"][pair_number % len(theme["pair_colors"])]
+            # spread across the season pairs: pale bar from lowest to highest
+            axis.plot([values.min(), values.max()], [row_number, row_number],
+                      color=dot_color, alpha=0.3, linewidth=10,
+                      solid_capstyle="round", zorder=2)
 
-                # uncertainty: pale bar behind the dot
-                axis.plot([low, high], [y_position, y_position], color=color,
-                          alpha=0.45, linewidth=6, solid_capstyle="round",
-                          zorder=2)
+            # each pair of seasons: small dot
+            axis.scatter(values, np.full(len(values), row_number), s=18,
+                         color=theme["surface"], edgecolor=dot_color,
+                         linewidth=1.1, zorder=3)
 
-                # estimate: solid dot
-                axis.scatter(r, y_position, s=52, color=color,
-                             edgecolor=theme["surface"], linewidth=1.4,
-                             zorder=3)
+            # average across pairs: the estimate
+            axis.scatter(average, row_number, s=70, color=dot_color,
+                         edgecolor=theme["surface"], linewidth=1.5, zorder=4)
 
-                axis.text(high + 0.025, y_position, f"{r:.2f}", ha="left",
-                          va="center", fontsize=8.5, color=theme["ink"])
+            axis.text(values.max() + 0.03, row_number, f"{average:.2f}",
+                      ha="left", va="center", fontsize=9.5, fontweight="bold",
+                      color=theme["ink"])
 
         axis.set_yticks(range(len(measures)), [label for _, label in measures])
         axis.set_ylim(len(measures) - 0.5, -0.5)
@@ -416,20 +414,24 @@ if X_RELIABILITY_FILE.exists() and CHASE_RELIABILITY_FILE.exists():
         add_titles(
             figure,
             "xChase+ repeats more than Chase+, and luck doesn't repeat",
-            "Hitters qualified in both seasons, values before shrinkage.\n"
-            "Pale bars: 95% interval for each correlation.",
+            f"Hitters qualified in both seasons, values before shrinkage, "
+            f"{pair_count} pairs of seasons\n({first_season} to {last_season}). "
+            "Number: average across the pairs.",
             theme,
             subtitle_y=0.925,
         )
 
         handles = [
-            plt.Line2D([], [], marker="o", linestyle="none", markersize=7,
-                       color=theme["pair_colors"][index % len(theme["pair_colors"])],
-                       markeredgecolor=theme["surface"],
-                       label=f"{label} ({int(reliability['paired_hitters'].iloc[index])} hitters)")
-            for index, label in enumerate(pair_labels)
+            plt.Line2D([], [], marker="o", linestyle="none", markersize=8,
+                       color=dot_color, markeredgecolor=theme["surface"],
+                       label="Average across pairs"),
+            plt.Line2D([], [], marker="o", linestyle="none", markersize=4.5,
+                       color=theme["surface"], markeredgecolor=dot_color,
+                       label="One pair of seasons"),
+            plt.Line2D([], [], color=dot_color, alpha=0.3, linewidth=8,
+                       solid_capstyle="round", label="Range across pairs"),
         ]
-        figure.legend(handles=handles, loc="upper left", ncol=len(handles),
+        figure.legend(handles=handles, loc="upper left", ncol=3,
                       bbox_to_anchor=(0.005, 0.845), fontsize=8.5,
                       handlelength=1.4, columnspacing=1.4)
 

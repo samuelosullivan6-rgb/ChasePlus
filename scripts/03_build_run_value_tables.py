@@ -23,9 +23,9 @@ Each table is printed next to published reference values so a broken step
 shows up immediately, before anything is built on it.
 
 Inputs:  data/cleaned/baseline_chase_pitches.parquet
-Outputs: results/run_expectancy_base_out.csv
-         results/run_value_by_event.csv
-         results/run_value_by_count.csv
+Outputs: results/run_values/run_expectancy_base_out.csv
+         results/run_values/run_value_by_event.csv
+         results/run_values/run_value_by_count.csv
          data/cleaned/plate_appearance_run_values.parquet
 """
 
@@ -88,7 +88,8 @@ if not (PROJECT_DIR / "data").exists():
     PROJECT_DIR = PROJECT_DIR.parent
 
 CLEAN_DIR = PROJECT_DIR / "data" / "cleaned"
-RESULTS_DIR = PROJECT_DIR / "results"
+# Shared by the Chase+ and xChase+ runs, so neither run's folder
+RESULTS_DIR = PROJECT_DIR / "results" / "run_values"
 
 RESULTS_DIR.mkdir(parents=True, exist_ok=True)
 

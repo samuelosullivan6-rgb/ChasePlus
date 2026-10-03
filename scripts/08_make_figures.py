@@ -3,7 +3,7 @@ README figures and tables for the chase leaderboard.
 
 Reads the finished results (nothing is recalculated, so the figures always
 match the saved leaderboards) and writes four charts, each in a light and a
-dark version, to results/figures/:
+dark version, to results/chase/figures/:
 
   chase_cost_by_count        average cost of one chase in each count
   leaderboard_by_season      top 5 and bottom 5 Chase+ per season
@@ -19,11 +19,11 @@ How uncertainty is drawn, in every chart:
     printed values show it as a smaller, lighter "±" figure;
   - reference values (league average = 100, zero) are thin gray lines.
 
-Inputs:  results/chase_cost_leaderboard_by_season.csv
-         results/chase_value_reliability.csv (to cross-check correlations)
+Inputs:  results/chase/chase_cost_leaderboard_by_season.csv
+         results/chase/chase_value_reliability.csv (to cross-check correlations)
          data/cleaned/chase_costs_by_pitch.parquet (count chart only; that
          chart is skipped if the file is missing)
-Outputs: results/figures/*.png
+Outputs: results/chase/figures/*.png
 
 With --expected-contact it draws the same charts and tables for xChase+:
 inputs come from results/xchase/ and xchase_costs_by_pitch.parquet, the
@@ -73,7 +73,7 @@ if EXPECTED_CONTACT:
     PITCH_COST_FILE = PROJECT_DIR / "data" / "cleaned" / "xchase_costs_by_pitch.parquet"
     STAT_NAME = "xChase+"
 else:
-    RESULTS_DIR = PROJECT_DIR / "results"
+    RESULTS_DIR = PROJECT_DIR / "results" / "chase"
     PITCH_COST_FILE = PROJECT_DIR / "data" / "cleaned" / "chase_costs_by_pitch.parquet"
     STAT_NAME = "Chase+"
 
@@ -165,12 +165,27 @@ def clean_axes(axis, keep_left=False):
     axis.tick_params(length=0)
 
 
-def add_titles(figure, title, subtitle, theme):
-    """Takeaway title plus one line of plain-language subtitle."""
+def from_top(figure, inches):
+    """Figure-fraction height that sits this many inches below the top."""
 
-    figure.text(0.01, 0.985, title, ha="left", va="top",
+    return 1 - inches / figure.get_figheight()
+
+
+def add_titles(figure, title, subtitle, theme, fixed_header=False):
+    """
+    Takeaway title plus one line of plain-language subtitle. With
+    fixed_header the two sit a fixed distance from the top in inches, for
+    charts whose height grows with the number of seasons.
+    """
+
+    title_y, subtitle_y = 0.985, 0.945
+
+    if fixed_header:
+        title_y, subtitle_y = from_top(figure, 0.12), from_top(figure, 0.42)
+
+    figure.text(0.01, title_y, title, ha="left", va="top",
                 fontsize=14, fontweight="bold", color=theme["ink"])
-    figure.text(0.01, 0.945, subtitle, ha="left", va="top",
+    figure.text(0.01, subtitle_y, subtitle, ha="left", va="top",
                 fontsize=9.5, color=theme["ink_secondary"])
 
 
@@ -232,7 +247,7 @@ actual_chase_plus = {}
 
 if EXPECTED_CONTACT:
 
-    chase_plus_file = PROJECT_DIR / "results" / "chase_cost_leaderboard_by_season.csv"
+    chase_plus_file = PROJECT_DIR / "results" / "chase" / "chase_cost_leaderboard_by_season.csv"
 
     if chase_plus_file.exists():
         actual = pd.read_csv(chase_plus_file)
@@ -240,7 +255,7 @@ if EXPECTED_CONTACT:
             actual_chase_plus[(row["batter"], row["game_year"])] = row["chase_plus"]
     else:
         print(
-            "No Chase+ leaderboard in results/, so the leaders chart will "
+            "No Chase+ leaderboard in results/chase/, so the leaders chart will "
             "not mark Chase+. Run 04_build_chase_leaderboard.py to add it."
         )
 
@@ -395,7 +410,11 @@ for mode, theme in THEMES.items():
         figsize=(7.6, 3.05 * len(seasons) + 1.0),
         sharex=True
     )
-    figure.subplots_adjust(left=0.22, right=0.96, top=0.875, bottom=0.05,
+    # header and footer in inches, so they don't spread out as seasons are
+    # added
+    figure.subplots_adjust(left=0.22, right=0.96,
+                           top=from_top(figure, 1.05),
+                           bottom=0.5 / figure.get_figheight(),
                            hspace=0.36)
 
     axes = np.atleast_1d(axes)
@@ -476,6 +495,7 @@ for mode, theme in THEMES.items():
         f"{STAT_NAME} leaders and trailers, season by season",
         "Top 5 (blue) and bottom 5 (red) qualified hitters.",
         theme,
+        fixed_header=True,
     )
 
     # legend: estimate, uncertainty, reference
@@ -500,7 +520,7 @@ for mode, theme in THEMES.items():
 
     figure.legend(handles=handles, loc="upper left",
                   ncol=4 if actual_chase_plus else 3,
-                  bbox_to_anchor=(0.005, 0.925), fontsize=8.5,
+                  bbox_to_anchor=(0.005, from_top(figure, 0.62)), fontsize=8.5,
                   handlelength=1.6, columnspacing=1.4)
 
     written.append(save(figure, "leaderboard_by_season", mode))
@@ -692,15 +712,28 @@ for mode, theme in THEMES.items():
 
     apply_style(theme)
 
+    # At most three panels per row, so more seasons add rows, not width
+    columns = min(3, len(season_pairs))
+    rows = int(np.ceil(len(season_pairs) / columns))
+    height = 1.35 + 0.65 + 3.3 * rows + 0.8 * (rows - 1)
+
     figure, axes = plt.subplots(
-        1, len(season_pairs),
-        figsize=(4.0 * len(season_pairs) + 0.4, 4.9),
+        rows, columns,
+        figsize=(4.0 * columns + 0.4, height),
         sharex=True, sharey=True, squeeze=False
     )
-    figure.subplots_adjust(left=0.09, right=0.98, top=0.77, bottom=0.13,
-                           wspace=0.12)
+    figure.subplots_adjust(left=0.09 if columns > 2 else 0.12, right=0.98,
+                           top=from_top(figure, 1.35),
+                           bottom=0.65 / height,
+                           wspace=0.12, hspace=0.8 / 3.3)
 
-    for axis, (first_season, second_season) in zip(axes[0], season_pairs):
+    panel_axes = axes.flatten()
+
+    # a leftover panel in the last row stays empty
+    for spare in panel_axes[len(season_pairs):]:
+        spare.set_visible(False)
+
+    for axis, (first_season, second_season) in zip(panel_axes, season_pairs):
 
         paired = paired_seasons(first_season, second_season)
 
@@ -753,10 +786,12 @@ for mode, theme in THEMES.items():
         axis.set_title(f"{first_season} to {second_season}  ·  {len(paired)} hitters",
                        loc="left", fontsize=10.5, fontweight="bold", pad=6)
         axis.set_xlabel(f"{first_season} runs saved per 600 PA")
+        axis.tick_params(labelbottom=True)
         axis.grid(zorder=0)
         clean_axes(axis)
 
-    axes[0][0].set_ylabel("Next season, runs saved per 600 PA")
+    for row in range(rows):
+        axes[row][0].set_ylabel("Next season, runs saved per 600 PA")
 
     add_titles(
         figure,
@@ -765,6 +800,7 @@ for mode, theme in THEMES.items():
         "Hitters qualified in both seasons (runs saved before shrinkage). "
         "Plain chase rate repeats more strongly.",
         theme,
+        fixed_header=True,
     )
 
     handles = [
@@ -778,7 +814,7 @@ for mode, theme in THEMES.items():
                    label="95% confidence band for the fit"),
     ]
     figure.legend(handles=handles, loc="upper left", ncol=3,
-                  bbox_to_anchor=(0.005, 0.915), fontsize=8.5,
+                  bbox_to_anchor=(0.005, from_top(figure, 0.62)), fontsize=8.5,
                   handlelength=1.8, columnspacing=1.6)
 
     written.append(save(figure, "reliability", mode))

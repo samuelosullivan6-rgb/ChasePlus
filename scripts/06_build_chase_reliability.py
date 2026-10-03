@@ -19,12 +19,12 @@ Design choices:
   - Chase rate, one of the most stable hitter stats, gets the same test
     as a yardstick.
 
-Input:   results/chase_cost_leaderboard_by_season.csv
-Outputs: results/chase_value_reliability.csv
-         results/chase_value_reliability.png
+Input:   results/chase/chase_cost_leaderboard_by_season.csv
+Outputs: results/chase/chase_value_reliability.csv
+         results/chase/chase_value_reliability.png
 
 With --expected-contact it does the same for xChase+: it reads and writes
-results/xchase/ instead of results/.
+results/xchase/ instead of results/chase/.
 """
 
 import argparse
@@ -66,7 +66,7 @@ if EXPECTED_CONTACT:
     RESULTS_DIR = PROJECT_DIR / "results" / "xchase"
     STAT_NAME = "xChase+"
 else:
-    RESULTS_DIR = PROJECT_DIR / "results"
+    RESULTS_DIR = PROJECT_DIR / "results" / "chase"
     STAT_NAME = "Chase+"
 
 RESULTS_DIR.mkdir(parents=True, exist_ok=True)

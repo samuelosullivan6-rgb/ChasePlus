@@ -22,9 +22,9 @@ Two ways to value a plate appearance are reported:
 The gap between them reflects the chances a hitter's teammates gave him.
 
 Inputs:  data/cleaned/plate_appearance_run_values.parquet
-         results/run_value_by_event.csv
-         results/chase_cost_leaderboard_by_season.csv (optional)
-Output:  results/hitter_value_leaderboard.csv
+         results/run_values/run_value_by_event.csv
+         results/chase/chase_cost_leaderboard_by_season.csv (optional)
+Output:  results/chase/hitter_value_leaderboard.csv
 
 With --expected-contact the chase columns come from the xChase+ run
 instead: it reads results/xchase/chase_cost_leaderboard_by_season.csv and
@@ -90,10 +90,10 @@ EXPECTED_CONTACT = arguments.expected_contact
 if EXPECTED_CONTACT:
     CHASE_DIR = RESULTS_DIR / "xchase"
 else:
-    CHASE_DIR = RESULTS_DIR
+    CHASE_DIR = RESULTS_DIR / "chase"
 
 PA_VALUE_FILE = CLEAN_DIR / "plate_appearance_run_values.parquet"
-EVENT_VALUE_FILE = RESULTS_DIR / "run_value_by_event.csv"
+EVENT_VALUE_FILE = RESULTS_DIR / "run_values" / "run_value_by_event.csv"
 CHASE_LEADERBOARD_FILE = (
     CHASE_DIR / "chase_cost_leaderboard_by_season.csv"
 )
@@ -363,10 +363,27 @@ hitters = hitters.merge(
     how="left"
 )
 
+# Every hitter-season on the chase leaderboard is kept too, even if this
+# file's plate appearance count puts him just under the floor. The two
+# scripts count plate appearances slightly differently (this one leaves
+# out half innings cut short by the end of the game), so a hitter sitting
+# exactly on the floor there (Trevor Larnach 2021: 300) can land a PA or
+# two under it here, and would otherwise be missing from the joined file.
+on_chase_leaderboard = pd.Series(False, index=hitters.index)
+
+if CHASE_LEADERBOARD_FILE.exists():
+    chase_keys = pd.read_csv(
+        CHASE_LEADERBOARD_FILE, usecols=["batter", "game_year"]
+    )
+    on_chase_leaderboard = (
+        pd.MultiIndex.from_frame(hitters[["batter", "game_year"]])
+        .isin(pd.MultiIndex.from_frame(chase_keys))
+    )
+
 qualified = hitters[
     (
-        hitters["plate_appearances"]
-        >= hitters["minimum_plate_appearances"]
+        (hitters["plate_appearances"] >= hitters["minimum_plate_appearances"])
+        | on_chase_leaderboard
     )
     & (hitters["standard_error_per_600_pa"] > 0)
     & hitters["standard_error_per_600_pa"].notna()

@@ -53,7 +53,7 @@ if EXPECTED_CONTACT:
     OUTPUT_DIR = RESULTS_DIR / "xchase"
     PITCH_COSTS = CLEAN_DIR / "xchase_costs_by_pitch.parquet"
 else:
-    OUTPUT_DIR = RESULTS_DIR
+    OUTPUT_DIR = RESULTS_DIR / "chase"
     PITCH_COSTS = CLEAN_DIR / "chase_costs_by_pitch.parquet"
 
 PITCH_FILE = CLEAN_DIR / "baseline_chase_pitches.parquet"
@@ -64,8 +64,8 @@ BY_SEASON = OUTPUT_DIR / "chase_cost_leaderboard_by_season.csv"
 CAREER = OUTPUT_DIR / "chase_cost_leaderboard.csv"
 SCALE = OUTPUT_DIR / "chase_plus_league_scale.csv"
 CALLED_STRIKE_CHECK = OUTPUT_DIR / "called_strike_model_check.csv"
-COUNT_VALUES = RESULTS_DIR / "run_value_by_count.csv"
-EVENT_VALUES = RESULTS_DIR / "run_value_by_event.csv"
+COUNT_VALUES = RESULTS_DIR / "run_values" / "run_value_by_count.csv"
+EVENT_VALUES = RESULTS_DIR / "run_values" / "run_value_by_event.csv"
 
 # Floating point slack for "equal"
 TOLERANCE = 1e-8

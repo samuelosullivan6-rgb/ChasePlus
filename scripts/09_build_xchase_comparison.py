@@ -21,8 +21,8 @@ Before comparing anything, this script checks that the two runs really
 differ only on balls in play (same fingerprint, same hitter-seasons, same
 takes/whiffs/fouls, same league scale). If a check fails it stops.
 
-Inputs:  results/chase_cost_leaderboard_by_season.csv
-         results/chase_plus_league_scale.csv
+Inputs:  results/chase/chase_cost_leaderboard_by_season.csv
+         results/chase/chase_plus_league_scale.csv
          results/xchase/chase_cost_leaderboard_by_season.csv
          results/xchase/chase_plus_league_scale.csv
          data/cleaned/chase_costs_by_pitch.parquet
@@ -71,8 +71,10 @@ CLEAN_DIR = PROJECT_DIR / "data" / "cleaned"
 RESULTS_DIR = PROJECT_DIR / "results"
 XCHASE_DIR = RESULTS_DIR / "xchase"
 
-CHASE_BY_SEASON = RESULTS_DIR / "chase_cost_leaderboard_by_season.csv"
-CHASE_SCALE = RESULTS_DIR / "chase_plus_league_scale.csv"
+CHASE_DIR = RESULTS_DIR / "chase"
+
+CHASE_BY_SEASON = CHASE_DIR / "chase_cost_leaderboard_by_season.csv"
+CHASE_SCALE = CHASE_DIR / "chase_plus_league_scale.csv"
 CHASE_PITCHES = CLEAN_DIR / "chase_costs_by_pitch.parquet"
 
 X_BY_SEASON = XCHASE_DIR / "chase_cost_leaderboard_by_season.csv"

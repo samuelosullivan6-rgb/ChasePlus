@@ -62,12 +62,12 @@ DESIGN CHOICES
 
 Inputs:  data/cleaned/baseline_chase_pitches.parquet
          data/cleaned/plate_appearance_run_values.parquet
-         results/run_value_by_count.csv, results/run_value_by_event.csv
-Outputs: results/chase_cost_leaderboard_<season>.csv (one per season)
-         results/chase_cost_leaderboard_by_season.csv
-         results/chase_cost_leaderboard.csv (career)
-         results/chase_plus_league_scale.csv
-         results/called_strike_model_check.csv
+         results/run_values/run_value_by_count.csv, results/run_values/run_value_by_event.csv
+Outputs: results/chase/chase_cost_leaderboard_<season>.csv (one per season)
+         results/chase/chase_cost_leaderboard_by_season.csv
+         results/chase/chase_cost_leaderboard.csv (career)
+         results/chase/chase_plus_league_scale.csv
+         results/chase/called_strike_model_check.csv
          data/cleaned/chase_costs_by_pitch.parquet
 
 Console output (presentation only; calculations, checks and saved files
@@ -151,7 +151,7 @@ def parse_command_line():
         action="store_true",
         help="xChase+: price chases put in play at their expected value "
              "from Savant's xwOBA instead of the actual result, and write "
-             "everything to results/xchase/ instead of results/",
+             "everything to results/xchase/ instead of results/chase/",
     )
 
     arguments = parser.parse_args()
@@ -317,20 +317,21 @@ RESULTS_DIR.mkdir(parents=True, exist_ok=True)
 PITCH_FILE = CLEAN_DIR / "baseline_chase_pitches.parquet"
 PA_VALUE_FILE = CLEAN_DIR / "plate_appearance_run_values.parquet"
 
-COUNT_VALUE_FILE = RESULTS_DIR / "run_value_by_count.csv"
-EVENT_VALUE_FILE = RESULTS_DIR / "run_value_by_event.csv"
+COUNT_VALUE_FILE = RESULTS_DIR / "run_values" / "run_value_by_count.csv"
+EVENT_VALUE_FILE = RESULTS_DIR / "run_values" / "run_value_by_event.csv"
 
 # One file per season, plus every qualified hitter-season stacked, plus the
 # career table (the same hitters added up over the seasons they qualified).
 SEASON_LEADERBOARD_NAME = "chase_cost_leaderboard_{season}.csv"
 
-# The xChase+ run writes the same files under results/xchase/ (the inputs
-# above still come from results/), so it can never overwrite Chase+.
+# Chase+ writes to results/chase/ and xChase+ writes the same files to
+# results/xchase/ (both read the shared run value tables in
+# results/run_values/), so neither run can overwrite the other.
 if EXPECTED_CONTACT:
     OUTPUT_DIR = RESULTS_DIR / "xchase"
     OUTPUT_PITCH_COSTS = CLEAN_DIR / "xchase_costs_by_pitch.parquet"
 else:
-    OUTPUT_DIR = RESULTS_DIR
+    OUTPUT_DIR = RESULTS_DIR / "chase"
     OUTPUT_PITCH_COSTS = CLEAN_DIR / "chase_costs_by_pitch.parquet"
 
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -1091,7 +1092,7 @@ called_strike_check_rows = []
 
 # The called-strike model is identical in the xChase+ run, so this check
 # gives the same numbers there. It still runs, so results/xchase/ has
-# every file results/ has (07_check_chase_invariants.py --expected-contact
+# every file results/chase/ has (07_check_chase_invariants.py --expected-contact
 # reads it).
 run_out_of_fold_check = RUN_OUT_OF_FOLD_CHECK
 
