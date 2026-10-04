@@ -68,6 +68,9 @@ if not (PROJECT_DIR / "data").exists():
     PROJECT_DIR = PROJECT_DIR.parent
 
 CLEAN_DIR = PROJECT_DIR / "data" / "cleaned"
+
+# Player names (Chadwick register), downloaded once and cached.
+PLAYER_REGISTER_FILE = PROJECT_DIR / "data" / "raw" / "chadwick_register.parquet"
 RESULTS_DIR = PROJECT_DIR / "results"
 
 RESULTS_DIR.mkdir(parents=True, exist_ok=True)
@@ -179,36 +182,49 @@ def shrink(effects, standard_errors):
 
 def attach_names(table, id_column="batter"):
     """
-    Add a 'player' column from pybaseball's player register. If the lookup
-    fails (for example with no network), print why and return the table
-    unchanged.
+    Add a 'player' column from the Chadwick player register, which keeps
+    names as written (McCann, LeMahieu, Acuña), so nothing is re-cased.
+    The register is downloaded once and cached in data/raw/, so reruns get
+    the same names without a network call. If it cannot be loaded, print
+    why and return the table unchanged.
     """
 
     try:
 
-        from pybaseball import playerid_reverse_lookup
+        if PLAYER_REGISTER_FILE.exists():
 
-        ids = [
-            int(one_id)
-            for one_id in table[id_column].dropna().unique()
-        ]
+            register = pd.read_parquet(PLAYER_REGISTER_FILE)
 
-        lookup = playerid_reverse_lookup(ids, key_type="mlbam")
+        else:
 
-        lookup["player"] = (
-            lookup["name_first"].str.title()
-            + " "
-            + lookup["name_last"].str.title()
-        )
+            from pybaseball import chadwick_register
+
+            register = chadwick_register()[
+                ["key_mlbam", "name_first", "name_last"]
+            ]
+
+            PLAYER_REGISTER_FILE.parent.mkdir(parents=True, exist_ok=True)
+            register.to_parquet(PLAYER_REGISTER_FILE, index=False)
 
         # One name per id. A duplicated id in the register would otherwise
         # duplicate that hitter's rows in the merge.
-        lookup = lookup.drop_duplicates(subset="key_mlbam")
+        lookup = (
+            register
+            .dropna(subset=["key_mlbam"])
+            .drop_duplicates(subset="key_mlbam")
+        )
+
+        lookup = pd.DataFrame({
+            id_column: lookup["key_mlbam"].astype(int),
+            "player": (
+                lookup["name_first"].str.strip()
+                + " "
+                + lookup["name_last"].str.strip()
+            ),
+        })
 
         named = table.merge(
-            lookup[["key_mlbam", "player"]].rename(
-                columns={"key_mlbam": id_column}
-            ),
+            lookup,
             on=id_column,
             how="left",
             validate="many_to_one"

@@ -10,8 +10,10 @@ Two charts, each in a light and a dark version:
   chase_plus_vs_xchase_plus   each qualified hitter's Chase+ against his
                               xChase+ for the latest season, with the
                               hitters the results flattered or hurt most
-  reliability_chase_vs_xchase how strongly chase rate, xChase+, Chase+ and
-                              luck repeat from one season to the next
+  reliability_chase_vs_xchase how strongly chase rate, xChase+ (and the
+                              part of it chase rate doesn't explain),
+                              Chase+ and luck repeat from one season to
+                              the next
 
 The highlighted hitters are the same ones 09_build_xchase_comparison.py prints
 first in its lists (sorted by luck_z, so a hitter with only a few balls in
@@ -356,6 +358,7 @@ if X_RELIABILITY_FILE.exists() and CHASE_RELIABILITY_FILE.exists():
     measures = [
         ("chase_rate_correlation", "Chase rate"),
         ("xchase_plus_r", "xChase+"),
+        ("xchase_plus_beyond_chase_rate_r", "xChase+ beyond chase rate"),
         ("chase_plus_r", "Chase+"),
         ("luck_r", "Luck (Chase+ minus xChase+)"),
     ]
@@ -374,8 +377,8 @@ if X_RELIABILITY_FILE.exists() and CHASE_RELIABILITY_FILE.exists():
 
         apply_style(theme)
 
-        figure, axis = plt.subplots(figsize=(7.6, 5.2))
-        figure.subplots_adjust(left=0.28, right=0.97, top=0.74, bottom=0.12)
+        figure, axis = plt.subplots(figsize=(7.6, 5.7))
+        figure.subplots_adjust(left=0.30, right=0.97, top=0.76, bottom=0.11)
 
         axis.grid(axis="x", zorder=0)
         axis.axvline(0, color=theme["ink_secondary"], linewidth=1, zorder=1)
@@ -413,7 +416,7 @@ if X_RELIABILITY_FILE.exists() and CHASE_RELIABILITY_FILE.exists():
 
         add_titles(
             figure,
-            "xChase+ repeats more than Chase+, and luck doesn't repeat",
+            "xChase+ repeats, even the part chase rate misses; luck doesn't",
             f"Hitters qualified in both seasons, values before shrinkage, "
             f"{pair_count} pairs of seasons\n({first_season} to {last_season}). "
             "Number: average across the pairs.",

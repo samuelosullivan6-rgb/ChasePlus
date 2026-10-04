@@ -9,15 +9,19 @@ up.
 
 It reports two scores on the same scale:
 
-- **xChase+** (the main number) prices a chase put in play by how it was
-  hit, using Savant's xwOBA. It measures the decision and the contact, not
-  where the ball landed, and it repeats better from one season to the next.
-- **Chase+** prices a chase put in play by what actually happened. It is
-  the record of the season, luck included.
+- **xChase+** (the main number, version 1.1) prices a chase put in play
+  by how it was hit, using Savant's xwOBA. It measures the decision and
+  the contact, not where the ball landed, and it repeats better from one
+  season to the next.
+- **Chase+** (version 2.0) prices a chase put in play by what actually
+  happened: the league value of a single, double, triple, home run or
+  out, whatever the runners and outs were. It is the record of the
+  season, luck included.
 
 Takes, whiffs and fouls are priced the same way in both. The gap between
 them (Chase+ minus xChase+) is called **luck** below. It's the same idea
-as xwOBA next to wOBA.
+as xwOBA next to wOBA. See [Version history](#version-history) for what
+changed between versions.
 
 **How to read the charts:** a solid mark (dot, line or bold number) is the
 estimate. The pale band or bar behind it, or the small ± figure, is its
@@ -29,7 +33,7 @@ uncertainty. A thin gray line marks the league average (100).
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="results/xchase/figures/chase_cost_by_count_dark.png">
-  <img alt="Average runs lost per chase in each count, from 0.061 at 0-1 to 0.341 at 3-2" src="results/xchase/figures/chase_cost_by_count.png" width="560">
+  <img alt="Average runs lost per chase in each count, from 0.061 at 0-1 to 0.342 at 3-2" src="results/xchase/figures/chase_cost_by_count.png" width="560">
 </picture>
 
 A chase with three balls costs far more than one early in the count.
@@ -54,97 +58,97 @@ the luck between them, are in `results/xchase/xchase_leaderboard_<season>.csv`.
 
 | Rank | Player | PA | Chase% | Runs saved / 600 PA | xChase+ ± 1 SD | Chase+ | Luck |
 |---:|---|---:|---:|---:|---|---:|---:|
-| 1 | Juan Soto | 635 | 12.2% | +24.5 | **167** ± 6 | 164 | -3 |
-| 2 | Robbie Grossman | 668 | 15.7% | +20.3 | **155** ± 7 | 145 | -10 |
-| 3 | Brandon Nimmo | 384 | 15.1% | +18.9 | **152** ± 8 | 143 | -9 |
-| 4 | Brandon Belt | 378 | 19.0% | +17.5 | **148** ± 12 | 144 | -3 |
-| 5 | Mookie Betts | 550 | 18.4% | +16.3 | **145** ± 9 | 137 | -8 |
+| 1 | Juan Soto | 635 | 12.2% | +24.5 | **167** ± 6 | 157 | -10 |
+| 2 | Robbie Grossman | 668 | 15.7% | +20.3 | **155** ± 7 | 153 | -3 |
+| 3 | Brandon Nimmo | 384 | 15.1% | +19.0 | **152** ± 8 | 145 | -7 |
+| 4 | Brandon Belt | 378 | 19.0% | +17.6 | **148** ± 12 | 145 | -3 |
+| 5 | Mookie Betts | 550 | 18.4% | +16.1 | **144** ± 8 | 141 | -3 |
 | | ... | | | | | | |
-| 247 | Kevin Pillar | 345 | 36.4% | -11.2 | **70** ± 10 | 93 | +23 |
-| 248 | Adolis García | 622 | 35.8% | -12.1 | **67** ± 10 | 71 | +4 |
-| 249 | James Mccann | 412 | 32.1% | -12.2 | **67** ± 10 | 62 | -4 |
-| 250 | Salvador Pérez | 660 | 45.3% | -15.2 | **59** ± 11 | 60 | +2 |
-| 251 | Javier Báez | 547 | 44.7% | -16.8 | **54** ± 11 | 83 | +29 |
+| 247 | Kevin Pillar | 345 | 36.4% | -11.2 | **70** ± 10 | 87 | +18 |
+| 248 | Adolis García | 622 | 35.8% | -12.1 | **67** ± 10 | 78 | +11 |
+| 249 | James McCann | 412 | 32.1% | -12.2 | **67** ± 10 | 72 | +5 |
+| 250 | Salvador Pérez | 660 | 45.3% | -15.4 | **58** ± 11 | 58 | +0 |
+| 251 | Javier Báez | 547 | 44.7% | -17.0 | **54** ± 11 | 71 | +18 |
 
 **2022** (267 qualified hitters)
 
 | Rank | Player | PA | Chase% | Runs saved / 600 PA | xChase+ ± 1 SD | Chase+ | Luck |
 |---:|---|---:|---:|---:|---|---:|---:|
-| 1 | Juan Soto | 662 | 17.1% | +18.4 | **152** ± 9 | 131 | -21 |
-| 2 | Steven Kwan | 635 | 20.3% | +16.0 | **145** ± 7 | 137 | -8 |
-| 3 | Alex Bregman | 655 | 18.2% | +15.6 | **144** ± 7 | 135 | -9 |
-| 4 | Max Muncy | 564 | 16.4% | +15.5 | **144** ± 8 | 138 | -6 |
-| 5 | Jesse Winker | 546 | 18.6% | +15.4 | **144** ± 8 | 130 | -13 |
+| 1 | Juan Soto | 662 | 17.1% | +18.6 | **152** ± 9 | 139 | -13 |
+| 2 | Alex Bregman | 655 | 18.2% | +15.8 | **144** ± 7 | 140 | -4 |
+| 3 | Steven Kwan | 635 | 20.3% | +15.7 | **144** ± 7 | 139 | -5 |
+| 4 | Max Muncy | 564 | 16.4% | +15.6 | **144** ± 8 | 138 | -6 |
+| 5 | Jesse Winker | 546 | 18.6% | +15.5 | **144** ± 7 | 130 | -14 |
 | | ... | | | | | | |
-| 263 | Andrés Giménez | 550 | 38.9% | -11.0 | **69** ± 9 | 85 | +16 |
-| 264 | Hunter Dozier | 500 | 33.0% | -11.3 | **68** ± 9 | 61 | -7 |
-| 265 | Avisaíl García | 382 | 41.1% | -11.4 | **68** ± 11 | 66 | -1 |
-| 266 | Jeremy Peña | 556 | 38.0% | -11.7 | **67** ± 8 | 82 | +15 |
-| 267 | Javier Báez | 590 | 47.7% | -13.6 | **62** ± 11 | 76 | +15 |
+| 263 | Andrés Giménez | 550 | 38.9% | -11.1 | **69** ± 9 | 81 | +12 |
+| 264 | Hunter Dozier | 500 | 33.0% | -11.2 | **69** ± 9 | 62 | -7 |
+| 265 | Avisaíl García | 382 | 41.1% | -11.5 | **68** ± 11 | 67 | -1 |
+| 266 | Jeremy Peña | 556 | 38.0% | -11.8 | **67** ± 8 | 72 | +5 |
+| 267 | Javier Báez | 590 | 47.7% | -13.1 | **63** ± 11 | 69 | +5 |
 
 **2023** (280 qualified hitters)
 
 | Rank | Player | PA | Chase% | Runs saved / 600 PA | xChase+ ± 1 SD | Chase+ | Luck |
 |---:|---|---:|---:|---:|---|---:|---:|
-| 1 | Juan Soto | 706 | 16.6% | +20.3 | **154** ± 8 | 147 | -7 |
-| 2 | Lars Nootbaar | 505 | 17.0% | +19.2 | **151** ± 9 | 139 | -12 |
-| 3 | Ha-Seong Kim | 627 | 20.5% | +18.6 | **149** ± 7 | 151 | +2 |
-| 4 | Alex Bregman | 721 | 18.7% | +17.8 | **147** ± 7 | 138 | -9 |
-| 5 | Will Smith | 548 | 25.6% | +16.6 | **144** ± 9 | 139 | -5 |
+| 1 | Juan Soto | 706 | 16.6% | +20.4 | **154** ± 8 | 148 | -6 |
+| 2 | Lars Nootbaar | 505 | 17.0% | +19.3 | **151** ± 9 | 148 | -3 |
+| 3 | Ha-Seong Kim | 627 | 20.5% | +18.4 | **148** ± 7 | 155 | +7 |
+| 4 | Alex Bregman | 721 | 18.7% | +17.8 | **147** ± 7 | 139 | -8 |
+| 5 | Will Smith | 548 | 25.6% | +16.7 | **144** ± 9 | 143 | -1 |
 | | ... | | | | | | |
-| 276 | Jake Burger | 539 | 38.9% | -14.4 | **62** ± 9 | 55 | -7 |
-| 277 | Mickey Moniak | 319 | 46.9% | -15.5 | **59** ± 12 | 66 | +7 |
-| 278 | Christian Bethancourt | 333 | 45.3% | -16.4 | **57** ± 11 | 74 | +17 |
-| 279 | Elehuris Montero | 306 | 43.7% | -16.9 | **55** ± 13 | 55 | -0 |
-| 280 | Javier Báez | 542 | 44.4% | -20.1 | **47** ± 10 | 56 | +9 |
+| 276 | Jake Burger | 539 | 38.9% | -14.4 | **62** ± 9 | 59 | -3 |
+| 277 | Mickey Moniak | 319 | 46.9% | -15.6 | **59** ± 12 | 65 | +6 |
+| 278 | Christian Bethancourt | 333 | 45.3% | -16.8 | **56** ± 11 | 64 | +8 |
+| 279 | Elehuris Montero | 306 | 43.7% | -17.0 | **55** ± 13 | 63 | +8 |
+| 280 | Javier Báez | 542 | 44.4% | -20.0 | **47** ± 10 | 46 | -2 |
 
 **2024** (269 qualified hitters)
 
 | Rank | Player | PA | Chase% | Runs saved / 600 PA | xChase+ ± 1 SD | Chase+ | Luck |
 |---:|---|---:|---:|---:|---|---:|---:|
-| 1 | Juan Soto | 710 | 18.0% | +17.4 | **148** ± 8 | 147 | -1 |
-| 2 | Mookie Betts | 516 | 21.2% | +17.0 | **147** ± 8 | 132 | -15 |
-| 3 | Lars Nootbaar | 404 | 17.0% | +15.6 | **143** ± 8 | 139 | -5 |
-| 4 | Ha-Seong Kim | 469 | 18.8% | +14.7 | **141** ± 8 | 126 | -15 |
-| 5 | Steven Kwan | 543 | 19.2% | +14.1 | **139** ± 7 | 131 | -9 |
+| 1 | Juan Soto | 710 | 18.0% | +17.5 | **148** ± 8 | 148 | +0 |
+| 2 | Mookie Betts | 516 | 21.2% | +17.0 | **147** ± 8 | 134 | -13 |
+| 3 | Lars Nootbaar | 404 | 17.0% | +15.7 | **143** ± 8 | 139 | -4 |
+| 4 | Ha-Seong Kim | 469 | 18.8% | +14.8 | **141** ± 8 | 131 | -10 |
+| 5 | Steven Kwan | 543 | 19.2% | +14.2 | **139** ± 7 | 135 | -5 |
 | | ... | | | | | | |
-| 265 | Korey Lee | 395 | 35.2% | -11.8 | **67** ± 9 | 70 | +2 |
-| 266 | Harrison Bader | 434 | 33.6% | -12.2 | **66** ± 9 | 70 | +4 |
-| 267 | Ezequiel Tovar | 695 | 43.8% | -15.4 | **57** ± 9 | 77 | +20 |
-| 268 | Ceddanne Rafaela | 569 | 46.7% | -15.5 | **57** ± 9 | 74 | +17 |
-| 269 | Mickey Moniak | 418 | 39.1% | -16.5 | **54** ± 9 | 58 | +4 |
+| 265 | Korey Lee | 395 | 35.2% | -11.7 | **68** ± 9 | 69 | +2 |
+| 266 | Harrison Bader | 434 | 33.6% | -12.2 | **66** ± 9 | 70 | +3 |
+| 267 | Ezequiel Tovar | 695 | 43.8% | -15.4 | **57** ± 9 | 72 | +15 |
+| 268 | Ceddanne Rafaela | 569 | 46.7% | -15.6 | **57** ± 9 | 67 | +10 |
+| 269 | Mickey Moniak | 418 | 39.1% | -16.6 | **54** ± 9 | 62 | +8 |
 
 **2025** (266 qualified hitters)
 
 | Rank | Player | PA | Chase% | Runs saved / 600 PA | xChase+ ± 1 SD | Chase+ | Luck |
 |---:|---|---:|---:|---:|---|---:|---:|
-| 1 | Gleyber Torres | 627 | 17.2% | +19.4 | **152** ± 7 | 151 | -2 |
-| 2 | Juan Soto | 707 | 15.9% | +16.3 | **144** ± 8 | 145 | +1 |
-| 3 | Geraldo Perdomo | 720 | 19.0% | +14.8 | **140** ± 7 | 144 | +4 |
-| 4 | Bryson Stott | 563 | 23.4% | +14.8 | **140** ± 8 | 125 | -15 |
-| 5 | Will Smith | 438 | 19.4% | +14.8 | **140** ± 9 | 130 | -10 |
+| 1 | Gleyber Torres | 627 | 17.2% | +19.5 | **153** ± 7 | 147 | -5 |
+| 2 | Juan Soto | 707 | 15.9% | +16.4 | **144** ± 8 | 138 | -6 |
+| 3 | Geraldo Perdomo | 720 | 19.0% | +15.1 | **141** ± 7 | 141 | +0 |
+| 4 | Bryson Stott | 563 | 23.4% | +14.9 | **140** ± 8 | 130 | -10 |
+| 5 | Will Smith | 438 | 19.4% | +14.9 | **140** ± 9 | 136 | -4 |
 | | ... | | | | | | |
-| 262 | Pedro Pagés | 388 | 35.9% | -12.7 | **66** ± 10 | 80 | +14 |
-| 263 | Jordan Walker | 394 | 34.1% | -13.6 | **63** ± 9 | 66 | +3 |
-| 264 | Hunter Goodman | 577 | 36.9% | -14.3 | **61** ± 8 | 87 | +26 |
-| 265 | Gabriel Arias | 470 | 39.0% | -14.4 | **61** ± 10 | 68 | +7 |
-| 266 | Javier Báez | 435 | 46.2% | -15.7 | **58** ± 10 | 82 | +25 |
+| 262 | Pedro Pagés | 388 | 35.9% | -12.9 | **65** ± 10 | 73 | +8 |
+| 263 | Jordan Walker | 394 | 34.1% | -13.5 | **63** ± 9 | 72 | +9 |
+| 264 | Hunter Goodman | 577 | 36.9% | -14.4 | **61** ± 8 | 76 | +15 |
+| 265 | Gabriel Arias | 470 | 39.0% | -14.4 | **61** ± 10 | 70 | +8 |
+| 266 | Javier Báez | 435 | 46.2% | -15.7 | **58** ± 10 | 65 | +7 |
 
 **2026** (267 qualified hitters, season in progress)
 
 | Rank | Player | PA | Chase% | Runs saved / 600 PA | xChase+ ± 1 SD | Chase+ | Luck |
 |---:|---|---:|---:|---:|---|---:|---:|
-| 1 | Geraldo Perdomo | 608 | 21.1% | +22.9 | **152** ± 6 | 139 | -13 |
-| 2 | Taylor Ward | 590 | 15.2% | +22.8 | **152** ± 6 | 144 | -8 |
-| 3 | Miguel Vargas | 619 | 21.2% | +19.9 | **145** ± 7 | 140 | -5 |
-| 4 | Steven Kwan | 567 | 20.1% | +19.4 | **144** ± 6 | 137 | -8 |
-| 5 | Gleyber Torres | 376 | 19.3% | +19.4 | **144** ± 8 | 134 | -10 |
+| 1 | Geraldo Perdomo | 608 | 21.1% | +23.0 | **152** ± 6 | 145 | -8 |
+| 2 | Taylor Ward | 590 | 15.2% | +22.9 | **152** ± 6 | 145 | -7 |
+| 3 | Miguel Vargas | 619 | 21.2% | +20.0 | **145** ± 7 | 143 | -2 |
+| 4 | Steven Kwan | 567 | 20.1% | +19.5 | **144** ± 6 | 143 | -1 |
+| 5 | Gleyber Torres | 376 | 19.3% | +19.4 | **144** ± 8 | 138 | -6 |
 | | ... | | | | | | |
-| 263 | Jarren Duran | 565 | 34.9% | -14.6 | **67** ± 7 | 71 | +4 |
-| 264 | Zach Neto | 621 | 37.7% | -15.5 | **65** ± 8 | 73 | +8 |
-| 265 | Ezequiel Tovar | 463 | 44.4% | -15.7 | **64** ± 8 | 65 | +1 |
-| 266 | Luke Raley | 284 | 34.9% | -15.9 | **64** ± 9 | 65 | +2 |
-| 267 | Mickey Moniak | 392 | 42.9% | -20.1 | **54** ± 8 | 57 | +3 |
+| 263 | Jarren Duran | 565 | 34.9% | -14.5 | **67** ± 7 | 64 | -3 |
+| 264 | Zach Neto | 621 | 37.7% | -15.4 | **65** ± 8 | 75 | +10 |
+| 265 | Ezequiel Tovar | 463 | 44.4% | -15.5 | **65** ± 8 | 60 | -5 |
+| 266 | Luke Raley | 284 | 34.9% | -15.8 | **64** ± 9 | 63 | -1 |
+| 267 | Mickey Moniak | 392 | 42.9% | -20.0 | **55** ± 8 | 49 | -6 |
 
 Luck is Chase+ minus xChase+. Hitters at the top of a list sorted by
 xChase+ tend to have negative luck (and the bottom positive luck): that's
@@ -170,15 +174,23 @@ measured, and for what it does and doesn't say about next season.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="results/xchase/figures/reliability_chase_vs_xchase_dark.png">
-  <img alt="Year-to-year correlations averaged over five pairs of seasons: chase rate 0.85, xChase+ 0.72, Chase+ 0.60, luck 0.02" src="results/xchase/figures/reliability_chase_vs_xchase.png" width="720">
+  <img alt="Year-to-year correlations averaged over five pairs of seasons: chase rate 0.85, xChase+ 0.72, the part of xChase+ chase rate doesn't explain 0.49, Chase+ 0.65, luck 0.03" src="results/xchase/figures/reliability_chase_vs_xchase.png" width="720">
 </picture>
 
 Yes. Across the five pairs of seasons from 2021 to 2026, xChase+ repeats at
-r = 0.69-0.75 (0.72 on average), Chase+ at 0.52-0.69 (0.60), and luck not
-at all (-0.10 to 0.08; 0.02). xChase+ beats Chase+ in every pair. That's
+r = 0.69-0.76 (0.72 on average), Chase+ at 0.59-0.71 (0.65), and luck not
+at all (-0.05 to 0.11; 0.03). xChase+ beats Chase+ in every pair. That's
 the reason xChase+ is the main number: taking the ball-in-play luck out
 leaves more of the hitter. Both are noisier than plain chase rate (0.84-0.86),
-which only counts chases and doesn't price them. The per-stat scatter
+which only counts chases and doesn't price them.
+
+Chase rate alone explains 58-72% of the spread in xChase+ within a
+season, so part of xChase+ repeating is just chase rate repeating. The
+part chase rate doesn't explain (what's left after a straight-line fit
+on chase rate, each season) still repeats at r = 0.43-0.53 (0.49). That
+part is what pricing chases adds over counting them, and it carries over
+from one season to the next. The same part of Chase+ repeats at
+0.34-0.46 (0.40); xChase+ is ahead in every pair here too. The per-stat scatter
 plots are in `results/xchase/figures/reliability.png` and
 `results/chase/figures/reliability.png`.
 
@@ -190,10 +202,14 @@ plots are in `results/xchase/figures/reliability.png` and
    a called-strike model. That model is a logistic regression fit separately
    for each season, on distance outside the zone plus the count. A whiff adds
    a strike, a foul adds a strike unless there are already two. A ball in
-   play gets a value from its xwOBA for xChase+ (a straight line fit, each
-   season, from xwOBA to this project's run values on chases put in play)
-   and its actual run value for Chase+. The roughly 1% of balls in play with
-   no xwOBA keep their actual value in both.
+   play is worth, for Chase+, the league-average run value of its outcome
+   that season: single, double, triple, home run or out (double plays,
+   fielder's choices, sacrifices and reaching on an error count as outs,
+   as in wOBA). For xChase+ it gets a value from its xwOBA instead (a
+   straight line fit, each season, from xwOBA to those same outcome
+   values on chases put in play). Neither depends on the runners or outs,
+   so the swing side is context neutral like the take side. The roughly
+   1% of balls in play with no xwOBA keep their outcome's value in both.
 2. **Compare to the league.** Each pitch is compared with what the league
    lost on average on the same kind of pitch: same season, count and
    distance bucket. That way a hitter isn't charged for working deep counts
@@ -227,8 +243,8 @@ MLB's ABS Challenge System.
 | Who was more dominant, comparable across seasons? | `xchase_plus` (100 = league average) |
 | How many runs on one fixed yardstick? | `runs_saved_vs_anchor_shrunk` (every season priced against 2024) |
 
-- **League chase cost:** the league lost 36.7, 35.5, 37.8, 36.0, 37.0 and
-  43.9 runs per 600 PA to chasing in 2021 through 2026.
+- **League chase cost:** the league lost 36.7, 35.6, 38.0, 36.1, 37.1 and
+  44.0 runs per 600 PA to chasing in 2021 through 2026.
 - **Where the files are:** everything for xChase+ is in `results/xchase/`
   (along with the files that compare the two) and everything for Chase+ in
   `results/chase/`, with the same file names. The run value tables both
@@ -236,14 +252,16 @@ MLB's ABS Challenge System.
   the xChase+ files the score columns are named `xchase_plus`,
   `xchase_plus_se`, ... so the two can't be mixed up.
 - **Uncertainty:** the charts and tables show ± `xchase_plus_posterior_sd`,
-  the uncertainty left after shrinkage (usually 7-11 points; 10-14 for
+  the uncertainty left after shrinkage (usually 7-10 points; 9-12 for
   Chase+). The files also have `xchase_plus_se`, the standard error before
-  shrinkage (usually about 10 points; about 15 for Chase+). xChase+ is
+  shrinkage (usually about 10 points; about 12 for Chase+). xChase+ is
   more precise because an xwOBA value varies less than an actual result.
 - **Other files:** `chase_cost_leaderboard.csv` adds each hitter's qualified
   seasons into one career line. `hitter_value_leaderboard.csv` places chase
   value next to total offense. `xchase_leaderboard_<season>.csv` ranks by
   xChase+ with Chase+, both ranks and luck alongside.
+- **Version:** the `stat_version` column of `chase_plus_league_scale.csv`
+  says which version of the stat a results folder was built with.
 
 **Qualifying:** a hitter needs 600 out-of-zone pitches seen and 300 plate
 appearances in a season. A season still in progress gets proportionally
@@ -258,8 +276,14 @@ fewer than 120 chases.
   those reasons would be understated by xChase+. Luck doesn't repeat in
   any of the five pairs of seasons, so there's no sign of that.
 - **The xwOBA line is fit on chases only.** Its implied wOBA scale is
-  1.13-1.19 each season, a little below the usual 1.2-1.25, because it is
-  fit on chased balls in play priced in this project's own run values.
+  1.15-1.21 each season, at or a little below the usual 1.2-1.25, because
+  it is fit on chased balls in play priced in this project's own run
+  values.
+- **Chase+ treats every out the same.** A chased ball in play that ends
+  in a double play, a sacrifice fly, a fielder's choice or an error is
+  priced as an average out, because those depend on the runners and the
+  fielders. That keeps Chase+ context neutral, but it also means a
+  productive out gets no extra credit.
 - **Shrinkage is a little too strong at the extremes.** The most and least
   disciplined hitters come out about 3 runs per 600 PA too close to average
   (7-8 Chase+ points), so the top and bottom values are understated.
@@ -373,24 +397,26 @@ byte-identical files (a 23rd check).
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="results/xchase/figures/chase_plus_vs_xchase_plus_dark.png">
-  <img alt="Chase+ against xChase+ for 2026, r = 0.88, with the five hitters the results flattered most and the five they hurt most" src="results/xchase/figures/chase_plus_vs_xchase_plus.png" width="720">
+  <img alt="Chase+ against xChase+ for 2026, r = 0.93, with the five hitters the results flattered most and the five they hurt most" src="results/xchase/figures/chase_plus_vs_xchase_plus.png" width="720">
 </picture>
 
-They mostly agree: r = 0.85-0.92 in every season from 2021 to 2026. Swing
+They mostly agree: r = 0.91-0.95 in every season from 2021 to 2026. Swing
 decisions drive most of both, and those are priced the same way. Luck has
-an SD of 7.5-9.5 points and doesn't repeat from one season to the next,
+an SD of 5.8-7.3 points and doesn't repeat from one season to the next,
 so it looks like ball-in-play luck rather than a skill xwOBA misses.
-2022 stands out: the two agree least that season (r = 0.85) and luck
-spreads the most (SD 9.5).
+2022 stands out a little: the two agree least that season (r = 0.91) and
+luck spreads the most (SD 7.3).
 
-**Regression candidates.** 10, 23, 12, 10, 12 and 16 hitters had luck at
-least 2 standard errors from zero in 2021 through 2026 (4.0%, 8.6%, 4.3%,
-3.7%, 4.5% and 6.0%). About 4.6% would land there by chance alone, so
-outside 2022 this is a list of who to watch, not proof anyone was lucky. Most of the list is hitters whose
-Chase+ should rise. Luck itself is balanced (its average is about 0),
-but unlucky hitters tend to have smaller standard errors on it (median
-10.0 points against 11.4 for lucky ones), so they reach -2 more easily
-than lucky hitters reach +2. See `results/xchase/regression_candidates.csv`.
+**Regression candidates.** 12, 17, 20, 12, 13 and 14 hitters had luck at
+least 2 standard errors from zero in 2021 through 2026 (4.8%, 6.4%, 7.1%,
+4.5%, 4.9% and 5.2%). About 4.6% would land there by chance alone, so this
+is a list of who to watch, not proof anyone was lucky; only 2022 and 2023
+run clearly above chance. The list splits about evenly between hitters
+whose Chase+ should fall (46) and rise (42). The standard error of luck
+comes from how each ball was hit (the league's typical luck on balls
+with the same xwOBA), not from the hitter's own results, so a few lucky
+home runs can't also widen his own error bar. See
+`results/xchase/regression_candidates.csv`.
 
 **Offense, same season.** Each stat against the matching kind of offense:
 Chase+ (actual results) against wOBA, xChase+ (expected) against xwOBA.
@@ -401,11 +427,11 @@ xChase+.
 | Season | Chase+ vs wOBA | xChase+ vs xwOBA | Chase rate vs wOBA | Chase rate vs xwOBA |
 |---|---:|---:|---:|---:|
 | 2021 | 0.29 | 0.35 | -0.26 | -0.27 |
-| 2022 | 0.21 | 0.32 | -0.16 | -0.23 |
-| 2023 | 0.27 | 0.34 | -0.22 | -0.27 |
-| 2024 | 0.22 | 0.30 | -0.20 | -0.24 |
-| 2025 | 0.25 | 0.32 | -0.27 | -0.30 |
-| 2026 | 0.25 | 0.31 | -0.17 | -0.27 |
+| 2022 | 0.25 | 0.33 | -0.16 | -0.23 |
+| 2023 | 0.28 | 0.35 | -0.22 | -0.27 |
+| 2024 | 0.23 | 0.30 | -0.20 | -0.24 |
+| 2025 | 0.27 | 0.32 | -0.27 | -0.30 |
+| 2026 | 0.27 | 0.32 | -0.17 | -0.27 |
 
 In every season xChase+ tracks expected offense more closely than Chase+
 tracks actual offense, and more closely than chase rate does.
@@ -420,9 +446,9 @@ chase rate are known?
 | 2022-23 (191) | xChase+ | 0.20 | 0.003 | -1.1 |
 | 2023-24 (192) | xChase+ | 0.24 | 0.001 | -0.5 |
 | 2024-25 (189) | xChase+ | 0.29 | 0.001 | 0.6 |
-| 2025-26 (187) | xChase+ | 0.13 | 0.008 | -1.5 |
+| 2025-26 (187) | xChase+ | 0.13 | 0.009 | -1.6 |
 | All (940) | xChase+ | 0.22 | 0.001 | -1.2 |
-| All (940) | Chase+ | 0.19 | 0.000 | -0.6 |
+| All (940) | Chase+ | 0.19 | 0.000 | -0.9 |
 
 No. Both correlate with next year's xwOBA on their own, but that's because
 good hitters have good chase decisions: once this year's xwOBA is known,
@@ -433,6 +459,23 @@ repeatable part of a hitter's approach, but it isn't a hidden predictor
 of next year's production.
 
 The Chase+ versions of every chart above are in `results/chase/figures/`.
+
+## Version history
+
+- **xChase+ 1.1, Chase+ 2.0.** A chase put in play is now priced context
+  neutral. Chase+ uses the league-average value of its outcome (single,
+  double, triple, home run or out) instead of its plate appearance's RE24
+  value, which depended on the runners and outs: a chased grounder into a
+  double play used to cost far more than the same grounder with the bases
+  empty. xChase+'s xwOBA line is now fit to those outcome values. xChase+
+  barely moved (r = 0.999 with 1.0, 0.4 points on average, the same top
+  and bottom five every season), hence 1.1. Chase+ moved more (r = 0.95
+  with 1.0, 4 points on average), hence 2.0. Luck (Chase+ minus xChase+)
+  is now only contact luck, its standard error comes from how each ball
+  was hit rather than the hitter's own results, and the README adds a
+  year-to-year test of the part of xChase+ that chase rate doesn't
+  explain.
+- **xChase+ 1.0, Chase+ 1.0.** First release.
 
 ## Use of AI
 

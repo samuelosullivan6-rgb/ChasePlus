@@ -15,8 +15,9 @@ current count cancels out.
     probability from a per-season logistic model (distance outside the
     zone + count), fit on this data's takes.
   - value_if_swung: a whiff or foul tip adds a strike, a foul adds a strike
-    unless there are already two, and a ball in play gets the plate
-    appearance's actual run value.
+    unless there are already two, and a ball in play gets the league
+    average run value of its outcome (single, double, triple, home run or
+    out) that season, whatever the base-out state.
 Takes cost 0.
 
 COMPARING HITTERS
@@ -57,8 +58,12 @@ DESIGN CHOICES
     count in each hitter's PA total (about 0.4% of PAs).
   - Every hitter-season is shrunk toward its season's mean
     (DerSimonian-Laird) in proportion to its standard error.
-  - Context neutral on purpose: base-out state is ignored, so a hitter is
-    not credited or charged for when his teammates reached base.
+  - Context neutral on purpose: base-out state is ignored on both sides of
+    the cost, so a hitter is not credited or charged for when his
+    teammates reached base. That is why a ball in play is priced by its
+    outcome's league value, not by its own plate appearance's RE24 value
+    (which would make a chased grounder into a double play cost far more
+    than the same grounder with the bases empty).
 
 Inputs:  data/cleaned/baseline_chase_pitches.parquet
          data/cleaned/plate_appearance_run_values.parquet
@@ -85,7 +90,7 @@ xChase+ (a second run, not a display mode):
     python scripts/04_build_chase_leaderboard.py --expected-contact
 
 prices every chase put in play at its expected value from Savant's xwOBA
-instead of the plate appearance's actual run value. Everything else (takes,
+instead of the league value of its actual outcome. Everything else (takes,
 whiffs, fouls, the called-strike model, baselines, floors, shrinkage,
 Chase+ scaling) is the same code. Its outputs go to results/xchase/ and
 data/cleaned/xchase_costs_by_pitch.parquet, so the Chase+ files are never
@@ -205,6 +210,15 @@ def print_header(title):
 # SETTINGS
 # --------------------------------------------------
 
+# Method version of each stat, saved in chase_plus_league_scale.csv next to
+# the run fingerprint. Change it whenever a change to the method moves the
+# numbers, and add a line to "Version history" in README.md. Chase+ 2.0
+# and xChase+ 1.1 price balls in play by their outcome's league value
+# instead of their plate appearance's RE24 value (context neutral).
+CHASE_PLUS_VERSION = "2.0"
+
+XCHASE_PLUS_VERSION = "1.1"
+
 # QUALIFYING, ONE SEASON AT A TIME
 #
 # Both floors must be cleared in the same season. The median qualified
@@ -291,8 +305,8 @@ OUT_OF_FOLD_GAP_SHARE_OF_OPTIMISM = 0.25
 CALIBRATION_Z_WARNING = 3.0
 
 # xChase+ only (--expected-contact): a warning prints if more than this
-# share of a season's chases put in play have no xwOBA (those keep their
-# actual value).
+# share of a season's chases put in play have no xwOBA (those keep the
+# league value of their actual outcome).
 MISSING_XWOBA_WARNING_SHARE = 0.01
 
 
@@ -310,6 +324,9 @@ if not (PROJECT_DIR / "data").exists():
     PROJECT_DIR = PROJECT_DIR.parent
 
 CLEAN_DIR = PROJECT_DIR / "data" / "cleaned"
+
+# Player names (Chadwick register), downloaded once and cached.
+PLAYER_REGISTER_FILE = PROJECT_DIR / "data" / "raw" / "chadwick_register.parquet"
 RESULTS_DIR = PROJECT_DIR / "results"
 
 RESULTS_DIR.mkdir(parents=True, exist_ok=True)
@@ -470,6 +487,7 @@ wanted_pitch_columns = [
     "pitcher",
     "game_year",
     "description",
+    "events",
     "balls",
     "strikes",
     "count_state",
@@ -516,12 +534,13 @@ opportunities["distance_bucket"] = pd.cut(
 # DROP PLATE APPEARANCES THAT CANNOT BE PRICED
 #
 # The run value file excludes half innings cut short by the end of the
-# game, so a ball in play from one has no value to look up. Pricing those
-# at zero would make every walk-off chase free, and would favor whoever
-# appears in walk-off innings most. So every out-of-zone pitch of those
-# plate appearances is removed, takes included (keeping only the takes
-# would pad the sample with decisions that could never cost anything).
-# The plate appearances still count in each hitter's PA total below.
+# game (03_build_run_value_tables.py), so the count and outcome values
+# below are built without them. Those plate appearances are left out here
+# too, so the decisions being priced come from the same innings as the
+# prices. Every out-of-zone pitch of them is removed, takes included
+# (keeping only the takes would pad the sample with decisions that could
+# never cost anything). The plate appearances still count in each
+# hitter's PA total below.
 # --------------------------------------------------
 
 pa_values = pd.read_parquet(PA_VALUE_FILE)
@@ -553,6 +572,81 @@ show_detail(
 )
 
 opportunities = opportunities[~unpriceable].copy()
+
+
+# --------------------------------------------------
+# WHAT A BALL IN PLAY IS WORTH, CONTEXT NEUTRAL
+#
+# A ball in play is priced by what kind of outcome it was, not by its own
+# plate appearance's RE24 value. The RE24 value depends on the base-out
+# state: the same chased grounder costs far more as a double play with a
+# runner on first than as an out with the bases empty, and a single is
+# worth more with runners on. The take side of every chase is already
+# context neutral (count run values), so the swing side has to be too.
+#
+# Outcomes are grouped the way wOBA groups them: single, double, triple,
+# home run, and everything else as an out (double plays, fielder's
+# choices, sacrifices and reaching on an error included -- those depend on
+# the runners or the fielders, not on how the ball was hit). Each group's
+# value is the average RE24 value of every ball in play with that outcome
+# that season, so the league's average ball in play is worth the same as
+# before; only how it is shared between hitters changes.
+# --------------------------------------------------
+
+IN_PLAY_HIT_EVENTS = ["single", "double", "triple", "home_run"]
+
+
+def in_play_outcome(events):
+    """single / double / triple / home_run, or out for anything else."""
+
+    return pd.Series(
+        np.where(events.isin(IN_PLAY_HIT_EVENTS), events, "out"),
+        index=events.index
+    )
+
+
+every_ball_in_play = (
+    df.loc[
+        df["description"] == "hit_into_play",
+        ["game_pk", "at_bat_number", "game_year", "events"]
+    ]
+    .merge(pa_lookup, on=["game_pk", "at_bat_number"], how="inner")
+)
+
+every_ball_in_play["outcome"] = in_play_outcome(every_ball_in_play["events"])
+
+in_play_outcome_values = (
+    every_ball_in_play
+    .groupby(["game_year", "outcome"])
+    .agg(
+        balls_in_play=("plate_appearance_value", "size"),
+        run_value=("plate_appearance_value", "mean"),
+    )
+    .reset_index()
+)
+
+expected_outcome_cells = len(run_value_seasons) * (len(IN_PLAY_HIT_EVENTS) + 1)
+
+if len(in_play_outcome_values) != expected_outcome_cells:
+    raise RuntimeError(
+        "Some season is missing an in-play outcome (single, double, triple, "
+        "home run or out), so its balls in play cannot all be priced."
+    )
+
+in_play_value_lookup = {
+    (int(row["game_year"]), row["outcome"]): float(row["run_value"])
+    for _, row in in_play_outcome_values.iterrows()
+}
+
+show_diagnostic_header("WHAT A BALL IN PLAY IS WORTH (league average RE24, by season)")
+show_diagnostic()
+show_diagnostic(
+    in_play_outcome_values
+    .pivot(index="outcome", columns="game_year", values="run_value")
+    .reindex(IN_PLAY_HIT_EVENTS + ["out"])
+    .round(4)
+    .to_string()
+)
 
 
 # --------------------------------------------------
@@ -1471,25 +1565,29 @@ opportunities.loc[is_foul, "value_if_swung"] = (
     foul_value[is_foul.to_numpy()]
 )
 
-# Balls in play get the real outcome. A chase that drops in for a hit is
-# not treated as a mistake in hindsight; otherwise the leaderboard would
-# partly measure contact luck.
-opportunities.loc[is_in_play, "value_if_swung"] = (
-    opportunities.loc[is_in_play, "plate_appearance_value"]
-)
+# Balls in play get the league value of what actually happened (see WHAT A
+# BALL IN PLAY IS WORTH above). A chase that drops in for a hit is not
+# treated as a mistake in hindsight.
+opportunities.loc[is_in_play, "value_if_swung"] = [
+    in_play_value_lookup[(season, outcome)]
+    for season, outcome in zip(
+        opportunities.loc[is_in_play, "game_year"].astype(int),
+        in_play_outcome(opportunities.loc[is_in_play, "events"])
+    )
+]
 
 
 # --------------------------------------------------
 # xChase+ ONLY: WHAT THE CONTACT SHOULD HAVE PRODUCED
 #
 # With --expected-contact, a chase put in play is priced by how it was hit
-# rather than where it landed. Within each season, the actual plate
-# appearance value of the chases put in play is fit as a straight line in
-# Savant's xwOBA:
+# rather than where it landed. Within each season, the Chase+ value of the
+# chases put in play (the league value of their actual outcome) is fit as
+# a straight line in Savant's xwOBA:
 #
 #   expected in-play value = intercept + slope * xwOBA
 #
-# and the fitted line replaces the actual value. The slope is 1 / wOBA
+# and the fitted line replaces the actual outcome's value. The slope is 1 / wOBA
 # scale in this project's own RE24 units (published scales are about
 # 1.2-1.25), so there is no outside constant to keep up to date.
 #
@@ -1498,13 +1596,12 @@ opportunities.loc[is_in_play, "value_if_swung"] = (
 # Chase+ scale, is the same as the Chase+ run. Only which hitters got the
 # runs moves.
 #
-# The fitted line is context neutral, like the takes, so errors, fielder's
-# choices and double plays are averaged in rather than charged to the
-# hitter. Chase+ minus xChase+ is contact luck plus the base-out context
-# of those plate appearances.
+# Both runs price balls in play context neutral, so Chase+ minus xChase+ is
+# only contact luck: how the outcome compared with what xwOBA expected
+# from the exit velocity and launch angle.
 #
-# Balls in play with no xwOBA (bunts, untracked balls) keep their actual
-# value and are counted.
+# Balls in play with no xwOBA (bunts, untracked balls) keep the value of
+# their actual outcome and are counted.
 # --------------------------------------------------
 
 if EXPECTED_CONTACT:
@@ -1539,8 +1636,9 @@ if EXPECTED_CONTACT:
             )
 
         season_xwoba = opportunities.loc[has_xwoba, "xwoba"].to_numpy()
+        # Still the Chase+ price here: the league value of the outcome
         season_actual = (
-            opportunities.loc[has_xwoba, "plate_appearance_value"]
+            opportunities.loc[has_xwoba, "value_if_swung"]
             .to_numpy()
         )
 
@@ -1573,8 +1671,8 @@ if EXPECTED_CONTACT:
             print(
                 f"WARNING: {season}: {missing_count:,} of "
                 f"{in_play_count:,} chases put in play have no xwOBA "
-                f"({missing_count / in_play_count:.1%}). They keep their "
-                "actual value."
+                f"({missing_count / in_play_count:.1%}). They keep the "
+                "value of their actual outcome."
             )
 
     xwoba_fit = pd.DataFrame(xwoba_fit_rows)
@@ -1596,8 +1694,8 @@ if EXPECTED_CONTACT:
     show_detail()
     show_detail(
         "implied_woba_scale is 1 / slope. r_squared is how much of the "
-        "actual in-play value xwOBA explains; the rest is what xChase+ "
-        "treats as luck and context."
+        "in-play value (by outcome) xwOBA explains; the rest is what "
+        "xChase+ treats as luck."
     )
 
 
@@ -2397,36 +2495,49 @@ if (shrinkage_summary["opportunities_vs_shrinkage"] > 0).any():
 
 def attach_names(table, id_column="batter"):
     """
-    Add a 'player' column from pybaseball's player register. If the lookup
-    fails (for example with no network), print why and return the table
-    unchanged.
+    Add a 'player' column from the Chadwick player register, which keeps
+    names as written (McCann, LeMahieu, Acuña), so nothing is re-cased.
+    The register is downloaded once and cached in data/raw/, so reruns get
+    the same names without a network call. If it cannot be loaded, print
+    why and return the table unchanged.
     """
 
     try:
 
-        from pybaseball import playerid_reverse_lookup
+        if PLAYER_REGISTER_FILE.exists():
 
-        ids = [
-            int(one_id)
-            for one_id in table[id_column].dropna().unique()
-        ]
+            register = pd.read_parquet(PLAYER_REGISTER_FILE)
 
-        lookup = playerid_reverse_lookup(ids, key_type="mlbam")
+        else:
 
-        lookup["player"] = (
-            lookup["name_first"].str.title()
-            + " "
-            + lookup["name_last"].str.title()
-        )
+            from pybaseball import chadwick_register
+
+            register = chadwick_register()[
+                ["key_mlbam", "name_first", "name_last"]
+            ]
+
+            PLAYER_REGISTER_FILE.parent.mkdir(parents=True, exist_ok=True)
+            register.to_parquet(PLAYER_REGISTER_FILE, index=False)
 
         # One name per id. A duplicated id in the register would otherwise
         # duplicate that hitter's rows in the merge.
-        lookup = lookup.drop_duplicates(subset="key_mlbam")
+        lookup = (
+            register
+            .dropna(subset=["key_mlbam"])
+            .drop_duplicates(subset="key_mlbam")
+        )
+
+        lookup = pd.DataFrame({
+            id_column: lookup["key_mlbam"].astype(int),
+            "player": (
+                lookup["name_first"].str.strip()
+                + " "
+                + lookup["name_last"].str.strip()
+            ),
+        })
 
         named = table.merge(
-            lookup[["key_mlbam", "player"]].rename(
-                columns={"key_mlbam": id_column}
-            ),
+            lookup,
             on=id_column,
             how="left",
             validate="many_to_one"
@@ -3531,7 +3642,15 @@ written_files.append(OUTPUT_PITCH_COSTS)
 # These two are written last and carry the run fingerprint, so a results
 # folder can be checked against the current script and data
 # (07_check_chase_invariants.py does that).
-columns_for_saving(chase_plus_scale).assign(run_fingerprint=RUN_FINGERPRINT).to_csv(
+STAT_VERSION = (
+    f"xChase+ {XCHASE_PLUS_VERSION}" if EXPECTED_CONTACT
+    else f"Chase+ {CHASE_PLUS_VERSION}"
+)
+
+columns_for_saving(chase_plus_scale).assign(
+    stat_version=STAT_VERSION,
+    run_fingerprint=RUN_FINGERPRINT,
+).to_csv(
     OUTPUT_CHASE_PLUS_SCALE,
     index=False
 )
@@ -3550,8 +3669,8 @@ if called_strike_check_rows:
 
 print()
 print(
-    f"Done (run fingerprint {RUN_FINGERPRINT}). Saved, overwriting the "
-    f"previous run, under {PROJECT_DIR}:"
+    f"Done ({STAT_VERSION}, run fingerprint {RUN_FINGERPRINT}). Saved, "
+    f"overwriting the previous run, under {PROJECT_DIR}:"
 )
 
 for path in written_files:

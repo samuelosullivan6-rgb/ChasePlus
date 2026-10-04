@@ -18,6 +18,12 @@ Design choices:
     alike than the measurements are.
   - Chase rate, one of the most stable hitter stats, gets the same test
     as a yardstick.
+  - Chase value and chase rate are strongly related, so part of chase
+    value repeating is just chase rate repeating. The part of chase value
+    that chase rate does not explain (what is left after a straight-line
+    fit on chase rate, within each season) gets the same test. That is the
+    part pricing chases adds, so it repeating is what says the extra
+    machinery measures something real about the hitter.
 
 Input:   results/chase/chase_cost_leaderboard_by_season.csv
 Outputs: results/chase/chase_value_reliability.csv
@@ -123,6 +129,35 @@ print(
 
 
 # --------------------------------------------------
+# THE PART CHASE RATE DOES NOT EXPLAIN
+#
+# Within each season, runs saved is fit as a straight line in chase rate
+# across that season's qualified hitters, and what is left over is kept.
+# --------------------------------------------------
+
+by_season["value_beyond_chase_rate"] = np.nan
+
+for season, one_season in by_season.groupby("game_year"):
+
+    slope, intercept = np.polyfit(
+        one_season["chase_rate"],
+        one_season["runs_saved_per_600_pa"],
+        1
+    )
+
+    by_season.loc[one_season.index, "value_beyond_chase_rate"] = (
+        one_season["runs_saved_per_600_pa"]
+        - (intercept + slope * one_season["chase_rate"])
+    )
+
+    print(
+        f"{season}: chase rate explains "
+        f"{one_season['chase_rate'].corr(one_season['runs_saved_per_600_pa']) ** 2:.0%} "
+        f"of the spread in {STAT_NAME} runs saved"
+    )
+
+
+# --------------------------------------------------
 # CORRELATE CONSECUTIVE SEASONS
 # --------------------------------------------------
 
@@ -150,12 +185,14 @@ def one_season_values(season, suffix):
         [
             "batter",
             "runs_saved_per_600_pa",
+            "value_beyond_chase_rate",
             "chase_rate",
             "opportunities"
         ]
     ].rename(
         columns={
             "runs_saved_per_600_pa": f"value_{suffix}",
+            "value_beyond_chase_rate": f"beyond_{suffix}",
             "chase_rate": f"rate_{suffix}",
             "opportunities": f"opportunities_{suffix}",
         }
@@ -194,6 +231,10 @@ for first_season, second_season in season_pairs:
         paired["rate_second"]
     )
 
+    beyond_correlation = paired["beyond_first"].corr(
+        paired["beyond_second"]
+    )
+
     pair_rows.append(
         {
             "first_season": first_season,
@@ -205,6 +246,7 @@ for first_season, second_season in season_pairs:
                 value_correlation, 2
             ),
             "chase_rate_correlation": rate_correlation,
+            "value_beyond_chase_rate_correlation": beyond_correlation,
             "paired": paired,
         }
     )
@@ -221,6 +263,7 @@ for first_season, second_season in season_pairs:
     print(f"Chase VALUE, year to year:  r = {value_correlation:+.3f}")
     print(f"  (Spearman rank version:   r = {value_spearman:+.3f})")
     print(f"Chase RATE,  year to year:  r = {rate_correlation:+.3f}")
+    print(f"Chase value beyond chase rate: r = {beyond_correlation:+.3f}")
 
     print()
     print(
@@ -253,6 +296,10 @@ average_rate_correlation = np.mean(
     [row["chase_rate_correlation"] for row in pair_rows]
 )
 
+average_beyond_correlation = np.mean(
+    [row["value_beyond_chase_rate_correlation"] for row in pair_rows]
+)
+
 print()
 print("=" * 78)
 print("VERDICT")
@@ -265,6 +312,7 @@ print(
 )
 print(f"  chase value: {average_value_correlation:+.3f}")
 print(f"  chase rate:  {average_rate_correlation:+.3f}")
+print(f"  chase value beyond chase rate: {average_beyond_correlation:+.3f}")
 
 print()
 
@@ -305,6 +353,14 @@ print(
     "stickiest things a hitter does, so it should win. How much "
     "it wins by is the real cost of the extra machinery, and that "
     "belongs in the writeup either way."
+)
+
+print()
+print(
+    "The third number is the one that justifies the machinery: the part "
+    "of chase value that chase rate does not explain. Clearly above zero "
+    "means pricing chases picks up something about the hitter that "
+    "counting them misses, and it carries over."
 )
 
 

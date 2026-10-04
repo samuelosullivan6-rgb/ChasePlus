@@ -8,12 +8,13 @@ xChase+ comes from a second run of the leaderboard script:
     python scripts/09_build_xchase_comparison.py
 
 The two runs share every step except how a chase put in play is priced
-(actual plate appearance value vs. a line in Savant's xwOBA), so
+(the league value of its actual outcome vs. a line in Savant's xwOBA), so
 
     luck = chase_plus - xchase_plus
 
 is what the result of those balls in play added beyond how they were hit
-(contact luck, plus the base-out context of those plate appearances).
+(contact luck). Both runs are context neutral, so base-out state is not
+part of it.
 Positive = the results flattered him. It repeating year to year would mean
 xwOBA is missing something real about the hitter.
 
@@ -156,7 +157,7 @@ x_pitches = pd.read_parquet(
 
 descriptions = pd.read_parquet(
     PITCH_FILE,
-    columns=pitch_key + ["description"]
+    columns=pitch_key + ["description", "estimated_woba_using_speedangle"]
 )
 
 pitches = chase_pitches.merge(x_pitches, on=pitch_key, how="outer",
@@ -209,13 +210,56 @@ print(
 #
 # Per pitch, Chase+ minus xChase+ in runs is runs_saved - x_runs_saved
 # (the league baselines differ a little between the runs, so this is not
-# only nonzero on balls in play). Its spread gives the standard error of
-# the gap directly, which is much smaller than either stat's own standard
-# error because the two share almost every pitch.
+# only nonzero on balls in play).
+#
+# Its standard error comes from the chases put in play that were repriced
+# (the ones with an xwOBA), because that is where the luck is. Each one's
+# luck is its outcome's value minus the xwOBA line's value. Its expected
+# size is NOT taken from the hitter's own balls in play: a hitter with a
+# few lucky home runs would then get a large standard error from the same
+# home runs that made him lucky, so lucky hitters would reach +2 standard
+# errors less easily than unlucky ones reach -2. Instead each repriced ball
+# gets the league's average squared luck for balls hit like it (same
+# season, same xwOBA decile), which depends only on how it was hit. A
+# hitter's variance is the sum over his repriced balls.
 # --------------------------------------------------
+
+LUCK_VARIANCE_BINS = 10
 
 pitches["luck_runs"] = pitches["runs_saved"] - pitches["x_runs_saved"]
 pitches["chase_in_play"] = (in_play & (pitches["is_chase"] == 1)).astype(int)
+
+repriced = (
+    (pitches["chase_in_play"] == 1)
+    & pitches["estimated_woba_using_speedangle"].notna()
+)
+
+# Outcome value minus the xwOBA line's value, in runs. Least squares makes
+# it average zero over each season's repriced balls.
+pitches["contact_luck"] = np.where(
+    repriced,
+    pitches["x_chase_cost"] - pitches["chase_cost"],
+    np.nan
+)
+
+pitches["expected_luck_variance"] = 0.0
+
+for season in sorted(pitches["game_year"].unique()):
+
+    season_repriced = repriced & (pitches["game_year"] == season)
+
+    xwoba_decile = pd.qcut(
+        pitches.loc[season_repriced, "estimated_woba_using_speedangle"],
+        LUCK_VARIANCE_BINS,
+        labels=False,
+        duplicates="drop"
+    )
+
+    squared_luck = pitches.loc[season_repriced, "contact_luck"] ** 2
+
+    pitches.loc[season_repriced, "expected_luck_variance"] = (
+        squared_luck.groupby(xwoba_decile).transform("mean")
+    )
 
 luck_by_hitter = (
     pitches
@@ -223,7 +267,7 @@ luck_by_hitter = (
     .agg(
         luck_opportunities=("luck_runs", "size"),
         mean_luck=("luck_runs", "mean"),
-        luck_standard_deviation=("luck_runs", "std"),
+        luck_variance_runs=("expected_luck_variance", "sum"),
         chases_in_play=("chase_in_play", "sum"),
     )
     .reset_index()
@@ -322,9 +366,11 @@ comparison["luck_raw"] = (
     comparison["chase_plus_raw"] - comparison["xchase_plus_raw"]
 )
 
+# Same scaling as luck_raw: runs per opportunity, to runs per 600 PA, to
+# Chase+ points.
 comparison["luck_se"] = (
-    comparison["luck_standard_deviation"]
-    / np.sqrt(comparison["luck_opportunities"])
+    np.sqrt(comparison["luck_variance_runs"])
+    / comparison["luck_opportunities"]
     * comparison["scale_to_600_pa"]
     * points_per_run
 )
@@ -350,6 +396,15 @@ if not np.allclose(rebuilt_gap, comparison["luck_raw"], rtol=0, atol=1e-6):
 print(
     f"Hitter-season check passed: {len(comparison):,} hitter-seasons in "
     "both runs, same counts, same league scale."
+)
+
+# If the standard errors are right, luck_z should spread like a standard
+# normal and should not grow with luck itself.
+print(
+    f"luck_z: mean {comparison['luck_z'].mean():+.2f}, SD "
+    f"{comparison['luck_z'].std():.2f} (about 1 if the standard errors are "
+    f"right); correlation of luck with its standard error "
+    f"{comparison['luck_raw'].corr(comparison['luck_se']):+.2f} (about 0)."
 )
 
 
@@ -492,6 +547,41 @@ for season in seasons:
 # 06_build_chase_reliability.py does it.
 # --------------------------------------------------
 
+def beyond_chase_rate(table, column):
+    """
+    The part of column that chase rate does not explain: what is left
+    after a straight-line fit on chase rate, within each season, across
+    that season's qualified hitters.
+    """
+
+    left_over = pd.Series(np.nan, index=table.index)
+
+    for _, one_season in table.groupby("game_year"):
+
+        slope, intercept = np.polyfit(
+            one_season["chase_rate"],
+            one_season[column],
+            1
+        )
+
+        left_over.loc[one_season.index] = (
+            one_season[column]
+            - (intercept + slope * one_season["chase_rate"])
+        )
+
+    return left_over
+
+
+# Chase+ and xChase+ correlate strongly with chase rate, so part of their
+# repeating is chase rate repeating. These columns test the part pricing
+# chases adds.
+comparison["xchase_plus_beyond_chase_rate"] = beyond_chase_rate(
+    comparison, "xchase_plus_raw"
+)
+comparison["chase_plus_beyond_chase_rate"] = beyond_chase_rate(
+    comparison, "chase_plus_raw"
+)
+
 reliability_rows = []
 
 print()
@@ -518,6 +608,13 @@ for first_season, second_season in zip(seasons[:-1], seasons[1:]):
         paired["chase_plus_raw_second"]
     )
 
+    x_beyond_r = paired["xchase_plus_beyond_chase_rate_first"].corr(
+        paired["xchase_plus_beyond_chase_rate_second"]
+    )
+    chase_beyond_r = paired["chase_plus_beyond_chase_rate_first"].corr(
+        paired["chase_plus_beyond_chase_rate_second"]
+    )
+
     reliability_rows.append({
         "first_season": int(first_season),
         "second_season": int(second_season),
@@ -526,6 +623,8 @@ for first_season, second_season in zip(seasons[:-1], seasons[1:]):
         "xchase_plus_r": x_r,
         "luck_r": luck_r,
         "xchase_plus_to_next_chase_plus_r": x_predicts_chase_r,
+        "xchase_plus_beyond_chase_rate_r": x_beyond_r,
+        "chase_plus_beyond_chase_rate_r": chase_beyond_r,
     })
 
     print()
@@ -534,6 +633,7 @@ for first_season, second_season in zip(seasons[:-1], seasons[1:]):
     print(f"  xChase+ r = {x_r:+.3f}")
     print(f"  luck    r = {luck_r:+.3f}   (near 0 = luck, clearly above = xwOBA misses a skill)")
     print(f"  xChase+ -> next Chase+ r = {x_predicts_chase_r:+.3f}   (vs {chase_r:+.3f} from Chase+ itself)")
+    print(f"  beyond chase rate: xChase+ r = {x_beyond_r:+.3f}, Chase+ r = {chase_beyond_r:+.3f}")
 
 pd.DataFrame(reliability_rows).to_csv(OUTPUT_RELIABILITY, index=False)
 
