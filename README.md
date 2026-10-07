@@ -259,7 +259,8 @@ MLB's ABS Challenge System.
 - **Other files:** `chase_cost_leaderboard.csv` adds each hitter's qualified
   seasons into one career line. `hitter_value_leaderboard.csv` places chase
   value next to total offense. `xchase_leaderboard_<season>.csv` ranks by
-  xChase+ with Chase+, both ranks and luck alongside.
+  xChase+ with Chase+, both ranks and luck alongside. `matchups/` has
+  xChase+ by handedness matchup (see the appendix).
 - **Version:** the `stat_version` column of `chase_plus_league_scale.csv`
   says which version of the stat a results folder was built with.
 
@@ -325,6 +326,7 @@ run touches the other's files.
 | 8 | `scripts/08_make_figures.py` | Draws the charts and prints the README tables |
 | 9 | `scripts/09_build_xchase_comparison.py` | Lines up Chase+ and xChase+, tests both against wOBA / xwOBA (needs step 4 both ways) |
 | 10 | `scripts/10_make_xchase_figures.py` | Draws the two charts that compare them |
+| 11 | `scripts/11_build_matchup_leaderboards.py` | xChase+ leaderboards by handedness matchup (needs step 4 with `--expected-contact`) |
 
 All together:
 
@@ -347,6 +349,7 @@ python scripts/08_make_figures.py --expected-contact
 
 python scripts/09_build_xchase_comparison.py
 python scripts/10_make_xchase_figures.py
+python scripts/11_build_matchup_leaderboards.py
 ```
 
 `04_build_chase_leaderboard.py` prints a short summary by default. Add
@@ -459,6 +462,131 @@ repeatable part of a hitter's approach, but it isn't a hidden predictor
 of next year's production.
 
 The Chase+ versions of every chart above are in `results/chase/figures/`.
+
+## Appendix: xChase+ by matchup
+
+A separate look at xChase+, not a change to it: the same priced pitches,
+split by handedness matchup (batter/pitcher), with a leaderboard for each
+matchup in each season. The overall xChase+ above is still the main
+number; these show how a hitter's chase decisions held up in one kind of
+matchup.
+
+**The matchup matters.** The average hitter in each matchup, on the main
+xChase+ scale:
+
+| Season | R/R | L/L | R/L | L/R |
+|---|---:|---:|---:|---:|
+| 2021 | 93.2 | 99.2 | 102.9 | 106.5 |
+| 2022 | 94.4 | 95.2 | 104.4 | 105.3 |
+| 2023 | 93.1 | 97.8 | 103.2 | 106.7 |
+| 2024 | 94.5 | 97.9 | 102.1 | 105.3 |
+| 2025 | 94.5 | 93.4 | 102.1 | 106.2 |
+| 2026 | 94.3 | 97.2 | 102.4 | 104.2 |
+
+Hitters chase worse against same-handed pitchers (93-99) and better
+against opposite-handed ones (102-107), every season.
+
+**How the boards work.** Each pitch is compared with what the league
+lost on the same kind of pitch in the same matchup (season, matchup,
+count and distance bucket), so 100 on a board is the average hitter *in
+that matchup*, not the league average. A point is worth the same runs as
+on the main leaderboard. To qualify, a hitter needs the main floors
+times the league's share of plate appearances against that pitcher hand:
+in a full season 79-89 PA and 159-178 out-of-zone pitches against
+lefties, 210-221 PA and 421-441 against righties. Each board is shrunk
+on its own, like the main one. Switch hitters appear on R/L and L/R, the
+side they batted from.
+
+**How much to trust them.** Year to year, hitters on the same board in
+both seasons, five pairs of seasons:
+
+| Board | Hitters per pair | r (average) |
+|---|---:|---|
+| R/R | 96 | 0.70-0.77 (0.74) |
+| L/R | 92 | 0.55-0.70 (0.64) |
+| R/L | 136 | 0.42-0.56 (0.47) |
+| L/L | 41 | 0.24-0.55 (0.44) |
+
+The boards against right-handed pitchers repeat about as well as overall
+xChase+. The boards against lefties rest on about a quarter of a
+season's pitches and are noisier, so read their extremes with the ± in
+mind. Within one season, the gap between a hitter's matchup score and
+his overall score is mostly noise, so a big gap isn't on its own a sign
+of a real platoon split.
+
+<details>
+<summary>2026 top 5 and bottom 5 on each board</summary>
+
+**R/R** (103 qualified hitters, season in progress)
+
+| Rank | Player | Bats | PA | Chase% | xChase+ ± 1 SD | Overall xChase+ |
+|---:|---|:---:|---:|---:|---|---:|
+| 1 | Taylor Ward | R | 412 | 14.0% | **158** ± 7 | 152 |
+| 2 | Miguel Vargas | R | 441 | 21.3% | **147** ± 9 | 145 |
+| 3 | Gleyber Torres | R | 263 | 21.8% | **143** ± 9 | 144 |
+| 4 | Isaac Paredes | R | 448 | 26.2% | **132** ± 8 | 124 |
+| 5 | Alex Bregman | R | 490 | 24.5% | **132** ± 8 | 128 |
+| | ... | | | | | |
+| 99 | Salvador Pérez | R | 414 | 44.3% | **76** ± 10 | 73 |
+| 100 | Trea Turner | R | 418 | 37.0% | **74** ± 9 | 79 |
+| 101 | Ezequiel Tovar | R | 317 | 45.4% | **73** ± 10 | 65 |
+| 102 | Oswald Peraza | R | 221 | 39.8% | **71** ± 11 | 75 |
+| 103 | Zach Neto | R | 450 | 38.8% | **70** ± 9 | 65 |
+
+**L/L** (83 qualified hitters)
+
+| Rank | Player | Bats | PA | Chase% | xChase+ ± 1 SD | Overall xChase+ |
+|---:|---|:---:|---:|---:|---|---:|
+| 1 | J. P. Crawford | L | 124 | 17.1% | **154** ± 13 | 139 |
+| 2 | Jonathan Aranda | L | 171 | 24.1% | **139** ± 11 | 133 |
+| 3 | Steven Kwan | L | 171 | 20.4% | **136** ± 10 | 144 |
+| 4 | Jake Bauers | L | 144 | 22.3% | **133** ± 12 | 133 |
+| 5 | JJ Wetherholt | L | 209 | 21.8% | **131** ± 11 | 128 |
+| | ... | | | | | |
+| 79 | Brandon Lowe | L | 185 | 40.4% | **78** ± 13 | 82 |
+| 80 | Brandon Marsh | L | 125 | 41.5% | **74** ± 13 | 85 |
+| 81 | Jac Caglianone | L | 154 | 46.0% | **65** ± 13 | 80 |
+| 82 | Andrés Giménez | L | 126 | 44.3% | **57** ± 11 | 69 |
+| 83 | Samuel Basallo | L | 91 | 43.6% | **45** ± 13 | 80 |
+
+**R/L** (179 qualified hitters)
+
+| Rank | Player | Bats | PA | Chase% | xChase+ ± 1 SD | Overall xChase+ |
+|---:|---|:---:|---:|---:|---|---:|
+| 1 | Gleyber Torres | R | 113 | 14.1% | **142** ± 13 | 144 |
+| 2 | Ryan Jeffers | R | 116 | 19.4% | **141** ± 13 | 132 |
+| 3 | Miguel Vargas | R | 178 | 20.8% | **141** ± 12 | 145 |
+| 4 | Junior Caminero | R | 163 | 25.4% | **140** ± 16 | 111 |
+| 5 | Taylor Ward | R | 178 | 17.9% | **140** ± 10 | 152 |
+| | ... | | | | | |
+| 175 | Edmundo Sosa | R | 128 | 48.9% | **73** ± 13 | - |
+| 176 | Ozzie Albies | S | 238 | 45.7% | **70** ± 12 | 87 |
+| 177 | Ceddanne Rafaela | R | 147 | 44.3% | **69** ± 14 | 85 |
+| 178 | Ezequiel Tovar | R | 146 | 42.3% | **68** ± 12 | 65 |
+| 179 | Colby Thomas | R | 104 | 40.6% | **59** ± 14 | - |
+
+**L/R** (159 qualified hitters)
+
+| Rank | Player | Bats | PA | Chase% | xChase+ ± 1 SD | Overall xChase+ |
+|---:|---|:---:|---:|---:|---|---:|
+| 1 | Geraldo Perdomo | S | 422 | 20.8% | **149** ± 7 | 152 |
+| 2 | Steven Kwan | L | 396 | 20.0% | **141** ± 7 | 144 |
+| 3 | Trent Grisham | L | 349 | 19.0% | **134** ± 7 | 133 |
+| 4 | Jakob Marsee | L | 430 | 20.7% | **131** ± 8 | 130 |
+| 5 | Kevin McGonigle | L | 443 | 19.5% | **131** ± 7 | 129 |
+| | ... | | | | | |
+| 155 | Michael Harris | L | 356 | 44.7% | **68** ± 10 | 75 |
+| 156 | Colson Montgomery | L | 399 | 33.2% | **62** ± 8 | 70 |
+| 157 | Luke Raley | L | 257 | 34.4% | **62** ± 9 | 64 |
+| 158 | Mickey Moniak | L | 306 | 42.3% | **60** ± 9 | 55 |
+| 159 | Jarren Duran | L | 433 | 36.0% | **59** ± 8 | 67 |
+
+</details>
+
+Full boards for every season are in
+`results/xchase/matchups/xchase_matchup_leaderboard_<season>.csv`, the
+league table and floors in `xchase_matchup_league.csv`, and the
+year-to-year correlations in `xchase_matchup_reliability.csv`.
 
 ## Version history
 
