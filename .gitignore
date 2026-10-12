@@ -45,3 +45,7 @@ data/cleaned/*.parquet
 # Local backup of the pre-methodology-change results, kept for my
 # own before/after comparison. Not something anyone else needs.
 archive/
+
+# YouTube video planning (script, visual brief). Personal, not part
+# of the project.
+video/

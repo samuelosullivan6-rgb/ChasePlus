@@ -134,21 +134,21 @@ the luck between them, are in `results/xchase/xchase_leaderboard_<season>.csv`.
 | 265 | Gabriel Arias | 470 | 39.0% | -14.4 | **61** ± 10 | 70 | +8 |
 | 266 | Javier Báez | 435 | 46.2% | -15.7 | **58** ± 10 | 65 | +7 |
 
-**2026** (267 qualified hitters, season in progress)
+**2026** (261 qualified hitters)
 
 | Rank | Player | PA | Chase% | Runs saved / 600 PA | xChase+ ± 1 SD | Chase+ | Luck |
 |---:|---|---:|---:|---:|---|---:|---:|
-| 1 | Geraldo Perdomo | 608 | 21.1% | +23.0 | **152** ± 6 | 145 | -8 |
-| 2 | Taylor Ward | 590 | 15.2% | +22.9 | **152** ± 6 | 145 | -7 |
-| 3 | Miguel Vargas | 619 | 21.2% | +20.0 | **145** ± 7 | 143 | -2 |
-| 4 | Steven Kwan | 567 | 20.1% | +19.5 | **144** ± 6 | 143 | -1 |
-| 5 | Gleyber Torres | 376 | 19.3% | +19.4 | **144** ± 8 | 138 | -6 |
+| 1 | Taylor Ward | 606 | 15.0% | +23.7 | **154** ± 6 | 148 | -6 |
+| 2 | Geraldo Perdomo | 681 | 20.6% | +21.1 | **148** ± 6 | 142 | -6 |
+| 3 | Steven Kwan | 637 | 19.4% | +20.3 | **146** ± 6 | 145 | -1 |
+| 4 | Gleyber Torres | 419 | 18.9% | +19.4 | **144** ± 7 | 137 | -7 |
+| 5 | Miguel Vargas | 696 | 20.9% | +18.5 | **142** ± 7 | 139 | -3 |
 | | ... | | | | | | |
-| 263 | Jarren Duran | 565 | 34.9% | -14.5 | **67** ± 7 | 64 | -3 |
-| 264 | Zach Neto | 621 | 37.7% | -15.4 | **65** ± 8 | 75 | +10 |
-| 265 | Ezequiel Tovar | 463 | 44.4% | -15.5 | **65** ± 8 | 60 | -5 |
-| 266 | Luke Raley | 284 | 34.9% | -15.8 | **64** ± 9 | 63 | -1 |
-| 267 | Mickey Moniak | 392 | 42.9% | -20.0 | **55** ± 8 | 49 | -6 |
+| 257 | Colson Montgomery | 633 | 32.7% | -14.0 | **68** ± 7 | 67 | -1 |
+| 258 | Jarren Duran | 607 | 34.5% | -14.2 | **68** ± 7 | 67 | -1 |
+| 259 | Andrés Giménez | 503 | 44.1% | -14.4 | **67** ± 7 | 81 | +14 |
+| 260 | Ezequiel Tovar | 508 | 43.7% | -15.1 | **66** ± 8 | 61 | -5 |
+| 261 | Mickey Moniak | 435 | 44.1% | -19.7 | **55** ± 8 | 49 | -6 |
 
 Luck is Chase+ minus xChase+. Hitters at the top of a list sorted by
 xChase+ tend to have negative luck (and the bottom positive luck): that's
@@ -178,16 +178,16 @@ measured, and for what it does and doesn't say about next season.
 </picture>
 
 Yes. Across the five pairs of seasons from 2021 to 2026, xChase+ repeats at
-r = 0.69-0.76 (0.72 on average), Chase+ at 0.59-0.71 (0.65), and luck not
-at all (-0.05 to 0.11; 0.03). xChase+ beats Chase+ in every pair. That's
+r = 0.70-0.76 (0.72 on average), Chase+ at 0.60-0.71 (0.65), and luck not
+at all (-0.07 to 0.11; 0.03). xChase+ beats Chase+ in every pair. That's
 the reason xChase+ is the main number: taking the ball-in-play luck out
 leaves more of the hitter. Both are noisier than plain chase rate (0.84-0.86),
 which only counts chases and doesn't price them.
 
-Chase rate alone explains 58-72% of the spread in xChase+ within a
+Chase rate alone explains 58-71% of the spread in xChase+ within a
 season, so part of xChase+ repeating is just chase rate repeating. The
 part chase rate doesn't explain (what's left after a straight-line fit
-on chase rate, each season) still repeats at r = 0.43-0.53 (0.49). That
+on chase rate, each season) still repeats at r = 0.43-0.55 (0.49). That
 part is what pricing chases adds over counting them, and it carries over
 from one season to the next. The same part of Chase+ repeats at
 0.34-0.46 (0.40); xChase+ is ahead in every pair here too. The per-stat scatter
@@ -244,7 +244,7 @@ MLB's ABS Challenge System.
 | How many runs on one fixed yardstick? | `runs_saved_vs_anchor_shrunk` (every season priced against 2024) |
 
 - **League chase cost:** the league lost 36.7, 35.6, 38.0, 36.1, 37.1 and
-  44.0 runs per 600 PA to chasing in 2021 through 2026.
+  43.9 runs per 600 PA to chasing in 2021 through 2026.
 - **Where the files are:** everything for xChase+ is in `results/xchase/`
   (along with the files that compare the two) and everything for Chase+ in
   `results/chase/`, with the same file names. The run value tables both
@@ -266,7 +266,7 @@ MLB's ABS Challenge System.
 
 **Qualifying:** a hitter needs 600 out-of-zone pitches seen and 300 plate
 appearances in a season. A season still in progress gets proportionally
-lower floors. 2026 currently has 90% of a full season's games. There is no
+lower floors. There is no
 chase-count minimum, but `cost_per_chase` is left blank for hitters with
 fewer than 120 chases.
 
@@ -293,11 +293,10 @@ fewer than 120 chases.
   the model predicts, and corners less often. This changes hitter values
   by roughly 0.2-0.4 runs per 600 PA.
 - **Each season's run values come from that season alone.** That keeps
-  seasons independent, but a part-season (2026 so far) has noisier run
+  seasons independent, but a season in progress has noisier run
   expectancy for rare base-out states than a full one.
-- **2026 is harder to compare with earlier years.** It is an in-progress
-  season, and Statcast records its zone boundaries differently from
-  earlier seasons. The models show 2026 calls differing from earlier seasons but
+- **2026 is harder to compare with earlier years.** Statcast records its
+  zone boundaries differently from earlier seasons. The models show 2026 calls differing from earlier seasons but
   can't say why.
 
 ## Running it
@@ -410,12 +409,12 @@ so it looks like ball-in-play luck rather than a skill xwOBA misses.
 2022 stands out a little: the two agree least that season (r = 0.91) and
 luck spreads the most (SD 7.3).
 
-**Regression candidates.** 12, 17, 20, 12, 13 and 14 hitters had luck at
+**Regression candidates.** 12, 17, 20, 12, 13 and 13 hitters had luck at
 least 2 standard errors from zero in 2021 through 2026 (4.8%, 6.4%, 7.1%,
-4.5%, 4.9% and 5.2%). About 4.6% would land there by chance alone, so this
+4.5%, 4.9% and 5.0%). About 4.6% would land there by chance alone, so this
 is a list of who to watch, not proof anyone was lucky; only 2022 and 2023
 run clearly above chance. The list splits about evenly between hitters
-whose Chase+ should fall (46) and rise (42). The standard error of luck
+whose Chase+ should fall (43) and rise (44). The standard error of luck
 comes from how each ball was hit (the league's typical luck on balls
 with the same xwOBA), not from the hitter's own results, so a few lucky
 home runs can't also widen his own error bar. See
@@ -434,7 +433,7 @@ xChase+.
 | 2023 | 0.28 | 0.35 | -0.22 | -0.27 |
 | 2024 | 0.23 | 0.30 | -0.20 | -0.24 |
 | 2025 | 0.27 | 0.32 | -0.27 | -0.30 |
-| 2026 | 0.27 | 0.32 | -0.17 | -0.27 |
+| 2026 | 0.29 | 0.33 | -0.18 | -0.26 |
 
 In every season xChase+ tracks expected offense more closely than Chase+
 tracks actual offense, and more closely than chase rate does.
@@ -450,13 +449,13 @@ chase rate are known?
 | 2023-24 (192) | xChase+ | 0.24 | 0.001 | -0.5 |
 | 2024-25 (189) | xChase+ | 0.29 | 0.001 | 0.6 |
 | 2025-26 (187) | xChase+ | 0.13 | 0.009 | -1.6 |
-| All (940) | xChase+ | 0.22 | 0.001 | -1.2 |
-| All (940) | Chase+ | 0.19 | 0.000 | -0.9 |
+| All (941) | xChase+ | 0.22 | 0.001 | -1.2 |
+| All (941) | Chase+ | 0.19 | 0.000 | -0.9 |
 
 No. Both correlate with next year's xwOBA on their own, but that's because
 good hitters have good chase decisions: once this year's xwOBA is known,
 neither adds anything, and the sign isn't even consistent from one pair of
-seasons to the next. With 940 hitter pairs, a gain of about half a percent
+seasons to the next. With 941 hitter pairs, a gain of about half a percent
 of R² or more would likely have shown up. So xChase+ describes a real,
 repeatable part of a hitter's approach, but it isn't a hidden predictor
 of next year's production.
@@ -481,7 +480,7 @@ xChase+ scale:
 | 2023 | 93.1 | 97.8 | 103.2 | 106.7 |
 | 2024 | 94.5 | 97.9 | 102.1 | 105.3 |
 | 2025 | 94.5 | 93.4 | 102.1 | 106.2 |
-| 2026 | 94.3 | 97.2 | 102.4 | 104.2 |
+| 2026 | 94.4 | 98.2 | 102.5 | 103.8 |
 
 Hitters chase worse against same-handed pitchers (93-99) and better
 against opposite-handed ones (102-107), every season.
@@ -492,8 +491,8 @@ count and distance bucket), so 100 on a board is the average hitter *in
 that matchup*, not the league average. A point is worth the same runs as
 on the main leaderboard. To qualify, a hitter needs the main floors
 times the league's share of plate appearances against that pitcher hand:
-in a full season 79-89 PA and 159-178 out-of-zone pitches against
-lefties, 210-221 PA and 421-441 against righties. Each board is shrunk
+in a full season 79-90 PA and 159-180 out-of-zone pitches against
+lefties, 210-221 PA and 420-441 against righties. Each board is shrunk
 on its own, like the main one. Switch hitters appear on R/L and L/R, the
 side they batted from.
 
@@ -502,10 +501,10 @@ both seasons, five pairs of seasons:
 
 | Board | Hitters per pair | r (average) |
 |---|---:|---|
-| R/R | 96 | 0.70-0.77 (0.74) |
-| L/R | 92 | 0.55-0.70 (0.64) |
-| R/L | 136 | 0.42-0.56 (0.47) |
-| L/L | 41 | 0.24-0.55 (0.44) |
+| R/R | 95 | 0.70-0.78 (0.74) |
+| L/R | 93 | 0.55-0.70 (0.64) |
+| R/L | 138 | 0.42-0.56 (0.47) |
+| L/L | 43 | 0.24-0.55 (0.44) |
 
 The boards against right-handed pitchers repeat about as well as overall
 xChase+. The boards against lefties rest on about a quarter of a
@@ -517,69 +516,69 @@ of a real platoon split.
 <details>
 <summary>2026 top 5 and bottom 5 on each board</summary>
 
-**R/R** (103 qualified hitters, season in progress)
+**R/R** (101 qualified hitters)
 
 | Rank | Player | Bats | PA | Chase% | xChase+ ± 1 SD | Overall xChase+ |
 |---:|---|:---:|---:|---:|---|---:|
-| 1 | Taylor Ward | R | 412 | 14.0% | **158** ± 7 | 152 |
-| 2 | Miguel Vargas | R | 441 | 21.3% | **147** ± 9 | 145 |
-| 3 | Gleyber Torres | R | 263 | 21.8% | **143** ± 9 | 144 |
-| 4 | Isaac Paredes | R | 448 | 26.2% | **132** ± 8 | 124 |
-| 5 | Alex Bregman | R | 490 | 24.5% | **132** ± 8 | 128 |
+| 1 | Taylor Ward | R | 414 | 14.0% | **159** ± 8 | 154 |
+| 2 | Miguel Vargas | R | 491 | 21.0% | **145** ± 9 | 142 |
+| 3 | Gleyber Torres | R | 292 | 21.4% | **141** ± 9 | 144 |
+| 4 | Isaac Paredes | R | 500 | 25.9% | **137** ± 8 | 127 |
+| 5 | Gabriel Moreno | R | 403 | 28.1% | **134** ± 9 | 132 |
 | | ... | | | | | |
-| 99 | Salvador Pérez | R | 414 | 44.3% | **76** ± 10 | 73 |
-| 100 | Trea Turner | R | 418 | 37.0% | **74** ± 9 | 79 |
-| 101 | Ezequiel Tovar | R | 317 | 45.4% | **73** ± 10 | 65 |
-| 102 | Oswald Peraza | R | 221 | 39.8% | **71** ± 11 | 75 |
-| 103 | Zach Neto | R | 450 | 38.8% | **70** ± 9 | 65 |
+| 97 | Salvador Pérez | R | 453 | 44.2% | **75** ± 9 | 73 |
+| 98 | Trea Turner | R | 466 | 37.4% | **73** ± 8 | 78 |
+| 99 | Ezequiel Tovar | R | 338 | 45.2% | **72** ± 10 | 66 |
+| 100 | Jeremy Peña | R | 370 | 39.8% | **71** ± 9 | 76 |
+| 101 | Oswald Peraza | R | 230 | 40.0% | **70** ± 11 | 76 |
 
-**L/L** (83 qualified hitters)
+**L/L** (81 qualified hitters)
 
 | Rank | Player | Bats | PA | Chase% | xChase+ ± 1 SD | Overall xChase+ |
 |---:|---|:---:|---:|---:|---|---:|
-| 1 | J. P. Crawford | L | 124 | 17.1% | **154** ± 13 | 139 |
-| 2 | Jonathan Aranda | L | 171 | 24.1% | **139** ± 11 | 133 |
-| 3 | Steven Kwan | L | 171 | 20.4% | **136** ± 10 | 144 |
-| 4 | Jake Bauers | L | 144 | 22.3% | **133** ± 12 | 133 |
-| 5 | JJ Wetherholt | L | 209 | 21.8% | **131** ± 11 | 128 |
+| 1 | J. P. Crawford | L | 159 | 18.7% | **143** ± 12 | 135 |
+| 2 | Jonathan Aranda | L | 188 | 24.9% | **137** ± 11 | 130 |
+| 3 | Steven Kwan | L | 204 | 19.9% | **137** ± 10 | 146 |
+| 4 | Wilyer Abreu | L | 218 | 27.3% | **130** ± 12 | 112 |
+| 5 | JJ Wetherholt | L | 218 | 21.9% | **129** ± 11 | 125 |
 | | ... | | | | | |
-| 79 | Brandon Lowe | L | 185 | 40.4% | **78** ± 13 | 82 |
-| 80 | Brandon Marsh | L | 125 | 41.5% | **74** ± 13 | 85 |
-| 81 | Jac Caglianone | L | 154 | 46.0% | **65** ± 13 | 80 |
-| 82 | Andrés Giménez | L | 126 | 44.3% | **57** ± 11 | 69 |
-| 83 | Samuel Basallo | L | 91 | 43.6% | **45** ± 13 | 80 |
+| 77 | Daylen Lile | L | 182 | 42.2% | **78** ± 12 | 90 |
+| 78 | Brandon Lowe | L | 209 | 40.5% | **76** ± 12 | 83 |
+| 79 | Brandon Marsh | L | 130 | 42.3% | **74** ± 12 | 84 |
+| 80 | Jac Caglianone | L | 169 | 46.8% | **66** ± 12 | 78 |
+| 81 | Andrés Giménez | L | 141 | 45.9% | **55** ± 10 | 67 |
 
-**R/L** (179 qualified hitters)
+**R/L** (182 qualified hitters)
 
 | Rank | Player | Bats | PA | Chase% | xChase+ ± 1 SD | Overall xChase+ |
 |---:|---|:---:|---:|---:|---|---:|
-| 1 | Gleyber Torres | R | 113 | 14.1% | **142** ± 13 | 144 |
-| 2 | Ryan Jeffers | R | 116 | 19.4% | **141** ± 13 | 132 |
-| 3 | Miguel Vargas | R | 178 | 20.8% | **141** ± 12 | 145 |
-| 4 | Junior Caminero | R | 163 | 25.4% | **140** ± 16 | 111 |
-| 5 | Taylor Ward | R | 178 | 17.9% | **140** ± 10 | 152 |
+| 1 | Gleyber Torres | R | 127 | 14.0% | **146** ± 12 | 144 |
+| 2 | Taylor Ward | R | 192 | 17.2% | **145** ± 9 | 154 |
+| 3 | Seiya Suzuki | R | 165 | 18.4% | **142** ± 14 | 124 |
+| 4 | Junior Caminero | R | 187 | 25.6% | **139** ± 15 | 106 |
+| 5 | Miguel Vargas | R | 205 | 20.5% | **137** ± 11 | 142 |
 | | ... | | | | | |
-| 175 | Edmundo Sosa | R | 128 | 48.9% | **73** ± 13 | - |
-| 176 | Ozzie Albies | S | 238 | 45.7% | **70** ± 12 | 87 |
-| 177 | Ceddanne Rafaela | R | 147 | 44.3% | **69** ± 14 | 85 |
-| 178 | Ezequiel Tovar | R | 146 | 42.3% | **68** ± 12 | 65 |
-| 179 | Colby Thomas | R | 104 | 40.6% | **59** ± 14 | - |
+| 178 | Ezequiel Tovar | R | 170 | 40.8% | **71** ± 11 | 66 |
+| 179 | Hunter Goodman | R | 185 | 40.3% | **70** ± 13 | 78 |
+| 180 | Ozzie Albies | S | 260 | 44.5% | **69** ± 11 | 82 |
+| 181 | Brooks Lee | S | 206 | 36.9% | **67** ± 11 | 84 |
+| 182 | Colby Thomas | R | 104 | 40.6% | **60** ± 14 | - |
 
-**L/R** (159 qualified hitters)
+**L/R** (161 qualified hitters)
 
 | Rank | Player | Bats | PA | Chase% | xChase+ ± 1 SD | Overall xChase+ |
 |---:|---|:---:|---:|---:|---|---:|
-| 1 | Geraldo Perdomo | S | 422 | 20.8% | **149** ± 7 | 152 |
-| 2 | Steven Kwan | L | 396 | 20.0% | **141** ± 7 | 144 |
-| 3 | Trent Grisham | L | 349 | 19.0% | **134** ± 7 | 133 |
-| 4 | Jakob Marsee | L | 430 | 20.7% | **131** ± 8 | 130 |
-| 5 | Kevin McGonigle | L | 443 | 19.5% | **131** ± 7 | 129 |
+| 1 | Geraldo Perdomo | S | 481 | 20.2% | **145** ± 7 | 148 |
+| 2 | Steven Kwan | L | 433 | 19.2% | **144** ± 7 | 146 |
+| 3 | Trent Grisham | L | 349 | 19.0% | **135** ± 7 | 132 |
+| 4 | Kevin McGonigle | L | 501 | 19.1% | **134** ± 7 | 130 |
+| 5 | Juan Soto | L | 306 | 19.0% | **132** ± 10 | 130 |
 | | ... | | | | | |
-| 155 | Michael Harris | L | 356 | 44.7% | **68** ± 10 | 75 |
-| 156 | Colson Montgomery | L | 399 | 33.2% | **62** ± 8 | 70 |
-| 157 | Luke Raley | L | 257 | 34.4% | **62** ± 9 | 64 |
-| 158 | Mickey Moniak | L | 306 | 42.3% | **60** ± 9 | 55 |
-| 159 | Jarren Duran | L | 433 | 36.0% | **59** ± 8 | 67 |
+| 157 | Spencer Jones | L | 229 | 35.7% | **68** ± 11 | - |
+| 158 | Luke Raley | L | 257 | 34.4% | **62** ± 9 | - |
+| 159 | Colson Montgomery | L | 438 | 32.7% | **62** ± 8 | 68 |
+| 160 | Jarren Duran | L | 465 | 35.2% | **60** ± 8 | 68 |
+| 161 | Mickey Moniak | L | 344 | 43.6% | **58** ± 9 | 55 |
 
 </details>
 
