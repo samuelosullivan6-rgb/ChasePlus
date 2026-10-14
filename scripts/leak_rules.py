@@ -252,3 +252,49 @@ def ops(frame, by):
     t = frame.groupby(by)[["on_base", "obp_denom", "bases", "at_bat"]].sum()
     return (t["on_base"] / t["obp_denom"].where(t["obp_denom"] > 0)
             + t["bases"] / t["at_bat"].where(t["at_bat"] > 0))
+
+
+# --------------------------------------------------
+# THE BACKTEST'S TOOLS (steps 16 and 20 share them, so a payoff means
+# the same thing when it is scored out of sample as when it was fit)
+# --------------------------------------------------
+
+WOBA_WEIGHTS = {"walk": 0.7, "hit_by_pitch": 0.7, "single": 0.9, "double": 1.25,
+                "triple": 1.6, "home_run": 2.0}   # Savant's, every season 2021-2026
+OUT_EVENTS = ["field_out", "strikeout", "force_out", "grounded_into_double_play",
+              "double_play", "fielders_choice_out", "strikeout_double_play"]
+
+
+def woba_scale(run_values):
+    """Each season's wOBA scale: Savant's weights fit against this
+    project's run values above an average out. One number per season."""
+
+    scale = {}
+    for season, r in run_values.groupby("game_year"):
+        r = r.set_index("event")
+        outs = r.loc[[e for e in OUT_EVENTS if e in r.index]]
+        out_value = (outs["run_value"] * outs["occurrences"]).sum() / outs["occurrences"].sum()
+        above = np.array([r.loc[e, "run_value"] - out_value for e in WOBA_WEIGHTS])
+        freq = np.array([r.loc[e, "occurrences"] for e in WOBA_WEIGHTS])
+        weight = np.array(list(WOBA_WEIGHTS.values()))
+        scale[season] = (freq * weight * above).sum() / (freq * above * above).sum()
+    return pd.Series(scale)
+
+
+def ols(y, columns, cluster):
+    """OLS with an intercept; standard errors clustered by `cluster`.
+    Returns (coefficients, standard errors), the intercept first."""
+
+    X = np.column_stack([np.ones(len(y))] + [np.asarray(c, float) for c in columns])
+    y = np.asarray(y, float)
+    beta, *_ = np.linalg.lstsq(X, y, rcond=None)
+    resid = y - X @ beta
+    bread = np.linalg.inv(X.T @ X)
+    meat = np.zeros((X.shape[1], X.shape[1]))
+    cluster = np.asarray(cluster)
+    for c in np.unique(cluster):
+        s = X[cluster == c].T @ resid[cluster == c]
+        meat += np.outer(s, s)
+    groups = len(np.unique(cluster))
+    cov = bread @ meat @ bread * groups / (groups - 1)
+    return beta, np.sqrt(np.diag(cov))

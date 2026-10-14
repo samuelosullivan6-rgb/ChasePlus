@@ -122,6 +122,7 @@ td .avg { color: var(--muted); margin-left: 6px; }
 tr.total td { font-weight: 800; border-top: 1px solid var(--hair); }
 .trend svg { width: 100%; height: auto; max-width: 520px; display: block; }
 .evidence { color: var(--muted); font-size: 13px; max-width: 80ch; }
+.evidence.target { color: var(--ink2, var(--muted)); }
 details { border-top: 1px solid var(--hair); padding-top: 12px; }
 .terrain { display: grid; gap: 8px; border-top: 1px solid var(--hair); padding-top: 14px; min-width: 0; }
 .terrain h2 { font-size: 20px; font-weight: 800; }
@@ -733,6 +734,7 @@ summary { cursor: pointer; font-weight: 700; }
     const leakSec = el("section", {}, el("div", { class: "sechead" }, el("h2", { text: "Biggest leaks" }), tabs));
     leakSec.append(leaks.length ? list : el("p", { class: "empty", text: "None worth a run per 600 PA." }));
     leakSec.append(el("p", { class: "evidence", text: state.hand === "all" ? "Numbered on the All pitchers row. Runs are what the choices cost, per 600 PA." : "Runs are what the choices cost, per 600 PA." }));
+    if (p.target && state.hand === "all") leakSec.append(el("p", { class: "evidence target", text: `Target: ${Math.round(p.target.excess * 100)} pts above the league in these spots in ${p.target.season}. Expected in ${p.target.next_season} with no change: ${Math.round(p.target.predicted * 100)} pts. Below that is a fix.` }));
     a.append(leakSec);
     a.append(el("section", {}, el("h2", { text: "By count" }), countTable(p.tables[state.hand], false),
       el("p", { class: "evidence", text: D.countNote })));

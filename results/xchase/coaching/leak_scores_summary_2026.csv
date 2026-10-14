@@ -1,0 +1,41 @@
+season,scored_on,out_of_sample,group,measure,test,value,se,n_hitters
+2025,2026,no,all,xchase_plus,reference payoff per 10-pt cut,4.10048,0.63520,
+2025,2026,no,all,offense_runs,reference payoff per 10-pt cut,0.93853,0.55700,
+2025,2026,no,all,woba_runs,reference payoff per 10-pt cut,0.46179,0.66021,
+2025,2026,no,all,bb_rate,reference payoff per 10-pt cut,0.00708,0.00085,
+2025,2026,no,all,k_rate,reference payoff per 10-pt cut,-0.00041,0.00147,
+2025,2026,no,all,zone_swing_rate,reference payoff per 10-pt cut,-0.00399,0.00153,
+2025,2026,no,all,far_off_chase_rate,reference payoff per 10-pt cut,-0.01681,0.00155,
+2025,2026,no,all,accounting,reference offense runs per run of leak choices recovered,0.72918,0.35992,
+2025,2026,no,all,leak_excess,"mean excess, frozen season",0.12836,,160.00000
+2025,2026,no,all,leak_excess,mean predicted excess,0.05648,,160.00000
+2025,2026,no,all,leak_excess,mean actual excess,0.05005,0.00825,160.00000
+2025,2026,no,all,leak_excess,actual minus predicted,-0.00643,0.00680,160.00000
+2025,2026,no,all,leak_excess,calibration intercept (actual on predicted),-0.00756,0.00999,160.00000
+2025,2026,no,all,leak_excess,calibration slope (actual on predicted),1.02005,0.11704,160.00000
+2025,2026,no,main: every leak also a backtest leak,leak_excess,"mean excess, frozen season",0.14470,,130.00000
+2025,2026,no,main: every leak also a backtest leak,leak_excess,mean predicted excess,0.06803,,130.00000
+2025,2026,no,main: every leak also a backtest leak,leak_excess,mean actual excess,0.05673,0.00935,130.00000
+2025,2026,no,main: every leak also a backtest leak,leak_excess,actual minus predicted,-0.01130,0.00758,130.00000
+2025,2026,no,main: every leak also a backtest leak,leak_excess,calibration intercept (actual on predicted),-0.02198,0.01219,130.00000
+2025,2026,no,main: every leak also a backtest leak,leak_excess,calibration slope (actual on predicted),1.15698,0.13245,130.00000
+2025,2026,no,some leak not,leak_excess,"mean excess, frozen season",0.05752,,30.00000
+2025,2026,no,some leak not,leak_excess,mean predicted excess,0.00643,,30.00000
+2025,2026,no,some leak not,leak_excess,mean actual excess,0.02114,0.01641,30.00000
+2025,2026,no,some leak not,leak_excess,actual minus predicted,0.01471,0.01506,30.00000
+2025,2026,no,some leak not,leak_excess,calibration intercept (actual on predicted),0.01586,0.01584,30.00000
+2025,2026,no,some leak not,leak_excess,calibration slope (actual on predicted),0.82037,0.33015,30.00000
+2025,2026,no,all,xchase_plus,payoff per 10-pt cut beyond predicted,7.52264,1.48655,160.00000
+2025,2026,no,all,offense_runs,payoff per 10-pt cut beyond predicted,3.64138,1.04020,160.00000
+2025,2026,no,all,woba_runs,payoff per 10-pt cut beyond predicted,3.05808,1.11709,160.00000
+2025,2026,no,all,bb_rate,payoff per 10-pt cut beyond predicted,0.01112,0.00187,160.00000
+2025,2026,no,all,k_rate,payoff per 10-pt cut beyond predicted,-0.00097,0.00298,160.00000
+2025,2026,no,all,zone_swing_rate,payoff per 10-pt cut beyond predicted,-0.00693,0.00294,160.00000
+2025,2026,no,all,far_off_chase_rate,payoff per 10-pt cut beyond predicted,-0.02105,0.00256,160.00000
+2025,2026,no,all,offense_runs,offense runs per run of leak choices recovered,0.77759,0.59223,160.00000
+2025,2026,no,all,offense_runs,"payoff per 10-pt cut beyond predicted, average in the counts",5.04167,1.47165,65.00000
+2025,2026,no,all,xchase_plus,"payoff per 10-pt cut beyond predicted, average in the counts",8.29046,2.24212,65.00000
+2025,2026,no,all,offense_runs,"payoff per 10-pt cut beyond predicted, productive in the counts",0.54518,1.54599,72.00000
+2025,2026,no,all,xchase_plus,"payoff per 10-pt cut beyond predicted, productive in the counts",3.28187,1.80624,72.00000
+2025,2026,no,all,offense_runs,"payoff per 10-pt cut beyond predicted, struggling in the counts",7.16530,2.99893,23.00000
+2025,2026,no,all,xchase_plus,"payoff per 10-pt cut beyond predicted, struggling in the counts",13.67987,4.79162,23.00000

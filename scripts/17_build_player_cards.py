@@ -39,9 +39,19 @@ OUTPUTS
   results/xchase/player_cards/player_cards_<season>.csv
       one row per hitter: the numbers behind the header and plan
 
+Each leak also says how far off the zone the chased pitches were (the
+median, in inches), so "let it go" is never read as "take borderline
+pitches". When step 19 has frozen this season's predictions, each card
+carries its target: how far above the league the hitter chased in his
+leaks, and what the line expects next season with no change, since
+leaks shrink on their own. Beating that number is what counts as a fix.
+
 Options: --season (default 2026), --static NAME [NAME ...] to also draw
 PNG cards for any hitters by name, --static-all to draw every hitter
-(into player_cards/static/, which is not committed).
+(into player_cards/static/, which is not committed), --data-only to
+write just the card data (card_players_<season>.json, the CSV) for an
+earlier season, so step 19 can freeze it retrospectively and step 20
+score it. The coach's notes are for 2026 only.
 
 Needs steps 04 (--expected-contact), 13, 15 and 16 first.
 """
@@ -52,6 +62,7 @@ import json
 import shutil
 import subprocess
 import sys
+import textwrap
 from pathlib import Path
 
 import numpy as np
@@ -81,8 +92,13 @@ parser.add_argument("--static-all", action="store_true",
                     help="draw a PNG card for every qualified hitter")
 parser.add_argument("--skip-png", action="store_true",
                     help="build the data and the HTML page only")
+parser.add_argument("--data-only", action="store_true",
+                    help="write card_players_<season>.json and the CSV only: no page, no PNGs, "
+                         "no noted report (for freezing an earlier season retrospectively)")
 args = parser.parse_args()
 SEASON = args.season
+NOTED_SEASON = 2026             # the coach's notes describe the 2026 cards
+NOTES = NOTED if SEASON == NOTED_SEASON else {}
 
 PA_SCALE = 600
 FAR_OFF_FT = 0.35
@@ -262,7 +278,7 @@ board = board.merge(action[["batter", "archetype", "far_off_recoverable",
                     on="batter", how="left")
 n_qualified = len(board)
 
-missing = [n for n in NOTED if n not in set(board["player"])]
+missing = [n for n in NOTES if n not in set(board["player"])]
 if missing:
     raise SystemExit(f"Noted hitters not on the {SEASON} leaderboard: {missing}")
 
@@ -344,6 +360,8 @@ def leaks(p, scale, batter):
             "extra_chases": float(lk.extra_chases), "choices": lk.choices, "contact": lk.contact,
             "share_rhp": float(rhp),
             "side": side, "x": float(on_side["xd"].median()), "z": float(on_side["zd"].median()),
+            # how far off the zone the chased pitches were, so the plan can say it
+            "depth_in": float(chased["distance_outside_zone"].median() * 12),
             "count_xwoba": cc.xwoba, "count_xwoba_league": cc.league_xwoba,
             "count_xwoba_shrunk": cc.xwoba_shrunk, "count_status": cc.status,
         })
@@ -362,6 +380,18 @@ GROUP_WORDS_SHORT = {"first": "On the first pitch", "ahead": "When you're ahead"
                      "even": "At 0-1 or 1-1", "two": "With two strikes"}
 
 
+CLEARLY_OFF_IN = 3              # a leak whose chased pitches are typically this far off
+
+
+def depth_phrase(depth_in):
+    """How far off the zone the chased pitches were, written to the player.
+    A take rule is for the pitch that is clearly a ball, never a borderline one."""
+
+    if depth_in >= CLEARLY_OFF_IN:
+        return f"The ones you swung at were typically {depth_in:.0f} inches off the zone."
+    return "Many of those were close to the zone; start with the ones clearly off."
+
+
 def plan_lines(leak_list, summary):
     lines = []
     for lk in [lk for lk in leak_list if lk["choices"] <= -lr.PLAN_MIN_RUNS][:2]:
@@ -371,13 +401,12 @@ def plan_lines(leak_list, summary):
             f"{opener}{hand}, let {PITCH_WORDS[lk['pitch_group']]} "
             f"{REGION_WORDS[lk['region']]} go. "
             f"You swung at {lk['rate'] * 100:.0f}% of them; hitters on average swing at "
-            f"{lk['league'] * 100:.0f}%.")
+            f"{lk['league'] * 100:.0f}%. {depth_phrase(lk['depth_in'])}")
     if summary["archetype"] == "execution-led":
         lines.append(
             f"Your bigger issue is contact: you miss on {summary['whiff'] * 100:.0f}% of your "
             f"chases, against {summary['whiff_league'] * 100:.0f}% for other hitters on the "
-            "same pitches. Your chases rarely turn into anything, so your take line with two "
-            "strikes can be stricter than most hitters'.")
+            "same pitches, so take a stricter line with two strikes.")
     if not lines:
         lines.append("Nothing stands out. Your chase choices are about league average "
                      "or better in every count.")
@@ -394,13 +423,62 @@ def span(measure, k=1.0):
     return f"{lo:.1f} to {hi:.1f}"
 
 
+# ...and the two directions separately, season to season: most of the
+# payoff is runs not lost by hitters who chased more, not runs gained by
+# those who cut more. The card says so rather than promise a better line.
+groups = backtest[backtest["test"].str.startswith("group vs as expected")].set_index(
+    ["pair_kind", "measure", "test"])["value"]
+lost = -groups[("season", "offense_runs", "group vs as expected: chased more than expected")]
+gained = groups[("season", "offense_runs", "group vs as expected: cut more than expected")]
+gained_x = groups[("season", "xchase_plus", "group vs as expected: cut more than expected")]
+group_se = backtest[backtest["test"].str.startswith("group vs as expected")].set_index(
+    ["pair_kind", "measure", "test"])["se"]
+half_gained = groups[("half", "offense_runs", "group vs as expected: cut more than expected")]
+half_lost = -groups[("half", "offense_runs", "group vs as expected: chased more than expected")]
+
 EVIDENCE_QUESTION = "Does fixing a leak pay?"
 EVIDENCE_LINE = (
-    f"{EVIDENCE_QUESTION} Hitters who chased 10 points less on their leak pitches than their "
-    f"numbers predicted gained {span('offense_runs')} runs per 600 PA (xwOBA) and "
-    f"{span('xchase_plus')} xChase+ points, with only {span('zone_swing_rate', 100)} pts "
-    "fewer swings at strikes. It paid about the same whether or not they hit well in "
-    "those counts.")
+    f"{EVIDENCE_QUESTION} Hitters who cut leak chasing 10 points more than predicted gained "
+    f"{span('offense_runs')} runs per 600 PA (xwOBA) and {span('xchase_plus')} xChase+ points, "
+    f"for {span('zone_swing_rate', 100)} pts fewer swings at strikes, whatever their count check. "
+    f"Season to season it was mostly runs not lost: chasing more cost {lost:.1f} runs, cutting "
+    f"more gained {gained:.1f}.")
+EVIDENCE_DETAIL = (
+    f"Hitters who cut their leak chasing 10 points more than their numbers predicted gained "
+    f"{span('offense_runs')} runs per 600 PA (xwOBA) and {span('xchase_plus')} xChase+ points, "
+    f"with only {span('zone_swing_rate', 100)} pts fewer swings at strikes. It paid about the "
+    "same whether or not they hit well in those counts. Two cautions before promising a "
+    "player anything. Season to season, most of the payoff came from the other direction: "
+    f"hitters who chased more than predicted lost {lost:.1f} ± "
+    f"{group_se[('season', 'offense_runs', 'group vs as expected: chased more than expected')]:.1f} "
+    f"runs of offense, while those who cut more gained {gained_x:.1f} xChase+ points but only "
+    f"{gained:.1f} ± "
+    f"{group_se[('season', 'offense_runs', 'group vs as expected: cut more than expected')]:.1f} "
+    f"runs (half to half, both sides show it: +{half_gained:.1f} and −{half_lost:.1f}). So the "
+    "first promise to a hitter is fewer wasted counts, not a better slash line. And leaks "
+    "shrink on their own: how far above the league a hitter chases in his leaks halves the "
+    "next season with nobody doing anything, so the target under each plan is the number "
+    "to beat, not the hitter's current rate.")
+if len(textwrap.wrap(EVIDENCE_LINE, 118)) > 3:
+    raise SystemExit("The card's footer line no longer fits in three lines; shorten EVIDENCE_LINE.")
+
+# The target (step 19): this season's leak chasing on the backtest's scale
+# and what its line predicts for next season with no change. Read from the
+# frozen file, so the number on the card is the number step 20 will score.
+PRED_FILE = XCHASE / "coaching" / f"leak_predictions_{SEASON}.csv"
+TARGETS = {}
+if PRED_FILE.exists():
+    frozen = pd.read_csv(PRED_FILE)
+    frozen_leaks = {b: set(map(tuple, g[lr.LEAK_CELL].itertuples(index=False)))
+                    for b, g in frozen[frozen["row"] != "hitter"].groupby("batter")}
+    for r in frozen[(frozen["row"] == "hitter") & (frozen["leaks"] > 0)].itertuples():
+        TARGETS[int(r.batter)] = {
+            "season": SEASON, "next_season": SEASON + 1,
+            "excess": float(getattr(r, f"excess_{SEASON}")),
+            "predicted": float(getattr(r, f"predicted_excess_{SEASON + 1}")),
+            "cells": frozen_leaks.get(int(r.batter), set()),
+            "out_of_sample": str(getattr(r, "out_of_sample", "yes")),
+        }
 
 print("Building hitter summaries...")
 players = []
@@ -419,12 +497,17 @@ for _, row in board.sort_values("xchase_plus", ascending=False).iterrows():
         "choices": float(p["choices"].sum() * scale), "contact": float(p["contact"].sum() * scale),
         "runs_at_stake": float(max(row["far_off_recoverable"], 0.0)),
         "archetype": row["archetype"],
-        "noted": NOTED.get(row["player"], (None, None))[0],
-        "coach_note": NOTED.get(row["player"], (None, None))[1],
+        "noted": NOTES.get(row["player"], (None, None))[0],
+        "coach_note": NOTES.get(row["player"], (None, None))[1],
     }
     summary["tables"] = {h: count_table(hand_view(p, h), scale, bid, h) for h in HANDS}
     summary["leaks"] = {h: leaks(hand_view(p, h), scale, bid) for h in HANDS}
     summary["plan"] = plan_lines(summary["leaks"]["all"], summary)
+    target = TARGETS.get(bid)
+    cells = {(lk["count_group"], lk["pitch_group"], lk["region"]) for lk in summary["leaks"]["all"]}
+    summary["target"] = ({k: target[k] for k in ("season", "next_season", "excess", "predicted",
+                                                   "out_of_sample")}
+                         if target and target["cells"] == cells else None)
     t = trend[trend["batter"] == bid]
     summary["trend"] = [[int(y), float(r)] for y, r in zip(t["game_year"], t["far_off_chase_rate"])]
     summary["side_pitches"] = {s: int((p["stand"] == s).sum()) for s in ("L", "R")}
@@ -436,8 +519,15 @@ for _, row in board.sort_values("xchase_plus", ascending=False).iterrows():
     players.append(summary)
 
 print(f"  {len(players)} hitters, {len(switch & set(board['batter']))} switch hitters")
-n_claims, n_noted = coach_notes.check(players)
-print(f"  checked {n_claims} claims in the coach's notes for {n_noted} hitters: all hold")
+if TARGETS:
+    with_target = sum(1 for p in players if p["target"])
+    stale = sum(1 for p in players if p["id"] in TARGETS and not p["target"])
+    print(f"  targets from {PRED_FILE.name}: {with_target} hitters"
+          + (f"; {stale} whose frozen leaks are not the card's leaks (no target shown)"
+             if stale else ""))
+if NOTES:
+    n_claims, n_noted = coach_notes.check(players)
+    print(f"  checked {n_claims} claims in the coach's notes for {n_noted} hitters: all hold")
 
 # --------------------------------------------------
 # SURFACES FOR ONE HITTER
@@ -613,7 +703,7 @@ class Card:
 
 PANEL_ASPECT = (ZS[-1] - ZS[0]) / (XS[-1] - XS[0])
 GRID_LEFT, GRID_TOP = 64, 196
-BOTTOM_BLOCK = 866              # y where the trend + legend block starts
+BOTTOM_BLOCK = 880              # y where the trend + legend block starts
 ROW_LABEL_W = 118
 RIGHT_X, RIGHT_W = 1086, 770
 
@@ -767,6 +857,15 @@ LEAK_REGION = {"up": "above the zone", "down": "below the zone", "in": "inside",
                "down-away": "down and away"}
 
 
+def target_line(t):
+    """The number to beat: leak chasing above the league this season, and
+    what the frozen line expects next season with no change at all."""
+
+    return (f"Target: {t['excess'] * 100:.0f} pts above the league in these spots in "
+            f"{t['season']}. Expected in {t['next_season']} with no change: "
+            f"{t['predicted'] * 100:.0f} pts. Below that is a fix.")
+
+
 def row_specs(summary):
     """(label, sublabel, batting side, pitcher hand, metric) for each picture row.
 
@@ -864,7 +963,7 @@ def player_card(summary, theme_name, out_path):
     y += 32
     for line in summary["plan"]:
         card.ax.add_patch(Circle((RIGHT_X + 6, y - 6), 4, fc=t["ink"], ec="none"))
-        y = card.wrapped(RIGHT_X + 22, y, line, 80, size=16, line=22) + 6
+        y = card.wrapped(RIGHT_X + 22, y, line, 80, size=16, line=22) + 4
     if summary["coach_note"]:
         y += 4
         card.text(RIGHT_X, y, "COACH'S NOTE", size=12, color="muted", weight="bold")
@@ -879,7 +978,7 @@ def player_card(summary, theme_name, out_path):
         y += 24
         card.text(RIGHT_X, y, "None worth a run per 600 PA.", size=16, color="ink2")
     for n, lk in enumerate(summary["leaks"]["all"], start=1):
-        y += 32
+        y += 30
         card.ax.add_patch(Circle((RIGHT_X + 12, y - 6), 12, fc=t["surface"], ec=t["ink"], lw=px(1.6)))
         card.text(RIGHT_X + 12, y - 5, str(n), size=14, weight="bold", ha="center", va="center")
         label = (f"{COUNT_LABELS[lk['count_group']]}, {LEAK_PITCH[lk['pitch_group']]} "
@@ -895,6 +994,10 @@ def player_card(summary, theme_name, out_path):
                   size=14, color="ink2")
         card.text(RIGHT_X + RIGHT_W, y, fmt_runs(lk["choices"]), size=16, weight="bold",
                   ha="right")
+    if summary["target"]:
+        y += 21
+        card.text(RIGHT_X, y, target_line(summary["target"]), size=13, color="ink2")
+        y -= 5
     y += 26
     card.hline(RIGHT_X, RIGHT_X + RIGHT_W, y - 8)
     y = draw_table(card, RIGHT_X, y + 16, summary["tables"]["all"])
@@ -903,11 +1006,11 @@ def player_card(summary, theme_name, out_path):
     y = BOTTOM_BLOCK
     card.hline(RIGHT_X, RIGHT_X + RIGHT_W, y - 8)
     card.text(RIGHT_X, y + 16, "Far-off chase rate by season", size=16, weight="bold")
-    draw_trend(card, RIGHT_X + 44, y + 32, 360, 58, summary["trend"], league_trend)
-    draw_legend(card, RIGHT_X + 470, y + 38, "gap",
+    draw_trend(card, RIGHT_X + 44, y + 32, 360, 46, summary["trend"], league_trend)
+    draw_legend(card, RIGHT_X + 470, y + 36, "gap",
                 "Chases vs average hitter, same spot and count")
-    card.text(RIGHT_X + 470, y + 92, "Blue: takes more. Red: chases more.", size=13, color="ink2")
-    card.text(RIGHT_X + 470, y + 110, "Faded: too few pitches to say. Outline: +15 pts.",
+    card.text(RIGHT_X + 470, y + 88, "Blue: takes more. Red: chases more.", size=13, color="ink2")
+    card.text(RIGHT_X + 470, y + 104, "Faded: too few pitches to say. Outline: +15 pts.",
               size=13, color="ink2")
     foot = 1028
     card.hline(RIGHT_X, RIGHT_X + RIGHT_W, foot - 24)
@@ -988,8 +1091,8 @@ def league_card(stand, theme_name, out_path):
     y = BOTTOM_BLOCK
     card.hline(RIGHT_X, RIGHT_X + RIGHT_W, y - 8)
     card.text(RIGHT_X, y + 16, "Far-off chase rate by season, every hitter", size=16, weight="bold")
-    draw_trend(card, RIGHT_X + 44, y + 32, 360, 58, [], league_trend)
-    draw_legend(card, RIGHT_X + 470, y + 38, "rate", "Chase rate at each spot")
+    draw_trend(card, RIGHT_X + 44, y + 32, 360, 46, [], league_trend)
+    draw_legend(card, RIGHT_X + 470, y + 36, "rate", "Chase rate at each spot")
     card.text(W - 64, H - 14, f"xChase+ 1.1  ·  Statcast {SEASON}  ·  catcher's view, "
               "each hitter's own zone", size=12, color="muted", ha="right")
     card.save(out_path)
@@ -1186,15 +1289,24 @@ def write_noted_report():
         "pitcher-hand matchup.",
         "Red is where they swing more, blue where they take more, and faded color",
         "means too few pitches to say. The plan is written to the player; the coach's",
-        "note underneath is for the staff. For what a normal card looks like, compare",
-        "with the average hitter:",
+        "note underneath is for the staff. A card says where a hitter chases, not why:",
+        "the same leak can be pitch recognition, timing or a two-strike approach, and the",
+        "drill is different for each, so the card says where to point the camera. For",
+        "what a normal card looks like, compare with the average hitter:",
         "",
         picture("../player_cards/reference/average_rhb_light.png",
                 "../player_cards/reference/average_rhb_dark.png",
                 "The average right-handed hitter's chase rate by location and count, with a guide to reading the cards"),
         "",
-        f"**{EVIDENCE_QUESTION}** " + EVIDENCE_LINE.replace(EVIDENCE_QUESTION + " ", ""),
+        f"**{EVIDENCE_QUESTION}** " + EVIDENCE_DETAIL,
         "(Step 16; see the main README for the method.)",
+        "",
+        "**The target.** Under each plan, how far above the league the hitter chased in",
+        f"his leaks in {SEASON} (on the backtest's scale), and what the season-to-season",
+        f"line predicts for {SEASON + 1} if he changes nothing (step 19, frozen before the",
+        "season). Leaks are a hitter's worst-looking spots, so about half of the excess",
+        "goes away by itself. A fix is a number below the prediction, not below this",
+        "season's rate; that is also how step 20 will score the card.",
         "",
         "**The count check.** Under each plan, how the hitter does once the count",
         "reaches the counts his leaks are in: the xwOBA of every plate appearance",
@@ -1233,6 +1345,11 @@ def write_noted_report():
             check = count_check_line(p)
             if check:
                 lines += ["", f"**Count check.** {check}"]
+            if p["target"]:
+                t = p["target"]
+                lines += ["", f"**Target.** {t['excess'] * 100:.0f} points above the league in these "
+                              f"spots in {t['season']}; {t['predicted'] * 100:.0f} expected in "
+                              f"{t['next_season']} with no change. Below that is a fix."]
             lines += ["", f"**Coach's note.** {p['coach_note']}", ""]
     (NOTED_DIR / "README.md").write_text("\n".join(lines))
     print(f"  wrote noted_players/README.md ({sum(1 for p in players if p['noted'])} hitters)")
@@ -1250,11 +1367,12 @@ df[keep].to_parquet(CLEAN / f"card_pitches_{SEASON}.parquet", index=False)
     "season": SEASON, "zone_height": ZONE_HEIGHT, "average_zone": AVERAGE_ZONE,
     "players": [{k: p[k] for k in ("id", "name", "bats", "rank", "of", "pa", "xchase_plus",
                                    "archetype", "noted", "runs_at_stake", "choices", "contact",
-                                   "zone", "height_in", "side_pitches", "leaks")}
+                                   "zone", "height_in", "side_pitches", "leaks", "target")}
                 for p in players]}), ensure_ascii=False))
 print(f"  saved card_pitches_{SEASON}.parquet and card_players_{SEASON}.json for step 18")
-qualified_pitches = build_page()
-check_javascript(qualified_pitches)
+if not args.data_only:
+    qualified_pitches = build_page()
+    check_javascript(qualified_pitches)
 
 summary_rows = []
 for p in players:
@@ -1277,12 +1395,17 @@ for p in players:
         "top_leak_count_league_xwoba": round(top["count_xwoba_league"], 4) if top else None,
         "top_leak_count_xwoba_shrunk": round(top["count_xwoba_shrunk"], 4) if top else None,
         "top_leak_count_status": top["count_status"] if top else "",
+        "top_leak_chase_depth_in": round(top["depth_in"], 1) if top else None,
+        "leak_excess_vs_league": round(p["target"]["excess"], 4) if p["target"] else None,
+        "leak_excess_predicted_next": round(p["target"]["predicted"], 4) if p["target"] else None,
         "plan": " ".join(p["plan"]),
     })
 pd.DataFrame(summary_rows).to_csv(CARDS_DIR / f"player_cards_{SEASON}.csv", index=False)
 print(f"  wrote player_cards/player_cards_{SEASON}.csv")
 
-if not args.skip_png:
+if args.data_only:
+    print("  --data-only: no page, PNGs or noted report")
+elif not args.skip_png:
     by_name = {p["name"]: p for p in players}
     for stand, word in (("R", "rhb"), ("L", "lhb")):
         for theme in THEMES:

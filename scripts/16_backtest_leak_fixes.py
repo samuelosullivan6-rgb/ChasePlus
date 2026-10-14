@@ -84,10 +84,6 @@ PA_SCALE = 600
 FAR_OFF_FT = 0.35
 MIN_SECOND_PERIOD_PITCHES = 10     # in the first period's leak cells
 GROUP_CUTOFF = 0.08                # fix of 8+ points either way, for the group table
-WOBA_WEIGHTS = {"walk": 0.7, "hit_by_pitch": 0.7, "single": 0.9, "double": 1.25,
-                "triple": 1.6, "home_run": 2.0}   # Savant's, every season 2021-2026
-OUT_EVENTS = ["field_out", "strikeout", "force_out", "grounded_into_double_play",
-              "double_play", "fielders_choice_out", "strikeout_double_play"]
 KEYS = ["game_pk", "at_bat_number", "pitch_number", "batter", "game_year"]
 
 # --------------------------------------------------
@@ -147,16 +143,7 @@ plate_apps = tag_half(plate_apps)
 base = tag_half(base)
 
 # wOBA scale: Savant's weights against this project's run values above an out
-woba_scale = {}
-for season, r in run_values.groupby("game_year"):
-    r = r.set_index("event")
-    outs = r.loc[[e for e in OUT_EVENTS if e in r.index]]
-    out_value = (outs["run_value"] * outs["occurrences"]).sum() / outs["occurrences"].sum()
-    above = np.array([r.loc[e, "run_value"] - out_value for e in WOBA_WEIGHTS])
-    freq = np.array([r.loc[e, "occurrences"] for e in WOBA_WEIGHTS])
-    weight = np.array(list(WOBA_WEIGHTS.values()))
-    woba_scale[season] = (freq * weight * above).sum() / (freq * above * above).sum()
-woba_scale = pd.Series(woba_scale)
+woba_scale = lr.woba_scale(run_values)
 in_woba = pas[pas["in_woba"]]
 league_x = in_woba.groupby("game_year")["x"].mean()
 league_w = in_woba.groupby("game_year")["w"].mean()
@@ -271,21 +258,7 @@ pairs["change_leak_choices"] = pairs["leak_choices_per_600_2"] - pairs["leak_cho
 # --------------------------------------------------
 
 
-def ols(y, columns, cluster):
-    """OLS with an intercept; standard errors clustered by `cluster`."""
-
-    X = np.column_stack([np.ones(len(y))] + [np.asarray(c, float) for c in columns])
-    y = np.asarray(y, float)
-    beta, *_ = np.linalg.lstsq(X, y, rcond=None)
-    resid = y - X @ beta
-    bread = np.linalg.inv(X.T @ X)
-    meat = np.zeros((X.shape[1], X.shape[1]))
-    for c in np.unique(cluster):
-        s = X[cluster == c].T @ resid[cluster == c]
-        meat += np.outer(s, s)
-    groups = len(np.unique(cluster))
-    cov = bread @ meat @ bread * groups / (groups - 1)
-    return beta, np.sqrt(np.diag(cov))
+ols = lr.ols      # clustered OLS, shared with step 20
 
 
 summary = []

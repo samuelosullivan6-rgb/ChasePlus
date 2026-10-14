@@ -63,9 +63,19 @@ aside) the file is left alone, and if they don't it stops rather than
 change a prediction after the fact. It also refuses to write once the
 pitch file has 2027 pitches in it.
 
-Options: --freeze-date (default today), --commit (default this
-checkout's HEAD, marked -dirty when a tracked file has changed), and
---overwrite to replace a frozen file whose predictions differ.
+Options: --season (default 2026), --freeze-date (default today),
+--commit (default this checkout's HEAD, marked -dirty when a tracked
+file has changed), and --overwrite to replace a frozen file whose
+predictions differ.
+
+RETROSPECTIVE FREEZES (--retrospective)
+  To test the freeze-and-score loop before 2027 exists, the same file
+  can be written for an earlier season whose next season is already in
+  the data (step 17 --season 2025 --data-only, then this step --season
+  2025 --retrospective, then step 20 --season 2025). Such a file is
+  stamped out_of_sample = no, and its line is refit on the backtest's
+  season pairs that end before that season (leak_backtest_pairs.csv),
+  so nothing from the season being scored goes into its predictions.
 
 Run after steps 16 and 17.
 """
@@ -88,10 +98,8 @@ PROJECT_DIR = Path(__file__).resolve().parents[1]
 CLEAN = PROJECT_DIR / "data" / "cleaned"
 OUT = PROJECT_DIR / "results" / "xchase" / "coaching"
 
-SEASON = 2026
 PA_SCALE = 600
-OUT_FILE = OUT / f"leak_predictions_{SEASON}.csv"
-STAMPS = ["freeze_date", "made_from_commit"]
+STAMPS = ["freeze_date", "made_from_commit", "out_of_sample"]
 KEYS = ["game_pk", "at_bat_number", "pitch_number", "batter", "game_year"]
 
 
@@ -110,7 +118,12 @@ def head_commit():
     return sha.stdout.strip() + ("-dirty" if changed else "")
 
 
-parser = argparse.ArgumentParser(description="Freeze the 2026 card leaks' predictions for 2027.")
+parser = argparse.ArgumentParser(description="Freeze the card leaks' predictions for next season.")
+parser.add_argument("--season", type=int, default=2026)
+parser.add_argument("--retrospective", action="store_true",
+                    help="allow a freeze for a season whose next season is already in the data; "
+                         "the file is stamped out_of_sample = no and the line is refit on "
+                         "earlier pairs only")
 parser.add_argument("--freeze-date", default=date.today().isoformat(),
                     help="date written on every row (default: today)")
 parser.add_argument("--commit", default=None,
@@ -118,6 +131,9 @@ parser.add_argument("--commit", default=None,
 parser.add_argument("--overwrite", action="store_true",
                     help="replace the frozen file even if its predictions differ")
 args = parser.parse_args()
+SEASON = args.season
+NEXT = SEASON + 1
+OUT_FILE = OUT / f"leak_predictions_{SEASON}.csv"
 commit = args.commit or head_commit()
 
 # --------------------------------------------------
@@ -134,9 +150,21 @@ base = pd.read_parquet(CLEAN / "baseline_chase_pitches.parquet",
 costs = pd.read_parquet(CLEAN / "xchase_costs_by_pitch.parquet",
                         filters=[("game_year", "==", SEASON)])
 card = json.loads((CLEAN / f"card_players_{SEASON}.json").read_text())
-summary = pd.read_csv(OUT / "leak_backtest_summary.csv").set_index(["pair_kind", "measure", "test"])
-intercept = float(summary.loc[("season", "leak_excess", "carried over (intercept)"), "value"])
-slope = float(summary.loc[("season", "leak_excess", "carried over (slope)"), "value"])
+if args.retrospective:
+    # Only pairs that end before this season: nothing from the season
+    # being scored goes into the line.
+    pairs = pd.read_csv(OUT / "leak_backtest_pairs.csv")
+    pairs = pairs[(pairs["kind"] == "season") & (pairs["season_2"] <= SEASON)]
+    pairs = pairs.dropna(subset=["leak_excess_1", "leak_excess_2"])
+    if pairs.empty:
+        raise SystemExit(f"No season pairs end by {SEASON}; nothing to fit the line on.")
+    slope, intercept = np.polyfit(pairs["leak_excess_1"], pairs["leak_excess_2"], 1)
+    line_from = f"{len(pairs)} season pairs ending by {SEASON}"
+else:
+    summary = pd.read_csv(OUT / "leak_backtest_summary.csv").set_index(["pair_kind", "measure", "test"])
+    intercept = float(summary.loc[("season", "leak_excess", "carried over (intercept)"), "value"])
+    slope = float(summary.loc[("season", "leak_excess", "carried over (slope)"), "value"])
+    line_from = "leak_backtest_summary.csv"
 
 # The same rows and labels as step 16: priced out-of-zone pitches with a
 # location, labelled with the season's average zone height.
@@ -158,15 +186,15 @@ pa = (base[base["is_analyzable"] == 1].drop_duplicates(["game_pk", "at_bat_numbe
 # --------------------------------------------------
 
 print("Measuring the card leaks...")
-hitters = pd.DataFrame([{"batter": p["id"], "player": p["name"], "rank_2026": p["rank"],
+hitters = pd.DataFrame([{"batter": p["id"], "player": p["name"], f"rank_{SEASON}": p["rank"],
                          "leaks": len(p["leaks"]["all"])} for p in card["players"]])
 leaks = pd.DataFrame([
     {"batter": p["id"], "row": f"leak {n}",
      **{c: lk[c] for c in lr.LEAK_CELL},
      "card_pitches": lk["pitches"], "card_chases": lk["chases"],
-     "card_league_rate_2026": lk["league"], "choices_runs_per_600_2026": lk["choices"],
-     "count_xwoba_gap_2026": lk["count_xwoba_shrunk"] - lk["count_xwoba_league"],
-     "count_status_2026": lk["count_status"]}
+     f"card_league_rate_{SEASON}": lk["league"], f"choices_runs_per_600_{SEASON}": lk["choices"],
+     f"count_xwoba_gap_{SEASON}": lk["count_xwoba_shrunk"] - lk["count_xwoba_league"],
+     f"count_status_{SEASON}": lk["count_status"]}
     for p in card["players"] for n, lk in enumerate(p["leaks"]["all"], start=1)])
 leaks = leaks.join(cells, on=["batter"] + lr.LEAK_CELL)
 
@@ -187,30 +215,30 @@ leaks["also_a_backtest_leak"] = np.where(
 
 # The hitter row: his leaks pooled, as step 16's leak_excess
 pooled = leaks.assign(
-    card_expected=leaks["card_league_rate_2026"] * leaks["pitches"],
-    count_gap_x_pitches=leaks["count_xwoba_gap_2026"] * leaks["pitches"],
+    card_expected=leaks[f"card_league_rate_{SEASON}"] * leaks["pitches"],
+    count_gap_x_pitches=leaks[f"count_xwoba_gap_{SEASON}"] * leaks["pitches"],
 ).groupby("batter")[["pitches", "chases", "expected", "card_expected",
-                     "choices_runs_per_600_2026", "count_gap_x_pitches"]].sum()
-pooled["card_league_rate_2026"] = pooled["card_expected"] / pooled["pitches"]
-pooled["count_xwoba_gap_2026"] = pooled["count_gap_x_pitches"] / pooled["pitches"]
-pooled["count_status_2026"] = np.select(
-    [pooled["count_xwoba_gap_2026"] <= -lr.COUNT_MARGIN,
-     pooled["count_xwoba_gap_2026"] >= lr.COUNT_MARGIN], ["struggling", "productive"], "average")
+                     f"choices_runs_per_600_{SEASON}", "count_gap_x_pitches"]].sum()
+pooled[f"card_league_rate_{SEASON}"] = pooled["card_expected"] / pooled["pitches"]
+pooled[f"count_xwoba_gap_{SEASON}"] = pooled["count_gap_x_pitches"] / pooled["pitches"]
+pooled[f"count_status_{SEASON}"] = np.select(
+    [pooled[f"count_xwoba_gap_{SEASON}"] <= -lr.COUNT_MARGIN,
+     pooled[f"count_xwoba_gap_{SEASON}"] >= lr.COUNT_MARGIN], ["struggling", "productive"], "average")
 hitters = hitters.join(pooled.drop(columns=["card_expected", "count_gap_x_pitches"]), on="batter")
 hitters["row"] = "hitter"
 every = leaks.groupby("batter")["also_a_backtest_leak"].agg(lambda v: "yes" if (v == "yes").all() else "no")
 hitters["also_a_backtest_leak"] = hitters["batter"].map(every)
 
 for frame in (hitters, leaks):
-    frame["chase_rate_2026"] = frame["chases"] / frame["pitches"]
-    frame["league_rate_2026"] = frame["expected"] / frame["pitches"]
-    frame["excess_2026"] = (frame["chases"] - frame["expected"]) / frame["pitches"]
+    frame[f"chase_rate_{SEASON}"] = frame["chases"] / frame["pitches"]
+    frame[f"league_rate_{SEASON}"] = frame["expected"] / frame["pitches"]
+    frame[f"excess_{SEASON}"] = (frame["chases"] - frame["expected"]) / frame["pitches"]
 
 # --------------------------------------------------
 # THE PREDICTION
 # --------------------------------------------------
 
-hitters["predicted_excess_2027"] = intercept + slope * hitters["excess_2026"]
+hitters[f"predicted_excess_{NEXT}"] = intercept + slope * hitters[f"excess_{SEASON}"]
 has_leaks = hitters["leaks"] > 0
 hitters.loc[has_leaks, "line_intercept"] = intercept
 hitters.loc[has_leaks, "line_slope"] = slope
@@ -219,26 +247,29 @@ hitters.loc[has_leaks, "line_slope"] = slope
 # WRITE (or check against the frozen file)
 # --------------------------------------------------
 
-leaks = leaks.join(hitters.set_index("batter")[["player", "rank_2026"]], on="batter")
+leaks = leaks.join(hitters.set_index("batter")[["player", f"rank_{SEASON}"]], on="batter")
 rows = pd.concat([hitters, leaks], ignore_index=True)
 rows["season"] = SEASON
 rows["freeze_date"] = args.freeze_date
 rows["made_from_commit"] = commit
+rows["out_of_sample"] = "no" if args.retrospective else "yes"
 for c in ("leaks", "pitches", "chases"):
     rows[c] = rows[c].astype("Int64")
-rows = rows.rename(columns={"pitches": "pitches_2026", "chases": "chases_2026"})
-columns = ["season", "rank_2026", "player", "batter", "row", "leaks", "count_group",
-           "pitch_group", "region", "pitches_2026", "chases_2026", "chase_rate_2026",
-           "league_rate_2026", "excess_2026", "predicted_excess_2027", "line_intercept",
-           "line_slope", "card_league_rate_2026", "choices_runs_per_600_2026",
-           "also_a_backtest_leak", "count_xwoba_gap_2026", "count_status_2026"] + STAMPS
-rows = rows.sort_values(["rank_2026", "batter", "row"])[columns]
+rows = rows.rename(columns={"pitches": f"pitches_{SEASON}", "chases": f"chases_{SEASON}"})
+columns = ["season", f"rank_{SEASON}", "player", "batter", "row", "leaks", "count_group",
+           "pitch_group", "region", f"pitches_{SEASON}", f"chases_{SEASON}", f"chase_rate_{SEASON}",
+           f"league_rate_{SEASON}", f"excess_{SEASON}", f"predicted_excess_{NEXT}", "line_intercept",
+           "line_slope", f"card_league_rate_{SEASON}", f"choices_runs_per_600_{SEASON}",
+           "also_a_backtest_leak", f"count_xwoba_gap_{SEASON}", f"count_status_{SEASON}"] + STAMPS
+rows = rows.sort_values([f"rank_{SEASON}", "batter", "row"])[columns]
 text = rows.to_csv(index=False, float_format="%.4f", lineterminator="\n")
 
 if OUT_FILE.exists():
     frozen = pd.read_csv(OUT_FILE, dtype=str, keep_default_na=False)
     fresh = pd.read_csv(io.StringIO(text), dtype=str, keep_default_na=False)
-    if frozen.drop(columns=STAMPS).equals(fresh.drop(columns=STAMPS)):
+    # The 2026 file was frozen before out_of_sample existed; a stamp
+    # missing from the file is not a changed prediction.
+    if frozen.drop(columns=STAMPS, errors="ignore").equals(fresh.drop(columns=STAMPS)):
         print(f"\nThe predictions match {OUT_FILE.relative_to(PROJECT_DIR)}, frozen on "
               f"{frozen['freeze_date'].iloc[0]} from commit {frozen['made_from_commit'].iloc[0]}."
               + (" Rewriting its stamps (--overwrite)." if args.overwrite else
@@ -251,13 +282,14 @@ if OUT_FILE.exists():
         raise SystemExit(f"The predictions differ from {OUT_FILE.relative_to(PROJECT_DIR)}, "
                          f"frozen on {frozen['freeze_date'].iloc[0]}. A frozen prediction is not "
                          f"changed after the fact; pass --overwrite only to replace it before "
-                         f"any 2027 pitch is in the data.")
+                         f"any {NEXT} pitch is in the data.")
 else:
     write = True
 
-if write and later:
+if write and later and not args.retrospective:
     raise SystemExit(f"The pitch file already has {later:,} pitches from after {SEASON}, so "
-                     f"predictions written now would not be out of sample. Not writing.")
+                     f"predictions written now would not be out of sample. Not writing "
+                     f"(--retrospective writes anyway, stamped out_of_sample = no).")
 if write:
     OUT.mkdir(parents=True, exist_ok=True)
     OUT_FILE.write_text(text)
@@ -272,15 +304,16 @@ print(f"\n{len(hitters)} qualified hitters, {has_leaks.sum()} with leaks on the 
       f"({len(leaks)} leaks).")
 print(f"Card leaks the backtest's rule also lists: {(leaks['also_a_backtest_leak'] == 'yes').sum()} "
       f"of {len(leaks)} (top leak: {(top['also_a_backtest_leak'] == 'yes').sum()} of {len(top)}).")
-print(f"Leak chasing, points above the league: {h['excess_2026'].mean() * 100:.1f} in {SEASON}, "
-      f"predicted {h['predicted_excess_2027'].mean() * 100:.1f} in {SEASON + 1} "
-      f"(next = {intercept * 100:+.1f} + {slope:.2f} x {SEASON}).")
+print(f"Leak chasing, points above the league: {h[f'excess_{SEASON}'].mean() * 100:.1f} in {SEASON}, "
+      f"predicted {h[f'predicted_excess_{NEXT}'].mean() * 100:.1f} in {NEXT} "
+      f"(next = {intercept * 100:+.1f} + {slope:.2f} x {SEASON}; line from {line_from}).")
 for answer, label in (("yes", "every leak also a backtest leak"), ("no", "some leak not")):
     g = h[h["also_a_backtest_leak"] == answer]
-    print(f"  {label:32s} {len(g):3d} hitters: {g['excess_2026'].mean() * 100:5.1f} -> "
-          f"{g['predicted_excess_2027'].mean() * 100:5.1f}")
+    print(f"  {label:32s} {len(g):3d} hitters: {g[f'excess_{SEASON}'].mean() * 100:5.1f} -> "
+          f"{g[f'predicted_excess_{NEXT}'].mean() * 100:5.1f}")
 print("Count check in the leaks' counts: "
-      + ", ".join(f"{s} {(h['count_status_2026'] == s).sum()}"
+      + ", ".join(f"{s} {(h[f'count_status_{SEASON}'] == s).sum()}"
                   for s in ("struggling", "average", "productive")))
 if write:
-    print(f"\nWrote {OUT_FILE.relative_to(PROJECT_DIR)} (frozen {args.freeze_date}, commit {commit}).")
+    print(f"\nWrote {OUT_FILE.relative_to(PROJECT_DIR)} (frozen {args.freeze_date}, commit {commit}"
+          + (", RETROSPECTIVE: not out of sample" if args.retrospective else "") + ").")

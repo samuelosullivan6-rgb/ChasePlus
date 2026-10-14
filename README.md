@@ -237,9 +237,15 @@ How to read it, top to bottom:
    an average hitter on the same pitches swings at 49%.
 4. **The plan is written to the player**, in the words a hitter would use
    in the cage: "With two strikes, let breaking balls below the zone go.
-   You swung at 78% of them; hitters on average swing at 49%."
+   You swung at 78% of them; hitters on average swing at 49%. The ones
+   you swung at were typically 5 inches off the zone."
+   That last sentence is on every plan line, so "let it go" is never
+   read as "take the borderline pitch".
 5. **The coach's note is for the staff.** It says where to start: breaking
    balls before two strikes, where a take costs nothing in strikeouts.
+   A card says where a hitter chases, not why. The same leak can be
+   pitch recognition, timing or a two-strike approach, and the drill is
+   different for each, so the card says where to point the camera.
 6. **The count table says whether he struggles there.** Next to his rates,
    the xwOBA column is the count check (below): every plate appearance
    that reached those counts, against the league's in the same counts.
@@ -248,6 +254,12 @@ How to read it, top to bottom:
 7. **The season trend says whether it is a habit or a slump.** Pérez has
    chased 32-39% of far-off pitches every season since 2021, against a
    league rate of 18-22%. It is a habit, so the plan is worth the effort.
+8. **The target, under the leaks, is the number to beat.** Leaks are a
+   hitter's worst-looking spots, so about half of the excess goes away
+   on its own next season (see step 16 below). The card shows how far
+   above the league he chased in his leaks this season and what the
+   frozen line expects next season with no change at all. Only a number
+   below that counts as a fix, and that is the number step 20 scores.
 
 **Does taking more pay?** Before putting "take that pitch" on a card, step
 14 checked what happened to real hitters who did it. Across 941 pairs of
@@ -363,7 +375,9 @@ it can't rule it out. Season to season, most of the effect comes from
 hitters who chased more than predicted losing offense (-2.9 ± 1.1 runs
 against those who did as predicted). Those who cut more gained 7.5 ± 1.5
 xChase+ points but only +0.3 ± 1.2 runs of offense. Half to half, both
-sides show it (+3.4 ± 1.2 and -3.1 ± 1.1). The backtest's leak rule uses
+sides show it (+3.4 ± 1.2 and -3.1 ± 1.1). So the first promise to a
+hitter is fewer wasted counts, not a better slash line, and every card
+and report says so in those words. The backtest's leak rule uses
 a simpler league baseline than the cards (league chase rate by count,
 distance, pitch group and side of the zone, instead of a smoothed
 location surface) and picks the same top leak for 207 of 219 hitters
@@ -378,9 +392,11 @@ he chased there in 2026 on the backtest's scale (12.4 points on average),
 and the 2027 excess the season-to-season line predicts (next = −3.8 +
 0.72 × 2026, so 5.1 points on average). The file is stamped with its
 freeze date and the commit it was made from, and step 19 won't rewrite it
-with different numbers. After 2027, step 16 should score it on the same
-cells, not the hitter's 2027 leaks, for every hitter qualified in 2027
-with at least 10 pitches there. Is the actual 2027 excess centered on the
+with different numbers. The same two numbers are the target on each
+hitter's card, so the player, the coach and the test are all looking at
+the same line. After 2027, step 20 scores the file on the same cells,
+not the hitter's 2027 leaks, for every hitter qualified in 2027 with at
+least 10 pitches there. Is the actual 2027 excess centered on the
 prediction? Against actual minus predicted, with the 2026 levels held
 fixed, do xChase+ and xwOBA offense change by the frozen +4.7 ± 0.6
 points and +1.4 ± 0.5 runs per 600 PA per 10-point cut? The line and
@@ -389,6 +405,76 @@ is in. One caveat is known now: 41 hitters have a card leak (44 in all)
 that the backtest's simpler baseline puts at or below the league, so the
 line may not fit them. The file marks them, and the main test is the
 other 188.
+
+**The loop, tested once on 2025 (step 20).** The 2027 test needs 2027.
+To check that the freeze-and-score loop works before then, the same
+three steps were run on 2025: the 2025 cards' leaks were frozen with a
+line fit only on the season pairs that end by 2025
+([`leak_predictions_2025.csv`](results/xchase/coaching/leak_predictions_2025.csv),
+marked `out_of_sample = no`, since the method itself was built with 2026
+in view), and step 20 scored them on 2026 for the 160 hitters who
+qualified again and saw at least 10 pitches in their frozen cells
+([`leak_scores_2026.csv`](results/xchase/coaching/leak_scores_2026.csv)).
+The prediction was centered: 12.8 points above the league in the 2025
+leaks, 5.6 predicted for 2026, 5.0 actual (−0.6 ± 0.7), and actual
+against predicted came out as a line with slope 1.02 ± 0.12. The
+reference payoffs, refit on the pairs ending by 2025, also held, and in
+this pair came out larger:
+
+| Per 10-point cut beyond predicted | Scored on 2026 | Reference (pairs to 2025) |
+|---|---:|---:|
+| xChase+ | +7.5 ± 1.5 | +4.1 ± 0.6 |
+| Offense, runs per 600 PA (xwOBA) | +3.6 ± 1.0 | +0.9 ± 0.6 |
+| Walk rate | +1.1 pts | +0.7 pts |
+| Strikeout rate | −0.1 pts | −0.0 pts |
+| Swing rate at strikes | −0.7 pts | −0.4 pts |
+| Offense runs per run of leak choices recovered | 0.78 ± 0.59 | 0.73 ± 0.36 |
+
+One pair of seasons and 160 hitters is a noisy test of the size, and
+2026 is the first season with zones set from height, so the size is not
+the point; the direction, the centering and the run accounting are. One
+thing to watch in 2027: in this pair the payoff was concentrated in
+hitters who were struggling or average in the leak's counts (+7.2 ± 3.0
+and +5.0 ± 1.5 runs per 10-point cut) and small for those hitting well
+there (+0.6 ± 1.6), where the pooled backtest found no difference. The
+cards keep every leak in the plan and show the count check as context,
+which is the right call on the pooled evidence, but if 2027 repeats the
+split, the productive group's leaks should move down the plan.
+
+### Using the cards
+
+A card is a diagnosis in the player's own units: count, pitch type,
+location, and one pitch to take. Some things to keep straight when the
+cards go from a file to a cage.
+
+- **Start every session with the average hitter's card.** Everyone
+  chases more with two strikes. A player needs to see what normal looks
+  like before his own card, in the same colors, means anything.
+- **Promise fewer wasted counts, not a better line.** The backtest's
+  payoff is mostly runs not lost by hitters who chased more. Hitters who
+  cut more than predicted gained xChase+ points and walks, and about
+  broke even in offense season to season.
+- **Measure against the target, not the current rate.** Leak chasing
+  halves on its own. A coach who runs the plan and sees the number drop
+  from 15 to 7 has seen regression to the mean, not the plan. The target
+  on the card is what the line expects with no change; only below that
+  is a fix, and that is what step 20 scores.
+- **The card says where, not why.** The same leak can be pitch
+  recognition, timing, or a two-strike approach that protects too wide,
+  and the drill is different for each. The card points the camera; it
+  does not replace the video.
+- **It is the far-off pitch, every time.** Each plan line says how far
+  off the zone the chased pitches were. A take rule is for the pitch
+  that is clearly a ball, never the borderline one, and a two-strike take
+  of a borderline pitch is a called third strike.
+- **Rebuild at midseason on the frozen cells.** The half-season pairs
+  carry the same payoff as the season pairs, so a card rebuilt at the
+  hitter's plate-appearance midpoint, scored on the cells frozen in the
+  spring, is a progress check with a known yardstick.
+- **The method ports; the numbers don't.** For a college or minor-league
+  feed, re-fit the run values, the called-strike model and the league
+  baselines on that league's data before trusting any card. The league
+  comparison is what makes a card fair, and it has to be that league.
 
 The cards for the 17 hitters named in the two coaching reports are in
 [`results/xchase/noted_players/`](results/xchase/noted_players/README.md).
@@ -474,9 +560,12 @@ MLB's ABS Challenge System.
   with notes in `actionable_hitters_<season>.md`). It also holds the
   checks on the advice: the count check for every hitter
   (`count_check_<season>.csv`, how much each part repeats in
-  `count_check_reliability.csv`) and the leak backtest (one row per
+  `count_check_reliability.csv`), the leak backtest (one row per
   hitter pair in `leak_backtest_pairs.csv`, every quoted number in
-  `leak_backtest_summary.csv`). `player_cards/` has
+  `leak_backtest_summary.csv`), the frozen predictions
+  (`leak_predictions_<season>.csv`) and their scores on the next season
+  (`leak_scores_<season>.csv`, one row per hitter, and
+  `leak_scores_summary_<season>.csv`). `player_cards/` has
   every hitter's decision card (`index.html`, with a 3D view of any
   zone picture), the average-hitter reference cards and the 3D stills
   (`terrain/`); `noted_players/` has the cards for the 17 hitters the
@@ -551,9 +640,10 @@ run touches the other's files.
 | 14 | `scripts/14_test_take_advice.py` | Checks whether hitters who cut far-off chases from one season to the next walked more, struck out less and gained xwOBA, and what it cost in swings at strikes |
 | 15 | `scripts/15_build_count_check.py` | The count check: each hitter's xwOBA once a plate appearance reaches each count group, against the league's in the same counts, shrunk for noise, and how much each part repeats (needs step 4 with `--expected-contact`) |
 | 16 | `scripts/16_backtest_leak_fixes.py` | Finds every hitter's card leaks in one season or half and checks what happened when he cut them the next: xChase+, offense runs, walks, strikeouts and swings at strikes, and whether the count check changes the payoff (needs step 15) |
-| 17 | `scripts/17_build_player_cards.py` | Draws a decision card for every qualified hitter: the interactive page, the noted hitters' cards and report, and the average-hitter reference cards (needs steps 13, 15 and 16) |
+| 17 | `scripts/17_build_player_cards.py` | Draws a decision card for every qualified hitter: the interactive page, the noted hitters' cards and report, and the average-hitter reference cards (needs steps 13, 15 and 16; `--data-only` writes just the card data for an earlier season) |
 | 18 | `scripts/18_make_terrain_figures.py` | Draws the same surfaces in 3D as still images: the average hitter's chase terrain by count, and one hitter's costliest panel (needs step 17) |
-| 19 | `scripts/19_freeze_leak_predictions.py` | Writes down, before the 2027 season, a prediction for every 2026 card's leaks, for step 16 to score out of sample. Run once: a later run only checks the frozen file (needs steps 16 and 17) |
+| 19 | `scripts/19_freeze_leak_predictions.py` | Writes down, before the 2027 season, a prediction for every 2026 card's leaks, for step 20 to score out of sample. Run once: a later run only checks the frozen file (needs steps 16 and 17). `--season 2025 --retrospective` writes the same file for 2025, marked as not out of sample, to test the loop |
+| 20 | `scripts/20_score_leak_predictions.py` | Scores a frozen file on the season that followed: is the actual leak chasing centered on the prediction, and did the frozen payoffs hold on the frozen cells? Run after the next season is in (needs step 19) |
 
 All together:
 
@@ -584,6 +674,17 @@ python scripts/15_build_count_check.py
 python scripts/16_backtest_leak_fixes.py
 python scripts/17_build_player_cards.py
 python scripts/18_make_terrain_figures.py
+```
+
+Step 19 is not in the list on purpose: it was run once, before 2027, and
+a rerun only checks that the frozen file still reproduces. Step 20 runs
+after 2027 is in the data (`python scripts/20_score_leak_predictions.py`).
+The retrospective test of that loop is three commands:
+
+```
+python scripts/17_build_player_cards.py --season 2025 --data-only
+python scripts/19_freeze_leak_predictions.py --season 2025 --retrospective
+python scripts/20_score_leak_predictions.py --season 2025
 ```
 
 `04_build_chase_leaderboard.py` prints a short summary by default. Add
