@@ -13,13 +13,13 @@ THEMES = {
     "light": {"surface": "#fcfcfb", "ink": "#0b0b0b", "ink2": "#52514e", "muted": "#898781",
               "hair": "#e1e0d9", "axis": "#c3c2b7", "mid": "#f0efec",
               "blue": "#2a78d6", "red": "#e34948", "league": "#898781",
-              "ramp": ["#fcfcfb", "#cde2fb", "#9ec5f4", "#6da7ec", "#3987e5",
-                       "#256abf", "#184f95", "#0d366b"]},
+              # raw chase rate, surface to deep red: the same red as "chases more"
+              # on a player card, so the average card and a player card read alike
+              "ramp": ["#fcfcfb", "#fbe1e0", "#f6bfbd", "#ef9c9a", "#e67775", "#d7514f", "#b83a39", "#8f2726"]},
     "dark": {"surface": "#1a1a19", "ink": "#ffffff", "ink2": "#c3c2b7", "muted": "#898781",
              "hair": "#2c2c2a", "axis": "#383835", "mid": "#383835",
              "blue": "#3987e5", "red": "#e66767", "league": "#898781",
-             "ramp": ["#1a1a19", "#0d366b", "#184f95", "#256abf", "#3987e5",
-                      "#6da7ec", "#9ec5f4", "#cde2fb"]},
+             "ramp": ["#1a1a19", "#4a1d1d", "#7a2a29", "#a83837", "#cf4f4e", "#e67775", "#f3a3a1", "#fbd0ce"]},
 }
 
 

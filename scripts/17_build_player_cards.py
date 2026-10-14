@@ -1247,7 +1247,8 @@ def dump_page(card, summary, n):
 
 
 GUIDE = [
-    "This card shows the raw chase rate of an average hitter: {more} blue means more swings. "
+    "This card shows the raw chase rate of an average hitter: {more} red means more swings, "
+    "the same red a player card uses for chasing more than average. "
     "Every player card shows the difference from this instead, so nobody is judged on a "
     "pitch everyone swings at.",
     "Every card is the catcher's view at true scale. The rectangle is that hitter's own "
