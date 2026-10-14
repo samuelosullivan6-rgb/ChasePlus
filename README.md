@@ -194,6 +194,82 @@ from one season to the next. The same part of Chase+ repeats at
 plots are in `results/xchase/figures/reliability.png` and
 `results/chase/figures/reliability.png`.
 
+### From a number to a plan: player decision cards
+
+xChase+ says how many runs a hitter loses to chasing. A decision card says
+where, and what to do about it. Every qualified hitter gets one, written so
+a coach can hand it to a player and the player can read it alone.
+
+Start with the average hitter. This card is the baseline: how often an
+average right-handed hitter swings at a pitch outside the zone at each
+spot, in each count, against each pitcher hand. Everyone chases more with
+two strikes, and nobody should be judged for that.
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="results/xchase/player_cards/reference/average_rhb_dark.png">
+  <img alt="The average right-handed hitter's chase rate by location, count and pitcher hand, with a numbered guide to reading a player card" src="results/xchase/player_cards/reference/average_rhb_light.png" width="900">
+</picture>
+
+A player card shows the difference from that baseline instead: red where
+the player swings more than an average hitter would at the same spot, count
+and matchup, blue where they take more. Here is Salvador Pérez, 255th of
+261 by xChase+:
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="results/xchase/noted_players/cards/salvador_perez_dark.png">
+  <img alt="Salvador Pérez's 2026 decision card: red below and away from the zone in every count, with a plan, leaks, a count table and a season trend" src="results/xchase/noted_players/cards/salvador_perez_light.png" width="900">
+</picture>
+
+How to read it, top to bottom:
+
+1. **The header says what kind of problem it is.** Pérez's swing choices
+   cost 23.3 runs per 600 PA, but those chases produce 7.8 more than an
+   average hitter's would. The swing is fine; the choices are not. That
+   makes it a coaching problem with a simple fix. The 16.9 "runs at stake"
+   is the part from pitches at least 4 inches off the plate, the ones that
+   are almost never called strikes.
+2. **The zones show where.** The rectangle is Pérez's own strike zone at
+   true height, seen from the catcher. Red runs below and away from it in
+   every count, against both hands. The outlines mark spots 15 points or more
+   above average. Faded areas had too few pitches to say anything.
+3. **The numbers on the zones are the leaks**, ranked by runs. The worst
+   is two-strike breaking balls below the zone: Pérez swings at 78%, where
+   an average hitter on the same pitches swings at 49%.
+4. **The plan is written to the player**, in the words a hitter would use
+   in the cage: "With two strikes, let breaking balls below the zone go.
+   You swung at 78% of them; hitters on average swing at 49%."
+5. **The coach's note is for the staff.** It says where to start: breaking
+   balls before two strikes, where a take costs nothing in strikeouts.
+6. **The season trend says whether it is a habit or a slump.** Pérez has
+   chased 32-39% of far-off pitches every season since 2021, against a
+   league rate of 18-22%. It is a habit, so the plan is worth the effort.
+
+**Does taking more pay?** Before putting "take that pitch" on a card, step
+14 checked what happened to real hitters who did it. Across 941 pairs of
+back-to-back seasons, a 10-point cut in far-off chase rate came with:
+
+| Change | Per 10-point cut in far-off chase rate |
+|---|---:|
+| Walk rate | +3.1 pts |
+| Strikeout rate | -1.7 pts |
+| xwOBA | +.022 |
+| Swing rate at strikes | -2.5 pts |
+
+The last row is the cost: hitters who cut chases also got a little more
+passive on strikes. It is small next to the gain, and every card says it,
+so the message to the player is to take the far-off pitch, not to stop
+swinging.
+
+The cards for the 17 hitters named in the two coaching reports are in
+[`results/xchase/noted_players/`](results/xchase/noted_players/README.md).
+Every qualified hitter's card, with switches for pitch type, the baseline
+and swing-and-miss, is in `results/xchase/player_cards/index.html`
+(download it and open it in a browser). Every card is drawn from the
+catcher's view, to scale, around the hitter's own strike zone, which from
+2026 is set from each hitter's height. Nobody is mirrored, so a
+left-handed batter's inside is on the right. Switch hitters get one row
+for each side of the plate, which is also their pitcher-hand split.
+
 ## How it works
 
 1. **Price each chase.** Cost = the value of taking the pitch minus the value
@@ -265,7 +341,11 @@ MLB's ABS Challenge System.
   10 in depth (`bottom10_<season>_*`, with draft notes in
   `bottom10_<season>_coaching_notes.md`) and every qualified hitter
   scored on how coachable the loss looks (`actionability_<season>.csv`,
-  with notes in `actionable_hitters_<season>.md`).
+  with notes in `actionable_hitters_<season>.md`). `player_cards/` has
+  every hitter's decision card (`index.html`, with a 3D view of any
+  zone picture), the average-hitter reference cards and the 3D stills
+  (`terrain/`); `noted_players/` has the cards for the 17 hitters the
+  coaching reports name.
 - **Version:** the `stat_version` column of `chase_plus_league_scale.csv`
   says which version of the stat a results folder was built with.
 
@@ -333,6 +413,9 @@ run touches the other's files.
 | 11 | `scripts/11_build_matchup_leaderboards.py` | xChase+ leaderboards by handedness matchup (needs step 4 with `--expected-contact`) |
 | 12 | `scripts/12_build_coaching_profiles.py` | Splits the bottom 10 hitters' runs lost into decision and execution, by count, zone, pitch group and more, into `results/xchase/coaching/` (needs step 4 with `--expected-contact`) |
 | 13 | `scripts/13_build_actionability_profiles.py` | Scores every qualified hitter on how much of the loss is swing decisions on far-off pitches, and sorts them into archetypes (needs step 4 with `--expected-contact`) |
+| 14 | `scripts/14_test_take_advice.py` | Checks whether hitters who cut far-off chases from one season to the next walked more, struck out less and gained xwOBA, and what it cost in swings at strikes |
+| 15 | `scripts/15_build_player_cards.py` | Draws a decision card for every qualified hitter: the interactive page, the noted hitters' cards and report, and the average-hitter reference cards (needs steps 13 and 14) |
+| 16 | `scripts/16_make_terrain_figures.py` | Draws the same surfaces in 3D as still images: the average hitter's chase terrain by count, and one hitter's costliest panel (needs step 15) |
 
 All together:
 
@@ -358,6 +441,9 @@ python scripts/10_make_xchase_figures.py
 python scripts/11_build_matchup_leaderboards.py
 python scripts/12_build_coaching_profiles.py
 python scripts/13_build_actionability_profiles.py
+python scripts/14_test_take_advice.py
+python scripts/15_build_player_cards.py
+python scripts/16_make_terrain_figures.py
 ```
 
 `04_build_chase_leaderboard.py` prints a short summary by default. Add

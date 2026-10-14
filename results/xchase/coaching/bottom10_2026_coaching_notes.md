@@ -63,7 +63,7 @@ two-strike ones.
 Pérez and Clement are worth a special note: their execution is *positive*
 (+7.8 and +3.2). When they chase, they do better than the league. Their
 entire loss is volume. Coaching them to stop chasing where they do damage
-would be a mistake; the targets below are the spots where they both
+would be a mistake; the targets below start with the spots where they both
 over-swing and get nothing for it.
 
 ## Hitter by hitter
@@ -207,15 +207,15 @@ Ordered worst to best. "Repeats?" compares with 2024 and 2025.
   pitches).
 - Repeats? Completely. xChase+ 82, 73, 73. Decision -24, -22, -23;
   execution +14, +8, +8 in each of the three seasons.
-- **Draft adjustment:** do not touch the two-strike breaking ball below
-  the zone, where he chases 78% but his execution is +2.75; he handles it.
-  The targets are early-count breaking balls away, where he over-swings
-  and gets nothing: 0-strike breaking balls away (51% chase vs 13.5%),
-  0-strike down-and-away (36% vs 17%), 1-strike away (66% vs 30%). Those
-  three cells are about -5 and none of them risks a strikeout. A "take the
-  first slider away" rule is the whole plan. At 36 the volume approach is
-  not changing, but it has never needed to; the early-count away pitch is
-  the only part that costs him.
+- **Draft adjustment:** start with early-count breaking balls away, where
+  he over-swings and gets nothing: 0-strike breaking balls away (51% chase
+  vs 13.5%), 0-strike down-and-away (36% vs 17%), 1-strike away (66% vs
+  30%). Those three cells are about -5 runs and none of them risks a
+  strikeout. The two-strike breaking ball below the zone is the next step:
+  he chases 78% of them, and his good contact (+2.75) offsets only part of
+  the choice cost (-4.65), so it is still about -1.9 on net. At 36 the
+  volume approach is not changing wholesale; the early-count away pitch is
+  the cheapest part to fix.
 
 ### 8. Ernie Clement (xChase+ 74, -14.1 runs)
 
