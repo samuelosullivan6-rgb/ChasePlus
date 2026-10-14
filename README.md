@@ -1,5 +1,9 @@
 # Chase Value (xChase+ and Chase+)
 
+**Everything, hosted:** [samuelosullivan6-rgb.github.io/ChasePlus](https://samuelosullivan6-rgb.github.io/ChasePlus/)
+has every hitter's decision card, the roster by team, the noted hitters'
+report with printable cards, and this write-up. Nothing to download.
+
 Chase rate counts how often a hitter swings at pitches outside the zone,
 and it treats every one of those swings as the same mistake. They aren't.
 On average a chase on 3-2 costs about 5.6 times as many runs as a chase on
