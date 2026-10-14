@@ -26,7 +26,7 @@ compares hitters who started at the same far-off chase rate.
 
 Writes results/xchase/coaching/take_advice_backtest.csv (one row per
 hitter pair of seasons) and take_advice_summary.csv (the slopes and group
-means quoted on the player cards).
+means quoted in the README).
 """
 
 from pathlib import Path

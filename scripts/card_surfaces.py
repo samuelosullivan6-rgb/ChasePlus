@@ -1,10 +1,10 @@
 """
-Shared geometry and smoothing for the player decision cards (step 15).
+Shared geometry and smoothing for the player decision cards (step 17).
 
 Everything a card's zone picture shows comes from two functions here,
 and templates/player_cards.html repeats the same arithmetic in
 JavaScript so the interactive page and the static images agree. If you
-change a constant or a formula here, change it there too; step 15 checks
+change a constant or a formula here, change it there too; step 17 checks
 the two against each other on one hitter every run.
 
 COORDINATES (what the card draws)
@@ -15,10 +15,10 @@ COORDINATES (what the card draws)
      its real height. Every card shares one scale, so a tall hitter's
      zone sits visibly higher than a short hitter's.
   The league comparison is still made relative to each hitter's own zone
-  (step 15 fits it on plate_x_batter and plate_z_normalized), so nobody
+  (step 17 fits it on plate_x_batter and plate_z_normalized), so nobody
   is judged on the height of their zone.
 
-THE LEAGUE EXPECTATION (per pitch, built in step 15)
+THE LEAGUE EXPECTATION (per pitch, built in step 17)
   For every out-of-zone pitch, the chance an average hitter swings at a
   pitch in that exact spot and count (and, for the "same matchup"
   baseline, the same batter side and pitcher hand). Fit on the whole

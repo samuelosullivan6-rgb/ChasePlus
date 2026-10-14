@@ -240,7 +240,12 @@ How to read it, top to bottom:
    You swung at 78% of them; hitters on average swing at 49%."
 5. **The coach's note is for the staff.** It says where to start: breaking
    balls before two strikes, where a take costs nothing in strikeouts.
-6. **The season trend says whether it is a habit or a slump.** Pérez has
+6. **The count table says whether he struggles there.** Next to his rates,
+   the xwOBA column is the count check (below): every plate appearance
+   that reached those counts, against the league's in the same counts.
+   Once Pérez reaches two strikes he is at .226 against the league's .234,
+   about average once noise is allowed for.
+7. **The season trend says whether it is a habit or a slump.** Pérez has
    chased 32-39% of far-off pitches every season since 2021, against a
    league rate of 18-22%. It is a habit, so the plan is worth the effort.
 
@@ -259,6 +264,110 @@ The last row is the cost: hitters who cut chases also got a little more
 passive on strikes. It is small next to the gain, and every card says it,
 so the message to the player is to take the far-off pitch, not to stop
 swinging.
+
+### Checking the advice
+
+Step 14 tests the general idea. Steps 15 and 16 test the cards themselves:
+is the hitter actually struggling where his leaks are, and when hitters
+fixed the exact leaks on their card, did it pay?
+
+**The count check (step 15).** A leak is one pitch inside a count:
+"two strikes, breaking balls below the zone." Nobody should rebuild a
+hitter's whole two-strike approach over one pitch, so the check looks at
+the count, not the pitch: how the hitter does once a plate appearance
+reaches those counts. That is the xwOBA of every plate appearance that got
+there, against the league's in the same counts.
+
+The league comparison matters more than it looks. In 2026 the league's
+xwOBA is .358 once a plate appearance reaches a hitter's count and .234
+once it reaches two strikes, so a raw ".900 OPS after 2-0" is about
+average, not hot. Most of a count split is also noise:
+
+| xwOBA vs the league in the same counts | Split halves | Year to year |
+|---|---:|---:|
+| Overall | 0.57 | 0.66 |
+| Ahead in the count, beyond his overall level | 0.05 | 0.07 |
+| Even or behind, beyond his overall level | 0.17 | 0.29 |
+| Two strikes, beyond his overall level | 0.36 | 0.53 |
+
+How a hitter does when he's ahead in the count, once his overall level is
+known, doesn't repeat at all. How he does with two strikes does. So the
+check estimates the two parts separately (his overall level, and how much
+better or worse he does in those counts) and shrinks each by how much
+hitters really differ in it that season (DerSimonian-Laird). A hitter is
+*struggling* in those counts when the estimate is at least 10 points of
+xwOBA below the league, and *productive* when it is 10 above. On a
+hitter's card it is the xwOBA column of the count table. The noted-hitters
+report gives the verdict under each plan.
+
+**Does fixing a leak pay? (step 16).** For every hitter qualified in
+back-to-back seasons (761 pairs) and every qualified season split into
+first and second halves at the hitter's own plate-appearance midpoint
+(1,202 pairs), step 16 finds the first period's card leaks with the
+card's own rule and watches the same spots in the next period.
+
+The catch is regression to the mean. Leaks are a hitter's worst-looking
+spots, so part of each one is bad luck. On average, how far above the
+league a hitter chases in his leaks halves the next period with nobody
+doing anything: from 15 points to 7 season to season, and from 16 to 7
+half to half. So the test compares what each hitter did with what his
+first period predicted, and every regression holds the first period's
+level fixed. Standard errors are clustered by hitter.
+
+Per 10-point cut in leak chasing beyond what was predicted:
+
+| Change | Season to season | First half to second |
+|---|---:|---:|
+| xChase+ | +4.7 ± 0.6 | +4.3 ± 0.5 |
+| Offense, runs per 600 PA (xwOBA) | +1.4 ± 0.5 | +2.0 ± 0.4 |
+| Offense, runs per 600 PA (wOBA) | +0.9 ± 0.6 | +1.3 ± 0.5 |
+| Walk rate | +0.8 pts | +0.5 pts |
+| Strikeout rate | -0.1 pts | -0.3 pts |
+| Swing rate at strikes | -0.5 pts | -0.3 pts |
+
+Offense runs are batting runs above average built on xwOBA:
+(xwOBA − league xwOBA) / wOBA scale × 600. That puts them in the same
+units as xChase+'s runs, and xwOBA leaves out the ball-in-play luck that
+wOBA (the next row) keeps. Each season's wOBA scale (1.20-1.23) is fit
+from Savant's wOBA weights against this project's run values. wRC+ would
+need park factors this data doesn't have, and OPS weights on-base and
+slugging wrong.
+
+**The run accounting holds up.** Each run of choices a hitter recovered
+in his leaks, as the cards price it, came back as 0.75 ± 0.31 (season
+pairs) and 1.21 ± 0.26 (halves) runs of xwOBA offense. Exactly 1 would
+mean the card's runs are the runs a hitter gets back.
+
+**The count check doesn't change the payoff.** Hitters gained about as
+much from fixing a leak whether they were struggling in those counts or
+hitting well there:
+
+| In the leak's counts, first period | Season to season | First half to second |
+|---|---:|---:|
+| Struggling | +1.4 ± 1.2 (112 pairs) | +2.9 ± 0.9 (219) |
+| Average | +1.8 ± 0.8 (276) | +1.7 ± 0.6 (476) |
+| Productive | +1.2 ± 0.7 (373) | +1.9 ± 0.7 (507) |
+
+Offense runs per 600 PA per 10-point cut beyond what was predicted. As a
+straight interaction, +20 points of xwOBA in those counts moves the payoff
+by 0.00 ± 0.44 runs (seasons) and +0.05 ± 0.49 (halves). The raw,
+unshrunk split shows the same. A hitter who hits well in a count still
+gains from taking the one pitch he keeps chasing there. So the cards show
+the count check as context and keep every leak in the plan.
+
+**Limits.** Nobody assigned these hitters to fix anything, so this is
+association, not an experiment. A hitter who is healthy and seeing the
+ball well may chase less and hit better for the same reason. The run
+accounting landing near 1 says that isn't inflating the result much, but
+it can't rule it out. Season to season, most of the effect comes from
+hitters who chased more than predicted losing offense (-2.9 ± 1.1 runs
+against those who did as predicted). Those who cut more gained 7.5 ± 1.5
+xChase+ points but only +0.3 ± 1.2 runs of offense. Half to half, both
+sides show it (+3.4 ± 1.2 and -3.1 ± 1.1). The backtest's leak rule uses
+a simpler league baseline than the cards (league chase rate by count,
+distance, pitch group and side of the zone, instead of a smoothed
+location surface) and picks the same top leak for 207 of 219 hitters
+in 2026.
 
 The cards for the 17 hitters named in the two coaching reports are in
 [`results/xchase/noted_players/`](results/xchase/noted_players/README.md).
@@ -341,7 +450,12 @@ MLB's ABS Challenge System.
   10 in depth (`bottom10_<season>_*`, with draft notes in
   `bottom10_<season>_coaching_notes.md`) and every qualified hitter
   scored on how coachable the loss looks (`actionability_<season>.csv`,
-  with notes in `actionable_hitters_<season>.md`). `player_cards/` has
+  with notes in `actionable_hitters_<season>.md`). It also holds the
+  checks on the advice: the count check for every hitter
+  (`count_check_<season>.csv`, how much each part repeats in
+  `count_check_reliability.csv`) and the leak backtest (one row per
+  hitter pair in `leak_backtest_pairs.csv`, every quoted number in
+  `leak_backtest_summary.csv`). `player_cards/` has
   every hitter's decision card (`index.html`, with a 3D view of any
   zone picture), the average-hitter reference cards and the 3D stills
   (`terrain/`); `noted_players/` has the cards for the 17 hitters the
@@ -414,8 +528,10 @@ run touches the other's files.
 | 12 | `scripts/12_build_coaching_profiles.py` | Splits the bottom 10 hitters' runs lost into decision and execution, by count, zone, pitch group and more, into `results/xchase/coaching/` (needs step 4 with `--expected-contact`) |
 | 13 | `scripts/13_build_actionability_profiles.py` | Scores every qualified hitter on how much of the loss is swing decisions on far-off pitches, and sorts them into archetypes (needs step 4 with `--expected-contact`) |
 | 14 | `scripts/14_test_take_advice.py` | Checks whether hitters who cut far-off chases from one season to the next walked more, struck out less and gained xwOBA, and what it cost in swings at strikes |
-| 15 | `scripts/15_build_player_cards.py` | Draws a decision card for every qualified hitter: the interactive page, the noted hitters' cards and report, and the average-hitter reference cards (needs steps 13 and 14) |
-| 16 | `scripts/16_make_terrain_figures.py` | Draws the same surfaces in 3D as still images: the average hitter's chase terrain by count, and one hitter's costliest panel (needs step 15) |
+| 15 | `scripts/15_build_count_check.py` | The count check: each hitter's xwOBA once a plate appearance reaches each count group, against the league's in the same counts, shrunk for noise, and how much each part repeats (needs step 4 with `--expected-contact`) |
+| 16 | `scripts/16_backtest_leak_fixes.py` | Finds every hitter's card leaks in one season or half and checks what happened when he cut them the next: xChase+, offense runs, walks, strikeouts and swings at strikes, and whether the count check changes the payoff (needs step 15) |
+| 17 | `scripts/17_build_player_cards.py` | Draws a decision card for every qualified hitter: the interactive page, the noted hitters' cards and report, and the average-hitter reference cards (needs steps 13, 15 and 16) |
+| 18 | `scripts/18_make_terrain_figures.py` | Draws the same surfaces in 3D as still images: the average hitter's chase terrain by count, and one hitter's costliest panel (needs step 17) |
 
 All together:
 
@@ -442,8 +558,10 @@ python scripts/11_build_matchup_leaderboards.py
 python scripts/12_build_coaching_profiles.py
 python scripts/13_build_actionability_profiles.py
 python scripts/14_test_take_advice.py
-python scripts/15_build_player_cards.py
-python scripts/16_make_terrain_figures.py
+python scripts/15_build_count_check.py
+python scripts/16_backtest_leak_fixes.py
+python scripts/17_build_player_cards.py
+python scripts/18_make_terrain_figures.py
 ```
 
 `04_build_chase_leaderboard.py` prints a short summary by default. Add

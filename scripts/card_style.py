@@ -1,5 +1,5 @@
 """
-Shared colors for the player cards (step 15) and the 3D terrain (step 16):
+Shared colors for the player cards (step 17) and the 3D terrain (step 18):
 the project's chart palette in light and dark, and the OKLab arithmetic
 behind the diverging (gap to league) and sequential (raw rate) scales.
 templates/card_surfaces.js repeats the same scales for the HTML page.
