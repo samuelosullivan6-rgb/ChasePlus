@@ -2,6 +2,7 @@ pair_kind,measure,test,value,se,n_pairs,n_hitters
 half,leak_excess,first period mean,0.15777,,1202,492
 half,leak_excess,second period mean,0.07411,,1202,492
 half,leak_excess,carried over (slope),0.60660,,1202,492
+half,leak_excess,carried over (intercept),-0.02160,,1202,492
 half,leak_chase_rate,first period mean,0.58488,,1202,492
 half,leak_chase_rate,second period mean,0.50409,,1202,492
 half,xchase_plus,per 10-pt cut beyond expected,4.30366,0.48109,1202,492
@@ -39,6 +40,7 @@ half,far_off_chase_rate,group vs as expected: chased more than expected,0.02841,
 season,leak_excess,first period mean,0.15029,,761,335
 season,leak_excess,second period mean,0.06981,,761,335
 season,leak_excess,carried over (slope),0.71950,,761,335
+season,leak_excess,carried over (intercept),-0.03832,,761,335
 season,leak_chase_rate,first period mean,0.58207,,761,335
 season,leak_chase_rate,second period mean,0.50937,,761,335
 season,xchase_plus,per 10-pt cut beyond expected,4.72089,0.57498,761,335

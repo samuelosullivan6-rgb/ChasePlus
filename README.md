@@ -369,6 +369,27 @@ distance, pitch group and side of the zone, instead of a smoothed
 location surface) and picks the same top leak for 207 of 219 hitters
 in 2026.
 
+**Frozen before 2027 (step 19).** Everything above was scored after the
+fact. So before the 2027 season, step 19 wrote down a prediction for
+every 2026 qualified hitter's card leaks in
+[`leak_predictions_2026.csv`](results/xchase/coaching/leak_predictions_2026.csv):
+the spots on his card with their count check, how far above the league
+he chased there in 2026 on the backtest's scale (12.4 points on average),
+and the 2027 excess the season-to-season line predicts (next = −3.8 +
+0.72 × 2026, so 5.1 points on average). The file is stamped with its
+freeze date and the commit it was made from, and step 19 won't rewrite it
+with different numbers. After 2027, step 16 should score it on the same
+cells, not the hitter's 2027 leaks, for every hitter qualified in 2027
+with at least 10 pitches there. Is the actual 2027 excess centered on the
+prediction? Against actual minus predicted, with the 2026 levels held
+fixed, do xChase+ and xwOBA offense change by the frozen +4.7 ± 0.6
+points and +1.4 ± 0.5 runs per 600 PA per 10-point cut? The line and
+payoffs to use are the frozen ones, not the ones step 16 refits once 2027
+is in. One caveat is known now: 41 hitters have a card leak (44 in all)
+that the backtest's simpler baseline puts at or below the league, so the
+line may not fit them. The file marks them, and the main test is the
+other 188.
+
 The cards for the 17 hitters named in the two coaching reports are in
 [`results/xchase/noted_players/`](results/xchase/noted_players/README.md).
 Every qualified hitter's card, with switches for pitch type, the baseline
@@ -532,6 +553,7 @@ run touches the other's files.
 | 16 | `scripts/16_backtest_leak_fixes.py` | Finds every hitter's card leaks in one season or half and checks what happened when he cut them the next: xChase+, offense runs, walks, strikeouts and swings at strikes, and whether the count check changes the payoff (needs step 15) |
 | 17 | `scripts/17_build_player_cards.py` | Draws a decision card for every qualified hitter: the interactive page, the noted hitters' cards and report, and the average-hitter reference cards (needs steps 13, 15 and 16) |
 | 18 | `scripts/18_make_terrain_figures.py` | Draws the same surfaces in 3D as still images: the average hitter's chase terrain by count, and one hitter's costliest panel (needs step 17) |
+| 19 | `scripts/19_freeze_leak_predictions.py` | Writes down, before the 2027 season, a prediction for every 2026 card's leaks, for step 16 to score out of sample. Run once: a later run only checks the frozen file (needs steps 16 and 17) |
 
 All together:
 

@@ -135,8 +135,7 @@ for season, g in df.groupby("game_year"):
     g = lr.add_labels(g.copy(), float((g["sz_top"] - g["sz_bot"]).mean()))
     parts.append(lr.add_choices_contact(g))
 df = tag_half(pd.concat(parts, ignore_index=True))
-expect_cell = ["game_year", "count_state", "distance_bucket", "pitch_group", "region"]
-df["e"] = df.groupby(expect_cell)["is_chase"].transform("mean")
+df["e"] = df.groupby(lr.BACKTEST_LEAGUE_CELL)["is_chase"].transform("mean")
 
 pas = tag_half(lr.plate_appearances(base))
 tracked = base[base["is_analyzable"] == 1]
@@ -309,6 +308,9 @@ for kind, P in pairs.groupby("kind"):
     record(kind, "leak_excess", "first period mean", P["leak_excess_1"].mean(), np.nan, n, hitters)
     record(kind, "leak_excess", "second period mean", P["leak_excess_2"].mean(), np.nan, n, hitters)
     record(kind, "leak_excess", "carried over (slope)", slope, np.nan, n, hitters)
+    # with the slope, the whole line: next = intercept + slope x first
+    # (step 19 freezes predictions with it)
+    record(kind, "leak_excess", "carried over (intercept)", intercept, np.nan, n, hitters)
     record(kind, "leak_chase_rate", "first period mean", P["leak_chase_rate_1"].mean(), np.nan, n, hitters)
     record(kind, "leak_chase_rate", "second period mean", P["leak_chase_rate_2"].mean(), np.nan, n, hitters)
 
