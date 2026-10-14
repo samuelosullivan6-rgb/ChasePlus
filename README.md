@@ -326,6 +326,7 @@ run touches the other's files.
 | 9 | `scripts/09_build_xchase_comparison.py` | Lines up Chase+ and xChase+, tests both against wOBA / xwOBA (needs step 4 both ways) |
 | 10 | `scripts/10_make_xchase_figures.py` | Draws the two charts that compare them |
 | 11 | `scripts/11_build_matchup_leaderboards.py` | xChase+ leaderboards by handedness matchup (needs step 4 with `--expected-contact`) |
+| 12 | `scripts/12_build_coaching_profiles.py` | Splits the bottom 10 hitters' runs lost into decision and execution, by count, zone, pitch group and more, into `results/xchase/coaching/` (needs step 4 with `--expected-contact`) |
 
 All together:
 
@@ -349,6 +350,7 @@ python scripts/08_make_figures.py --expected-contact
 python scripts/09_build_xchase_comparison.py
 python scripts/10_make_xchase_figures.py
 python scripts/11_build_matchup_leaderboards.py
+python scripts/12_build_coaching_profiles.py
 ```
 
 `04_build_chase_leaderboard.py` prints a short summary by default. Add
