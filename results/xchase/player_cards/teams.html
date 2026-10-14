@@ -41,15 +41,28 @@ input, select { font: inherit; color: inherit; background: var(--surface); borde
                  border-radius: 6px; padding: 6px 10px; }
 :focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
 .card { background: var(--surface); border: 1px solid var(--hair); border-radius: 10px; overflow: auto; }
-table { border-collapse: collapse; width: 100%; min-width: 1100px; }
+table { border-collapse: collapse; width: 100%; min-width: 1560px; }
 th, td { padding: 7px 10px; text-align: left; border-bottom: 1px solid var(--hair); vertical-align: top; white-space: nowrap; }
 th { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; cursor: pointer;
       position: sticky; top: 0; background: var(--surface); user-select: none; }
 th.sorted { color: var(--ink); }
 th .dir { font-size: 10px; margin-left: 3px; }
 td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
-td.plan { white-space: normal; max-width: 44ch; color: var(--ink2); font-size: 13px; }
-td.leak { white-space: normal; max-width: 26ch; }
+td.plan { white-space: normal; min-width: 40ch; max-width: 52ch; color: var(--ink2); font-size: 13px; }
+td.leak { white-space: normal; min-width: 22ch; max-width: 28ch; }
+/* phones: each hitter as a stacked card instead of a 16-column row */
+@media (max-width: 720px) {
+  table { min-width: 0; }
+  thead { display: none; }
+  tbody tr { display: block; padding: 10px 12px; border-bottom: 1px solid var(--hair); }
+  tbody td { display: flex; justify-content: space-between; gap: 12px; border: 0; padding: 2px 0; white-space: normal; text-align: left; }
+  tbody td::before { content: attr(data-label); color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .05em; flex: 0 0 auto; padding-top: 3px; }
+  tbody td.num { text-align: right; }
+  tbody td.plan { display: block; min-width: 0; max-width: none; padding-top: 6px; }
+  tbody td.plan::before { display: block; margin-bottom: 2px; }
+  tbody td.leak { min-width: 0; max-width: none; }
+  tbody td:first-child { font-weight: 700; }
+}
 .neg { color: var(--red); }
 .pos { color: var(--blue); }
 .tag { display: inline-block; font-size: 11px; padding: 1px 6px; border-radius: 10px; background: var(--plane); color: var(--ink2); }
@@ -106,8 +119,8 @@ function render() {
   const body = document.querySelector("#t tbody"); body.replaceChildren();
   for (const r of rows) {
     const tr = el("tr");
-    for (const [k, , num] of COLS) {
-      const td = el("td", { class: (num ? "num" : "") + (k === "plan" ? " plan" : "") + (k === "leak" ? " leak" : "") });
+    for (const [k, label, num] of COLS) {
+      const td = el("td", { class: (num ? "num" : "") + (k === "plan" ? " plan" : "") + (k === "leak" ? " leak" : ""), "data-label": label });
       if (k === "player") { td.append(el("a", { href: "index.html#" + r.slug, text: r.player })); if (r.noted) td.append(" ", el("span", { class: "tag", text: "noted" })); }
       else if (k === "team") td.textContent = r.teams;
       else if (k === "choices" || k === "contact" || k === "leak_runs") { td.textContent = fmt(k, r[k]); if (r[k] < -0.05) td.classList.add("neg"); else if (r[k] > 0.05) td.classList.add("pos"); }
