@@ -2,8 +2,9 @@
 Shared rules for the coaching steps: the labels a card's leaks are built
 on, the leak rule itself, and the count check.
 
-Steps 15 (count check), 16 (leak backtest) and 17 (player cards) all
-import from here, so a leak means the same thing in all three.
+Steps 15 (count check), 16 (leak backtest), 17 (player cards) and 19
+(frozen predictions) all import from here, so a leak means the same
+thing in all of them.
 
 LABELS
   count_group   first (0-0), ahead (1-0 2-0 3-0 2-1 3-1),
@@ -52,6 +53,12 @@ LEAK_MIN_PITCHES = 12
 LEAK_MIN_RUNS = 0.75            # runs per 600 PA, to be listed as a leak
 PLAN_MIN_RUNS = 1.0             # ...and to make the plan
 LEAK_TOP = 3
+
+# The backtest's league expectation for a pitch (steps 16 and 19): the
+# league's chase rate in the same season, count, distance bucket, pitch
+# group and side of the zone. The 2026 predictions are frozen on this
+# scale, so the 2027 run of step 16 that scores them must keep it.
+BACKTEST_LEAGUE_CELL = ["game_year", "count_state", "distance_bucket", "pitch_group", "region"]
 
 # The count check: a count group's verdict, in xwOBA points against the
 # league in the same counts (shrunk estimate).
