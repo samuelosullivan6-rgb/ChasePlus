@@ -713,8 +713,10 @@ summary { cursor: pointer; font-weight: 700; }
       return;
     }
     const plan = el("ul", { class: "plan" });
-    p.plan.forEach((l) => plan.append(el("li", { text: l })));
-    const sec = el("section", {}, el("h2", { text: "What to work on" }), plan);
+    const planLines = state.hand === "all" ? p.plan : ((p.plan_by_hand || {})[state.hand] || p.plan);
+    planLines.forEach((l) => plan.append(el("li", { text: l })));
+    const sec = el("section", {}, el("h2", { text: state.hand === "all" ? "What to work on" : `What to work on vs ${state.hand === "R" ? "right-handers" : "left-handers"}` }), plan);
+    if (state.hand !== "all") sec.append(el("p", { class: "evidence", text: "The plan for this pitcher hand only; pick All pitchers for the full plan. The target below counts all pitchers." }));
     if (p.coach_note) sec.append(el("div", { class: "coach" }, el("span", { class: "eyebrow", text: "Coach's note" }), p.coach_note));
     a.append(sec);
 

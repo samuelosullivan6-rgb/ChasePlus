@@ -62,6 +62,11 @@ OUTPUTS, in results/xchase/coaching/
   leak_backtest_pairs.csv     one row per hitter pair of periods
   leak_backtest_summary.csv   every number quoted in the README and on
                               the cards
+and in results/xchase/figures/
+  leak_fix_direction.png      (and _dark) every pair's change in offense
+                              against its fix, with the three groups'
+                              adjusted changes marked: which direction
+                              the payoff comes from
 
 Run after step 04 (--expected-contact) and step 15.
 """
@@ -406,3 +411,86 @@ for kind, label in (("season", "Season to next season"), ("half", "First half to
               f"{r['value']:+.2f} ± {r['se']:.2f} runs per 10-pt cut")
 print(f"\nWrote leak_backtest_pairs.csv and leak_backtest_summary.csv to "
       f"{OUT.relative_to(PROJECT_DIR)}/")
+
+# --------------------------------------------------
+# FIGURE: which direction the payoff comes from
+#
+# Every pair as a dot: the fix (next period's leak chasing against what
+# the first predicted; negative = cut more) against the change in xwOBA
+# offense. The three groups' markers are the summary's adjusted changes
+# against the "as expected" group, first-period levels held fixed, drawn
+# at each group's mean fix. "As expected" sits at zero by construction.
+# --------------------------------------------------
+
+import matplotlib  # noqa: E402
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt  # noqa: E402
+
+FIG_DIR = XCHASE / "figures"
+FIG_THEMES = {
+    "light": {"surface": "#fcfcfb", "ink": "#0b0b0b", "ink2": "#52514e", "muted": "#898781",
+              "grid": "#e1e0d9", "axis": "#c3c2b7", "dots": "#c3c2b7",
+              "blue": "#2a78d6", "red": "#e34948"},
+    "dark": {"surface": "#1a1a19", "ink": "#ffffff", "ink2": "#c3c2b7", "muted": "#898781",
+             "grid": "#2c2c2a", "axis": "#383835", "dots": "#4a4a47",
+             "blue": "#3987e5", "red": "#e66767"},
+}
+GROUP_STYLE = [("cut more than expected", "blue", "Cut more\nthan predicted"),
+               ("as expected", "muted", "As predicted"),
+               ("chased more than expected", "red", "Chased more\nthan predicted")]
+
+for mode, th in FIG_THEMES.items():
+    plt.rcParams.update({"font.family": "sans-serif",
+                         "font.sans-serif": ["Avenir Next", "Helvetica Neue", "Arial", "DejaVu Sans"],
+                         "figure.facecolor": th["surface"], "axes.facecolor": th["surface"],
+                         "savefig.facecolor": th["surface"], "text.color": th["ink"],
+                         "axes.labelcolor": th["ink2"], "xtick.color": th["ink2"],
+                         "ytick.color": th["ink2"], "axes.edgecolor": th["axis"],
+                         "axes.unicode_minus": True})
+    fig, axes = plt.subplots(1, 2, figsize=(11.5, 4.9), dpi=200, sharey=True)
+    for ax, (kind, title) in zip(axes, [("season", "Season to next season"),
+                                        ("half", "First half to second half")]):
+        P = pairs[pairs["kind"] == kind]
+        ax.scatter(P["fix"] * 100, P["change_offense_runs"], s=8, color=th["dots"], lw=0,
+                   alpha=0.8, zorder=1)
+        ax.axhline(0, color=th["axis"], lw=0.8, zorder=2)
+        ax.axvline(0, color=th["axis"], lw=0.8, zorder=2)
+        for group, color, label in GROUP_STYLE:
+            G = P[P["group"] == group]
+            if G.empty:
+                continue
+            xm = G["fix"].mean() * 100
+            if group == "as expected":
+                v, se = 0.0, np.nan
+            else:
+                r = S.loc[(kind, "offense_runs", f"group vs as expected: {group}")]
+                v, se = r["value"], r["se"]
+            ax.errorbar(xm, v, yerr=None if np.isnan(se) else se, fmt="o", color=th[color],
+                        ms=7, capsize=4, lw=1.6, zorder=5)
+            text = label if np.isnan(se) else f"{label}\n{v:+.1f} ± {se:.1f} runs"
+            offset, ha, va = {"blue": ((-10, 10), "right", "bottom"),
+                              "muted": ((0, 12), "center", "bottom"),
+                              "red": ((10, -12), "left", "top")}[color]
+            ax.annotate(text, (xm, v), xytext=offset, textcoords="offset points", ha=ha, va=va,
+                        fontsize=8.5, color=th[color], fontweight="bold", zorder=6)
+        ax.set_xlim(-45, 45)
+        ax.set_ylim(-45, 45)
+        ax.set_title(f"{title}  ({len(P):,} pairs)", fontsize=11, color=th["ink"], loc="left")
+        ax.set_xlabel("Leak chasing, points vs what the first period predicted (negative = cut more)",
+                      fontsize=9)
+        for side in ("top", "right"):
+            ax.spines[side].set_visible(False)
+        ax.grid(True, color=th["grid"], lw=0.6, zorder=0)
+        ax.set_axisbelow(True)
+    axes[0].set_ylabel("Change in offense, runs per 600 PA (xwOBA)", fontsize=9)
+    fig.suptitle("Where the payoff comes from: mostly runs not lost", x=0.01, ha="left",
+                 fontsize=13, fontweight="bold", color=th["ink"])
+    fig.text(0.01, 0.915, "Markers: each group's change in offense against the as-predicted group, "
+             "first-period levels held fixed (± 1 SE). Dots: every hitter pair.",
+             fontsize=8.5, color=th["muted"])
+    fig.tight_layout(rect=(0, 0, 1, 0.93))
+    FIG_DIR.mkdir(parents=True, exist_ok=True)
+    out = FIG_DIR / ("leak_fix_direction.png" if mode == "light" else "leak_fix_direction_dark.png")
+    fig.savefig(out, dpi=200)
+    plt.close(fig)
+print(f"Wrote leak_fix_direction.png and leak_fix_direction_dark.png to {FIG_DIR.relative_to(PROJECT_DIR)}/")

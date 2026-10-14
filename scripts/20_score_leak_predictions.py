@@ -42,7 +42,14 @@ OUTPUTS, in results/xchase/coaching/
   leak_scores_<next>.csv          one row per scored hitter
   leak_scores_summary_<next>.csv  every number printed below
 
-Options: --season (default 2026; the frozen season, scored on the next).
+Options: --season (default 2026; the frozen season, scored on the next),
+--period full | h1 | h2 (default full): score on one half of the next
+season instead, split at each hitter's plate-appearance midpoint by game
+date as step 16 does. --period h1 is the midseason check: the spring's
+frozen cells scored on the first half, with the half-to-half backtest
+as the reference (the closest yardstick; the pairs it was fit on are
+halves of one season, not a season and the next half). Outputs get the
+period as a suffix (leak_scores_<next>_h1.csv).
 
 Run after step 19 for that season, once the next season is in the data
 (steps 02-04 with --expected-contact, so the leaderboard and priced
@@ -77,9 +84,13 @@ UNITS = {"xchase_plus": ("xChase+", 1, "pts"), "offense_runs": ("offense (xwOBA)
 
 parser = argparse.ArgumentParser(description="Score a frozen prediction file on the next season.")
 parser.add_argument("--season", type=int, default=2026, help="the frozen season")
+parser.add_argument("--period", choices=["full", "h1", "h2"], default="full",
+                    help="score on the whole next season (default) or one half of it")
 args = parser.parse_args()
 SEASON = args.season
 NEXT = SEASON + 1
+PERIOD = args.period
+SUFFIX = f"_{NEXT}" + ("" if PERIOD == "full" else f"_{PERIOD}")
 
 # --------------------------------------------------
 # LOAD
@@ -108,7 +119,7 @@ qualified_next = set(board_next["batter"])
 
 print(f"Loading {SEASON} and {NEXT} pitches...")
 base = pd.read_parquet(CLEAN / "baseline_chase_pitches.parquet", columns=KEYS + [
-    "pitch_type", "description", "events", "balls", "strikes", "woba_value", "woba_denom",
+    "game_date", "pitch_type", "description", "events", "balls", "strikes", "woba_value", "woba_denom",
     "estimated_woba_using_speedangle", "is_analyzable", "is_in_zone", "is_outside_zone",
     "is_swing", "distance_outside_zone", "plate_x_batter", "plate_z_normalized", "sz_top",
     "sz_bot"], filters=[("game_year", "in", [SEASON, NEXT])])
@@ -144,19 +155,40 @@ zone = tracked[tracked["is_in_zone"] == 1]
 far = tracked[(tracked["is_outside_zone"] == 1) & (tracked["distance_outside_zone"] > FAR_OFF_FT)]
 plate_apps = tracked.drop_duplicates(["game_pk", "at_bat_number", "batter"])
 
+# Halves of the next season, as step 16 cuts them: each hitter's games in
+# date order, split at his plate-appearance midpoint, whole games only.
+games = (base[(base["is_analyzable"] == 1) & (base["game_year"] == NEXT)]
+         .drop_duplicates(["game_pk", "at_bat_number", "batter"])
+         .groupby(["batter", "game_pk", "game_date"]).size().rename("pa").reset_index()
+         .sort_values(["batter", "game_date", "game_pk"]))
+games["before"] = games.groupby("batter")["pa"].cumsum() - games["pa"]
+games["total"] = games.groupby("batter")["pa"].transform("sum")
+games["half"] = np.where(games["before"] + games["pa"] / 2 <= games["total"] / 2, "h1", "h2")
+half_of = games.set_index(["batter", "game_pk"])["half"]
+
+
+def in_period(frame, season):
+    """The rows of `frame` in `season`, cut to PERIOD when it is the next season."""
+
+    frame = frame[frame["game_year"] == season]
+    if season != NEXT or PERIOD == "full":
+        return frame
+    idx = pd.MultiIndex.from_arrays([frame["batter"], frame["game_pk"]])
+    return frame[half_of.reindex(idx).to_numpy() == PERIOD]
+
 
 def outcomes(season):
-    d = df[df["game_year"] == season]
-    p = pas[pas["game_year"] == season]
+    d = in_period(df, season)
+    p = in_period(pas, season)
     pw = p[p["in_woba"]]
-    st = pd.DataFrame({"pa": plate_apps[plate_apps["game_year"] == season].groupby("batter").size()})
+    st = pd.DataFrame({"pa": in_period(plate_apps, season).groupby("batter").size()})
     st["runs_saved"] = d.groupby("batter")["runs_saved"].sum()
     st["xwoba"] = pw.groupby("batter")["x"].mean()
     st["woba"] = pw.groupby("batter")["w"].mean()
     st["k_rate"] = p.groupby("batter")["strikeout"].mean()
     st["bb_rate"] = p.groupby("batter")["walk"].mean()
-    st["zone_swing_rate"] = zone[zone["game_year"] == season].groupby("batter")["is_swing"].mean()
-    st["far_off_chase_rate"] = far[far["game_year"] == season].groupby("batter")["is_swing"].mean()
+    st["zone_swing_rate"] = in_period(zone, season).groupby("batter")["is_swing"].mean()
+    st["far_off_chase_rate"] = in_period(far, season).groupby("batter")["is_swing"].mean()
     st["xchase_plus"] = 100 + 100 * (st["runs_saved"] * PA_SCALE / st["pa"]) / scale[season]
     st["offense_runs"] = (st["xwoba"] - league_x[season]) / woba_scale[season] * PA_SCALE
     st["woba_runs"] = (st["woba"] - league_w[season]) / woba_scale[season] * PA_SCALE
@@ -172,7 +204,7 @@ first, second = outcomes(SEASON), outcomes(NEXT)
 print("Measuring the frozen cells...")
 cells = {}
 for season in (SEASON, NEXT):
-    d = df[df["game_year"] == season]
+    d = in_period(df, season)
     cells[season] = d.groupby(["batter"] + lr.LEAK_CELL).agg(
         n=("is_chase", "size"), chases=("is_chase", "sum"), expected=("e", "sum"),
         choices=("choices", "sum"))
@@ -224,7 +256,8 @@ g["qualified_next"] = g.index.isin(qualified_next)
 scored = g[g["qualified_next"] & (g["pitches_2"] >= MIN_NEXT_PITCHES)].copy()
 scored = scored.dropna(subset=["excess_2", "fix"])
 print(f"  {frozen_n} hitters with frozen leaks; {int(g['qualified_next'].sum())} qualified in "
-      f"{NEXT}; {len(scored)} with {MIN_NEXT_PITCHES}+ pitches in their frozen cells")
+      f"{NEXT}; {len(scored)} with {MIN_NEXT_PITCHES}+ pitches in their frozen cells"
+      + ("" if PERIOD == "full" else f" in {PERIOD}"))
 
 # --------------------------------------------------
 # REFERENCE PAYOFFS
@@ -238,24 +271,25 @@ def record(test, measure, value, se, n, group="all"):
                     "test": test, "value": value, "se": se, "n_hitters": n})
 
 
+REF_KIND = "season" if PERIOD == "full" else "half"
 if out_of_sample == "yes":
     ref = pd.read_csv(OUT / "leak_backtest_summary.csv")
-    ref = ref[(ref["pair_kind"] == "season") & (ref["test"] == "per 10-pt cut beyond expected")]
+    ref = ref[(ref["pair_kind"] == REF_KIND) & (ref["test"] == "per 10-pt cut beyond expected")]
     reference = {r.measure: (r.value, r.se) for r in ref.itertuples()}
     acc = pd.read_csv(OUT / "leak_backtest_summary.csv")
-    acc = acc[(acc["pair_kind"] == "season") & (acc["measure"] == "offense_runs")
+    acc = acc[(acc["pair_kind"] == REF_KIND) & (acc["measure"] == "offense_runs")
               & (acc["test"] == "per run of leak choices recovered")].iloc[0]
     reference["accounting"] = (acc["value"], acc["se"])
-    ref_from = "leak_backtest_summary.csv (frozen before the season)"
+    ref_from = (f"leak_backtest_summary.csv ({REF_KIND} pairs, frozen before the season)")
 else:
     # Retrospective file: the reference is the backtest on pairs that end
     # by the frozen season, with its own line, so the scored season is
     # in neither.
     pairs = pd.read_csv(OUT / "leak_backtest_pairs.csv")
-    pairs = pairs[(pairs["kind"] == "season") & (pairs["season_2"] <= SEASON)]
+    pairs = pairs[(pairs["kind"] == REF_KIND) & (pairs["season_2"] <= SEASON)]
     pairs = pairs.dropna(subset=["leak_excess_1", "leak_excess_2"]).copy()
     s_, i_ = np.polyfit(pairs["leak_excess_1"], pairs["leak_excess_2"], 1)
-    if abs(s_ - slope) > 1e-3 or abs(i_ - intercept) > 1e-3:
+    if REF_KIND == "season" and (abs(s_ - slope) > 1e-3 or abs(i_ - intercept) > 1e-3):
         raise SystemExit("The frozen file's line does not match a refit on the pairs ending by "
                          f"{SEASON} (file {intercept:+.4f} + {slope:.4f} x, refit {i_:+.4f} + "
                          f"{s_:.4f} x). Rebuild step 16 and refreeze with --retrospective.")
@@ -271,7 +305,7 @@ else:
                       [pairs["change_leak_choices"], pairs["leak_choices_per_600_1"],
                        pairs["offense_runs_1"]], pairs["batter"].to_numpy())
     reference["accounting"] = (beta[1], se[1])
-    ref_from = f"the backtest refit on {len(pairs)} season pairs ending by {SEASON}"
+    ref_from = f"the backtest refit on {len(pairs)} {REF_KIND} pairs ending by {SEASON}"
 for m, (v, se) in reference.items():
     record("reference payoff per 10-pt cut" if m != "accounting"
            else "reference offense runs per run of leak choices recovered", m, v, se, np.nan)
@@ -338,18 +372,21 @@ out = scored[keep].rename(columns={"pitches_1": f"pitches_{SEASON}", "pitches_2"
 out.insert(0, "scored_on", NEXT)
 out.insert(0, "season", SEASON)
 out.insert(2, "out_of_sample", out_of_sample)
-out.reset_index().sort_values("fix").to_csv(OUT / f"leak_scores_{NEXT}.csv", index=False,
+out.insert(2, "period", PERIOD)
+out.reset_index().sort_values("fix").to_csv(OUT / f"leak_scores{SUFFIX}.csv", index=False,
                                              float_format="%.4f")
 summary = pd.DataFrame(summary)
 summary.insert(2, "out_of_sample", out_of_sample)
-summary.to_csv(OUT / f"leak_scores_summary_{NEXT}.csv", index=False, float_format="%.5f")
+summary.insert(2, "period", PERIOD)
+summary.to_csv(OUT / f"leak_scores_summary{SUFFIX}.csv", index=False, float_format="%.5f")
 
 # --------------------------------------------------
 # REPORT
 # --------------------------------------------------
 
 S = summary.set_index(["group", "measure", "test"])
-print(f"\nScoring {pred_file.name} on {NEXT}"
+print(f"\nScoring {pred_file.name} on {NEXT}" + ("" if PERIOD == "full" else f" ({PERIOD}, the "
+      + ("first" if PERIOD == "h1" else "second") + " half at each hitter's PA midpoint)")
       + (" (RETROSPECTIVE: the file was not frozen before the season)" if out_of_sample == "no"
          else " (frozen before the season)"))
 print(f"Line in the file: next = {intercept * 100:+.1f} + {slope:.2f} x {SEASON}")
@@ -386,5 +423,5 @@ for status in ("struggling", "average", "productive"):
         r = S.loc[key]
         print(f"    {status:10s} in the counts ({int(r['n_hitters']):3d} hitters): "
               f"{r['value']:+.2f} ± {r['se']:.2f} runs per 10-pt cut")
-print(f"\nWrote leak_scores_{NEXT}.csv and leak_scores_summary_{NEXT}.csv to "
+print(f"\nWrote leak_scores{SUFFIX}.csv and leak_scores_summary{SUFFIX}.csv to "
       f"{OUT.relative_to(PROJECT_DIR)}/")

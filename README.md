@@ -200,6 +200,11 @@ xChase+ says how many runs a hitter loses to chasing. A decision card says
 where, and what to do about it. Every qualified hitter gets one, written so
 a coach can hand it to a player and the player can read it alone.
 
+**Open them:** [samuelosullivan6-rgb.github.io/ChasePlus](https://samuelosullivan6-rgb.github.io/ChasePlus/)
+has every card ([the interactive page](https://samuelosullivan6-rgb.github.io/ChasePlus/results/xchase/player_cards/index.html))
+and [the roster on one page](https://samuelosullivan6-rgb.github.io/ChasePlus/results/xchase/player_cards/teams.html),
+served straight from this repository by GitHub Pages. No download needed.
+
 Start with the average hitter. This card is the baseline: how often an
 average right-handed hitter swings at a pitch outside the zone at each
 spot, in each count, against each pitcher hand. Everyone chases more with
@@ -383,6 +388,17 @@ distance, pitch group and side of the zone, instead of a smoothed
 location surface) and picks the same top leak for 207 of 219 hitters
 in 2026.
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="results/xchase/figures/leak_fix_direction_dark.png">
+  <img alt="Every hitter pair's change in offense against how much more or less he chased in his leaks than predicted, season to season and half to half, with the cut-more, as-predicted and chased-more groups marked" src="results/xchase/figures/leak_fix_direction.png" width="720">
+</picture>
+
+The same result as a picture: each dot is one hitter pair, and the
+markers are the three groups' changes against the as-predicted group with
+the first period's levels held fixed. Season to season the chased-more
+group is clearly below zero and the cut-more group is not clearly above
+it; half to half both sides move.
+
 **Frozen before 2027 (step 19).** Everything above was scored after the
 fact. So before the 2027 season, step 19 wrote down a prediction for
 every 2026 qualified hitter's card leaks in
@@ -441,6 +457,15 @@ cards keep every leak in the plan and show the count check as context,
 which is the right call on the pooled evidence, but if 2027 repeats the
 split, the productive group's leaks should move down the plan.
 
+The midseason check works the same way. Scored on the first half of 2026
+only (`--period h1`, 157 hitters,
+[`leak_scores_2026_h1.csv`](results/xchase/coaching/leak_scores_2026_h1.csv)),
+the 2025 predictions were again centered (5.7 predicted, 5.1 actual,
+−0.5 ± 0.8) and the payoffs sat on the half-to-half reference: +4.9 ± 1.5
+xChase+ points and +2.2 ± 1.2 runs per 10-point cut against +4.1 ± 0.5
+and +1.7 ± 0.5. That is the July check a coach can run on the spring's
+cards.
+
 ### Using the cards
 
 A card is a diagnosis in the player's own units: count, pitch type,
@@ -467,20 +492,29 @@ cards go from a file to a cage.
   off the zone the chased pitches were. A take rule is for the pitch
   that is clearly a ball, never the borderline one, and a two-strike take
   of a borderline pitch is a called third strike.
-- **Rebuild at midseason on the frozen cells.** The half-season pairs
-  carry the same payoff as the season pairs, so a card rebuilt at the
-  hitter's plate-appearance midpoint, scored on the cells frozen in the
-  spring, is a progress check with a known yardstick.
+- **Check at midseason on the frozen cells.** The half-season pairs
+  carry the same payoff as the season pairs, so the spring's frozen cells
+  scored on the first half of the season (`step 20 --period h1`, split at
+  each hitter's plate-appearance midpoint) is a progress check with a
+  known yardstick in July instead of November.
 - **The method ports; the numbers don't.** For a college or minor-league
   feed, re-fit the run values, the called-strike model and the league
   baselines on that league's data before trusting any card. The league
   comparison is what makes a card fair, and it has to be that league.
 
 The cards for the 17 hitters named in the two coaching reports are in
-[`results/xchase/noted_players/`](results/xchase/noted_players/README.md).
-Every qualified hitter's card, with switches for pitch type, the baseline
-and swing-and-miss, is in `results/xchase/player_cards/index.html`
-(download it and open it in a browser). Every card is drawn from the
+[`results/xchase/noted_players/`](results/xchase/noted_players/README.md),
+each with a printable two-page letter-size version in
+[`noted_players/print/`](results/xchase/noted_players/print/): the plan,
+the target, the pictures and the leaks on page 1, and on page 2 a guide
+to the card in the player's own words next to the average hitter's
+two-strike picture. Every qualified hitter's card, with switches for
+pitch type, the baseline and swing-and-miss, is in
+`results/xchase/player_cards/index.html` (hosted at the link above, or
+download it and open it in a browser); the plan there follows the
+pitcher-hand tabs. The roster on one page is `teams.html` beside it:
+every hitter by team, sorted by runs at stake, with the top leak, the
+count check and the target, linking to each card. Every card is drawn from the
 catcher's view, to scale, around the hitter's own strike zone, which from
 2026 is set from each hitter's height. Nobody is mirrored, so a
 left-handed batter's inside is on the right. Switch hitters get one row
@@ -565,11 +599,13 @@ MLB's ABS Challenge System.
   `leak_backtest_summary.csv`), the frozen predictions
   (`leak_predictions_<season>.csv`) and their scores on the next season
   (`leak_scores_<season>.csv`, one row per hitter, and
-  `leak_scores_summary_<season>.csv`). `player_cards/` has
-  every hitter's decision card (`index.html`, with a 3D view of any
-  zone picture), the average-hitter reference cards and the 3D stills
-  (`terrain/`); `noted_players/` has the cards for the 17 hitters the
-  coaching reports name.
+  `leak_scores_summary_<season>.csv`, with `_h1` for a midseason
+  check). `player_cards/` has every hitter's decision card
+  (`index.html`, with a 3D view of any zone picture), the roster page
+  (`teams.html`, with `team_view_<season>.csv` behind it), the
+  average-hitter reference cards and the 3D stills (`terrain/`);
+  `noted_players/` has the cards for the 17 hitters the coaching reports
+  name and their printable versions (`print/`).
 - **Version:** the `stat_version` column of `chase_plus_league_scale.csv`
   says which version of the stat a results folder was built with.
 
@@ -643,7 +679,8 @@ run touches the other's files.
 | 17 | `scripts/17_build_player_cards.py` | Draws a decision card for every qualified hitter: the interactive page, the noted hitters' cards and report, and the average-hitter reference cards (needs steps 13, 15 and 16; `--data-only` writes just the card data for an earlier season) |
 | 18 | `scripts/18_make_terrain_figures.py` | Draws the same surfaces in 3D as still images: the average hitter's chase terrain by count, and one hitter's costliest panel (needs step 17) |
 | 19 | `scripts/19_freeze_leak_predictions.py` | Writes down, before the 2027 season, a prediction for every 2026 card's leaks, for step 20 to score out of sample. Run once: a later run only checks the frozen file (needs steps 16 and 17). `--season 2025 --retrospective` writes the same file for 2025, marked as not out of sample, to test the loop |
-| 20 | `scripts/20_score_leak_predictions.py` | Scores a frozen file on the season that followed: is the actual leak chasing centered on the prediction, and did the frozen payoffs hold on the frozen cells? Run after the next season is in (needs step 19) |
+| 20 | `scripts/20_score_leak_predictions.py` | Scores a frozen file on the season that followed: is the actual leak chasing centered on the prediction, and did the frozen payoffs hold on the frozen cells? Run after the next season is in (needs step 19). `--period h1` scores the first half only, for a midseason check |
+| 21 | `scripts/21_build_team_view.py` | The roster on one page: every qualified hitter by team with the top leak, the count check and the target, as a filterable page (`teams.html`) and a CSV (needs step 17 and the raw files from step 01) |
 
 All together:
 
@@ -674,6 +711,7 @@ python scripts/15_build_count_check.py
 python scripts/16_backtest_leak_fixes.py
 python scripts/17_build_player_cards.py
 python scripts/18_make_terrain_figures.py
+python scripts/21_build_team_view.py
 ```
 
 Step 19 is not in the list on purpose: it was run once, before 2027, and
@@ -710,7 +748,10 @@ fouls, same league scale) and stops if not. Then it writes, in
 
 The Statcast data files in `data/` are not committed, because the raw pull
 is several hundred MB. `results/` is committed, so the leaderboards and
-charts can be viewed without running anything.
+charts can be viewed without running anything, and GitHub Pages serves
+the repository as it is (main branch, root folder; `index.html` at the
+root is the landing page and `.nojekyll` keeps Pages from processing
+the files). Pushing to main republishes the cards.
 
 ## Checks
 

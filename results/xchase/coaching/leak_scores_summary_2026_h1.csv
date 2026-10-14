@@ -1,0 +1,41 @@
+season,scored_on,period,out_of_sample,group,measure,test,value,se,n_hitters
+2025,2026,h1,no,all,xchase_plus,reference payoff per 10-pt cut,4.09466,0.52854,
+2025,2026,h1,no,all,offense_runs,reference payoff per 10-pt cut,1.72824,0.47116,
+2025,2026,h1,no,all,woba_runs,reference payoff per 10-pt cut,0.81683,0.56880,
+2025,2026,h1,no,all,bb_rate,reference payoff per 10-pt cut,0.00520,0.00070,
+2025,2026,h1,no,all,k_rate,reference payoff per 10-pt cut,-0.00266,0.00121,
+2025,2026,h1,no,all,zone_swing_rate,reference payoff per 10-pt cut,-0.00348,0.00103,
+2025,2026,h1,no,all,far_off_chase_rate,reference payoff per 10-pt cut,-0.01353,0.00103,
+2025,2026,h1,no,all,accounting,reference offense runs per run of leak choices recovered,0.96297,0.29947,
+2025,2026,h1,no,all,leak_excess,"mean excess, frozen season",0.12880,,157.00000
+2025,2026,h1,no,all,leak_excess,mean predicted excess,0.05680,,157.00000
+2025,2026,h1,no,all,leak_excess,mean actual excess,0.05132,0.00890,157.00000
+2025,2026,h1,no,all,leak_excess,actual minus predicted,-0.00547,0.00783,157.00000
+2025,2026,h1,no,all,leak_excess,calibration intercept (actual on predicted),-0.00080,0.01196,157.00000
+2025,2026,h1,no,all,leak_excess,calibration slope (actual on predicted),0.91773,0.15102,157.00000
+2025,2026,h1,no,main: every leak also a backtest leak,leak_excess,"mean excess, frozen season",0.14564,,127.00000
+2025,2026,h1,no,main: every leak also a backtest leak,leak_excess,mean predicted excess,0.06869,,127.00000
+2025,2026,h1,no,main: every leak also a backtest leak,leak_excess,mean actual excess,0.05913,0.00991,127.00000
+2025,2026,h1,no,main: every leak also a backtest leak,leak_excess,actual minus predicted,-0.00957,0.00865,127.00000
+2025,2026,h1,no,main: every leak also a backtest leak,leak_excess,calibration intercept (actual on predicted),-0.00996,0.01400,127.00000
+2025,2026,h1,no,main: every leak also a backtest leak,leak_excess,calibration slope (actual on predicted),1.00567,0.16291,127.00000
+2025,2026,h1,no,some leak not,leak_excess,"mean excess, frozen season",0.05752,,30.00000
+2025,2026,h1,no,some leak not,leak_excess,mean predicted excess,0.00643,,30.00000
+2025,2026,h1,no,some leak not,leak_excess,mean actual excess,0.01829,0.01939,30.00000
+2025,2026,h1,no,some leak not,leak_excess,actual minus predicted,0.01186,0.01841,30.00000
+2025,2026,h1,no,some leak not,leak_excess,calibration intercept (actual on predicted),0.01329,0.01998,30.00000
+2025,2026,h1,no,some leak not,leak_excess,calibration slope (actual on predicted),0.77905,0.49296,30.00000
+2025,2026,h1,no,all,xchase_plus,payoff per 10-pt cut beyond predicted,4.88587,1.45660,157.00000
+2025,2026,h1,no,all,offense_runs,payoff per 10-pt cut beyond predicted,2.17724,1.18192,157.00000
+2025,2026,h1,no,all,woba_runs,payoff per 10-pt cut beyond predicted,1.24499,1.39456,157.00000
+2025,2026,h1,no,all,bb_rate,payoff per 10-pt cut beyond predicted,0.00977,0.00208,157.00000
+2025,2026,h1,no,all,k_rate,payoff per 10-pt cut beyond predicted,0.00217,0.00305,157.00000
+2025,2026,h1,no,all,zone_swing_rate,payoff per 10-pt cut beyond predicted,-0.00775,0.00261,157.00000
+2025,2026,h1,no,all,far_off_chase_rate,payoff per 10-pt cut beyond predicted,-0.01625,0.00268,157.00000
+2025,2026,h1,no,all,offense_runs,offense runs per run of leak choices recovered,0.61046,0.71077,157.00000
+2025,2026,h1,no,all,offense_runs,"payoff per 10-pt cut beyond predicted, average in the counts",2.36260,1.74576,63.00000
+2025,2026,h1,no,all,xchase_plus,"payoff per 10-pt cut beyond predicted, average in the counts",6.01908,2.41099,63.00000
+2025,2026,h1,no,all,offense_runs,"payoff per 10-pt cut beyond predicted, productive in the counts",1.79637,1.78736,72.00000
+2025,2026,h1,no,all,xchase_plus,"payoff per 10-pt cut beyond predicted, productive in the counts",2.47887,1.61786,72.00000
+2025,2026,h1,no,all,offense_runs,"payoff per 10-pt cut beyond predicted, struggling in the counts",3.88720,4.63138,22.00000
+2025,2026,h1,no,all,xchase_plus,"payoff per 10-pt cut beyond predicted, struggling in the counts",11.14700,6.50307,22.00000

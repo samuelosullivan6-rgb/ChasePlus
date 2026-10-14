@@ -6,7 +6,11 @@ the nine whose chase losses look easiest to fix
 bottom 10 by xChase+
 ([bottom10_2026_coaching_notes.md](../coaching/bottom10_2026_coaching_notes.md)).
 Every other qualified hitter has the same card in the interactive page,
-`results/xchase/player_cards/index.html` (download it and open it in a browser).
+`results/xchase/player_cards/index.html` (hosted at
+[samuelosullivan6-rgb.github.io/ChasePlus](https://samuelosullivan6-rgb.github.io/ChasePlus/results/xchase/player_cards/index.html),
+or download it and open it in a browser). Each hitter below also has a printable
+two-page card in `print/`: the plan, the target, the pictures and the leaks, then a
+guide to the card in the player's own words.
 
 Each card is drawn from the catcher's view, to scale, around the hitter's own
 strike zone; nobody is mirrored, so a left-handed batter's inside is on the right.
@@ -56,6 +60,8 @@ xChase+ 73 (255 of 261). Runs at stake on far-off pitches: 16.9 per 600 PA. Choi
   <img alt="Salvador Pérez decision card" src="cards/salvador_perez_light.png" width="900">
 </picture>
 
+[Printable card, two pages (PDF)](print/salvador_perez.pdf)
+
 **What to work on**
 
 - With two strikes, let breaking balls below the zone go. You swung at 78% of them; hitters on average swing at 49%. The ones you swung at were typically 5 inches off the zone.
@@ -75,6 +81,8 @@ xChase+ 78 (251 of 261). Runs at stake on far-off pitches: 16.8 per 600 PA. Choi
   <source media="(prefers-color-scheme: dark)" srcset="cards/michael_harris_dark.png">
   <img alt="Michael Harris decision card" src="cards/michael_harris_light.png" width="900">
 </picture>
+
+[Printable card, two pages (PDF)](print/michael_harris.pdf)
 
 **What to work on**
 
@@ -96,6 +104,8 @@ xChase+ 74 (254 of 261). Runs at stake on far-off pitches: 13.8 per 600 PA. Choi
   <img alt="Ernie Clement decision card" src="cards/ernie_clement_light.png" width="900">
 </picture>
 
+[Printable card, two pages (PDF)](print/ernie_clement.pdf)
+
 **What to work on**
 
 - With two strikes, let fastballs above the zone go. You swung at 82% of them; hitters on average swing at 42%. The ones you swung at were typically 7 inches off the zone.
@@ -115,6 +125,8 @@ xChase+ 87 (222 of 261). Runs at stake on far-off pitches: 12.6 per 600 PA. Choi
   <source media="(prefers-color-scheme: dark)" srcset="cards/angel_martinez_dark.png">
   <img alt="Angel Martínez decision card" src="cards/angel_martinez_light.png" width="900">
 </picture>
+
+[Printable card, two pages (PDF)](print/angel_martinez.pdf)
 
 **What to work on**
 
@@ -136,6 +148,8 @@ xChase+ 86 (226 of 261). Runs at stake on far-off pitches: 12.2 per 600 PA. Choi
   <img alt="Ceddanne Rafaela decision card" src="cards/ceddanne_rafaela_light.png" width="900">
 </picture>
 
+[Printable card, two pages (PDF)](print/ceddanne_rafaela.pdf)
+
 **What to work on**
 
 - With two strikes, let fastballs above the zone go. You swung at 67% of them; hitters on average swing at 43%. The ones you swung at were typically 5 inches off the zone.
@@ -155,6 +169,8 @@ xChase+ 79 (246 of 261). Runs at stake on far-off pitches: 11.7 per 600 PA. Choi
   <source media="(prefers-color-scheme: dark)" srcset="cards/jose_caballero_dark.png">
   <img alt="José Caballero decision card" src="cards/jose_caballero_light.png" width="900">
 </picture>
+
+[Printable card, two pages (PDF)](print/jose_caballero.pdf)
 
 **What to work on**
 
@@ -176,6 +192,8 @@ xChase+ 78 (249 of 261). Runs at stake on far-off pitches: 10.0 per 600 PA. Choi
   <img alt="Hunter Goodman decision card" src="cards/hunter_goodman_light.png" width="900">
 </picture>
 
+[Printable card, two pages (PDF)](print/hunter_goodman.pdf)
+
 **What to work on**
 
 - With two strikes, let breaking balls below the zone go. You swung at 66% of them; hitters on average swing at 46%. The ones you swung at were typically 6 inches off the zone.
@@ -196,6 +214,8 @@ xChase+ 82 (239 of 261). Runs at stake on far-off pitches: 8.5 per 600 PA. Choic
   <img alt="Ozzie Albies decision card" src="cards/ozzie_albies_light.png" width="900">
 </picture>
 
+[Printable card, two pages (PDF)](print/ozzie_albies.pdf)
+
 **What to work on**
 
 - With two strikes, let changeups and splitters below the zone go. You swung at 76% of them; hitters on average swing at 46%. The ones you swung at were typically 7 inches off the zone.
@@ -215,6 +235,8 @@ xChase+ 86 (225 of 261). Runs at stake on far-off pitches: 8.4 per 600 PA. Choic
   <source media="(prefers-color-scheme: dark)" srcset="cards/luis_garcia_dark.png">
   <img alt="Luis García decision card" src="cards/luis_garcia_light.png" width="900">
 </picture>
+
+[Printable card, two pages (PDF)](print/luis_garcia.pdf)
 
 **What to work on**
 
@@ -240,6 +262,8 @@ xChase+ 55 (261 of 261). Runs at stake on far-off pitches: 13.5 per 600 PA. Choi
   <img alt="Mickey Moniak decision card" src="cards/mickey_moniak_light.png" width="900">
 </picture>
 
+[Printable card, two pages (PDF)](print/mickey_moniak.pdf)
+
 **What to work on**
 
 - With two strikes against right-handers, let breaking balls below the zone go. You swung at 71% of them; hitters on average swing at 43%. The ones you swung at were typically 8 inches off the zone.
@@ -259,6 +283,8 @@ xChase+ 66 (260 of 261). Runs at stake on far-off pitches: 12.0 per 600 PA. Choi
   <source media="(prefers-color-scheme: dark)" srcset="cards/ezequiel_tovar_dark.png">
   <img alt="Ezequiel Tovar decision card" src="cards/ezequiel_tovar_light.png" width="900">
 </picture>
+
+[Printable card, two pages (PDF)](print/ezequiel_tovar.pdf)
 
 **What to work on**
 
@@ -280,6 +306,8 @@ xChase+ 71 (256 of 261). Runs at stake on far-off pitches: 10.5 per 600 PA. Choi
   <img alt="Zach Neto decision card" src="cards/zach_neto_light.png" width="900">
 </picture>
 
+[Printable card, two pages (PDF)](print/zach_neto.pdf)
+
 **What to work on**
 
 - With two strikes, let breaking balls below the zone go. You swung at 69% of them; hitters on average swing at 47%. The ones you swung at were typically 7 inches off the zone.
@@ -299,6 +327,8 @@ xChase+ 67 (259 of 261). Runs at stake on far-off pitches: 10.0 per 600 PA. Choi
   <source media="(prefers-color-scheme: dark)" srcset="cards/andres_gimenez_dark.png">
   <img alt="Andrés Giménez decision card" src="cards/andres_gimenez_light.png" width="900">
 </picture>
+
+[Printable card, two pages (PDF)](print/andres_gimenez.pdf)
 
 **What to work on**
 
@@ -320,6 +350,8 @@ xChase+ 76 (252 of 261). Runs at stake on far-off pitches: 8.8 per 600 PA. Choic
   <img alt="Jeremy Peña decision card" src="cards/jeremy_pena_light.png" width="900">
 </picture>
 
+[Printable card, two pages (PDF)](print/jeremy_pena.pdf)
+
 **What to work on**
 
 - With two strikes, let fastballs above the zone go. You swung at 78% of them; hitters on average swing at 52%. The ones you swung at were typically 5 inches off the zone.
@@ -339,6 +371,8 @@ xChase+ 76 (253 of 261). Runs at stake on far-off pitches: 7.6 per 600 PA. Choic
   <source media="(prefers-color-scheme: dark)" srcset="cards/oswald_peraza_dark.png">
   <img alt="Oswald Peraza decision card" src="cards/oswald_peraza_light.png" width="900">
 </picture>
+
+[Printable card, two pages (PDF)](print/oswald_peraza.pdf)
 
 **What to work on**
 
@@ -360,6 +394,8 @@ xChase+ 68 (258 of 261). Runs at stake on far-off pitches: 4.6 per 600 PA. Choic
   <img alt="Jarren Duran decision card" src="cards/jarren_duran_light.png" width="900">
 </picture>
 
+[Printable card, two pages (PDF)](print/jarren_duran.pdf)
+
 **What to work on**
 
 - With two strikes against right-handers, let breaking balls below the zone go. You swung at 52% of them; hitters on average swing at 41%. The ones you swung at were typically 8 inches off the zone.
@@ -380,6 +416,8 @@ xChase+ 68 (257 of 261). Runs at stake on far-off pitches: 3.1 per 600 PA. Choic
   <source media="(prefers-color-scheme: dark)" srcset="cards/colson_montgomery_dark.png">
   <img alt="Colson Montgomery decision card" src="cards/colson_montgomery_light.png" width="900">
 </picture>
+
+[Printable card, two pages (PDF)](print/colson_montgomery.pdf)
 
 **What to work on**
 

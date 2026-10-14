@@ -54,3 +54,6 @@ video/
 # Optional PNG cards for every hitter (scripts/15_build_player_cards.py
 # --static-all). Regenerable and large; the interactive page has them all.
 results/xchase/player_cards/static/
+
+# Printable PDFs for hitters beyond the 17 noted ones (step 17 --print).
+results/xchase/player_cards/print/
