@@ -630,6 +630,14 @@ Add `--expected-contact` to run the same checks on the xChase+ files, and
 `--rerun` to also rerun the leaderboard and confirm it writes
 byte-identical files (a 23rd check).
 
+The coach's notes on the 17 noted cards are the only hand-written text
+on a card, so step 17 checks them too. Each note in `scripts/coach_notes.py`
+sits next to the facts it states (59 in all: every quoted percentage,
+run total and xwOBA, and patterns like "in every count" or "his contact
+pays for it"), and step 17 tests each one against the data before drawing
+any card. If a fact no longer holds, after a data refresh or a method
+change, the run stops and names the note and the sentence.
+
 ## Appendix: Chase+ vs xChase+
 
 <picture>

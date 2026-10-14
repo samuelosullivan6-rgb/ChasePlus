@@ -18,7 +18,10 @@ and what is it costing me?" for one hitter-season:
     foot of the card what step 16 found when hitters fixed their leaks.
 
 The leak rule, the labels and the choices / contact split come from
-leak_rules.py, which steps 15 and 16 share.
+leak_rules.py, which steps 15 and 16 share. The coach's notes for the 17
+noted hitters are in coach_notes.py, each next to the facts it states;
+every fact is checked against the data before a card is drawn, and the
+run stops if one no longer holds.
 
 Hitters whose problem is contact rather than choices (the execution-led
 group from step 13) also get a whiff picture: how often they miss when
@@ -60,6 +63,8 @@ from scipy.optimize import brentq
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import card_surfaces as cs  # noqa: E402
 import leak_rules as lr  # noqa: E402
+from coach_notes import NOTED  # noqa: E402
+import coach_notes  # noqa: E402
 
 PROJECT_DIR = Path(__file__).resolve().parents[1]
 CLEAN = PROJECT_DIR / "data" / "cleaned"
@@ -101,30 +106,8 @@ COUNT_DETAIL = {
 HANDS = ["all", "R", "L"]
 PITCH_GROUPS = ["fastball", "breaking", "offspeed"]
 
-# The 17 hitters named in the step 12 and 13 reports, with a coach's
-# note condensed from those reports. Everything else on their cards is
-# computed, the same as for every other hitter.
-NOTED = {
-    # Easiest to improve (step 13): decision-only, persistent pattern
-    "Salvador Pérez": ("easiest", "Volume, not contact: these chases turn out better than the league's, which softens every leak but erases none. Start with breaking balls before two strikes, where the take costs nothing in strikeouts."),
-    "Michael Harris": ("easiest", "One pitch type: soft stuff below the zone with two strikes, mostly from right-handers, about half his net loss. His contact is among the best in this group, so nothing else needs to change."),
-    "Ernie Clement": ("easiest", "The high fastball before two strikes. He puts 44% of those chases in play (league 18%), so it never looks like a mistake, but it is weak contact (.173 xwOBA vs .283) that gives away a hitter's count."),
-    "Angel Martínez": ("easiest", "Two strikes, right-hander, soft stuff that starts at the knees: take it. The contact is there on the swings that stay."),
-    "Ceddanne Rafaela": ("easiest", "The high fastball with two strikes first. His early-count chasing came down in 2025 (35% to 28% of far-off pitches) but is still well above the league's 17% and costs about 4 runs; it is next."),
-    "José Caballero": ("easiest", "One pitch with two strikes: the fastball above the belt. He has chased more of the far-off ones every year (55%, 65%, 77% since 2024), even in 2025, when his xChase+ was 109."),
-    "Ozzie Albies": ("easiest", "Changeups and splitters that dive below the knees, in every count, from both hands. Against left-handers he chases far-off pitches of every kind more (35% vs 19%)."),
-    "Luis García": ("easiest", "With three balls, swing only at strikes: that is the big one, about 5 runs. With two strikes he chases nine high fastballs in ten, but his contact there pays for it, so leave that pitch alone."),
-    "Hunter Goodman": ("easiest", "The free part is the breaking ball below the zone before two strikes (48% vs 30%, about 5 runs). The high fastball looks worse than it is: his contact nearly pays for it. The two-strike breaking ball may be contact as much as choice."),
-    # Biggest losses (step 12): the bottom 10 not already listed
-    "Mickey Moniak": ("biggest", "Two separate leaks: high fastballs early, low breaking balls with two strikes. Fix the early one first; it costs nothing in strikeouts."),
-    "Ezequiel Tovar": ("biggest", "Breaking balls that start at the knees and keep dropping are a take in every count, and the changeup below the zone is the second piece. The fastball decisions are fine."),
-    "Andrés Giménez": ("biggest", "Not new: xChase+ 69 and 74 in 2022-23, then 95 and 105, and back to 67. Find out what made 2024-25 work before changing anything; the target is 0-1 and 1-1."),
-    "Jarren Duran": ("biggest", "A contact problem: six chases in ten are misses. The two-strike take line should be stricter than league norms, especially below the knees against right-handers."),
-    "Colson Montgomery": ("biggest", "A contact problem: two chases in three are misses, so a chase is close to a sure strike. Start by taking the first-strike pitch below the zone."),
-    "Zach Neto": ("biggest", "Sliders below the zone from right-handers. He chased them well above league in 2024 and 2025 too; in 2026 pitchers threw him far more (290, up from 184). Sit fastball; the fastball decisions are a strength."),
-    "Oswald Peraza": ("biggest", "Three-ball counts first: swing only at strikes (62% chase against about 40%, about 5 runs in 45 pitches). Then two-strike soft stuff down, the bigger loss. Smallest sample of the group."),
-    "Jeremy Peña": ("biggest", "The first pitch, and the two-strike slider away from right-handers. Keep the aggression up in the zone; that is where the damage comes from."),
-}
+# The 17 noted hitters and their coach's notes live in coach_notes.py,
+# next to the claims step 17 checks before drawing their cards.
 README_EXAMPLE = "Salvador Pérez"
 
 # --------------------------------------------------
@@ -453,6 +436,8 @@ for _, row in board.sort_values("xchase_plus", ascending=False).iterrows():
     players.append(summary)
 
 print(f"  {len(players)} hitters, {len(switch & set(board['batter']))} switch hitters")
+n_claims, n_noted = coach_notes.check(players)
+print(f"  checked {n_claims} claims in the coach's notes for {n_noted} hitters: all hold")
 
 # --------------------------------------------------
 # SURFACES FOR ONE HITTER
