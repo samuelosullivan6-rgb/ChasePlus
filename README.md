@@ -441,6 +441,23 @@ cards keep every leak in the plan and show the count check as context,
 which is the right call on the pooled evidence, but if 2027 repeats the
 split, the productive group's leaks should move down the plan.
 
+**Who made the fix, 2025 to 2026 (step 21, a test).** Step 20 scores
+hitters as a group. Step 21 asks the case-study question on the same
+frozen cells: who chased there at least 5 points below the line's
+prediction in 2026, and did his xwOBA go up in the leak's counts?
+The 44 hitters who did gained +10.5 ± 4.6 points of xwOBA against the
+league in those counts, against −3.6 ± 3.0 for the 78 who held to the
+line and −7.4 ± 3.9 for the 38 who chased more. Sixteen of the 44 also
+gained there by more than they did overall, with better choices in the
+cells ([`adjusters_2026.csv`](results/xchase/coaching/adjusters_2026.csv));
+Taylor Ward (62% to 32% in his even and two-strike leaks, +3 to +26),
+Lars Nootbaar, Ryan Jeffers, Hunter Goodman and Oneil Cruz are the
+clearest. What it does not show yet is a gain specific to those counts:
+measured against each hitter's own overall change, the groups don't
+separate (+4.2, −3.0 and +5.8), so most of the adjusters' gain came
+everywhere. Read the sixteen as examples of the advice followed, not as
+proof it worked, and rerun the step on 2027.
+
 ### Using the cards
 
 A card is a diagnosis in the player's own units: count, pitch type,
@@ -644,6 +661,7 @@ run touches the other's files.
 | 18 | `scripts/18_make_terrain_figures.py` | Draws the same surfaces in 3D as still images: the average hitter's chase terrain by count, and one hitter's costliest panel (needs step 17) |
 | 19 | `scripts/19_freeze_leak_predictions.py` | Writes down, before the 2027 season, a prediction for every 2026 card's leaks, for step 20 to score out of sample. Run once: a later run only checks the frozen file (needs steps 16 and 17). `--season 2025 --retrospective` writes the same file for 2025, marked as not out of sample, to test the loop |
 | 20 | `scripts/20_score_leak_predictions.py` | Scores a frozen file on the season that followed: is the actual leak chasing centered on the prediction, and did the frozen payoffs hold on the frozen cells? Run after the next season is in (needs step 19) |
+| 21 | `scripts/21_find_adjusters.py` | A test: which hitters in a scored file cut their frozen leaks beyond the line's prediction, and did their xwOBA in the leak's counts go up, beyond their overall change? Run after step 20 (`--season`, default 2025) |
 
 All together:
 
@@ -679,12 +697,14 @@ python scripts/18_make_terrain_figures.py
 Step 19 is not in the list on purpose: it was run once, before 2027, and
 a rerun only checks that the frozen file still reproduces. Step 20 runs
 after 2027 is in the data (`python scripts/20_score_leak_predictions.py`).
-The retrospective test of that loop is three commands:
+The retrospective test of that loop is three commands, and step 21
+pulls the case studies out of it:
 
 ```
 python scripts/17_build_player_cards.py --season 2025 --data-only
 python scripts/19_freeze_leak_predictions.py --season 2025 --retrospective
 python scripts/20_score_leak_predictions.py --season 2025
+python scripts/21_find_adjusters.py --season 2025
 ```
 
 `04_build_chase_leaderboard.py` prints a short summary by default. Add
