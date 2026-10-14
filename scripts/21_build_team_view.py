@@ -34,9 +34,9 @@ season (step 01), for the team columns.
 """
 
 import argparse
-import html
 import json
 from pathlib import Path
+import re
 import unicodedata
 
 import pandas as pd
@@ -100,6 +100,18 @@ print(f"  wrote player_cards/team_view_{SEASON}.csv ({len(out)} hitters, "
 # THE PAGE
 # --------------------------------------------------
 
+# The plan's first line (the table shows one pitch to start with; the
+# full plan is on the card and in the CSV). Lines are joined with a space
+# in the CSV, so split where the next line's opener begins.
+OPENERS = ("With two strikes", "On the first pitch", "When you're ahead", "Early in the count",
+           "At 0-1 or 1-1", "Your bigger issue", "Nothing stands out")
+SPLIT = re.compile(r"(?= (?:" + "|".join(re.escape(o) for o in OPENERS) + "))")
+
+
+def first_line(plan):
+    return SPLIT.split(plan, maxsplit=1)[0].strip() if isinstance(plan, str) else ""
+
+
 ARCHETYPE_WORDS = {"decision-only": "choices", "decision-led": "mostly choices", "mixed": "mixed",
                    "execution-led": "mostly contact", "execution-only": "contact"}
 STATUS_WORDS = {"struggling": "struggling", "average": "average", "productive": "hitting well"}
@@ -130,7 +142,7 @@ for r in out.itertuples(index=False):
         "depth": None if pd.isna(r.top_leak_chase_depth_in) else round(float(r.top_leak_chase_depth_in)),
         "target": target,
         "excess": None if pd.isna(r.leak_excess_vs_league) else round(float(r.leak_excess_vs_league) * 100),
-        "plan": r.plan if isinstance(r.plan, str) else "",
+        "plan": first_line(r.plan),
     })
 team_list = sorted({t for r in rows for t in r["teams"].split(", ")})
 
@@ -184,7 +196,7 @@ th {{ font-size: 11px; color: var(--muted); text-transform: uppercase; letter-sp
 th.sorted {{ color: var(--ink); }}
 th .dir {{ font-size: 10px; margin-left: 3px; }}
 td.num, th.num {{ text-align: right; font-variant-numeric: tabular-nums; }}
-td.plan {{ white-space: normal; min-width: 40ch; max-width: 52ch; color: var(--ink2); font-size: 13px; }}
+td.plan {{ white-space: normal; min-width: 34ch; max-width: 44ch; color: var(--ink2); font-size: 13px; }}
 td.leak {{ white-space: normal; min-width: 22ch; max-width: 28ch; }}
 /* phones: each hitter as a stacked card instead of a 16-column row */
 @media (max-width: 720px) {{
@@ -215,7 +227,7 @@ td.leak {{ white-space: normal; min-width: 22ch; max-width: 28ch; }}
     <p class="count" id="count"></p>
   </div>
   <div class="card"><table id="t"><thead><tr></tr></thead><tbody></tbody></table></div>
-  <p class="note">Runs are per 600 plate appearances. Choices is what the swing decisions cost against an average hitter at the same spot, count and matchup; contact is what the chases produced compared with the average hitter's chases. Problem: the share of the loss that is choices (step 13). Top leak: the costliest count, pitch group and side of the zone, with the hitter's rate against the league's and how far off the zone the chased pitches were (median inches). Count check: how he hits once the count reaches the leak's counts, shrunk for noise, against the league in the same counts. Target: leak chasing in points above the league, this season → next season with no change (step 19). Built by step 21 of the Chase Leaderboard project; the cards themselves are <a href="index.html">index.html</a>.</p>
+  <p class="note">Runs are per 600 plate appearances. Choices is what the swing decisions cost against an average hitter at the same spot, count and matchup; contact is what the chases produced compared with the average hitter's chases. Problem: the share of the loss that is choices (step 13). Top leak: the costliest count, pitch group and side of the zone, with the hitter's rate against the league's and how far off the zone the chased pitches were (median inches). Count check: how he hits once the count reaches the leak's counts, shrunk for noise, against the league in the same counts. Target: leak chasing in points above the league, this season → next season with no change (step 19). Start with: the first line of the plan; the rest is on the card. Built by step 21 of the Chase Leaderboard project; the cards themselves are <a href="index.html">index.html</a>.</p>
 </div>
 <script>
 const ROWS = {json.dumps(rows, ensure_ascii=False)};
@@ -225,7 +237,7 @@ const COLS = [
   ["stake", "Runs at stake", true], ["choices", "Choices", true], ["contact", "Contact", true],
   ["kind", "Problem", false], ["leak", "Top leak", false], ["leak_runs", "Leak runs", true],
   ["depth", "Off zone, in", true], ["check", "Count check", false], ["target", "Target", true],
-  ["plan", "Plan", false],
+  ["plan", "Start with", false],
 ];
 const state = {{ sort: "stake", dir: -1, team: "", q: "", kind: "" }};
 const el = (tag, attrs = {{}}, ...kids) => {{ const e = document.createElement(tag); for (const [k, v] of Object.entries(attrs)) {{ if (k === "text") e.textContent = v; else e.setAttribute(k, v); }} kids.forEach((k) => e.append(k)); return e; }};
