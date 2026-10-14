@@ -144,7 +144,7 @@ xChase+ 79 (246 of 261). Runs at stake on far-off pitches: 11.7 per 600 PA. Choi
 
 **Count check.** Two strikes: .195 xwOBA once there, league .234; allowing for noise, struggling (.211). Ahead in the count: .298 xwOBA once there, league .358; allowing for noise, struggling (.332).
 
-**Coach's note.** One pitch with two strikes: the fastball above the belt. This was a take in 2025, a season with a 109 xChase+.
+**Coach's note.** One pitch with two strikes: the fastball above the belt. He has chased more of the far-off ones every year (55%, 65%, 77% since 2024), even in 2025, when his xChase+ was 109.
 
 ### Hunter Goodman
 

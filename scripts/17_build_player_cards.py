@@ -111,7 +111,7 @@ NOTED = {
     "Ernie Clement": ("easiest", "The high fastball before two strikes. It usually gets put in play, so it never looks like a mistake, but it is weak contact that gives away a hitter's count."),
     "Angel Martínez": ("easiest", "Two strikes, right-hander, soft stuff that starts at the knees: take it. The contact is there on the swings that stay."),
     "Ceddanne Rafaela": ("easiest", "The high fastball with two strikes. Early-count chasing has already improved three seasons running, so leave that alone."),
-    "José Caballero": ("easiest", "One pitch with two strikes: the fastball above the belt. This was a take in 2025, a season with a 109 xChase+."),
+    "José Caballero": ("easiest", "One pitch with two strikes: the fastball above the belt. He has chased more of the far-off ones every year (55%, 65%, 77% since 2024), even in 2025, when his xChase+ was 109."),
     "Ozzie Albies": ("easiest", "Changeups and splitters that dive below the knees, heaviest against left-handers, in every count."),
     "Luis García": ("easiest", "With three balls, swing only at strikes. Then the high fastball, chased nine times in ten with two strikes."),
     "Hunter Goodman": ("easiest", "The first-pitch and one-strike high fastball is the free part. The two-strike breaking ball may be contact as much as choice."),

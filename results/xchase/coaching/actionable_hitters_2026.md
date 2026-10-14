@@ -152,7 +152,9 @@ With two strikes he chases 47% of far-off pitches against 30%, and 37 of
 single worst cell for any hitter in the group). In 2025 his far-off
 decision runs were +1.2 and his xChase+ 109. Draft: this is one pitch
 with two strikes. A fastball above the belt that he has to reach up for
-is a ball, and in 2025 he took it.
+is a ball. It was not a take in 2025 either: he chased 65% of the
+far-off ones that year (55% in 2024), so his good 2025 came from
+elsewhere, and this pitch has gotten worse every season.
 
 **Ozzie Albies.** Everything is below the zone and most of it is soft:
 2-strike splitters/changeups down (70% vs 39%), 2-strike breaking balls
