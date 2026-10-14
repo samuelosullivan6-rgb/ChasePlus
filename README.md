@@ -260,7 +260,12 @@ MLB's ABS Challenge System.
   seasons into one career line. `hitter_value_leaderboard.csv` places chase
   value next to total offense. `xchase_leaderboard_<season>.csv` ranks by
   xChase+ with Chase+, both ranks and luck alongside. `matchups/` has
-  xChase+ by handedness matchup (see the appendix).
+  xChase+ by handedness matchup (see the appendix). `coaching/` splits
+  each hitter's loss into swing decisions and swing results: the bottom
+  10 in depth (`bottom10_<season>_*`, with draft notes in
+  `bottom10_<season>_coaching_notes.md`) and every qualified hitter
+  scored on how coachable the loss looks (`actionability_<season>.csv`,
+  with notes in `actionable_hitters_<season>.md`).
 - **Version:** the `stat_version` column of `chase_plus_league_scale.csv`
   says which version of the stat a results folder was built with.
 
@@ -327,6 +332,7 @@ run touches the other's files.
 | 10 | `scripts/10_make_xchase_figures.py` | Draws the two charts that compare them |
 | 11 | `scripts/11_build_matchup_leaderboards.py` | xChase+ leaderboards by handedness matchup (needs step 4 with `--expected-contact`) |
 | 12 | `scripts/12_build_coaching_profiles.py` | Splits the bottom 10 hitters' runs lost into decision and execution, by count, zone, pitch group and more, into `results/xchase/coaching/` (needs step 4 with `--expected-contact`) |
+| 13 | `scripts/13_build_actionability_profiles.py` | Scores every qualified hitter on how much of the loss is swing decisions on far-off pitches, and sorts them into archetypes (needs step 4 with `--expected-contact`) |
 
 All together:
 
@@ -351,6 +357,7 @@ python scripts/09_build_xchase_comparison.py
 python scripts/10_make_xchase_figures.py
 python scripts/11_build_matchup_leaderboards.py
 python scripts/12_build_coaching_profiles.py
+python scripts/13_build_actionability_profiles.py
 ```
 
 `04_build_chase_leaderboard.py` prints a short summary by default. Add
