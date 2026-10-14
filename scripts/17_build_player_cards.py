@@ -1,5 +1,5 @@
 """
-Step 15: a decision card for every qualified hitter.
+Step 17: a decision card for every qualified hitter.
 
 Each card answers "where do I swing at balls more than other hitters do,
 and what is it costing me?" for one hitter-season:
@@ -10,9 +10,15 @@ and what is it costing me?" for one hitter-season:
     an average hitter at the same spot, count and matchup. Where they saw
     few pitches the color fades out (see card_surfaces.py);
   - the biggest leaks, numbered on the pictures, in runs per 600 PA;
-  - a count table with the hitter's rates next to the league's;
+  - a count table with the hitter's rates next to the league's, and the
+    count check from step 15: his xwOBA once the count gets there, next
+    to the league's in the same counts;
   - the far-off chase rate by season against the league's;
-  - a short plan in plain language, written to the player.
+  - a short plan in plain language, written to the player, and at the
+    foot of the card what step 16 found when hitters fixed their leaks.
+
+The leak rule, the labels and the choices / contact split come from
+leak_rules.py, which steps 15 and 16 share.
 
 Hitters whose problem is contact rather than choices (the execution-led
 group from step 13) also get a whiff picture: how often they miss when
@@ -34,7 +40,7 @@ Options: --season (default 2026), --static NAME [NAME ...] to also draw
 PNG cards for any hitters by name, --static-all to draw every hitter
 (into player_cards/static/, which is not committed).
 
-Needs steps 04 (--expected-contact), 13 and 14 first.
+Needs steps 04 (--expected-contact), 13, 15 and 16 first.
 """
 
 import argparse
@@ -53,6 +59,7 @@ from scipy.optimize import brentq
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import card_surfaces as cs  # noqa: E402
+import leak_rules as lr  # noqa: E402
 
 PROJECT_DIR = Path(__file__).resolve().parents[1]
 CLEAN = PROJECT_DIR / "data" / "cleaned"
@@ -74,14 +81,8 @@ SEASON = args.season
 
 PA_SCALE = 600
 FAR_OFF_FT = 0.35
-WHIFFS = {"swinging_strike", "swinging_strike_blocked", "foul_tip"}
-FASTBALLS = {"FF", "SI", "FC", "FA"}
-BREAKING = {"SL", "ST", "CU", "KC", "SV", "CS"}
 SWITCH_SHARE = 0.15             # bats from each side on 15%+ of pitches
 ABS_TOP_SHARE = 0.535           # 2026 zone top = 53.5% of the batter's height
-LEAK_MIN_PITCHES = 12
-LEAK_MIN_RUNS = 0.75            # runs per 600 PA, to be listed as a leak
-PLAN_MIN_RUNS = 1.0             # ...and to make the plan
 TREND_MIN_FAR_PITCHES = 150
 
 COUNT_GROUPS = ["first", "ahead", "even", "two"]
@@ -164,27 +165,13 @@ df["z"] = df["plate_z_normalized"] * ZONE_HEIGHT
 # stay batter-relative for the league comparison and the zone regions.
 df["xd"] = np.where(df["stand"] == "L", -df["x"], df["x"])
 df["zd"] = df["sz_bot"] + df["plate_z_normalized"] * (df["sz_top"] - df["sz_bot"])
-df["whiff"] = df["description"].isin(WHIFFS).astype(int)
+df["whiff"] = df["description"].isin(lr.WHIFFS).astype(int)
 df["count_state"] = df["balls"].astype(str) + "-" + df["strikes"].astype(str)
-df["count_group"] = np.select(
-    [(df["balls"] == 0) & (df["strikes"] == 0), df["strikes"] == 2,
-     df["balls"] > df["strikes"]],
-    ["first", "two", "ahead"], "even")
-df["pitch_group"] = np.select(
-    [df["pitch_type"].isin(FASTBALLS), df["pitch_type"].isin(BREAKING)],
-    ["fastball", "breaking"], "offspeed")
-df["region"] = cs.zone_region(df["x"], df["z"], ZONE_HEIGHT)
+df = lr.add_labels(df, ZONE_HEIGHT)          # count_group, pitch_group, region
 df["far_off"] = df["distance_outside_zone"] > FAR_OFF_FT
 
 # Choices and contact: the decision / execution split from steps 12-13
-cell = ["balls", "strikes", "distance_bucket"]
-cost_per_chase = (df[df["is_chase"] == 1].groupby(cell)["chase_cost"].mean()
-                  .rename("league_cost_per_chase"))
-df = df.join(cost_per_chase, on=cell)
-df["league_cost_per_chase"] = df["league_cost_per_chase"].fillna(0.0)
-df["choices"] = df["expected_cost_per_pitch"] - df["is_chase"] * df["league_cost_per_chase"]
-df["contact"] = df["is_chase"] * (df["league_cost_per_chase"] - df["chase_cost"])
-assert np.allclose(df["choices"] + df["contact"], df["runs_saved"])
+df = lr.add_choices_contact(df)
 
 # --------------------------------------------------
 # LEAGUE EXPECTATION FOR EVERY PITCH
@@ -285,7 +272,8 @@ for col, y in [("e_all", "is_chase"), ("e_match", "is_chase")]:
 
 board = pd.read_csv(XCHASE / f"xchase_leaderboard_{SEASON}.csv")
 action = pd.read_csv(XCHASE / "coaching" / f"actionability_{SEASON}.csv")
-advice = pd.read_csv(XCHASE / "coaching" / "take_advice_summary.csv")
+backtest = pd.read_csv(XCHASE / "coaching" / "leak_backtest_summary.csv")
+count_check = pd.read_csv(XCHASE / "coaching" / f"count_check_{SEASON}.csv")
 board = board.merge(action[["batter", "archetype", "far_off_recoverable",
                             "runs_saved_per_600", "decision_per_600", "execution_per_600"]],
                     on="batter", how="left")
@@ -323,12 +311,20 @@ def hand_view(frame, hand):
     return frame if hand == "all" else frame[frame["p_throws"] == hand]
 
 
-def count_table(p, scale):
+# The count check (step 15): xwOBA once the count gets there, by hitter,
+# pitcher hand and count group. The shrunk estimate and its status are
+# for all pitchers only.
+COUNTS = {(int(r.batter), r.hand, r.count_group): r for r in count_check.itertuples()}
+
+
+def count_table(p, scale, batter, hand):
     rows = []
     for g in COUNT_GROUPS + ["total"]:
         s = p if g == "total" else p[p["count_group"] == g]
         ch = s[s["is_chase"] == 1]
         far = s[s["far_off"]]
+        # every plate appearance passes through 0-0, so "first" is the total
+        cc = COUNTS.get((batter, hand, "first" if g == "total" else g))
         rows.append({
             "group": g, "pitches": int(len(s)),
             "chase": s["is_chase"].mean() if len(s) else None,
@@ -339,39 +335,36 @@ def count_table(p, scale):
             "whiff_league": ch["w_match"].mean() if len(ch) else None,
             "choices": s["choices"].sum() * scale,
             "contact": s["contact"].sum() * scale,
+            "xwoba": cc.xwoba if cc is not None else None,
+            "xwoba_league": cc.league_xwoba if cc is not None else None,
         })
     return rows
 
 
-def leaks(p, scale, top=3):
+def leaks(p, scale, batter):
     out = []
-    p = p[p["region"] != "edge"]
-    for (g, pg, reg), s in p.groupby(["count_group", "pitch_group", "region"]):
-        if len(s) < LEAK_MIN_PITCHES:
-            continue
-        choices = s["choices"].sum() * scale
-        contact = s["contact"].sum() * scale
-        extra = (s["is_chase"] - s["e_match"]).sum()
-        if choices > -LEAK_MIN_RUNS or extra <= 0:
-            continue
-        # Where the chases do damage, the choice costs nothing overall:
-        # that pitch is not something to take away.
-        if choices + contact >= 0:
-            continue
+    cells = lr.leak_cells(p, scale, "e_match").head(lr.LEAK_TOP)
+    for lk in cells.itertuples():
+        s = p[(p["count_group"] == lk.count_group) & (p["pitch_group"] == lk.pitch_group)
+              & (p["region"] == lk.region)]
         rhp = (s["p_throws"] == "R").mean()
         chased = s[s["is_chase"] == 1]
         side = chased["stand"].mode().iloc[0]
         on_side = chased[chased["stand"] == side]
+        # Is the hitter struggling once the count gets there? All pitchers,
+        # whatever the hand of the leak list.
+        cc = COUNTS[(batter, "all", lk.count_group)]
         out.append({
-            "count_group": g, "pitch_group": pg, "region": reg,
-            "pitches": int(len(s)), "chases": int(s["is_chase"].sum()),
-            "rate": s["is_chase"].mean(), "league": s["e_match"].mean(),
-            "extra_chases": float(extra), "choices": choices, "contact": contact,
+            "count_group": lk.count_group, "pitch_group": lk.pitch_group, "region": lk.region,
+            "pitches": int(lk.pitches), "chases": int(lk.chases),
+            "rate": lk.rate, "league": lk.league,
+            "extra_chases": float(lk.extra_chases), "choices": lk.choices, "contact": lk.contact,
             "share_rhp": float(rhp),
             "side": side, "x": float(on_side["xd"].median()), "z": float(on_side["zd"].median()),
+            "count_xwoba": cc.xwoba, "count_xwoba_league": cc.league_xwoba,
+            "count_xwoba_shrunk": cc.xwoba_shrunk, "count_status": cc.status,
         })
-    out.sort(key=lambda r: r["choices"])
-    return out[:top]
+    return out
 
 
 def hand_phrase(share_rhp):
@@ -388,7 +381,7 @@ GROUP_WORDS_SHORT = {"first": "On the first pitch", "ahead": "When you're ahead"
 
 def plan_lines(leak_list, summary):
     lines = []
-    for lk in [lk for lk in leak_list if lk["choices"] <= -PLAN_MIN_RUNS][:2]:
+    for lk in [lk for lk in leak_list if lk["choices"] <= -lr.PLAN_MIN_RUNS][:2]:
         hand = hand_phrase(lk["share_rhp"])
         opener = (GROUP_WORDS_SHORT if hand else GROUP_WORDS)[lk["count_group"]]
         lines.append(
@@ -408,14 +401,23 @@ def plan_lines(leak_list, summary):
     return lines
 
 
-slope = advice[advice["kind"] == "slope_per_10pt_cut"].set_index("measure")["value"]
-n_pairs = int(advice.loc[advice["kind"] == "slope_per_10pt_cut", "n_pairs"].iloc[0])
+# What step 16 found when hitters fixed their card's leaks, as a range
+# over its two kinds of pairs (season to season, first half to second).
+payoff = backtest[backtest["test"] == "per 10-pt cut beyond expected"].groupby("measure")["value"]
+
+
+def span(measure, k=1.0):
+    lo, hi = sorted(abs(payoff.get_group(measure)) * k)
+    return f"{lo:.1f} to {hi:.1f}"
+
+
+EVIDENCE_QUESTION = "Does fixing a leak pay?"
 EVIDENCE_LINE = (
-    f"Does taking more pay? Across {n_pairs} hitters' back-to-back seasons, a 10-point cut "
-    f"in far-off chase rate came with {slope['bb_rate'] * 100:+.1f} pts of walk rate, "
-    f"{slope['k_rate'] * 100:+.1f} pts of strikeout rate and {slope['xwoba'] * 1000:+.0f} "
-    f"points of xwOBA. Those hitters also swung at {abs(slope['zone_swing_rate']) * 100:.1f} "
-    "pts fewer strikes, so keep swinging at strikes while you take the far-off pitch.")
+    f"{EVIDENCE_QUESTION} Hitters who chased 10 points less on their leak pitches than their "
+    f"numbers predicted gained {span('offense_runs')} runs per 600 PA (xwOBA) and "
+    f"{span('xchase_plus')} xChase+ points, with only {span('zone_swing_rate', 100)} pts "
+    "fewer swings at strikes. It paid about the same whether or not they hit well in "
+    "those counts.")
 
 print("Building hitter summaries...")
 players = []
@@ -437,8 +439,8 @@ for _, row in board.sort_values("xchase_plus", ascending=False).iterrows():
         "noted": NOTED.get(row["player"], (None, None))[0],
         "coach_note": NOTED.get(row["player"], (None, None))[1],
     }
-    summary["tables"] = {h: count_table(hand_view(p, h), scale) for h in HANDS}
-    summary["leaks"] = {h: leaks(hand_view(p, h), scale) for h in HANDS}
+    summary["tables"] = {h: count_table(hand_view(p, h), scale, bid, h) for h in HANDS}
+    summary["leaks"] = {h: leaks(hand_view(p, h), scale, bid) for h in HANDS}
     summary["plan"] = plan_lines(summary["leaks"]["all"], summary)
     t = trend[trend["batter"] == bid]
     summary["trend"] = [[int(y), float(r)] for y, r in zip(t["game_year"], t["far_off_chase_rate"])]
@@ -689,18 +691,31 @@ def draw_header(card, title, line1, line2):
     card.hline(64, W - 64, 172)
 
 
+def xw(v):
+    return "–" if v is None or not np.isfinite(v) else f"{v:.3f}".lstrip("0")
+
+
 def draw_table(card, x, y, rows, league_only=False):
-    cols = [("", 0, "left"), ("Pitches", 190, "right"), ("Chases", 290, "right"),
-            ("Far-off", 400, "right"), ("Misses", 510, "right")]
+    # A player's table adds the count check: xwOBA once the count gets
+    # there, next to the league's. The average card keeps the narrow table.
+    if league_only:
+        at = {"pitches": 190, "chase": 290, "far": 400, "whiff": 510}
+    else:
+        at = {"pitches": 190, "chase": 275, "far": 360, "whiff": 445, "xwoba": 550,
+              "choices": 660, "contact": 760}
+    cols = [("", 0, "left"), ("Pitches", at["pitches"], "right"), ("Chases", at["chase"], "right"),
+            ("Far-off", at["far"], "right"), ("Misses", at["whiff"], "right")]
     if not league_only:
-        cols += [("Choices", 640, "right"), ("Contact", 760, "right")]
+        cols += [("xwOBA", at["xwoba"], "right"), ("Choices", at["choices"], "right"),
+                 ("Contact", at["contact"], "right")]
     for label, cx, ha in cols:
         card.text(x + cx, y, label, size=14, color="muted", ha=ha, weight="bold")
     sub = "you / avg" if not league_only else "rate"
-    for label, cx, ha in cols[2:5]:
+    for label, cx, ha in cols[2:6]:
         card.text(x + cx, y + 17, sub, size=12, color="muted", ha=ha)
     if not league_only:
-        card.text(x + 700, y + 17, "runs per 600 PA", size=12, color="muted", ha="center")
+        card.text(x + (at["choices"] + at["contact"]) / 2 - 22, y + 17, "runs per 600 PA",
+                  size=12, color="muted", ha="center")
     y += 26
     card.hline(x, x + 770 if not league_only else x + 520, y + 4)
     names = dict(COUNT_LABELS, total="All counts")
@@ -708,19 +723,29 @@ def draw_table(card, x, y, rows, league_only=False):
         y += 23
         bold = "bold" if r["group"] == "total" else "normal"
         card.text(x, y, names[r["group"]], size=15, weight=bold)
-        card.text(x + 190, y, f"{r['pitches']:,}", size=15, ha="right", color="ink2")
-        for key, cx in (("chase", 290), ("far", 400), ("whiff", 510)):
+        card.text(x + at["pitches"], y, f"{r['pitches']:,}", size=15, ha="right", color="ink2")
+        for key in ("chase", "far", "whiff"):
+            cx = at[key]
             if league_only:
                 card.text(x + cx, y, pct(r[key]), size=15, ha="right", weight=bold)
             else:
-                card.text(x + cx - 46, y, pct(r[key]), size=15, ha="right", weight="bold")
+                card.text(x + cx - 44, y, pct(r[key]), size=15, ha="right", weight="bold")
                 card.text(x + cx, y, pct(r[key + "_league"]), size=15, ha="right", color="muted")
         if not league_only:
-            for key, cx in (("choices", 640), ("contact", 760)):
+            card.text(x + at["xwoba"] - 48, y, xw(r["xwoba"]), size=15, ha="right", weight="bold")
+            card.text(x + at["xwoba"], y, xw(r["xwoba_league"]), size=15, ha="right", color="muted")
+            for key in ("choices", "contact"):
                 v = r[key]
-                card.text(x + cx, y, fmt_runs(v), size=15, ha="right",
+                card.text(x + at[key], y, fmt_runs(v), size=15, ha="right",
                           color="ink" if abs(v) >= 1 else "ink2", weight=bold)
+    if not league_only:
+        y += 24
+        card.text(x, y, COUNT_CHECK_NOTE, size=12, color="muted")
     return y
+
+
+COUNT_CHECK_NOTE = ("xwOBA: every plate appearance that reached those counts, against the "
+                    "league's in the same counts.")
 
 
 def draw_trend(card, x, y, w, h, series, league):
@@ -1077,10 +1102,11 @@ def build_page():
         "leagueTrend": [[int(y), float(r)] for y, r in league_trend.items()],
         "players": page_players, "references": references,
         "defaultSlug": slug(README_EXAMPLE), "guide": GUIDE, "evidence": EVIDENCE_LINE,
+        "countNote": COUNT_CHECK_NOTE + " With a pitcher-hand tab, both sides face that hand.",
         "footer": (f"xChase+ 1.1 · Statcast {SEASON} · {len(players)} qualified hitters. "
                    "Every surface compares a hitter with the average hitter on pitches at the "
                    "same spot and count; “Same matchup” also matches batter side and "
-                   "pitcher hand. Runs are per 600 plate appearances. Built by step 15 of the "
+                   "pitcher hand. Runs are per 600 plate appearances. Built by step 17 of the "
                    "Chase Leaderboard project."),
     }
     template = (TEMPLATE_DIR / "player_cards.html").read_text()
@@ -1135,6 +1161,26 @@ def picture(rel_light, rel_dark, alt, width=900):
             f'  <img alt="{alt}" src="{rel_light}" width="{width}">\n</picture>')
 
 
+STATUS_WORDS = {"struggling": "struggling", "average": "about average",
+                "productive": "hitting well"}
+
+
+def count_check_line(p):
+    """One sentence per count group the hitter's leaks are in."""
+
+    parts, seen = [], []
+    for lk in p["leaks"]["all"]:
+        g = lk["count_group"]
+        if g in seen:
+            continue
+        seen.append(g)
+        parts.append(
+            f"{COUNT_LABELS[g]}: {xw(lk['count_xwoba'])} xwOBA once there, league "
+            f"{xw(lk['count_xwoba_league'])}; allowing for noise, "
+            f"{STATUS_WORDS[lk['count_status']]} ({xw(lk['count_xwoba_shrunk'])}).")
+    return " ".join(parts)
+
+
 def write_noted_report():
     by_name = {p["name"]: p for p in players}
     lines = [
@@ -1162,7 +1208,16 @@ def write_noted_report():
                 "../player_cards/reference/average_rhb_dark.png",
                 "The average right-handed hitter's chase rate by location and count, with a guide to reading the cards"),
         "",
-        "**Does taking more pay?** " + EVIDENCE_LINE.replace("Does taking more pay? ", ""),
+        f"**{EVIDENCE_QUESTION}** " + EVIDENCE_LINE.replace(EVIDENCE_QUESTION + " ", ""),
+        "(Step 16; see the main README for the method.)",
+        "",
+        "**The count check.** Under each plan, how the hitter does once the count",
+        "reaches the counts his leaks are in: the xwOBA of every plate appearance",
+        "that got there, against the league's in the same counts (step 15). The",
+        "verdict uses an estimate shrunk for noise, so a small sample or a split that",
+        "doesn't repeat from year to year (being ahead in the count) can't swing it.",
+        "It is context, not a filter: step 16 found that hitters gained about as much",
+        "from fixing a leak whether they were hitting well in those counts or not.",
         "",
     ]
     sections = [("easiest", "Easiest to improve",
@@ -1190,6 +1245,9 @@ def write_noted_report():
                 "",
             ]
             lines += [f"- {line}" for line in p["plan"]]
+            check = count_check_line(p)
+            if check:
+                lines += ["", f"**Count check.** {check}"]
             lines += ["", f"**Coach's note.** {p['coach_note']}", ""]
     (NOTED_DIR / "README.md").write_text("\n".join(lines))
     print(f"  wrote noted_players/README.md ({sum(1 for p in players if p['noted'])} hitters)")
@@ -1209,7 +1267,7 @@ df[keep].to_parquet(CLEAN / f"card_pitches_{SEASON}.parquet", index=False)
                                    "archetype", "noted", "runs_at_stake", "choices", "contact",
                                    "zone", "height_in", "side_pitches", "leaks")}
                 for p in players]}), ensure_ascii=False))
-print(f"  saved card_pitches_{SEASON}.parquet and card_players_{SEASON}.json for step 16")
+print(f"  saved card_pitches_{SEASON}.parquet and card_players_{SEASON}.json for step 18")
 qualified_pitches = build_page()
 check_javascript(qualified_pitches)
 
@@ -1230,6 +1288,10 @@ for p in players:
         "top_leak": (f"{COUNT_LABELS[top['count_group']]} / {top['pitch_group']} / {top['region']}"
                      if top else ""),
         "top_leak_runs": round(top["choices"], 2) if top else None,
+        "top_leak_count_xwoba": round(top["count_xwoba"], 4) if top else None,
+        "top_leak_count_league_xwoba": round(top["count_xwoba_league"], 4) if top else None,
+        "top_leak_count_xwoba_shrunk": round(top["count_xwoba_shrunk"], 4) if top else None,
+        "top_leak_count_status": top["count_status"] if top else "",
         "plan": " ".join(p["plan"]),
     })
 pd.DataFrame(summary_rows).to_csv(CARDS_DIR / f"player_cards_{SEASON}.csv", index=False)

@@ -1,3 +1,5 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Chase Decision Cards</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -292,6 +294,7 @@ summary { cursor: pointer; font-weight: 700; }
 
   // ---- helpers ----
   const pct = (v) => (v == null || !isFinite(v) ? "–" : Math.round(v * 100) + "%");
+  const xw = (v) => (v == null || !isFinite(v) ? "–" : v.toFixed(3).replace(/^0/, ""));
   const runs = (v) => { const r = Math.round(v * 10) / 10; return r === 0 ? "0.0" : (r > 0 ? "+" : "−") + Math.abs(r).toFixed(1); };
   const el = (tag, attrs, ...kids) => {
     const n = document.createElement(tag);
@@ -648,7 +651,7 @@ summary { cursor: pointer; font-weight: 700; }
     const head = el("tr", {}, el("th", { text: "" }), el("th", { text: "Pitches" }));
     for (const [n, s] of [["Chases", leagueOnly ? "rate" : "you / avg"], ["Far-off", leagueOnly ? "rate" : "you / avg"], ["Misses", leagueOnly ? "per chase" : "you / avg"]])
       head.append(el("th", {}, n, el("small", { text: s })));
-    if (!leagueOnly) head.append(el("th", {}, "Choices", el("small", { text: "runs" })), el("th", {}, "Contact", el("small", { text: "runs" })));
+    if (!leagueOnly) head.append(el("th", {}, "xwOBA", el("small", { text: "you / avg" })), el("th", {}, "Choices", el("small", { text: "runs" })), el("th", {}, "Contact", el("small", { text: "runs" })));
     t.append(el("thead", {}, head));
     const body = el("tbody");
     const names = Object.fromEntries(GROUPS.map((g) => [g.key, g.label])); names.total = "All counts";
@@ -658,7 +661,7 @@ summary { cursor: pointer; font-weight: 700; }
         if (leagueOnly) tr.append(el("td", { text: pct(r[k]) }));
         else tr.append(el("td", {}, el("strong", { text: pct(r[k]) }), el("span", { class: "avg", text: pct(r[k + "_league"]) })));
       }
-      if (!leagueOnly) tr.append(el("td", { text: runs(r.choices) }), el("td", { text: runs(r.contact) }));
+      if (!leagueOnly) tr.append(el("td", {}, el("strong", { text: xw(r.xwoba) }), el("span", { class: "avg", text: xw(r.xwoba_league) })), el("td", { text: runs(r.choices) }), el("td", { text: runs(r.contact) }));
       body.append(tr);
     }
     t.append(body);
@@ -731,7 +734,8 @@ summary { cursor: pointer; font-weight: 700; }
     leakSec.append(leaks.length ? list : el("p", { class: "empty", text: "None worth a run per 600 PA." }));
     leakSec.append(el("p", { class: "evidence", text: state.hand === "all" ? "Numbered on the All pitchers row. Runs are what the choices cost, per 600 PA." : "Runs are what the choices cost, per 600 PA." }));
     a.append(leakSec);
-    a.append(el("section", {}, el("h2", { text: "By count" }), countTable(p.tables[state.hand], false)));
+    a.append(el("section", {}, el("h2", { text: "By count" }), countTable(p.tables[state.hand], false),
+      el("p", { class: "evidence", text: D.countNote })));
     a.append(el("section", { class: "trend" }, el("h2", { text: "Far-off chase rate by season" }), trendSvg(p.trend, `${p.name} far-off chase rate by season against the league`)));
     a.append(el("p", { class: "evidence", text: D.evidence }));
   }

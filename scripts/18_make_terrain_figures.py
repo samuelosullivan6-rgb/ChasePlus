@@ -1,7 +1,7 @@
 """
-Step 16: the decision surfaces in 3D, as still images.
+Step 18: the decision surfaces in 3D, as still images.
 
-The player cards (step 15) draw each hitter's chase decisions as a flat
+The player cards (step 17) draw each hitter's chase decisions as a flat
 picture. Here the same surfaces are lifted into a terrain: the floor is
 the plate area from the catcher's view, and height is the swing rate.
 The flat card is still where the numbers are read; the terrain is for
@@ -18,7 +18,7 @@ seeing the shape at a glance (in the README and the video).
       matplotlib cannot depth-sort against a surface)
 
 Reads data/cleaned/card_pitches_<season>.parquet and
-card_players_<season>.json, which step 15 writes. Uses the same smoothing
+card_players_<season>.json, which step 17 writes. Uses the same smoothing
 (card_surfaces.py) and colors (card_style.py) as the cards, so a terrain
 and its flat picture are the same numbers.
 

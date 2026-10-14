@@ -1,0 +1,8 @@
+measure,split_half_r,full_season_reliability,year_to_year_r,mean_weight_kept_after_shrinkage,hitter_seasons,season_pairs
+overall,0.5730,0.7286,0.6601,0.7429,1594,941
+ahead,0.3853,0.5563,0.5059,,1594,941
+even,0.4350,0.6063,0.5642,,1594,941
+two,0.3960,0.5674,0.5228,,1594,941
+ahead beyond overall,0.0470,0.0897,0.0705,0.0990,1594,941
+even beyond overall,0.1660,0.2848,0.2863,0.4434,1594,941
+two beyond overall,0.3642,0.5339,0.5252,0.6262,1594,941

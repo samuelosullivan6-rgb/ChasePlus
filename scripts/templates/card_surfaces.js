@@ -1,7 +1,7 @@
 /*
  * JavaScript twin of scripts/card_surfaces.py, used by player_cards.html.
  * The constants and the arithmetic must match the Python file exactly;
- * step 15 runs both on one hitter and stops if they disagree.
+ * step 17 runs both on one hitter and stops if they disagree.
  */
 (function (root) {
   "use strict";
