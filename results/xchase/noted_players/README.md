@@ -72,7 +72,7 @@ xChase+ 78 (251 of 261). Runs at stake on far-off pitches: 16.8 per 600 PA. Choi
 
 **Count check.** Two strikes: .254 xwOBA once there, league .234; allowing for noise, hitting well (.252).
 
-**Coach's note.** One pitch: the two-strike breaking ball straight down from a right-hander. The contact is the best in this group, so nothing else needs to change.
+**Coach's note.** One pitch type: soft stuff below the zone with two strikes, mostly from right-handers, about half his net loss. His contact is among the best in this group, so nothing else needs to change.
 
 ### Ernie Clement
 
@@ -90,7 +90,7 @@ xChase+ 74 (254 of 261). Runs at stake on far-off pitches: 13.8 per 600 PA. Choi
 
 **Count check.** Two strikes: .213 xwOBA once there, league .234; allowing for noise, struggling (.211). First pitch: .258 xwOBA once there, league .315; allowing for noise, struggling (.275).
 
-**Coach's note.** The high fastball before two strikes. It usually gets put in play, so it never looks like a mistake, but it is weak contact that gives away a hitter's count.
+**Coach's note.** The high fastball before two strikes. He puts 44% of those chases in play (league 18%), so it never looks like a mistake, but it is weak contact (.173 xwOBA vs .283) that gives away a hitter's count.
 
 ### Angel Martínez
 
@@ -126,7 +126,7 @@ xChase+ 86 (226 of 261). Runs at stake on far-off pitches: 12.2 per 600 PA. Choi
 
 **Count check.** Two strikes: .212 xwOBA once there, league .234; allowing for noise, struggling (.220). Even or behind: .247 xwOBA once there, league .276; allowing for noise, struggling (.257).
 
-**Coach's note.** The high fastball with two strikes. Early-count chasing has already improved three seasons running, so leave that alone.
+**Coach's note.** The high fastball with two strikes first. His early-count chasing came down in 2025 (35% to 28% of far-off pitches) but is still well above the league's 17% and costs about 4 runs; it is next.
 
 ### José Caballero
 
@@ -162,7 +162,7 @@ xChase+ 78 (249 of 261). Runs at stake on far-off pitches: 10.0 per 600 PA. Choi
 
 **Count check.** Two strikes: .226 xwOBA once there, league .234; allowing for noise, about average (.231). Ahead in the count: .410 xwOBA once there, league .358; allowing for noise, hitting well (.370).
 
-**Coach's note.** The first-pitch and one-strike high fastball is the free part. The two-strike breaking ball may be contact as much as choice.
+**Coach's note.** The free part is the breaking ball below the zone before two strikes (48% vs 30%, about 5 runs). The high fastball looks worse than it is: his contact nearly pays for it. The two-strike breaking ball may be contact as much as choice.
 
 ### Ozzie Albies
 
@@ -180,7 +180,7 @@ xChase+ 82 (239 of 261). Runs at stake on far-off pitches: 8.5 per 600 PA. Choic
 
 **Count check.** Two strikes: .224 xwOBA once there, league .234; allowing for noise, about average (.224). Even or behind: .262 xwOBA once there, league .276; allowing for noise, struggling (.258).
 
-**Coach's note.** Changeups and splitters that dive below the knees, heaviest against left-handers, in every count.
+**Coach's note.** Changeups and splitters that dive below the knees, in every count, from both hands. Against left-handers he chases far-off pitches of every kind more (35% vs 19%).
 
 ### Luis García
 
@@ -198,7 +198,7 @@ xChase+ 86 (225 of 261). Runs at stake on far-off pitches: 8.4 per 600 PA. Choic
 
 **Count check.** Ahead in the count: .369 xwOBA once there, league .358; allowing for noise, hitting well (.377). Two strikes: .285 xwOBA once there, league .234; allowing for noise, hitting well (.269).
 
-**Coach's note.** With three balls, swing only at strikes. Then the high fastball, chased nine times in ten with two strikes.
+**Coach's note.** With three balls, swing only at strikes: that is the big one, about 5 runs. With two strikes he chases nine high fastballs in ten, but his contact there pays for it, so leave that pitch alone.
 
 ## Biggest losses
 
@@ -238,7 +238,7 @@ xChase+ 66 (260 of 261). Runs at stake on far-off pitches: 12.0 per 600 PA. Choi
 
 **Count check.** Two strikes: .188 xwOBA once there, league .234; allowing for noise, struggling (.205).
 
-**Coach's note.** One rule covers it: spin that starts at the knees and keeps dropping is a take in every count. The fastball decisions are fine.
+**Coach's note.** Breaking balls that start at the knees and keep dropping are a take in every count, and the changeup below the zone is the second piece. The fastball decisions are fine.
 
 ### Zach Neto
 
@@ -256,7 +256,7 @@ xChase+ 71 (256 of 261). Runs at stake on far-off pitches: 10.5 per 600 PA. Choi
 
 **Count check.** Two strikes: .214 xwOBA once there, league .234; allowing for noise, struggling (.221).
 
-**Coach's note.** Sliders below the zone from right-handers. Sit fastball; the fastball decisions are a strength, and this was league average in 2024.
+**Coach's note.** Sliders below the zone from right-handers. He chased them well above league in 2024 and 2025 too; in 2026 pitchers threw him far more (290, up from 184). Sit fastball; the fastball decisions are a strength.
 
 ### Andrés Giménez
 
@@ -274,7 +274,7 @@ xChase+ 67 (259 of 261). Runs at stake on far-off pitches: 10.0 per 600 PA. Choi
 
 **Count check.** Two strikes: .223 xwOBA once there, league .234; allowing for noise, about average (.227).
 
-**Coach's note.** New in 2026 (xChase+ 95, 105, then 67). Find out what changed before changing anything; the target is 0-1 and 1-1.
+**Coach's note.** Not new: xChase+ 69 and 74 in 2022-23, then 95 and 105, and back to 67. Find out what made 2024-25 work before changing anything; the target is 0-1 and 1-1.
 
 ### Jeremy Peña
 
@@ -310,7 +310,7 @@ xChase+ 76 (253 of 261). Runs at stake on far-off pitches: 7.6 per 600 PA. Choic
 
 **Count check.** Two strikes: .175 xwOBA once there, league .234; allowing for noise, struggling (.201).
 
-**Coach's note.** Three-ball counts first: nothing below the knees is a swing. Then two-strike soft stuff down. Smallest sample of the group.
+**Coach's note.** Three-ball counts first: swing only at strikes (62% chase against about 40%, about 5 runs in 45 pitches). Then two-strike soft stuff down, the bigger loss. Smallest sample of the group.
 
 ### Jarren Duran
 

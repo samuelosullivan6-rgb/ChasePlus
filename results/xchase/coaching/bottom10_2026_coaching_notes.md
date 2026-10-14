@@ -121,7 +121,9 @@ Ordered worst to best. "Repeats?" compares with 2024 and 2025.
 - With two strikes he chases 77% of fastballs above the zone (league 52%).
 - Contact on chases is weak: .221 xwOBA on chased balls in play (league
   .288), the lowest of the ten.
-- Repeats? **No.** xChase+ 95, 105, 67. Chase rate 38%, 35%, 44%. The
+- Repeats? **Not from 2024-25.** xChase+ 95, 105, 67. Before this
+  report's window he was at 69 (2022) and 74 (2023), so 2026 is a return
+  to his earlier level, not a new problem. Chase rate 38%, 35%, 44%. The
   2026 expansion is across every zone and pitch type (up 45/43/49, down
   36/38/45, breaking 41/32/47). In 2025 he was an above-average chase
   decision-maker.
@@ -187,12 +189,15 @@ Ordered worst to best. "Repeats?" compares with 2024 and 2025.
 - Whiffs on 54% of chases (league 43%), so there is a contact component on
   the slider too.
 - Repeats? Trending the wrong way. xChase+ 100, 79, 71. Chase rate below
-  the zone 38%, 38%, 50%; on breaking balls 35%, 33%, 43%. In 2024 he was
-  league average at this.
+  the zone 38%, 38%, 50%; on breaking balls 35%, 33%, 43%. That is not a
+  new habit, though: against the league on the same pitches he chased
+  right-handers' sliders and sweepers below the zone 9 points above
+  average in 2024, 5 in 2025 and 9 in 2026. What changed is volume: 290
+  of them in 2026, 184 in 2024.
 - **Draft adjustment:** right-handed slider below the zone, period. His
   fastball decisions are a strength, so this is a "sit fastball, take
-  anything that breaks below the knees" plan, and the 2024 numbers say he
-  could do it. The two-strike breaking-ball cells below the zone and
+  anything that breaks below the knees" plan. The 2024 numbers do not show he
+  has done it before, so expect it to take work. The two-strike breaking-ball cells below the zone and
   down-and-away are -9.5 together.
 
 ### 7. Salvador Pérez (xChase+ 73, -15.5 runs)
@@ -251,8 +256,9 @@ Ordered worst to best. "Repeats?" compares with 2024 and 2025.
 - Repeats? Only a 2025 partial (472 out-of-zone pitches, not qualified).
   His two-strike chase rate then was below league (33%), so the two-strike
   pattern may be a 2026 thing; whiff rate on chases was 56% then too.
-- **Draft adjustment:** cheapest first: with three balls, nothing below
-  the knees is a swing. That is -5 in 45 pitches. Then the two-strike soft
+- **Draft adjustment:** cheapest first: with three balls, swing only
+  at strikes. That is -5 in 45 pitches, and most of it is not below the
+  knees (the pitch inside is the biggest piece). Then the two-strike soft
   stuff down and down-and-away (-9.7 across the three cells). Leave the
   pitch away alone; it is where he does damage. Flag the sample size on
   anything beyond the three-ball rule.

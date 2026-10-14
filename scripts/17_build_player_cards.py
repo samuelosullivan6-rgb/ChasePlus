@@ -107,22 +107,22 @@ PITCH_GROUPS = ["fastball", "breaking", "offspeed"]
 NOTED = {
     # Easiest to improve (step 13): decision-only, persistent pattern
     "Salvador Pérez": ("easiest", "Volume, not contact: these chases turn out better than the league's, which softens every leak but erases none. Start with breaking balls before two strikes, where the take costs nothing in strikeouts."),
-    "Michael Harris": ("easiest", "One pitch: the two-strike breaking ball straight down from a right-hander. The contact is the best in this group, so nothing else needs to change."),
-    "Ernie Clement": ("easiest", "The high fastball before two strikes. It usually gets put in play, so it never looks like a mistake, but it is weak contact that gives away a hitter's count."),
+    "Michael Harris": ("easiest", "One pitch type: soft stuff below the zone with two strikes, mostly from right-handers, about half his net loss. His contact is among the best in this group, so nothing else needs to change."),
+    "Ernie Clement": ("easiest", "The high fastball before two strikes. He puts 44% of those chases in play (league 18%), so it never looks like a mistake, but it is weak contact (.173 xwOBA vs .283) that gives away a hitter's count."),
     "Angel Martínez": ("easiest", "Two strikes, right-hander, soft stuff that starts at the knees: take it. The contact is there on the swings that stay."),
-    "Ceddanne Rafaela": ("easiest", "The high fastball with two strikes. Early-count chasing has already improved three seasons running, so leave that alone."),
+    "Ceddanne Rafaela": ("easiest", "The high fastball with two strikes first. His early-count chasing came down in 2025 (35% to 28% of far-off pitches) but is still well above the league's 17% and costs about 4 runs; it is next."),
     "José Caballero": ("easiest", "One pitch with two strikes: the fastball above the belt. He has chased more of the far-off ones every year (55%, 65%, 77% since 2024), even in 2025, when his xChase+ was 109."),
-    "Ozzie Albies": ("easiest", "Changeups and splitters that dive below the knees, heaviest against left-handers, in every count."),
-    "Luis García": ("easiest", "With three balls, swing only at strikes. Then the high fastball, chased nine times in ten with two strikes."),
-    "Hunter Goodman": ("easiest", "The first-pitch and one-strike high fastball is the free part. The two-strike breaking ball may be contact as much as choice."),
+    "Ozzie Albies": ("easiest", "Changeups and splitters that dive below the knees, in every count, from both hands. Against left-handers he chases far-off pitches of every kind more (35% vs 19%)."),
+    "Luis García": ("easiest", "With three balls, swing only at strikes: that is the big one, about 5 runs. With two strikes he chases nine high fastballs in ten, but his contact there pays for it, so leave that pitch alone."),
+    "Hunter Goodman": ("easiest", "The free part is the breaking ball below the zone before two strikes (48% vs 30%, about 5 runs). The high fastball looks worse than it is: his contact nearly pays for it. The two-strike breaking ball may be contact as much as choice."),
     # Biggest losses (step 12): the bottom 10 not already listed
     "Mickey Moniak": ("biggest", "Two separate leaks: high fastballs early, low breaking balls with two strikes. Fix the early one first; it costs nothing in strikeouts."),
-    "Ezequiel Tovar": ("biggest", "One rule covers it: spin that starts at the knees and keeps dropping is a take in every count. The fastball decisions are fine."),
-    "Andrés Giménez": ("biggest", "New in 2026 (xChase+ 95, 105, then 67). Find out what changed before changing anything; the target is 0-1 and 1-1."),
+    "Ezequiel Tovar": ("biggest", "Breaking balls that start at the knees and keep dropping are a take in every count, and the changeup below the zone is the second piece. The fastball decisions are fine."),
+    "Andrés Giménez": ("biggest", "Not new: xChase+ 69 and 74 in 2022-23, then 95 and 105, and back to 67. Find out what made 2024-25 work before changing anything; the target is 0-1 and 1-1."),
     "Jarren Duran": ("biggest", "A contact problem: six chases in ten are misses. The two-strike take line should be stricter than league norms, especially below the knees against right-handers."),
     "Colson Montgomery": ("biggest", "A contact problem: two chases in three are misses, so a chase is close to a sure strike. Start by taking the first-strike pitch below the zone."),
-    "Zach Neto": ("biggest", "Sliders below the zone from right-handers. Sit fastball; the fastball decisions are a strength, and this was league average in 2024."),
-    "Oswald Peraza": ("biggest", "Three-ball counts first: nothing below the knees is a swing. Then two-strike soft stuff down. Smallest sample of the group."),
+    "Zach Neto": ("biggest", "Sliders below the zone from right-handers. He chased them well above league in 2024 and 2025 too; in 2026 pitchers threw him far more (290, up from 184). Sit fastball; the fastball decisions are a strength."),
+    "Oswald Peraza": ("biggest", "Three-ball counts first: swing only at strikes (62% chase against about 40%, about 5 runs in 45 pitches). Then two-strike soft stuff down, the bigger loss. Smallest sample of the group."),
     "Jeremy Peña": ("biggest", "The first pitch, and the two-strike slider away from right-handers. Keep the aggression up in the zone; that is where the damage comes from."),
 }
 README_EXAMPLE = "Salvador Pérez"

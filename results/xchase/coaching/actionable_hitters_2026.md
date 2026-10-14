@@ -55,7 +55,7 @@ nine combine the biggest far-off loss with evidence the pattern is real:
 | Player | xChase+ | Decision | Execution | Far-off recoverable | xChase+ if fixed | Far-off chase rate by season (2K) | Note |
 |---|---:|---:|---:|---:|---:|---|---|
 | Salvador Pérez | 73 | -23.3 | +7.8 | 16.9 | 112 | .48 / .37 / .34 / .38 | four straight seasons of 15-22 far-off runs lost |
-| Michael Harris II | 78 | -21.8 | +9.0 | 16.8 | 116 | .42 / .42 / .48 / .50 | best execution in the group; far-off loss has grown every year |
+| Michael Harris II | 78 | -21.8 | +9.0 | 16.8 | 116 | .42 / .42 / .48 / .50 | execution second only to Martínez in the group; far-off loss has grown every year |
 | Ernie Clement | 74 | -17.4 | +3.2 | 13.8 | 105 | .50 / .44 / .55 | lowest whiff rate on chases in the group (23%) |
 | Angel Martínez | 87 | -17.8 | +9.3 | 12.6 | 116 | .48 / .47 | two seasons, same pattern |
 | Ceddanne Rafaela | 86 | -16.6 | +8.5 | 12.2 | 113 | .42 / .36 / .46 | three seasons at 10-16 far-off runs lost |
@@ -112,8 +112,9 @@ baseline, not a slump.
 **Michael Harris II.** The loss is the most concentrated in the group:
 -8.9 of -16.8 far-off runs come with two strikes against right-handers,
 and -5.0 from one cell, 2-strike breaking balls straight down (76% chase
-vs 47%, 15 excess). Sliders and curves at 80-86 mph. His chases are the
-best in the group (+9.0 execution; .32 xwOBA on chased balls in play), so
+vs 47%, 15 excess). Sliders and curves at 80-86 mph. His chases are
+among the best in the group (+9.0 execution, second to Martínez's +9.3;
+.32 xwOBA on chased balls in play), so
 a chase that stays in the zone-ish is not the problem. Draft: a 2-strike
 breaking ball that starts at the knees from a right-hander is a take.
 Nothing else needs to change; his early-count far-off chase (29%) is high
@@ -140,10 +141,11 @@ strikes, right-hander, anything soft that starts at the knees, take it.
 **Ceddanne Rafaela.** Fastballs up: 2-strike 55% chase vs 39% (11
 excess, -3.5), 1-strike 50% vs 24% (10 excess, -1.0). Mostly 95 mph
 four-seamers. Secondary: 2-strike breaking balls away (71% vs 32%). He
-has improved: far-off early-count chase went 35% to 28% to 27% over three
-seasons and 2024's far-off loss was -15.8. Draft: the high heater with
-two strikes is where to spend the attention; 2026 was his best early-count
-year so leave that alone.
+has improved some: far-off early-count chase went 35% to 28% in 2025, then
+held at 27% in 2026, still well above the league's 17% (-4.4 early far-off
+decision runs), and 2024's far-off loss was -15.8. Draft: the high heater
+with two strikes is where to spend the attention first; the early-count
+chasing is next, not something to leave alone.
 
 **José Caballero.** The cleanest case in the group. With fewer than two
 strikes he is a league-average taker (far-off chase 16%, decision +0.3).
@@ -159,10 +161,11 @@ elsewhere, and this pitch has gotten worse every season.
 **Ozzie Albies.** Everything is below the zone and most of it is soft:
 2-strike splitters/changeups down (70% vs 39%), 2-strike breaking balls
 down (73% vs 47%), and the same pitches earlier (0- and 1-strike offspeed
-and breaking down, 61-65% vs 26-39%). The loss is heavier from lefties
-(-5.8 of -8.5 far-off runs on a third of the pitches). Draft: a changeup
-or splitter that disappears below the knees from a left-hander is the
-pitch, every count.
+and breaking down, 61-65% vs 26-39%). The far-off loss is heavier from lefties
+(-5.8 of -8.5 far-off runs on a third of the pitches), but it is spread
+across pitch types: on far-off changeups and splitters he chases about the
+same against both hands (37% and 39%). Draft: a changeup or splitter that
+disappears below the knees is the pitch, from either hand, every count.
 
 **Luis García.** Two unrelated leaks. High fastballs: 2-strike 90% chase
 vs 39% (18 of 20) and 0-strike 60% vs 14% (18 of 30), -4.3 runs together.
@@ -176,9 +179,12 @@ balls, a swing has to be at a strike. Full stop.
 (0-strike 37% vs 14%, 1-strike 50% vs 24%, 21 excess, -2.4) and breaking
 balls down with one strike (65% vs 39%, -1.9). He chases 23% of 0-0
 far-off pitches against 11%. Execution is only +1.2 and his whiff rate on
-chases (50%) is above league, so he is the weakest fit here. Draft: the
-0-0 and 1-strike high fastball is the free part; the two-strike breaking
-ball may be a contact issue as much as a decision one.
+chases (50%) is above league, so he is the weakest fit here. His chases on the
+high fastball turn out well, though: before two strikes they net only
+about -1.0 run once contact is counted, while breaking balls below the
+zone before two strikes net about -5.3 (48% chase vs 30%). Draft: the
+breaking ball below the zone before two strikes is the free part; the
+two-strike breaking ball may be a contact issue as much as a decision one.
 
 ## Reading the files
 
