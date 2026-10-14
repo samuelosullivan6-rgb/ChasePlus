@@ -578,11 +578,13 @@ summary { cursor: pointer; font-weight: 700; }
       }
     }
     if (extras && extras.markers) {
+      // markers shrink with the panel so they never swamp a small picture (phones)
+      const scale = Math.min(1, rect.width / 150);
       for (const [n, x, z] of extras.markers) {
-        const r = 11 * dpr;
+        const r = 11 * dpr * scale;
         ctx.beginPath(); ctx.arc(sx(x), sz(z), r, 0, Math.PI * 2);
-        ctx.fillStyle = T.surface; ctx.fill(); ctx.strokeStyle = T.ink; ctx.lineWidth = 1.6 * dpr; ctx.stroke();
-        ctx.fillStyle = T.ink; ctx.font = `800 ${13 * dpr}px ${getComputedStyle(document.body).fontFamily}`;
+        ctx.fillStyle = T.surface; ctx.fill(); ctx.strokeStyle = T.ink; ctx.lineWidth = 1.6 * dpr * Math.max(scale, 0.6); ctx.stroke();
+        ctx.fillStyle = T.ink; ctx.font = `800 ${13 * dpr * scale}px ${getComputedStyle(document.body).fontFamily}`;
         ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(String(n), sx(x), sz(z) + 0.5 * dpr);
       }
     }
