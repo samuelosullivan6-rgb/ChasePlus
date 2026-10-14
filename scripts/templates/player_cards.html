@@ -114,7 +114,9 @@ aside h2 { font-size: 20px; font-weight: 800; }
 .leaks .runs { font-weight: 800; font-variant-numeric: tabular-nums; text-align: right; }
 .empty { color: var(--ink2); }
 .tablewrap { overflow-x: auto; }
-table { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; font-size: 14px; }
+/* color stated on the table itself: a browser extension's user stylesheet that colors tables
+   would otherwise win, since author rules only beat user rules when they exist */
+table { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; font-size: 14px; color: var(--ink); }
 th, td { padding: 4px 8px; text-align: right; white-space: nowrap; }
 th:first-child, td:first-child { text-align: left; padding-left: 0; }
 thead th { color: var(--muted); font-size: 12px; font-weight: 700; border-bottom: 1px solid var(--hair); vertical-align: bottom; }
