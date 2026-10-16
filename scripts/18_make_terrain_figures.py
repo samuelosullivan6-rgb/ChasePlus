@@ -60,9 +60,9 @@ AVERAGE_ZONE = meta["average_zone"]
 XS, ZS = cs.grid()
 GX, GZ = np.meshgrid(XS, ZS)
 COUNT_LABELS = {"first": "First pitch", "ahead": "Ahead in the count",
-                "even": "Even or behind", "two": "Two strikes"}
+                "even": "0-1 or 1-1", "two": "Two strikes"}
 COUNT_DETAIL = {"first": "0-0", "ahead": "1-0  2-0  3-0  2-1  3-1",
-                "even": "0-1  1-1", "two": "0-2  1-2  2-2  3-2"}
+                "even": "even or behind", "two": "0-2  1-2  2-2  3-2"}
 REGION_WORDS = {"up": "above the zone", "down": "below the zone", "in": "inside",
                 "away": "away", "up-in": "up and in", "up-away": "up and away",
                 "down-in": "down and in", "down-away": "down and away"}
@@ -153,8 +153,8 @@ def average_terrain(theme):
     mask = cs.in_zone_mask(XS, ZS, *zone)
     fig = figure(t)
     text(fig, 64, 76, "The average right-handed hitter's chase terrain", t, 40, weight="bold")
-    text(fig, 64, 118, "Height and color are how often a pitch outside the zone gets a swing. "
-         "The walls rise with every strike and are steepest right next to the zone.", t, 20, "ink2")
+    text(fig, 64, 118, "Height and color are how often a pitch outside the zone gets a swing; darker "
+         "is more. The walls rise with every strike and are steepest right next to the zone.", t, 20, "ink2")
     peaks = {}
     for k, g in enumerate(["first", "ahead", "even", "two"]):
         frame = lg[lg["count_group"] == g]
@@ -232,7 +232,7 @@ def hitter_terrain(name, theme):
     if leak:
         y += 150
         text(fig, 64, y, "BIGGEST LEAK", t, 13, "muted", weight="bold")
-        text(fig, 64, y + 32, f"{COUNT_LABELS[group]}, {where}", t, 18)
+        text(fig, 64, y + 32, leak.get("phrase", f"{COUNT_LABELS[group]}, {where}"), t, 18)
         text(fig, 64, y + 60, f"{leak['rate'] * 100:.0f}% swings vs {leak['league'] * 100:.0f}% for the "
              f"average hitter, {abs(leak['choices']):.1f} runs per 600 PA", t, 15, "ink2")
     text(fig, 64, H - 26, "Catcher's view, around the hitter's own zone (outlined at the rim of the hole in the middle); "
