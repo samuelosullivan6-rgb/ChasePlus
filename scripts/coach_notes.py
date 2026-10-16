@@ -40,28 +40,31 @@ FAR = {"clearly off", "nowhere near"}
 KEYS = ["game_pk", "at_bat_number", "pitch_number", "batter", "game_year"]
 
 # The 17 hitters named in the step 12 and 13 reports, with a coach's
-# note condensed from those reports. Everything else on their cards is
-# computed, the same as for every other hitter.
+# note condensed from those reports and the leak the note says to start
+# with (count group, pitch group, side of the zone): step 17 makes that
+# leak the plan's first line, so the player's plan and the staff's note
+# open in the same place. Everything else on their cards is computed, the
+# same as for every other hitter.
 NOTED = {
     # Easiest to improve (step 13): decision-only, persistent pattern
-    "Salvador Pérez": ("easiest", "Volume, not contact: these chases turn out better than the league's, which softens every leak but erases none. Start with breaking balls before two strikes, where the take costs nothing in strikeouts."),
-    "Michael Harris": ("easiest", "One pitch type: soft stuff below the zone with two strikes, mostly from right-handers, about half his net loss. His contact is among the best in this group, so nothing else needs to change."),
-    "Ernie Clement": ("easiest", "The high fastball before two strikes. He puts 44% of those chases in play (league 18%), so it never looks like a mistake, but it is weak contact (.173 xwOBA vs .283) that gives away a hitter's count."),
-    "Angel Martínez": ("easiest", "Two strikes, right-hander, soft stuff that starts at the knees: take it. The contact is there on the swings that stay."),
-    "Ceddanne Rafaela": ("easiest", "The high fastball with two strikes first. His early-count chasing came down in 2025 (35% to 28% of far-off pitches) but is still well above the league's 17% and costs about 4 runs; it is next."),
-    "José Caballero": ("easiest", "One pitch with two strikes: the fastball above the belt. He has chased more of the far-off ones every year (55%, 65%, 77% since 2024), even in 2025, when his xChase+ was 109."),
-    "Ozzie Albies": ("easiest", "Changeups and splitters that dive below the knees, in every count, from both hands. Against left-handers he chases far-off pitches of every kind more (35% vs 19%)."),
-    "Luis García": ("easiest", "With three balls, swing only at strikes: that is the big one, about 5 runs. With two strikes he chases nine high fastballs in ten, but his contact there pays for it, so leave that pitch alone."),
-    "Hunter Goodman": ("easiest", "The free part is the breaking ball below the zone before two strikes (48% vs 30%, about 5 runs). The high fastball looks worse than it is: his contact nearly pays for it. The two-strike breaking ball may be contact as much as choice."),
+    "Salvador Pérez": ("easiest", "Volume, not contact: these chases turn out better than the league's, which softens every leak but erases none. Start with breaking balls before two strikes, the plan's first line, where the take costs nothing in strikeouts.", ("even", "breaking", "down")),
+    "Michael Harris": ("easiest", "One pitch type: soft stuff below the zone with two strikes, mostly from right-handers, about half of what his chases cost him. His contact is among the best in this group, so nothing else needs to change.", ("two", "breaking", "down")),
+    "Ernie Clement": ("easiest", "The high fastball before two strikes, the plan's first line. He puts 44% of those chases in play (league 18%), so it never looks like a mistake, but it is weak contact (.173 xwOBA vs .283) that gives away a hitter's count.", ("first", "fastball", "up")),
+    "Angel Martínez": ("easiest", "Two strikes, right-hander, soft stuff that starts at the knees: take it. The contact is there on the swings that stay.", ("two", "breaking", "down")),
+    "Ceddanne Rafaela": ("easiest", "The high fastball with two strikes first. His early-count chasing came down in 2025 (35% to 28% of far-off pitches) but is still well above the league's 17% and costs about 4 runs; it is next.", ("two", "fastball", "up")),
+    "José Caballero": ("easiest", "One pitch with two strikes: the fastball above the belt. He has chased more of the far-off ones every year (55%, 65%, 77% since 2024), even in 2025, when his xChase+ was 109.", ("two", "fastball", "up")),
+    "Ozzie Albies": ("easiest", "Changeups and splitters that dive below the knees, in every count, from both hands; the two-strike ones on the plan are the biggest piece. Against left-handers he chases far-off pitches of every kind more (35% vs 19%).", ("two", "offspeed", "down")),
+    "Luis García": ("easiest", "With three balls, swing only at strikes: that is the big one, about 5 runs, and on this card those counts sit inside 'Ahead in the count', the plan's first line. With two strikes he chases nine high fastballs in ten, but his contact there pays for it, so don't coach that one.", ("ahead", "fastball", "up")),
+    "Hunter Goodman": ("easiest", "The free part is the breaking ball below the zone before two strikes (48% vs 30%, about 5 runs), the plan's first line. The high fastball looks worse than it is: his contact nearly pays for it. The two-strike breaking ball may be contact as much as choice.", ("ahead", "breaking", "down")),
     # Biggest losses (step 12): the bottom 10 not already listed
-    "Mickey Moniak": ("biggest", "Two separate leaks: high fastballs early, low breaking balls with two strikes. Fix the early one first; it costs nothing in strikeouts."),
-    "Ezequiel Tovar": ("biggest", "Breaking balls that start at the knees and keep dropping are a take in every count, and the changeup below the zone is the second piece. The fastball decisions are fine."),
-    "Andrés Giménez": ("biggest", "Not new: xChase+ 69 and 74 in 2022-23, then 95 and 105, and back to 67. Find out what made 2024-25 work before changing anything; the target is 0-1 and 1-1."),
-    "Jarren Duran": ("biggest", "A contact problem: six chases in ten are misses. The two-strike take line should be stricter than league norms, especially below the knees against right-handers."),
-    "Colson Montgomery": ("biggest", "A contact problem: two chases in three are misses, so a chase is close to a sure strike. Start by taking the first-strike pitch below the zone."),
-    "Zach Neto": ("biggest", "Sliders below the zone from right-handers. He chased them well above league in 2024 and 2025 too; in 2026 pitchers threw him far more (290, up from 184). Sit fastball; the fastball decisions are a strength."),
-    "Oswald Peraza": ("biggest", "Three-ball counts first: swing only at strikes (62% chase against about 40%, about 5 runs in 45 pitches). Then two-strike soft stuff down, the bigger loss. Smallest sample of the group."),
-    "Jeremy Peña": ("biggest", "The first pitch, and the two-strike slider away from right-handers. Keep the aggression up in the zone; that is where the damage comes from."),
+    "Mickey Moniak": ("biggest", "Two separate leaks: pitches below the zone with two strikes, and the early counts, where he chases high fastballs and soft stuff below the zone far more than the league. Fix the early ones first; they cost nothing in strikeouts.", ("ahead", "offspeed", "down")),
+    "Ezequiel Tovar": ("biggest", "Breaking balls that start at the knees and keep dropping are a take in every count, with two strikes first and then earlier; the changeup below the zone is the second piece. The fastball decisions are fine.", ("two", "breaking", "down")),
+    "Andrés Giménez": ("biggest", "Not new: xChase+ 69 and 74 in 2022-23, then 95 and 105, and back to 67. Find out what made 2024-25 work before any mechanical change; the counts to look at are 0-1 and 1-1. The two-strike takes on the plan are the cheap rules in the meantime.", ("two", "fastball", "up")),
+    "Jarren Duran": ("biggest", "A contact problem: six chases in ten are misses. The two-strike take line should be stricter than league norms, especially below the knees against right-handers.", ("two", "breaking", "down")),
+    "Colson Montgomery": ("biggest", "A contact problem: two chases in three are misses, so a chase is close to a sure strike. Start with the breaking ball below the zone when he is ahead, the plan's first take; with two strikes he cannot afford to chase at all.", ("ahead", "breaking", "down")),
+    "Zach Neto": ("biggest", "Sliders below the zone from right-handers. He chased them well above league in 2024 and 2025 too; in 2026 pitchers threw him far more (290, up from 184). Sit fastball; the fastball decisions are a strength.", ("two", "breaking", "down")),
+    "Oswald Peraza": ("biggest", "Three-ball counts first: swing only at strikes (62% chase against about 40%, about 5 runs in 45 pitches); on this card they sit inside 'Ahead in the count' and the 3-2 part of 'Two strikes'. Then the two-strike soft stuff down, the plan's two lines and the bigger loss. Fewest plate appearances of the 17, so flag the sample on anything beyond the three-ball rule.", ("two", "breaking", "down")),
+    "Jeremy Peña": ("biggest", "The two-strike fastball a ball or more above the zone is the one clear take on his card, the plan's first line; his contact pays for the high fastballs nearer the zone, so keep him swinging at strikes at the top of it. The two-strike slider away from right-handers and the breaking ball below the zone at 0-1 and 1-1 were mostly within a ball of the zone: video items, a pattern a pitcher can plan around, not take rules. The first pitch, where he chases 32% against 19%, is the other early-count piece.", ("two", "fastball", "up")),
 }
 
 
@@ -156,7 +159,7 @@ def soft(f):
 
 def claims(d):
     p = {x["name"]: x for x in d.players}
-    easiest = [n for n, (group, _) in NOTED.items() if group == "easiest"]
+    easiest = [n for n, (group, *_) in NOTED.items() if group == "easiest"]
     out = []
 
     def add(name, text, result):
@@ -179,7 +182,7 @@ def claims(d):
     rhp = d.net(m[(m["strikes"] == 2) & soft(m) & m["down"] & (m["p_throws"] == "R")], "Michael Harris")
     share = rhp / d.net(m, "Michael Harris")
     add("Michael Harris", "soft stuff below the zone with two strikes, mostly from right-handers, "
-        "about half his net loss", holds(0.4 <= share <= 0.6, f"{share:.0%}"))
+        "about half of what his chases cost him", holds(0.4 <= share <= 0.6, f"{share:.0%}"))
     rank = sorted((-p[n]["contact"], n) for n in easiest).index(
         (-p["Michael Harris"]["contact"], "Michael Harris")) + 1
     add("Michael Harris", "his contact is among the best in this group", holds(rank <= 2, f"rank {rank}"))
@@ -261,8 +264,16 @@ def claims(d):
     m = d.me("Mickey Moniak")
     early = d.net(m[(m["strikes"] < 2) & (m["pitch_group"] == "fastball") & m["up"]], "Mickey Moniak")
     late = d.net(m[(m["strikes"] == 2) & (m["pitch_group"] == "breaking") & m["down"]], "Mickey Moniak")
-    add("Mickey Moniak", "two separate leaks: high fastballs early, low breaking balls with two strikes",
+    add("Mickey Moniak", "two separate leaks: pitches below the zone with two strikes, and the early counts",
         holds(early < -1 and late < -1, f"early {early:+.1f}, two strikes {late:+.1f}"))
+    f = m[(m["strikes"] < 2) & (m["pitch_group"] == "fastball") & m["up"]]
+    add("Mickey Moniak", "early counts: he chases high fastballs far more than the league",
+        holds(f["is_chase"].mean() - f["e"].mean() >= 0.10,
+              f"{f['is_chase'].mean():.0%} vs {f['e'].mean():.0%}"))
+    f = m[(m["count_group"] == "ahead") & soft(m) & m["down"]]
+    add("Mickey Moniak", "and soft stuff below the zone far more than the league",
+        holds(f["is_chase"].mean() - f["e"].mean() >= 0.10,
+              f"{f['is_chase'].mean():.0%} vs {f['e'].mean():.0%}"))
 
     # Ezequiel Tovar
     m = d.me("Ezequiel Tovar")
@@ -280,7 +291,7 @@ def claims(d):
         add("Andrés Giménez", f"xChase+ {q} in {year}", about(d.xchase("Andrés Giménez", year), q, 0.5))
     m = d.me("Andrés Giménez")
     nets = {g: d.net(f, "Andrés Giménez") for g, f in m.groupby("count_group")}
-    add("Andrés Giménez", "the target is 0-1 and 1-1", holds(min(nets, key=nets.get) == "even",
+    add("Andrés Giménez", "the counts to look at are 0-1 and 1-1", holds(min(nets, key=nets.get) == "even",
                                                            " ".join(f"{g} {v:+.1f}" for g, v in nets.items())))
 
     # Jarren Duran, Colson Montgomery
@@ -293,8 +304,8 @@ def claims(d):
     m = d.me("Colson Montgomery")
     w = m.loc[m["is_chase"] == 1, "whiff"].mean()
     add("Colson Montgomery", "two chases in three are misses", holds(abs(w - 2 / 3) <= 0.03, f"{w:.1%}"))
-    f = m[m["down"] & (m["strikes"] == 0)]
-    add("Colson Montgomery", "taking the first-strike pitch below the zone",
+    f = m[(m["count_group"] == "ahead") & (m["pitch_group"] == "breaking") & m["down"]]
+    add("Colson Montgomery", "start with the breaking ball below the zone when he is ahead",
         holds(d.choices(f, "Colson Montgomery") < -1, f"{d.choices(f, 'Colson Montgomery'):+.1f}"))
 
     # Zach Neto
@@ -326,7 +337,7 @@ def claims(d):
     add("Oswald Peraza", "then two-strike soft stuff down, the bigger loss",
         holds(big < d.net(t, "Oswald Peraza"), f"{big:+.1f}"))
     smallest = min(p[n]["pa"] for n in NOTED)
-    add("Oswald Peraza", "smallest sample of the group", holds(p["Oswald Peraza"]["pa"] == smallest,
+    add("Oswald Peraza", "fewest plate appearances of the 17", holds(p["Oswald Peraza"]["pa"] == smallest,
                                                              f"{p['Oswald Peraza']['pa']} PA"))
 
     # Jeremy Peña
@@ -345,8 +356,21 @@ def claims(d):
         return f["is_swing"].mean(), bip["estimated_woba_using_speedangle"].mean()
 
     (ms, mx), (ls, lx) = zone_damage(mine), zone_damage(z)
-    add("Jeremy Peña", "keep the aggression up in the zone; that is where the damage comes from",
+    add("Jeremy Peña", "keep him swinging at strikes at the top of the zone",
         holds(ms > ls and mx > lx, f"swing {ms:.0%} vs {ls:.0%}, xwOBA {mx:.3f} vs {lx:.3f}"))
+    takes = [it for it in p["Jeremy Peña"]["plan_items"] if it["kind"] == "pitch" and ", let " in it["text"]]
+    add("Jeremy Peña", "the one clear take on his card", holds(len(takes) == 1, f"{len(takes)} take lines"))
+    videos = [it for it in p["Jeremy Peña"]["plan_items"] if it["kind"] == "pitch" and "video room" in it["text"]]
+    add("Jeremy Peña", "the breaking ball below the zone at 0-1 and 1-1 ... a video item",
+        holds(any(tuple(it["cell"]) == ("even", "breaking", "down") for it in videos), "plan video items"))
+    first = next(r for r in p["Jeremy Peña"]["tables"]["all"] if r["group"] == "first")
+    add("Jeremy Peña", "the first pitch, where he chases 32%", pct(first["chase"], 32))
+    add("Jeremy Peña", "against 19%", pct(first["chase_league"], 19))
+    f = m[(m["pitch_group"] == "fastball") & m["up"]]
+    c, ch = f["contact"].sum(), f["choices"].sum()
+    add("Jeremy Peña", "his contact pays for most of his high-fastball chases",
+        holds(c > 0 and c >= 0.5 * -ch, f"contact {c * 600 / d.pa('Jeremy Peña'):+.1f} vs choices "
+              f"{ch * 600 / d.pa('Jeremy Peña'):+.1f}"))
     return out
 
 
@@ -357,6 +381,19 @@ def check(players):
     missing = [n for n in NOTED if n not in {p["name"] for p in players}]
     if missing:
         raise SystemExit(f"Noted hitters missing from the cards: {missing}")
+    # The note's starting leak must be on the card and lead the plan, so
+    # the player's first line and the staff's first sentence agree.
+    by_name = {p["name"]: p for p in players}
+    for name, (_, _, start) in NOTED.items():
+        p = by_name[name]
+        cells = [(lk["count_group"], lk["pitch_group"], lk["region"]) for lk in p["leaks"]["all"]]
+        if tuple(start) not in cells:
+            raise SystemExit(f"{name}: the note's starting leak {start} is not among the card's "
+                             f"leaks {cells} (scripts/coach_notes.py)")
+        first = next((it for it in p["plan_items"] if it["kind"] == "pitch"), None)
+        if first is None or tuple(first["cell"]) != tuple(start):
+            raise SystemExit(f"{name}: the plan's first pitch line is "
+                             f"{first and first['cell']}, not the note's {start}")
     results = claims(Data(players))
     failed = [r for r in results if not r[2]]
     if failed:
@@ -364,4 +401,4 @@ def check(players):
         raise SystemExit(f"{len(failed)} of {len(results)} claims in the coach's notes no longer "
                          "hold (scripts/coach_notes.py):\n" + "\n".join(lines))
     covered = {name for name, *_ in results}
-    return len(results), len(covered)
+    return len(results) + len(NOTED), len(covered)

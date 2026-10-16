@@ -5,6 +5,13 @@ Built from `scripts/12_build_coaching_profiles.py`. Every number is runs per
 so "-5.5 on pitches below the zone" means that is what those pitches cost
 this hitter beyond what the league loses on the same pitches.
 
+One vocabulary: the two parts below are called **Choices** and **Contact**
+on the cards and the roster page; the CSV columns keep the names
+`decision` and `execution`. The league rates quoted here come from a
+count-by-distance baseline, so a cell's rate can differ a little from the
+same cell on a hitter's card, which compares him with the average hitter
+at the same spot, count and matchup.
+
 Each hitter's loss is split into two parts that add up exactly:
 
 - **Decision**: what his swing/take choices cost if every chase had turned
@@ -153,8 +160,9 @@ Ordered worst to best. "Repeats?" compares with 2024 and 2025.
   swing rate is much lower than the league's. Two options, not exclusive:
   (a) a stricter two-strike take line on anything below the knees from
   RHP, accepting some called third strikes; (b) a two-strike contact
-  swing. Option (a) is the one this data can price: the two-strike cells
-  below the zone and fastball up are -9.7 combined.
+  swing, which is a swing conversation outside this data's scope and a
+  staff decision. Option (a) is the one this data can price: the
+  two-strike cells below the zone and fastball up are -9.7 combined.
 
 ### 5. Colson Montgomery (xChase+ 68, -16.6 runs)
 
@@ -169,13 +177,15 @@ Ordered worst to best. "Repeats?" compares with 2024 and 2025.
 - Repeats? Only one prior partial season (2025, not qualified), where the
   whiff rate on chases was already 59%.
 - **Draft adjustment:** this is a bat-to-ball problem on pitches below the
-  zone, and the stat can't say whether that is swing path, pitch
-  recognition or timing. What it can say: a chase is close to a guaranteed
+  zone. Whether that is swing path, pitch recognition or timing is a
+  video and cage question this data does not answer; the staff decision
+  is who takes it. What the data can say: a chase is close to a guaranteed
   strike for him, so (a) the early-count chases are more expensive for him
   than the decision number suggests because they lead to two-strike counts
   where his whiff bites, and (b) his two-strike take line should be
   stricter than league norms, as with Duran. The first lever is the cheap
-  one: take the 0-strike pitch below the zone.
+  one: take the pitch below the zone before two strikes, which is his
+  card's first line.
 
 ### 6. Zach Neto (xChase+ 71, -15.9 runs)
 
@@ -212,11 +222,14 @@ Ordered worst to best. "Repeats?" compares with 2024 and 2025.
   pitches).
 - Repeats? Completely. xChase+ 82, 73, 73. Decision -24, -22, -23;
   execution +14, +8, +8 in each of the three seasons.
-- **Draft adjustment:** start with early-count breaking balls away, where
-  he over-swings and gets nothing: 0-strike breaking balls away (51% chase
-  vs 13.5%), 0-strike down-and-away (36% vs 17%), 1-strike away (66% vs
-  30%). Those three cells are about -5 runs and none of them risks a
-  strikeout. The two-strike breaking ball below the zone is the next step:
+- **Draft adjustment:** one rule for both reports and the card: breaking
+  balls before two strikes, away and below the zone, are a take. He
+  over-swings there and gets nothing: 0-strike breaking balls away (51%
+  chase vs 13.5%), 0-strike down-and-away (36% vs 17%), 1-strike away (66%
+  vs 30%). Those three cells are about -5 runs and none of them risks a
+  strikeout; his card's plan leads with the same pitch at 0-1 and 1-1,
+  where its cells put it. The two-strike breaking ball below the zone is
+  the next step:
   he chases 78% of them, and his good contact (+2.75) offsets only part of
   the choice cost (-4.65), so it is still about -1.9 on net. At 36 the
   volume approach is not changing wholesale; the early-count away pitch is
@@ -241,6 +254,10 @@ Ordered worst to best. "Repeats?" compares with 2024 and 2025.
   mistake, but at .235 xwOBA it is a weak out that cost him a hitter's
   count. The 0- and 1-strike fastball-up cells are -4.6; add the 0-strike
   fastball in (-1.4) and the early-count fastball leak is about -6.
+  Choices alone say two strikes (his card's two-strike cells are its
+  biggest leaks), but his contact there pays most of it back, so the
+  first take is the one before two strikes, where nothing is risked; the
+  card's plan leads with it.
 
 ### 9. Oswald Peraza (xChase+ 76, -14.9 runs, 367 PA)
 
@@ -269,8 +286,10 @@ Ordered worst to best. "Repeats?" compares with 2024 and 2025.
   +6.2: he hurts the chased fastball). Breaking balls are -16.9 (chases 48%
   vs 33%), both decision (-9.6) and execution (-7.3). Sliders alone -8.6.
 - Above the zone he chases 61% (league 36%) but his execution there is
-  +5.4, so the high fastball nets out to about zero. Do not coach that
-  away.
+  +5.4, so across counts the high fastball nets out to about zero and is
+  not a target in general. The two-strike fastball a ball above the zone
+  is still a net loss after contact and stays on his card's leak list;
+  the plan leads with the slider away and the early counts instead.
 - The leaks: RHP breaking balls away and down-and-away with two strikes
   (84% chase vs 47% on breaking balls away; 34% vs 26% down-and-away with
   whiffs, -8.6 for the two cells), and the first pitch (-4.1, 32% vs 17%

@@ -17,29 +17,33 @@
   --muted: #76746e;
   --hair: #e1e0d9;
   --axis: #c3c2b7;
-  --mid: #f0efec;
+  --mid: #e6e5de;
   --blue: #2a78d6;
   --red: #e34948;
+  --whiff-more: #7a4fc9;
+  --whiff-less: #2f9e6b;
   --league: #898781;
   --focus: #2a78d6;
-  --ramp: #fcfcfb,#fbe1e0,#f6bfbd,#ef9c9a,#e67775,#d7514f,#b83a39,#8f2726;
+  --ramp: #fcfcfb,#ece9e2,#d8d4c9,#c0bbae,#a39e90,#857f72,#635d51,#3e3a33;
   --font: "Avenir Next", "Nunito Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
   color-scheme: light;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --surface: #1a1a19; --plane: #121211; --ink: #ffffff; --ink2: #c3c2b7; --muted: #959389;
-    --hair: #2c2c2a; --axis: #383835; --mid: #383835; --blue: #3987e5; --red: #e66767;
+    --hair: #2c2c2a; --axis: #383835; --mid: #34342f; --blue: #3987e5; --red: #e66767;
+    --whiff-more: #a98ae0; --whiff-less: #4fbf8a;
     --league: #898781; --focus: #6da7ec;
-    --ramp: #1a1a19,#4a1d1d,#7a2a29,#a83837,#cf4f4e,#e67775,#f3a3a1,#fbd0ce;
+    --ramp: #1a1a19,#2b2b28,#3f3e3a,#56554f,#6f6d65,#8c897f,#aaa69b,#cdc8bb;
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
   --surface: #1a1a19; --plane: #121211; --ink: #ffffff; --ink2: #c3c2b7; --muted: #959389;
-  --hair: #2c2c2a; --axis: #383835; --mid: #383835; --blue: #3987e5; --red: #e66767;
+  --hair: #2c2c2a; --axis: #383835; --mid: #34342f; --blue: #3987e5; --red: #e66767;
+  --whiff-more: #a98ae0; --whiff-less: #4fbf8a;
   --league: #898781; --focus: #6da7ec;
-  --ramp: #1a1a19,#4a1d1d,#7a2a29,#a83837,#cf4f4e,#e67775,#f3a3a1,#fbd0ce;
+  --ramp: #1a1a19,#2b2b28,#3f3e3a,#56554f,#6f6d65,#8c897f,#aaa69b,#cdc8bb;
   color-scheme: dark;
 }
 * { box-sizing: border-box; }
@@ -99,7 +103,13 @@ button, input, select { font: inherit; color: inherit; }
 aside { display: grid; gap: 22px; align-content: start; min-width: 0; }
 aside section { display: grid; gap: 10px; min-width: 0; }
 aside h2 { font-size: 20px; font-weight: 800; }
-.plan { margin: 0; padding-left: 20px; display: grid; gap: 8px; font-size: 16px; max-width: 68ch; }
+.plan { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; font-size: 16px; max-width: 68ch; }
+.plan li { display: grid; grid-template-columns: 26px minmax(0, 1fr); gap: 8px; align-items: start; }
+.plan .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--ink); margin: 8px 0 0 8px; }
+.plan .keep { color: var(--ink2); font-size: 14px; }
+.state { color: var(--muted); font-size: 13px; margin: 0; }
+.zgrid .rowhead.whiff { border-top: 1px solid var(--axis); padding-top: 6px; }
+.zgrid .whiffrule { grid-column: 1 / -1; border-top: 1px solid var(--axis); height: 0; }
 .coach { border-left: 3px solid var(--axis); padding-left: 12px; color: var(--ink2); font-size: 14px; max-width: 72ch; }
 .coach .eyebrow { display: block; margin-bottom: 2px; }
 .tabs { display: flex; gap: 4px; flex-wrap: wrap; }
@@ -114,6 +124,7 @@ aside h2 { font-size: 20px; font-weight: 800; }
 .leaks .runs { font-weight: 800; font-variant-numeric: tabular-nums; text-align: right; }
 .empty { color: var(--ink2); }
 .tablewrap { overflow-x: auto; }
+.tablebtn { display: none; border: 1px solid var(--axis); background: transparent; color: var(--ink2); border-radius: 999px; padding: 2px 10px; font-size: 13px; cursor: pointer; width: max-content; }
 /* color stated on the table itself: a browser extension's user stylesheet that colors tables
    would otherwise win, since author rules only beat user rules when they exist */
 table { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; font-size: 14px; color: var(--ink); }
@@ -142,9 +153,13 @@ summary { cursor: pointer; font-weight: 700; }
 .tip strong { font-size: 15px; }
 .tip .k { color: var(--muted); }
 
-@media (max-width: 1100px) { .body { grid-template-columns: minmax(0, 1fr); } }
+/* one column: the plan, leaks and table come before the pictures, so a phone opens on the plan */
+@media (max-width: 1100px) { .body { grid-template-columns: minmax(0, 1fr); } aside { order: -1; } }
 @media (max-width: 640px) {
   .card { padding: 16px; }
+  th.nar, td.nar { display: none; }
+  .tablewrap.all th.nar, .tablewrap.all td.nar { display: table-cell; }
+  .tablebtn { display: inline-block; }
   .head { grid-template-columns: minmax(0, 1fr); }
   .zgrid { grid-template-columns: 58px repeat(4, minmax(0, 1fr)); gap: 4px; }
   .zgrid .colhead { font-size: 12px; }
@@ -171,7 +186,7 @@ summary { cursor: pointer; font-weight: 700; }
     <div class="control">
       <span class="label" id="lab-base">Compare with</span>
       <div class="seg" role="radiogroup" aria-labelledby="lab-base" id="seg-base">
-        <input type="radio" name="base" id="base-match" value="match" checked><label for="base-match">Same matchup</label>
+        <input type="radio" name="base" id="base-match" value="match" checked><label for="base-match">Same side and hand</label>
         <input type="radio" name="base" id="base-all" value="all"><label for="base-all">All hitters</label>
       </div>
     </div>
@@ -191,7 +206,16 @@ summary { cursor: pointer; font-weight: 700; }
         <input type="radio" name="pitch" id="pitch-offspeed" value="2"><label for="pitch-offspeed">Changeups</label>
       </div>
     </div>
+    <div class="control">
+      <span class="label" id="lab-hand">Plan, leaks and table</span>
+      <div class="seg" role="radiogroup" aria-labelledby="lab-hand" id="seg-hand">
+        <input type="radio" name="hand" id="hand-all" value="all" checked><label for="hand-all">All pitchers</label>
+        <input type="radio" name="hand" id="hand-R" value="R"><label for="hand-R">vs RHP</label>
+        <input type="radio" name="hand" id="hand-L" value="L"><label for="hand-L">vs LHP</label>
+      </div>
+    </div>
   </div>
+  <p class="state" id="state"></p>
 
   <article class="card" id="card" aria-live="polite">
     <div class="head">
@@ -209,14 +233,12 @@ summary { cursor: pointer; font-weight: 700; }
           <div class="orient" id="orient"></div>
           <div class="legend" id="legend"></div>
         </div>
-        <section class="terrain" aria-labelledby="terrain-title">
-          <div class="sechead">
-            <h2 id="terrain-title">In 3D</h2>
-            <label class="check" for="mesh"><input type="checkbox" id="mesh" checked> Show the average hitter as a mesh</label>
-          </div>
+        <details class="terrain" id="terrain-box">
+          <summary>In 3D: the selected picture as a hill, taller where you swing more</summary>
+          <label class="check" for="mesh"><input type="checkbox" id="mesh" checked> Show the average hitter as a mesh</label>
           <p class="evidence" id="terrain-note"></p>
           <div id="terrain" class="terrain-plot" role="img"></div>
-        </section>
+        </details>
         <details id="numbers">
           <summary>Zone numbers</summary>
           <p class="evidence" id="numbers-note"></p>
@@ -292,6 +314,8 @@ summary { cursor: pointer; font-weight: 700; }
           red: g("--red"), axis: g("--axis"), league: g("--league"), muted: g("--muted"),
           ramp: g("--ramp").split(",").map((s) => s.trim()) };
     T.div = M.divergingScale(T.mid, T.blue, T.red);
+    T.whiffMore = g("--whiff-more"); T.whiffLess = g("--whiff-less");
+    T.divW = M.divergingScale(T.mid, T.whiffLess, T.whiffMore);
     T.seq = M.sequentialScale(T.ramp, 0.7);
     T.surfaceRgb = M.hexRgb(T.surface);
   }
@@ -436,19 +460,19 @@ summary { cursor: pointer; font-weight: 700; }
       `${bats}${height} \u00b7 ${D.season} \u00b7 ${p.pa} PA \u00b7 xChase+ ${Math.round(p.xchase_plus)}, ${ordinal(p.rank)} of ${p.of}`;
     document.getElementById("line2").textContent =
       `Swings at ${pct(p.chase)} of pitches outside the zone. Hitters on average swing at ${pct(p.chase_league)} of the same pitches.`;
-    const stake = el("div", { class: "tile" }, el("div", { class: "eyebrow", text: "Runs at stake" }),
+    const stake = el("div", { class: "tile" }, el("div", { class: "eyebrow", text: "Cost of far-off chases" }),
       el("div", { class: "big", text: p.runs_at_stake.toFixed(1) }),
-      el("div", { class: "note", text: "per 600 PA, on far-off pitches" }));
+      el("div", { class: "note", text: "runs per 600 PA from your choices on pitches at least 4 inches off the plate" }));
     const bars = el("div", { class: "bars" });
     for (const [lab, v] of [["Choices", p.choices], ["Contact", p.contact]]) {
       const w = Math.min(25, Math.abs(v)) / 25 * 50;
       const bar = el("div", { class: "bar" });
-      bar.style.background = v < 0 ? "var(--red)" : "var(--blue)";
+      bar.style.background = "var(--ink2)";
       bar.style.width = w + "%";
       bar.style.left = v < 0 ? 50 - w + "%" : "50%";
       bars.append(el("span", { class: "lab", text: lab }), el("div", { class: "track" }, bar), el("span", { class: "val", text: runs(v) }));
     }
-    const where = el("div", { class: "tile" }, el("div", { class: "eyebrow", text: "Where the runs go · per 600 PA" }), bars);
+    const where = el("div", { class: "tile" }, el("div", { class: "eyebrow", text: "Where the runs go · all chases, per 600 PA" }), bars);
     tiles.replaceChildren(stake, where);
   }
 
@@ -468,7 +492,7 @@ summary { cursor: pointer; font-weight: 700; }
     }
     if (p.archetype === "execution-led" && state.metric === "chase") {
       const side = p.bats !== "S" ? p.bats : (p.side_pitches.L >= p.side_pitches.R ? "L" : "R");
-      rows.push(["Misses on chases", "how often a chase is a swing and miss", side, "all", "whiff"]);
+      rows.push(["Misses on chases", "swing-and-miss per chase, vs the average hitter: purple more, green fewer", side, "all", "whiff"]);
     }
     return rows;
   }
@@ -482,23 +506,29 @@ summary { cursor: pointer; font-weight: 700; }
     const placed = {};                       // "row|group" -> [[n, x, z]]
     if (!p.reference && state.metric === "chase" && state.pitch === "all") {
       (p.leaks.all || []).forEach((lk, k) => {
-        const row = rows.findIndex((r) => r[2] === lk.side && r[4] === "chase");
+        let row = rows.findIndex((r) => r[2] === lk.side && r[3] === (lk.hand || "all") && r[4] === "chase");
+        if (row < 0) row = rows.findIndex((r) => r[2] === lk.side && r[4] === "chase");
         if (row < 0) return;
         const key = row + "|" + lk.count_group;
+        const taken = placed[key] || [];
         let x = lk.x, z = lk.z;
-        for (const [, ox, oz] of placed[key] || []) if (Math.hypot(x - ox, z - oz) < 0.45) x += x <= 0 ? 0.48 : -0.48;
+        for (const [dx, dz] of [[0, 0], [0.5, 0], [-0.5, 0], [0, -0.5], [0, 0.5], [0.5, -0.5], [-0.5, -0.5]]) {
+          const cx = lk.x + dx, cz = lk.z + dz;
+          if (taken.every(([, ox, oz]) => Math.hypot(cx - ox, cz - oz) >= 0.5)) { x = cx; z = cz; break; }
+        }
         (placed[key] = placed[key] || []).push([k + 1, x, z]);
       });
     }
     rows.forEach(([label, sub, side, hand, metric], ri) => {
-      grid.append(el("div", { class: "rowhead" }, label, sub ? el("span", { text: sub }) : null));
+      if (metric === "whiff") grid.append(el("div", { class: "whiffrule" }));
+      grid.append(el("div", { class: "rowhead" + (metric === "whiff" ? " whiff" : "") }, label, sub ? el("span", { text: sub }) : null));
       GROUPS.forEach((g, gi) => {
         const canvas = el("canvas", { role: "img" });
         grid.append(canvas);
         const key = ri + "|" + g.key;
         canvas.tabIndex = 0;
         canvas.dataset.key = key;
-        const pick = () => { state.sel = key; state.selFor = p.slug; markSelected(); drawTerrain(p); };
+        const pick = () => { state.sel = key; state.selFor = p.slug; markSelected(); document.getElementById("terrain-box").open = true; drawTerrain(p); };
         canvas.addEventListener("click", pick);
         canvas.addEventListener("keydown", (ev) => { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); pick(); } });
         if (metric === "rate") {
@@ -518,8 +548,9 @@ summary { cursor: pointer; font-weight: 700; }
         const marks = placed[ri + "|" + g.key] || null;
         const what = metric === "whiff" ? "misses on chases" : "chases";
         canvas.setAttribute("aria-label", `${label}, ${g.label}: ${what} compared with the average hitter. ${s.n} pitches.`);
+        const scale = metric === "whiff" ? T.divW : T.div;
         const draw = () => drawPanel(canvas, (j) => {
-          const c = T.div(s.gap[j]), a = s.evidence[j];
+          const c = scale(s.gap[j]), a = s.evidence[j];
           return [c[0] * a + T.surfaceRgb[0] * (1 - a), c[1] * a + T.surfaceRgb[1] * (1 - a), c[2] * a + T.surfaceRgb[2] * (1 - a)];
         }, { lines, markers: marks });
         requestAnimationFrame(draw);
@@ -548,9 +579,11 @@ summary { cursor: pointer; font-weight: 700; }
       ramp.style.background = `linear-gradient(90deg, ${T.ramp.join(",")})`;
       legend.replaceChildren(el("span", { text: "Chase rate at each spot" }), ramp, el("div", { class: "ticks" }, el("span", { text: "0%" }), el("span", { text: "70%+" })));
     } else {
-      ramp.style.background = `linear-gradient(90deg, ${T.blue}, ${T.mid}, ${T.red})`;
-      const what = state.metric === "whiff" ? "Misses on chases" : "Chases";
-      legend.replaceChildren(el("span", { text: `${what} vs the average hitter at the same spot and count. Blue: less. Red: more. Faded: too few pitches. Outline: +15 pts.` }),
+      const whiff = state.metric === "whiff";
+      ramp.style.background = whiff ? `linear-gradient(90deg, ${T.whiffLess}, ${T.mid}, ${T.whiffMore})` : `linear-gradient(90deg, ${T.blue}, ${T.mid}, ${T.red})`;
+      const words = whiff ? "Misses on chases vs the average hitter at the same spot and count. Green: fewer. Purple: more."
+                          : "Chases vs the average hitter at the same spot and count. Blue: takes more. Red: chases more.";
+      legend.replaceChildren(el("span", { text: `${words} Gray: about average. Background: too few pitches to say. Outline: +15 pts.` }),
         ramp, el("div", { class: "ticks" }, el("span", { text: "−30 pts" }), el("span", { text: "average" }), el("span", { text: "+30 pts" })));
     }
     if (state.selFor !== p.slug || !panels[state.sel]) {
@@ -575,6 +608,7 @@ summary { cursor: pointer; font-weight: 700; }
     const box = document.getElementById("terrain"), note = document.getElementById("terrain-note");
     const panel = panels[state.sel];
     if (!panel) return;
+    if (!document.getElementById("terrain-box").open) return;
     if (!window.Plotly) {
       note.textContent = "The 3D view loads a charting library from the internet and could not reach it. The flat pictures above show the same thing.";
       box.hidden = true;
@@ -615,7 +649,7 @@ summary { cursor: pointer; font-weight: 700; }
                     colorscale: stops, showscale: false, text: txt, hovertemplate: "%{text}<extra></extra>" });
     } else {
       traces.push({ type: "surface", x: Array.from(XS), y: Array.from(ZS), z: zP, surfacecolor: col, cmin: -30, cmax: 30,
-                    colorscale: [[0, T.blue], [0.5, T.mid], [1, T.red]], showscale: false,
+                    colorscale: panel.kind === "whiff" ? [[0, T.whiffLess], [0.5, T.mid], [1, T.whiffMore]] : [[0, T.blue], [0.5, T.mid], [1, T.red]], showscale: false,
                     text: txt, hovertemplate: "%{text}<extra></extra>" });
       if (mesh) traces.push({ type: "surface", x: Array.from(XS), y: Array.from(ZS), z: zL, hidesurface: true, showscale: false,
                     hoverinfo: "skip",
@@ -656,7 +690,7 @@ summary { cursor: pointer; font-weight: 700; }
     const t = el("table");
     const head = el("tr", {}, el("th", { text: "" }), el("th", { text: "Pitches" }));
     for (const [n, s] of [["Chases", leagueOnly ? "rate" : "you / avg"], ["Far-off", leagueOnly ? "rate" : "you / avg"], ["Misses", leagueOnly ? "per chase" : "you / avg"]])
-      head.append(el("th", {}, n, el("small", { text: s })));
+      head.append(el("th", { class: n === "Chases" ? "" : "nar" }, n, el("small", { text: s })));
     if (!leagueOnly) head.append(el("th", {}, "xwOBA", el("small", { text: "you / avg" })), el("th", {}, "Choices", el("small", { text: "runs" })), el("th", {}, "Contact", el("small", { text: "runs" })));
     t.append(el("thead", {}, head));
     const body = el("tbody");
@@ -664,14 +698,18 @@ summary { cursor: pointer; font-weight: 700; }
     for (const r of rows) {
       const tr = el("tr", { class: r.group === "total" ? "total" : "" }, el("td", { text: names[r.group] }), el("td", { text: r.pitches.toLocaleString() }));
       for (const k of ["chase", "far", "whiff"]) {
-        if (leagueOnly) tr.append(el("td", { text: pct(r[k]) }));
-        else tr.append(el("td", {}, el("strong", { text: pct(r[k]) }), el("span", { class: "avg", text: pct(r[k + "_league"]) })));
+        const cls = k === "chase" ? "" : "nar";
+        if (leagueOnly) tr.append(el("td", { class: cls, text: pct(r[k]) }));
+        else tr.append(el("td", { class: cls }, el("strong", { text: pct(r[k]) }), el("span", { class: "avg", text: pct(r[k + "_league"]) })));
       }
       if (!leagueOnly) tr.append(el("td", {}, el("strong", { text: xw(r.xwoba) }), el("span", { class: "avg", text: xw(r.xwoba_league) })), el("td", { text: runs(r.choices) }), el("td", { text: runs(r.contact) }));
       body.append(tr);
     }
     t.append(body);
-    return el("div", { class: "tablewrap" }, t);
+    const wrap = el("div", { class: "tablewrap" }, t);
+    const btn = el("button", { class: "tablebtn", type: "button", text: "Show far-off and misses" });
+    btn.addEventListener("click", () => { const all = wrap.classList.toggle("all"); btn.textContent = all ? "Fewer columns" : "Show far-off and misses"; });
+    return el("div", {}, wrap, btn);
   }
 
   function trendSvg(series, label) {
@@ -695,8 +733,8 @@ summary { cursor: pointer; font-weight: 700; }
     const lastL = D.leagueTrend[D.leagueTrend.length - 1];
     let avgY = sy(lastL[1]) + 4;
     if (series.length) {
-      add("path", { d: path(series), fill: "none", stroke: "var(--blue)", "stroke-width": 2.4, "stroke-linecap": "round", "stroke-linejoin": "round" });
-      series.forEach(([y, v]) => add("circle", { cx: sx(y), cy: sy(v), r: 4.5, fill: "var(--blue)", stroke: "var(--surface)", "stroke-width": 2 }));
+      if (series.length >= 3) add("path", { d: path(series), fill: "none", stroke: "var(--ink)", "stroke-width": 2.4, "stroke-linecap": "round", "stroke-linejoin": "round" });
+      series.forEach(([y, v]) => add("circle", { cx: sx(y), cy: sy(v), r: 4.5, fill: "var(--ink)", stroke: "var(--surface)", "stroke-width": 2 }));
       const last = series[series.length - 1];
       add("text", { x: sx(last[0]) + 10, y: sy(last[1]) + 4, "font-size": 13, "font-weight": 800, fill: "var(--ink)" }, "you");
       if (Math.abs(sy(last[1]) - sy(lastL[1])) < 14) avgY = Math.max(sy(last[1]), sy(lastL[1])) + 18;
@@ -718,35 +756,43 @@ summary { cursor: pointer; font-weight: 700; }
       return;
     }
     const plan = el("ul", { class: "plan" });
-    const planLines = state.hand === "all" ? p.plan : ((p.plan_by_hand || {})[state.hand] || p.plan);
-    planLines.forEach((l) => plan.append(el("li", { text: l })));
+    const items = state.hand === "all" ? p.plan_items : ((p.plan_items_by_hand || {})[state.hand] || p.plan_items);
+    items.forEach((it) => {
+      if (it.kind === "keep") { plan.append(el("li", {}, el("span"), el("span", { class: "keep", text: it.text }))); return; }
+      const mark = it.kind === "pitch" ? el("span", { class: "num", text: String(it.n) }) : el("span", { class: "dot" });
+      plan.append(el("li", {}, mark, el("span", { text: it.text })));
+    });
     const sec = el("section", {}, el("h2", { text: state.hand === "all" ? "What to work on" : `What to work on vs ${state.hand === "R" ? "right-handers" : "left-handers"}` }), plan);
-    if (state.hand !== "all") sec.append(el("p", { class: "evidence", text: "The plan for this pitcher hand only; pick All pitchers for the full plan. The target below counts all pitchers." }));
-    if (p.coach_note) sec.append(el("div", { class: "coach" }, el("span", { class: "eyebrow", text: "Coach's note" }), p.coach_note));
+    if (state.hand !== "all") sec.append(el("p", { class: "evidence", text: "The plan for this pitcher hand only; pick All pitchers for the full plan. The target counts all pitchers." }));
+    if (p.coach_note) sec.append(el("div", { class: "coach" }, el("span", { class: "eyebrow", text: "Coach's note, for the staff" }), p.coach_note));
     a.append(sec);
 
-    const tabs = el("div", { class: "tabs", role: "group", "aria-label": "Pitcher hand for leaks and table" });
-    for (const [k, lab] of [["all", "All pitchers"], ["R", "vs RHP"], ["L", "vs LHP"]]) {
-      const b = el("button", { type: "button", "aria-pressed": String(state.hand === k), text: lab });
-      b.addEventListener("click", () => { state.hand = k; aside(p); });
-      tabs.append(b);
-    }
     const list = el("ol", { class: "leaks" });
     const leaks = p.leaks[state.hand] || [];
     leaks.forEach((lk, k) => list.append(el("li", {},
       el("span", { class: "num", text: String(k + 1) }),
-      el("span", { class: "what", text: `${GROUPS.find((g) => g.key === lk.count_group).label}, ${LEAK_PITCH[lk.pitch_group]} ${LEAK_REGION[lk.region]}` }),
-      el("span", { class: "rate", text: `${pct(lk.rate)} vs ${pct(lk.league)} avg` }),
+      el("span", { class: "what", text: lk.phrase }),
+      el("span", { class: "rate", text: `${pct(lk.rate)} vs ${pct(lk.league)} avg · ${lk.chases} of ${lk.pitches}` }),
       el("span", { class: "runs", text: runs(lk.choices) }))));
-    const leakSec = el("section", {}, el("div", { class: "sechead" }, el("h2", { text: "Biggest leaks" }), tabs));
+    const leakSec = el("section", {}, el("div", { class: "sechead" }, el("h2", { text: state.hand === "all" ? "Biggest leaks" : `Biggest leaks vs ${state.hand === "R" ? "right-handers" : "left-handers"}` })));
     leakSec.append(leaks.length ? list : el("p", { class: "empty", text: "None worth 0.75 runs per 600 PA." }));
-    leakSec.append(el("p", { class: "evidence", text: state.hand === "all" ? "Numbered on the All pitchers row. Runs are what the choices cost, per 600 PA." : "Runs are what the choices cost, per 600 PA." }));
-    if (p.target && state.hand === "all") leakSec.append(el("p", { class: "evidence target", text: `Target: ${Math.round(p.target.excess * 100)} pts above the league in these spots in ${p.target.season}. Expected in ${p.target.next_season} with no change: ${Math.round(p.target.predicted * 100)} pts. Below that is a fix.` }));
+    leakSec.append(el("p", { class: "evidence", text: (state.hand === "all" ? "Numbered on the pictures, on the row of the hand a leak names. " : "") + "Ranked by what the choices cost, per 600 PA; the plan is in the order to work on them." }));
+    if (p.target_text && state.hand === "all") leakSec.append(el("p", { class: "evidence target", text: `Target: ${p.target_text}` }));
     a.append(leakSec);
     a.append(el("section", {}, el("h2", { text: "By count" }), countTable(p.tables[state.hand], false),
       el("p", { class: "evidence", text: D.countNote })));
-    a.append(el("section", { class: "trend" }, el("h2", { text: "Far-off chase rate by season" }), trendSvg(p.trend, `${p.name} far-off chase rate by season against the league`)));
+    const seasons = p.trend.length && p.trend.length < 3 ? ` (${p.trend.length} season${p.trend.length > 1 ? "s" : ""})` : "";
+    a.append(el("section", { class: "trend" }, el("h2", { text: "Far-off chase rate by season" + seasons }), trendSvg(p.trend, `${p.name} far-off chase rate by season against the league`)));
     a.append(el("p", { class: "evidence", text: D.evidence }));
+  }
+
+  function stateLine(p) {
+    const line = document.getElementById("state");
+    if (p.reference) { line.textContent = ""; return; }
+    const pitches = state.pitch === "all" ? "all pitches" : PITCH_NAMES[+state.pitch];
+    const base = state.base === "all" ? "compared with every hitter" : "compared with hitters of your side against the same hand";
+    const hand = { all: "all pitchers", R: "right-handers", L: "left-handers" }[state.hand];
+    line.textContent = `Showing: ${state.metric === "whiff" ? "misses on chases" : "chase choices"} · ${pitches} · ${base} · plan, leaks and table vs ${hand}.`;
   }
 
   function numbersTable(p) {
@@ -787,8 +833,8 @@ summary { cursor: pointer; font-weight: 700; }
     ZONE = p.zone;
     MASK = M.zoneMask(XS, ZS, ZONE[0], ZONE[1]);
     document.getElementById("player").value = p.slug;
-    setSegEnabled("seg-base", !p.reference); setSegEnabled("seg-metric", !p.reference); setSegEnabled("seg-pitch", !p.reference);
-    header(p); zones(p); aside(p); numbersTable(p);
+    setSegEnabled("seg-base", !p.reference); setSegEnabled("seg-metric", !p.reference); setSegEnabled("seg-pitch", !p.reference); setSegEnabled("seg-hand", !p.reference);
+    header(p); zones(p); aside(p); numbersTable(p); stateLine(p);
     lastRender = p;
     try { history.replaceState(null, "", "#" + p.slug); } catch (e) {}
   }
@@ -810,8 +856,10 @@ summary { cursor: pointer; font-weight: 700; }
   });
   for (const [name, key] of [["base", "base"], ["metric", "metric"], ["pitch", "pitch"]])
     document.querySelectorAll(`input[name="${name}"]`).forEach((r) => r.addEventListener("change", () => { state[key] = r.value; render(); }));
+  document.querySelectorAll('input[name="hand"]').forEach((r) => r.addEventListener("change", () => { state.hand = r.value; if (lastRender) { aside(lastRender); stateLine(lastRender); } }));
 
   document.getElementById("mesh").addEventListener("change", () => lastRender && drawTerrain(lastRender));
+  document.getElementById("terrain-box").addEventListener("toggle", () => { if (lastRender && document.getElementById("terrain-box").open) drawTerrain(lastRender); });
   document.getElementById("footer").textContent = D.footer;
 
   readTheme();

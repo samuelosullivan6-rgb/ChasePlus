@@ -12,6 +12,13 @@ season, count and distance bucket, so they are the same units as the
 
 ## How "coachable" is measured
 
+One vocabulary: the two parts are called **Choices** and **Contact** on
+the cards and the roster page; the CSV columns keep the names `decision`
+and `execution`. The cells and league rates here use a strikes-by-pitch-
+group-by-side baseline on far-off pitches, so a rate can differ from the
+same cell on a hitter's card, which compares him with the average hitter
+at the same spot, count and matchup.
+
 Every out-of-zone pitch's runs saved is split into two parts that add
 back exactly:
 
@@ -52,7 +59,7 @@ decision-only group is the subset where an approach change is most likely
 to pay, because there is nothing wrong with the swing. Within it, these
 nine combine the biggest far-off loss with evidence the pattern is real:
 
-| Player | xChase+ | Decision | Execution | Far-off recoverable | xChase+ if fixed | Far-off chase rate by season (2K) | Note |
+| Player | xChase+ | Decision | Execution | Far-off recoverable | Ceiling if far-off chases matched the league (not a forecast) | Far-off chase rate by season (2K) | Note |
 |---|---:|---:|---:|---:|---:|---|---|
 | Salvador Pérez | 73 | -23.3 | +7.8 | 16.9 | 112 | .48 / .37 / .34 / .38 | four straight seasons of 15-22 far-off runs lost |
 | Michael Harris II | 78 | -21.8 | +9.0 | 16.8 | 116 | .42 / .42 / .48 / .50 | execution second only to Martínez in the group; far-off loss has grown every year |
@@ -69,11 +76,13 @@ be called persistent: Samuel Basallo (12.2 recoverable), Jac Caglianone
 (11.4), Cole Carrigg (8.7), Konnor Griffin (6.8). Worth tracking, not yet
 worth a verdict.
 
-"xChase+ if fixed" is an upper bound. It assumes the hitter takes far-off
-pitches at exactly the league rate with no cost anywhere else, and the
-decision/execution split uses league-average chase outcomes per cell, so
-a hitter who chases pitches he can handle will look slightly better on
-execution than he is.
+The ceiling column is an upper bound, not a forecast. It assumes the
+hitter takes far-off pitches at exactly the league rate with no cost
+anywhere else; the backtest's measured payoff is 4 to 5 xChase+ points
+per 10-point cut beyond what regression already gives back (see the main
+README). The decision/execution split uses league-average chase outcomes
+per cell, so a hitter who chases pitches he can handle will look slightly
+better on execution than he is.
 
 ## What is not in the subset, and why
 
@@ -103,11 +112,12 @@ balls down-and-away against 14-20% league (22 excess chases, -2.6 runs),
 then 69% on 2-strike breaking balls down against 47% (12 excess, -3.9).
 He also chases 22% of 0-0 far-off pitches against 11% and 57% of 3-ball
 out-of-zone pitches against 36% (-2.9 runs). His chases produce +7.8
-execution runs, so the swing is fine. Draft: take the first pitch unless
-it's a fastball, and treat any spin below the knees before two strikes as
-an automatic take. He has done this before; his far-off chase rate with
-fewer than two strikes has sat at 31-34% for four years, so this is the
-baseline, not a slump.
+execution runs, so the swing is fine. Draft, the same rule as the
+bottom-10 report and his card: breaking balls before two strikes, away
+and below the zone, are an automatic take; the first pitch is where to
+start (22% chase against 11%). He has done this before; his far-off chase
+rate with fewer than two strikes has sat at 31-34% for four years, so this
+is the baseline, not a slump.
 
 **Michael Harris II.** The loss is the most concentrated in the group:
 -8.9 of -16.8 far-off runs come with two strikes against right-handers,

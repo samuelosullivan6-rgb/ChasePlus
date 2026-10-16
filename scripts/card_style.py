@@ -9,17 +9,24 @@ import numpy as np
 
 import card_surfaces as cs
 
+# "mid" is the diverging scale's midpoint (about average, with plenty of
+# pitches) and sits visibly apart from "surface", which is where the color
+# fades to when there are too few pitches to say: gray means average, the
+# card's background means unknown. Red and blue are kept for the chase
+# maps; the misses picture on an execution-led card uses its own pair.
+# The reference card's raw chase rate runs through neutral grays, so its
+# dark end is never confused with a player card's "chases more" red.
 THEMES = {
     "light": {"surface": "#fcfcfb", "ink": "#0b0b0b", "ink2": "#52514e", "muted": "#898781",
-              "hair": "#e1e0d9", "axis": "#c3c2b7", "mid": "#f0efec",
+              "hair": "#e1e0d9", "axis": "#c3c2b7", "mid": "#e6e5de",
               "blue": "#2a78d6", "red": "#e34948", "league": "#898781",
-              # raw chase rate, surface to deep red: the same red as "chases more"
-              # on a player card, so the average card and a player card read alike
-              "ramp": ["#fcfcfb", "#fbe1e0", "#f6bfbd", "#ef9c9a", "#e67775", "#d7514f", "#b83a39", "#8f2726"]},
+              "whiff_more": "#7a4fc9", "whiff_less": "#2f9e6b",
+              "ramp": ["#fcfcfb", "#ece9e2", "#d8d4c9", "#c0bbae", "#a39e90", "#857f72", "#635d51", "#3e3a33"]},
     "dark": {"surface": "#1a1a19", "ink": "#ffffff", "ink2": "#c3c2b7", "muted": "#898781",
-             "hair": "#2c2c2a", "axis": "#383835", "mid": "#383835",
+             "hair": "#2c2c2a", "axis": "#383835", "mid": "#34342f",
              "blue": "#3987e5", "red": "#e66767", "league": "#898781",
-             "ramp": ["#1a1a19", "#4a1d1d", "#7a2a29", "#a83837", "#cf4f4e", "#e67775", "#f3a3a1", "#fbd0ce"]},
+             "whiff_more": "#a98ae0", "whiff_less": "#4fbf8a",
+             "ramp": ["#1a1a19", "#2b2b28", "#3f3e3a", "#56554f", "#6f6d65", "#8c897f", "#aaa69b", "#cdc8bb"]},
 }
 
 
@@ -58,13 +65,14 @@ def from_oklab(lab):
     return _gam(rgb)
 
 
-def diverging(values, theme):
-    """Gray midpoint to blue (negative) or red (positive), in OKLab."""
+def diverging(values, theme, kind="chase"):
+    """Gray midpoint to blue (negative) or red (positive), in OKLab; the
+    misses picture ("whiff") runs green to purple instead."""
 
     t = np.clip(values / cs.GAP_LIMIT, -1, 1)[..., None]
     mid = to_oklab(hex_rgb(theme["mid"]))
-    pos = to_oklab(hex_rgb(theme["red"]))
-    neg = to_oklab(hex_rgb(theme["blue"]))
+    pos = to_oklab(hex_rgb(theme["whiff_more" if kind == "whiff" else "red"]))
+    neg = to_oklab(hex_rgb(theme["whiff_less" if kind == "whiff" else "blue"]))
     lab = np.where(t >= 0, mid + t * (pos - mid), mid + (-t) * (neg - mid))
     return from_oklab(lab)
 

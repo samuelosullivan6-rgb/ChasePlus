@@ -16,10 +16,12 @@ TEAM
   appears under each of them in the filter.
 
 COLUMNS (from player_cards_<season>.csv, step 17, plus the team)
-  team, player, bats, xChase+ and rank, PA, runs at stake (choices on
+  team, player, bats, xChase+ with rank, PA, runs at stake (choices on
   far-off pitches), choices, contact, archetype, the top leak and its
-  runs, the count check in that leak's counts, the target (this season's
-  leak excess and next season's with no change) and the plan.
+  runs, the count check in that leak's counts, the number to beat (next
+  season's leak excess with no change, with this season's beside it) and
+  the plan's first pitch line. On a phone each hitter is a short row that
+  opens on a tap.
 
 OUTPUTS, in results/xchase/player_cards/
   team_view_<season>.csv   one row per qualified hitter, with team
@@ -90,7 +92,7 @@ keep = ["team", "teams", "player", "batter", "slug", "bats", "xchase_plus", "xch
         "contact_runs_per_600", "archetype", "noted", "chase_rate",
         "league_chase_rate_same_pitches", "top_leak", "top_leak_runs",
         "top_leak_count_status", "top_leak_chase_depth_in", "leak_excess_vs_league",
-        "leak_excess_predicted_next", "plan"]
+        "leak_excess_predicted_next", "target_text", "start_with", "plan"]
 out = cards[keep]
 out.to_csv(CARDS_DIR / f"team_view_{SEASON}.csv", index=False)
 print(f"  wrote player_cards/team_view_{SEASON}.csv ({len(out)} hitters, "
@@ -100,17 +102,23 @@ print(f"  wrote player_cards/team_view_{SEASON}.csv ({len(out)} hitters, "
 # THE PAGE
 # --------------------------------------------------
 
-# The plan's first line (the table shows one pitch to start with; the
-# full plan is on the card and in the CSV). Lines are joined with a space
-# in the CSV, so split where the next line's opener begins.
-OPENERS = ("With two strikes", "On the first pitch", "When you're ahead", "Early in the count",
-           "At 0-1 or 1-1", "Your bigger issue", "Nothing stands out", "No single pitch",
-           "Nothing to take away")
+# The one line to start with: the plan's first pitch line with its
+# numbers (step 17 writes it as start_with). A hitter with no pitch line
+# shows his plan's first line instead. Lines are joined with a space in
+# the CSV, so split where the next line's opener begins.
+OPENERS = ("With two strikes", "On the first pitch", "When you're ahead", "At 0-1 or 1-1",
+           "Your bigger issue", "Your issue is contact", "Nothing stands out", "No single pitch",
+           "Nothing to change", "Your chase choices cost", "Keep swinging")
 SPLIT = re.compile(r"(?= (?:" + "|".join(re.escape(o) for o in OPENERS) + "))")
 
 
 def first_line(plan):
     return SPLIT.split(plan, maxsplit=1)[0].strip() if isinstance(plan, str) else ""
+
+
+def ordinal(n):
+    n = int(n)
+    return f"{n}{'th' if 10 <= n % 100 <= 20 else {1: 'st', 2: 'nd', 3: 'rd'}.get(n % 10, 'th')}"
 
 
 ARCHETYPE_WORDS = {"decision-only": "choices", "decision-led": "mostly choices", "mixed": "mixed",
@@ -127,11 +135,17 @@ def num(v, digits=1, plus=False):
 
 rows = []
 for r in out.itertuples(index=False):
-    target = ("" if pd.isna(r.leak_excess_vs_league) else
-              f"{r.leak_excess_vs_league * 100:.0f} → {r.leak_excess_predicted_next * 100:.0f}")
+    if pd.isna(r.leak_excess_vs_league):
+        beat = ""
+    elif round(r.leak_excess_predicted_next * 100) <= 2:
+        beat = "no target"
+    else:
+        beat = f"under {r.leak_excess_predicted_next * 100:.0f} (was {r.leak_excess_vs_league * 100:.0f})"
+    start = r.start_with if isinstance(r.start_with, str) and r.start_with else first_line(r.plan)
     rows.append({
         "team": r.team, "teams": r.teams, "player": r.player, "slug": r.slug, "bats": r.bats,
         "xchase": round(float(r.xchase_plus)), "rank": int(r.xchase_plus_rank),
+        "rank_txt": ordinal(r.xchase_plus_rank),
         "pa": int(r.plate_appearances), "stake": round(float(r.runs_at_stake_far_off), 1),
         "choices": round(float(r.choices_runs_per_600), 1),
         "contact": round(float(r.contact_runs_per_600), 1),
@@ -141,9 +155,9 @@ for r in out.itertuples(index=False):
         "leak_runs": None if pd.isna(r.top_leak_runs) else round(float(r.top_leak_runs), 1),
         "check": STATUS_WORDS.get(r.top_leak_count_status, "") if isinstance(r.top_leak_count_status, str) else "",
         "depth": None if pd.isna(r.top_leak_chase_depth_in) else round(float(r.top_leak_chase_depth_in)),
-        "target": target,
+        "target": beat,
         "excess": None if pd.isna(r.leak_excess_vs_league) else round(float(r.leak_excess_vs_league) * 100),
-        "plan": first_line(r.plan),
+        "plan": start,
     })
 team_list = sorted({t for r in rows for t in r["teams"].split(", ")})
 
@@ -198,13 +212,13 @@ th {{ font-size: 11px; color: var(--muted); text-transform: uppercase; letter-sp
 th.sorted {{ color: var(--ink); }}
 th .dir {{ font-size: 10px; margin-left: 3px; }}
 td.num, th.num {{ text-align: right; font-variant-numeric: tabular-nums; }}
-td.plan {{ white-space: normal; min-width: 34ch; max-width: 44ch; color: var(--ink2); font-size: 13px; }}
+td.plan {{ white-space: normal; min-width: 30ch; max-width: 40ch; color: var(--ink2); font-size: 13px; }}
 td.leak {{ white-space: normal; min-width: 22ch; max-width: 28ch; }}
-/* phones: each hitter as a stacked card instead of a 16-column row */
+/* phones: each hitter as a short card (team, name, runs, top leak, start with) that opens on a tap */
 @media (max-width: 720px) {{
   table {{ min-width: 0; }}
   thead {{ display: none; }}
-  tbody tr {{ display: block; padding: 10px 12px; border-bottom: 1px solid var(--hair); }}
+  tbody tr {{ display: block; padding: 10px 12px; border-bottom: 1px solid var(--hair); cursor: pointer; }}
   tbody td {{ display: flex; justify-content: space-between; gap: 12px; border: 0; padding: 2px 0; white-space: normal; text-align: left; }}
   tbody td::before {{ content: attr(data-label); color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .05em; flex: 0 0 auto; padding-top: 3px; }}
   tbody td.num {{ text-align: right; }}
@@ -212,6 +226,8 @@ td.leak {{ white-space: normal; min-width: 22ch; max-width: 28ch; }}
   tbody td.plan::before {{ display: block; margin-bottom: 2px; }}
   tbody td.leak {{ min-width: 0; max-width: none; }}
   tbody td:first-child {{ font-weight: 700; }}
+  tbody td.more {{ display: none; }}
+  tbody tr.open td.more {{ display: flex; }}
 }}
 .neg {{ color: var(--red); }}
 .pos {{ color: var(--blue); }}
@@ -221,7 +237,7 @@ td.leak {{ white-space: normal; min-width: 22ch; max-width: 28ch; }}
 </style>
 <div class="wrap">
   <h1>Chase decisions by team, {SEASON}</h1>
-  <p class="lede">Every qualified hitter, sorted by the runs his swing choices on far-off pitches cost per 600 plate appearances. Click a name for his decision card. The target is how far above the league he chased in his card's leaks this season and what the frozen line expects next season with no change; below that is a fix.</p>
+  <p class="lede">Every qualified hitter, sorted by the runs his swing choices on far-off pitches cost per 600 plate appearances. Click a name for his decision card. Beat is the number to get under next season: what the frozen line expects with no change at all, with this season's number beside it. On a phone, tap a hitter for the rest of his row.</p>
   <div class="controls">
     <div class="control"><label for="team">Team</label><select id="team"><option value="">All teams</option>{"".join(f'<option value="{t}">{t}</option>' for t in team_list)}</select></div>
     <div class="control"><label for="q">Search</label><input id="q" type="search" placeholder="Hitter name" autocomplete="off"></div>
@@ -229,18 +245,19 @@ td.leak {{ white-space: normal; min-width: 22ch; max-width: 28ch; }}
     <p class="count" id="count"></p>
   </div>
   <div class="card"><table id="t"><thead><tr></tr></thead><tbody></tbody></table></div>
-  <p class="note">Runs are per 600 plate appearances. Choices is what the swing decisions cost against an average hitter at the same spot, count and matchup; contact is what the chases produced compared with the average hitter's chases. Problem: the share of the loss that is choices (step 13). Top leak: the costliest count, pitch group and side of the zone, with the hitter's rate against the league's and how far off the zone the chased pitches were (median inches). Count check: how he hits once the count reaches the leak's counts, shrunk for noise, against the league in the same counts. Target: leak chasing in points above the league, this season → next season with no change (step 19). Start with: the first line of the plan; the rest is on the card. Built by step 21 of the Chase Leaderboard project; the cards themselves are <a href="index.html">index.html</a>.</p>
+  <p class="note">Runs are per 600 plate appearances. Choices is what the swing decisions cost against an average hitter at the same spot, count and matchup; contact is what the chases produced compared with the average hitter's chases. Problem: the share of the loss that is choices (step 13). Top leak: the costliest count, pitcher hand, pitch group and side of the zone, with the hitter's rate against the league's and how far off the zone the chased pitches were (median inches). Count check: how he hits once the count reaches the leak's counts, shrunk for noise, against the league in the same counts. Beat: leak chasing in points above the league that the frozen line expects next season with no change, with this season's number beside it (step 19); a fix is anything under it. Start with: the plan's first pitch line, with the two rates and the inches off; the rest of the plan is on the card. Built by step 21 of the Chase Leaderboard project; the cards themselves are <a href="index.html">index.html</a>.</p>
 </div>
 <script>
 const ROWS = {json.dumps(rows, ensure_ascii=False)};
 const COLS = [
   ["team", "Team", false], ["player", "Hitter", false], ["bats", "Bats", false],
-  ["xchase", "xChase+", true], ["rank", "Rank", true], ["pa", "PA", true],
+  ["xchase", "xChase+ · rank", true], ["pa", "PA", true],
   ["stake", "Runs at stake", true], ["choices", "Choices", true], ["contact", "Contact", true],
   ["kind", "Problem", false], ["leak", "Top leak", false], ["leak_runs", "Leak runs", true],
-  ["depth", "Off zone, in", true], ["check", "Count check", false], ["target", "Target", true],
+  ["depth", "Inches off", true], ["check", "Count check", false], ["target", "Beat", true],
   ["plan", "Start with", false],
 ];
+const PHONE = new Set(["team", "player", "stake", "leak", "plan"]);   // the rest opens on a tap
 const state = {{ sort: "stake", dir: -1, team: "", q: "", kind: "" }};
 const el = (tag, attrs = {{}}, ...kids) => {{ const e = document.createElement(tag); for (const [k, v] of Object.entries(attrs)) {{ if (k === "text") e.textContent = v; else e.setAttribute(k, v); }} kids.forEach((k) => e.append(k)); return e; }};
 const fmt = (k, v) => {{
@@ -269,10 +286,12 @@ function render() {{
   const body = document.querySelector("#t tbody"); body.replaceChildren();
   for (const r of rows) {{
     const tr = el("tr");
+    tr.addEventListener("click", (e) => {{ if (e.target.tagName !== "A") tr.classList.toggle("open"); }});
     for (const [k, label, num] of COLS) {{
-      const td = el("td", {{ class: (num ? "num" : "") + (k === "plan" ? " plan" : "") + (k === "leak" ? " leak" : ""), "data-label": label }});
+      const td = el("td", {{ class: (num ? "num" : "") + (k === "plan" ? " plan" : "") + (k === "leak" ? " leak" : "") + (PHONE.has(k) ? "" : " more"), "data-label": label }});
       if (k === "player") {{ td.append(el("a", {{ href: "index.html#" + r.slug, text: r.player }})); if (r.noted) td.append(" ", el("span", {{ class: "tag", text: "noted" }})); }}
       else if (k === "team") td.textContent = r.teams;
+      else if (k === "xchase") td.textContent = r.xchase + " · " + r.rank_txt;
       else if (k === "choices" || k === "contact" || k === "leak_runs") {{ td.textContent = fmt(k, r[k]); if (r[k] < -0.05) td.classList.add("neg"); else if (r[k] > 0.05) td.classList.add("pos"); }}
       else td.textContent = fmt(k, r[k]);
       tr.append(td);

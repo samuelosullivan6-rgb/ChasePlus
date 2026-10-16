@@ -234,42 +234,56 @@ How to read it, top to bottom:
 1. **The header says what kind of problem it is.** Pérez's swing choices
    cost 23.3 runs per 600 PA, but those chases produce 7.8 more than an
    average hitter's would. The swing is fine; the choices are not. That
-   makes it a coaching problem with a simple fix. The 16.9 "runs at stake"
-   is the part from pitches at least 4 inches off the plate, the ones that
-   are almost never called strikes.
+   makes it a coaching problem with a simple fix. The 16.9 "cost of
+   far-off chases" is the part of the choices from pitches at least 4
+   inches off the plate, the ones that are almost never called strikes;
+   the two bars beside it count all chases, which is why they don't add
+   to it.
 2. **The zones show where.** The rectangle is Pérez's own strike zone at
    true height, seen from the catcher. Red runs below and away from it in
-   every count, against both hands. The outlines mark spots 15 points or more
-   above average. Faded areas had too few pitches to say anything.
-3. **The numbers on the zones are the leaks**, ranked by runs. The worst
-   is two-strike breaking balls below the zone: Pérez swings at 78%, where
-   an average hitter on the same pitches swings at 49%.
+   every count, against both hands. Gray is about average; white areas had
+   too few pitches to say anything. The outlines mark spots 15 points or
+   more above average.
+3. **The numbers on the zones are the leaks**, ranked by runs, each with
+   the pitcher hand it belongs to and the pitch count behind the rate. The
+   worst is two-strike breaking balls below the zone: Pérez swings at 78%,
+   where an average hitter on the same pitches swings at 49%.
 4. **The plan is written to the player**, in the words a hitter would use
-   in the cage: "With two strikes, let breaking balls below the zone go.
-   You swung at 78% of them; hitters on average swing at 49%. The ones
-   you swung at were typically 5 inches off the zone."
-   That last sentence is on every plan line, so "let it go" is never
-   read as "take the borderline pitch". The two percentages are quoted
-   only when they print at least 5 points apart. A leak needs more chases
-   than the league expects in sum, so a costly spot can sit a point above
-   the league rate when the extra swings come on its costlier pitches;
-   there the line says what the swings cost instead, as on Vinnie
-   Pasquantino's card: "You swung at about as many of them as an average
-   hitter would, but those swings cost you 0.9 runs per 600 PA." The
-   plan takes the card's first two leaks. When those explain less than a
-   quarter of a loss of three runs or more, the plan opens by saying so
-   and naming the count to start in: Trea Turner chases a little more
-   than the league in every count and no one spot costs him a full run,
-   so his first line says the 7 runs are spread out and to start when he
-   is ahead. Every sentence of the plan is written from the count table
-   beside it, so a plan is empty only when that table agrees that no
-   count costs a run, and a hitter who chases more with two strikes but
-   produces there, like Luis Arráez, is told there is nothing to take
-   away.
+   in the cage, one pitch per line and numbered to the leaks: "At 0-1 or
+   1-1, let breaking balls below the zone go. You swung at 74% of them;
+   hitters on average swing at 42%. The ones you swung at were typically
+   5 inches off the zone." That last sentence is on every take line, so
+   "let it go" is never read as "take the borderline pitch". The lines
+   are in the order to work on them, not the order of their runs: a take
+   before two strikes comes first, because it costs nothing in strikeouts
+   and the league rarely swings there, and two-strike takes follow. So
+   Pérez's plan opens with his third leak and his biggest, the two-strike
+   breaking ball below the zone, is second. A leak whose chased pitches
+   were mostly within a ball of the zone is written as a video item, not a
+   take ("fastballs off the plate inside are one for the video room, not a
+   take rule"). The two percentages are quoted only when they print at
+   least 5 points apart; a costly spot can sit a point above the league
+   rate when the extra swings come in its costlier counts, and there the
+   line says which counts and what they cost, as on Vinnie Pasquantino's
+   card: "You swung at these about as often as other hitters do, but more
+   of yours came at 2-2 and 3-2, and over a season they cost you 0.9
+   runs." When the two pitches explain less than a quarter of a loss of
+   three runs or more, a first line says so without denying them: Trea
+   Turner's says his chase choices cost 7 runs across every count and the
+   two pitches below are the biggest pieces. A hitter whose problem is
+   contact reads that first ("Your bigger issue is contact"), with the
+   miss rate quoted only when it is above the league's and what his
+   chases produced otherwise. Every plan ends with "Keep swinging at
+   strikes." Every sentence is written from the count table beside it, so
+   a plan is empty only when that table agrees that no count costs a run,
+   and a hitter who chases more with two strikes but produces there, like
+   Luis Arráez, is told there is nothing to change.
 5. **The coach's note is for the staff.** It says where to start: breaking
-   balls before two strikes, where a take costs nothing in strikeouts.
-   A card says where a hitter chases, not why. The same leak can be
-   pitch recognition, timing or a two-strike approach, and the drill is
+   balls before two strikes, where a take costs nothing in strikeouts, and
+   it names the leak the plan leads with, so the player's first line and
+   the staff's first sentence are the same place; step 17 stops if they
+   are not. A card says where a hitter chases, not why. The same leak can
+   be pitch recognition, timing or a two-strike approach, and the drill is
    different for each, so the card says where to point the camera.
 6. **The count table says whether he struggles there.** Next to his rates,
    the xwOBA column is the count check (below): every plate appearance
@@ -279,12 +293,14 @@ How to read it, top to bottom:
 7. **The season trend says whether it is a habit or a slump.** Pérez has
    chased 32-39% of far-off pitches every season since 2021, against a
    league rate of 18-22%. It is a habit, so the plan is worth the effort.
-8. **The target, under the leaks, is the number to beat.** Leaks are a
-   hitter's worst-looking spots, so about half of the excess goes away
-   on its own next season (see step 16 below). The card shows how far
-   above the league he chased in his leaks this season and what the
-   frozen line expects next season with no change at all. Only a number
-   below that counts as a fix, and that is the number step 20 scores.
+8. **The target, beside the trend, is the number to get under.** Leaks
+   are a hitter's worst-looking spots, so about half of the excess goes
+   away on its own next season (see step 16 below). The card says how far
+   above the league he chased in his leaks this season, what the frozen
+   line expects next season with no change at all, and that only under
+   that is a fix; that is the number step 20 scores. A hitter whose
+   forecast is already at the league's rate gets no target rather than a
+   negative one.
 
 **Does taking more pay?** Before putting "take that pitch" on a card, step
 14 checked what happened to real hitters who did it. Across 941 pairs of
@@ -508,10 +524,17 @@ cards go from a file to a cage.
   recognition, timing, or a two-strike approach that protects too wide,
   and the drill is different for each. The card points the camera; it
   does not replace the video.
-- **It is the far-off pitch, every time.** Each pitch line in the plan says
+- **It is the far-off pitch, every time.** Each take line in the plan says
   how far off the zone the chased pitches were. A take rule is for the pitch
   that is clearly a ball, never the borderline one, and a two-strike take
-  of a borderline pitch is a called third strike.
+  of a borderline pitch is a called third strike; a leak whose chased
+  pitches were mostly within a ball of the zone is written as a video
+  item instead.
+- **Start before two strikes.** The plan's lines are in the order to work
+  on them: a take in an early count costs nothing in strikeouts and the
+  league rarely swings there, so it comes first even when a two-strike
+  leak costs more runs. The leak list stays ranked by runs; the plan
+  carries its numbers.
 - **Check at midseason on the frozen cells.** The half-season pairs
   carry the same payoff as the season pairs, so the spring's frozen cells
   scored on the first half of the season (`step 20 --period h1`, split at
@@ -534,7 +557,8 @@ pitch type, the baseline and swing-and-miss, is in
 download it and open it in a browser); the plan there follows the
 pitcher-hand tabs. The roster on one page is `teams.html` beside it:
 every hitter by team, sorted by runs at stake, with the top leak, the
-count check and the target, linking to each card. Every card is drawn from the
+count check, the number to beat and the plan's first pitch line, linking
+to each card. Every card is drawn from the
 catcher's view, to scale, around the hitter's own strike zone, which from
 2026 is set from each hitter's height. Nobody is mirrored, so a
 left-handed batter's inside is on the right. Switch hitters get one row
@@ -794,11 +818,13 @@ byte-identical files (a 23rd check).
 
 The coach's notes on the 17 noted cards are the only hand-written text
 on a card, so step 17 checks them too. Each note in `scripts/coach_notes.py`
-sits next to the facts it states (59 in all: every quoted percentage,
-run total and xwOBA, and patterns like "in every count" or "his contact
-pays for it"), and step 17 tests each one against the data before drawing
+sits next to the facts it states (every quoted percentage, run total and
+xwOBA, and patterns like "in every count" or "his contact pays for it")
+and names the leak the plan must lead with, and step 17 tests each fact
+against the data and each starting leak against the card before drawing
 any card. If a fact no longer holds, after a data refresh or a method
-change, the run stops and names the note and the sentence.
+change, or a note's leak is no longer on the card, the run stops and
+names the note and the sentence.
 
 ## Appendix: Chase+ vs xChase+
 
