@@ -108,6 +108,7 @@ xChase+ 74 (254 of 261). Runs at stake on far-off pitches: 13.8 per 600 PA. Choi
 
 **What to work on**
 
+- No single pitch is the problem: your chase choices cost 17 runs per 600 PA, spread over every count. Start with two strikes, where it costs the most.
 - With two strikes, let fastballs above the zone go. You swung at 82% of them; hitters on average swing at 42%. The ones you swung at were typically 7 inches off the zone.
 - With two strikes, let breaking balls below the zone go. You swung at 81% of them; hitters on average swing at 46%. The ones you swung at were typically 7 inches off the zone.
 
@@ -240,6 +241,7 @@ xChase+ 86 (225 of 261). Runs at stake on far-off pitches: 8.4 per 600 PA. Choic
 
 **What to work on**
 
+- No single pitch is the problem: your chase choices cost 15 runs per 600 PA, spread over every count. Start with two strikes, where it costs the most.
 - When you're ahead in the count, let fastballs above the zone go. You swung at 79% of them; hitters on average swing at 21%. The ones you swung at were typically 5 inches off the zone.
 - With two strikes against right-handers, let breaking balls down and in go. You swung at 34% of them; hitters on average swing at 21%. The ones you swung at were typically 10 inches off the zone.
 
@@ -421,7 +423,7 @@ xChase+ 68 (257 of 261). Runs at stake on far-off pitches: 3.1 per 600 PA. Choic
 
 **What to work on**
 
-- With two strikes against right-handers, let breaking balls below the zone go. You swung at 58% of them; hitters on average swing at 54%. The ones you swung at were typically 4 inches off the zone.
+- With two strikes against right-handers, let breaking balls below the zone go. You swung at about as many of them as an average hitter would, but those swings cost you 1.9 runs per 600 PA. The ones you swung at were typically 4 inches off the zone.
 - When you're ahead against right-handers, let breaking balls below the zone go. You swung at 57% of them; hitters on average swing at 25%. The ones you swung at were typically 9 inches off the zone.
 - Your bigger issue is contact: you miss on 68% of your chases, against 45% for other hitters on the same pitches, so take a stricter line with two strikes.
 

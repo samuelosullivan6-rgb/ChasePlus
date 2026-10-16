@@ -408,11 +408,15 @@ def depth_phrase(depth_in):
 
 # The plan: one pitch per line from the leaks (the first two), and around
 # them a framing line and a fallback written from the count table, so
-# every sentence is true of the numbers next to it. A hitter whose loss is
-# spread thin (no one pitch is the problem) is told so and where to start;
-# a hitter whose chases produce more than his choices cost is told there
-# is nothing to take away; "nothing stands out" is said only when the count
-# table agrees.
+# every sentence is true of the numbers next to it. A pitch line quotes
+# the hitter's chase rate against the league's only when the two print
+# well apart; otherwise it says what the swings cost. A hitter whose loss
+# is spread thin (no one pitch is the problem) is told so and where to
+# start; a hitter whose chases produce more than his choices cost is told
+# there is nothing to take away; "nothing stands out" is said only when
+# the count table agrees.
+RATE_GAP_MIN_PTS = 5            # a pitch line quotes the two chase rates only
+                                # when they print this many points apart
 COSTLY_COUNT_RUNS = 1.0         # a count group costing this much is named
 SPREAD_MIN_RUNS = 3.0           # a choices loss this big...
 SPREAD_SHARE = 0.25             # ...that the plan's pitches cover less than a
@@ -435,13 +439,27 @@ def chases_more(row):
     return row["chase"] is not None and row["chase"] >= row["chase_league"] + 0.01
 
 
+def rate_clause(lk):
+    """Why this pitch is on the plan, in the numbers the leak list shows
+    beside it. The leak rule asks for more chases than the league expects
+    in sum, so a costly cell can sit a point or two above the league rate
+    when the extra swings come on its costlier pitches. Two near-identical
+    percentages would argue against the line, so there the cost makes the
+    case instead. The comparison is on the printed numbers, so the line
+    never shows the same rounded rate for the hitter and the league."""
+
+    mine, theirs = f"{lk['rate'] * 100:.0f}", f"{lk['league'] * 100:.0f}"
+    if int(mine) - int(theirs) >= RATE_GAP_MIN_PTS:
+        return f"You swung at {mine}% of them; hitters on average swing at {theirs}%."
+    return (f"You swung at about as many of them as an average hitter would, but those "
+            f"swings cost you {-lk['choices']:.1f} runs per 600 PA.")
+
+
 def pitch_line(lk):
     hand = hand_phrase(lk["share_rhp"])
     opener = (GROUP_WORDS_SHORT if hand else GROUP_WORDS)[lk["count_group"]]
     return (f"{opener}{hand}, let {PITCH_WORDS[lk['pitch_group']]} "
-            f"{REGION_WORDS[lk['region']]} go. "
-            f"You swung at {lk['rate'] * 100:.0f}% of them; hitters on average swing at "
-            f"{lk['league'] * 100:.0f}%. {depth_phrase(lk['depth_in'])}")
+            f"{REGION_WORDS[lk['region']]} go. {rate_clause(lk)} {depth_phrase(lk['depth_in'])}")
 
 
 def productive_line(rows, costly, contact):

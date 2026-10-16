@@ -249,16 +249,23 @@ How to read it, top to bottom:
    You swung at 78% of them; hitters on average swing at 49%. The ones
    you swung at were typically 5 inches off the zone."
    That last sentence is on every plan line, so "let it go" is never
-   read as "take the borderline pitch". The plan takes the card's first
-   two leaks. When those explain less than a quarter of a loss of three
-   runs or more, the plan opens by saying so and naming the count to
-   start in: Trea Turner chases a little more than the league in every
-   count and no one spot costs him a full run, so his first line says the
-   7 runs are spread out and to start when he is ahead. Every sentence of
-   the plan is written from the count table beside it, so a plan is empty
-   only when that table agrees that no count costs a run, and a hitter
-   who chases more with two strikes but produces there, like Luis Arráez,
-   is told there is nothing to take away.
+   read as "take the borderline pitch". The two percentages are quoted
+   only when they print at least 5 points apart. A leak needs more chases
+   than the league expects in sum, so a costly spot can sit a point above
+   the league rate when the extra swings come on its costlier pitches;
+   there the line says what the swings cost instead, as on Vinnie
+   Pasquantino's card: "You swung at about as many of them as an average
+   hitter would, but those swings cost you 0.9 runs per 600 PA." The
+   plan takes the card's first two leaks. When those explain less than a
+   quarter of a loss of three runs or more, the plan opens by saying so
+   and naming the count to start in: Trea Turner chases a little more
+   than the league in every count and no one spot costs him a full run,
+   so his first line says the 7 runs are spread out and to start when he
+   is ahead. Every sentence of the plan is written from the count table
+   beside it, so a plan is empty only when that table agrees that no
+   count costs a run, and a hitter who chases more with two strikes but
+   produces there, like Luis Arráez, is told there is nothing to take
+   away.
 5. **The coach's note is for the staff.** It says where to start: breaking
    balls before two strikes, where a take costs nothing in strikeouts.
    A card says where a hitter chases, not why. The same leak can be
