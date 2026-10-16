@@ -14,8 +14,12 @@ and what is it costing me?" for one hitter-season:
     count check from step 15: his xwOBA once the count gets there, next
     to the league's in the same counts;
   - the far-off chase rate by season against the league's;
-  - a short plan in plain language, written to the player, and at the
-    foot of the card what step 16 found when hitters fixed their leaks.
+  - a short plan in plain language, written to the player: one pitch per
+    line from the leaks, and when no single pitch explains the loss, a
+    first line that says so and where to start. Every sentence of the
+    plan is written from the count table next to it, so a plan is empty
+    only when that table agrees. At the foot of the card, what step 16
+    found when hitters fixed their leaks.
 
 The leak rule, the labels and the choices / contact split come from
 leak_rules.py, which steps 15 and 16 share. The coach's notes for the 17
@@ -402,24 +406,118 @@ def depth_phrase(depth_in):
     return "Many of those were close to the zone; start with the ones clearly off."
 
 
-def plan_lines(leak_list, summary):
-    lines = []
-    for lk in [lk for lk in leak_list if lk["choices"] <= -lr.PLAN_MIN_RUNS][:2]:
-        hand = hand_phrase(lk["share_rhp"])
-        opener = (GROUP_WORDS_SHORT if hand else GROUP_WORDS)[lk["count_group"]]
-        lines.append(
-            f"{opener}{hand}, let {PITCH_WORDS[lk['pitch_group']]} "
+# The plan: one pitch per line from the leaks (the first two), and around
+# them a framing line and a fallback written from the count table, so
+# every sentence is true of the numbers next to it. A hitter whose loss is
+# spread thin (no one pitch is the problem) is told so and where to start;
+# a hitter whose chases produce more than his choices cost is told there
+# is nothing to take away; "nothing stands out" is said only when the count
+# table agrees.
+COSTLY_COUNT_RUNS = 1.0         # a count group costing this much is named
+SPREAD_MIN_RUNS = 3.0           # a choices loss this big...
+SPREAD_SHARE = 0.25             # ...that the plan's pitches cover less than a
+                                # quarter of gets the spread-out line first
+
+COUNT_PHRASES = {"first": "on the first pitch", "ahead": "when you're ahead in the count",
+                 "even": "at 0-1 or 1-1", "two": "with two strikes"}
+
+
+def join_words(items):
+    return items[0] if len(items) == 1 else ", ".join(items[:-1]) + " and " + items[-1]
+
+
+def runs_phrase(runs):
+    n = round(runs)
+    return f"{n:.0f} run" + ("" if n == 1 else "s")
+
+
+def chases_more(row):
+    return row["chase"] is not None and row["chase"] >= row["chase_league"] + 0.01
+
+
+def pitch_line(lk):
+    hand = hand_phrase(lk["share_rhp"])
+    opener = (GROUP_WORDS_SHORT if hand else GROUP_WORDS)[lk["count_group"]]
+    return (f"{opener}{hand}, let {PITCH_WORDS[lk['pitch_group']]} "
             f"{REGION_WORDS[lk['region']]} go. "
             f"You swung at {lk['rate'] * 100:.0f}% of them; hitters on average swing at "
             f"{lk['league'] * 100:.0f}%. {depth_phrase(lk['depth_in'])}")
+
+
+def productive_line(rows, costly, contact):
+    """The costly counts are counts where the hitter's chases have produced
+    more than his choices cost (the leak rule never names such a pitch)."""
+
+    cost = sum(-rows[g]["choices"] for g in costly)
+    where = join_words([COUNT_PHRASES[g] for g in costly])
+    if all(chases_more(rows[g]) for g in costly):
+        what = f"You chase more than the league {where}"
+        if len(costly) == 1:
+            r = rows[costly[0]]
+            what += f" ({r['chase'] * 100:.0f}% against {r['chase_league'] * 100:.0f}%)"
+    else:
+        what = f"Your chase choices cost {runs_phrase(cost)} per 600 PA {where}"
+    return (f"Nothing to take away. {what}, but those swings have produced: {contact:+.0f} "
+            "runs of contact against an average hitter's chases, more than the choices cost.")
+
+
+def spread_line(rows, loss, contact, costly, has_pitches):
+    """No one pitch explains the loss: say so, and where to start. The
+    rates in that count are in the table beside the plan, so the line
+    does not repeat them. A hitter whose chases produce more than his
+    choices cost, with no pitch worth a take rule, is told so instead."""
+
+    if (not has_pitches and contact > 0 and contact >= loss and costly
+            and contact >= sum(-rows[g]["choices"] for g in costly)):
+        return productive_line(rows, costly, contact)
+    neg = [g for g in COUNT_GROUPS if rows[g]["choices"] < 0]
+    if len(neg) == 4:
+        where = "spread over every count"
+    elif len(neg) == 1:
+        where = f"nearly all of it {COUNT_PHRASES[neg[0]]}"
+    else:
+        where = join_words([COUNT_PHRASES[g] for g in neg]) + " rather than in one spot"
+    worst = min(COUNT_GROUPS, key=lambda g: rows[g]["choices"])
+    return (f"No single pitch is the problem: your chase choices cost {runs_phrase(loss)} per "
+            f"600 PA, {where}. Start {COUNT_PHRASES[worst]}, where it costs the most.")
+
+
+def fallback_line(rows, costly):
+    """What the plan says when no leak makes it."""
+
+    choices, contact = rows["total"]["choices"], rows["total"]["contact"]
+    if not costly:
+        return ("Nothing stands out. Your chase choices are about league average"
+                + (" or better" if choices >= 0 else "") + " in every count.")
+    cost = sum(-rows[g]["choices"] for g in costly)
+    if contact > 0 and contact >= cost and contact >= -choices:
+        return productive_line(rows, costly, contact)
+    level = "better than average" if choices >= 1 else "about average"
+    where = join_words([COUNT_PHRASES[g] for g in costly])
+    return (f"No single pitch stands out. Your chase choices are {level} overall "
+            f"({choices:+.1f} runs per 600 PA); you give back about {runs_phrase(cost)} "
+            f"per 600 PA {where}.")
+
+
+def plan_lines(leak_list, summary, table):
+    """The plan for one view (all pitchers, or one pitcher hand): its leaks
+    and its count table (count_table's rows for the same pitches)."""
+
+    rows = {r["group"]: r for r in table}
+    loss = -rows["total"]["choices"]
+    costly = [g for g in COUNT_GROUPS if rows[g]["choices"] <= -COSTLY_COUNT_RUNS]
+    top = leak_list[:2]
+    lines = [pitch_line(lk) for lk in top]
+    named = sum(-lk["choices"] for lk in top)
+    if loss >= SPREAD_MIN_RUNS and named < SPREAD_SHARE * loss:
+        lines.insert(0, spread_line(rows, loss, rows["total"]["contact"], costly, bool(top)))
     if summary["archetype"] == "execution-led":
         lines.append(
             f"Your bigger issue is contact: you miss on {summary['whiff'] * 100:.0f}% of your "
             f"chases, against {summary['whiff_league'] * 100:.0f}% for other hitters on the "
             "same pitches, so take a stricter line with two strikes.")
     if not lines:
-        lines.append("Nothing stands out. Your chase choices are about league average "
-                     "or better in every count.")
+        lines.append(fallback_line(rows, costly))
     return lines
 
 
@@ -512,10 +610,11 @@ for _, row in board.sort_values("xchase_plus", ascending=False).iterrows():
     }
     summary["tables"] = {h: count_table(hand_view(p, h), scale, bid, h) for h in HANDS}
     summary["leaks"] = {h: leaks(hand_view(p, h), scale, bid) for h in HANDS}
-    summary["plan"] = plan_lines(summary["leaks"]["all"], summary)
+    summary["plan"] = plan_lines(summary["leaks"]["all"], summary, summary["tables"]["all"])
     # the same plan for one pitcher hand (the page shows it on the hand tabs;
     # for a switch hitter the hand tab is also his side of the plate)
-    summary["plan_by_hand"] = {h: plan_lines(summary["leaks"][h], summary) for h in ("R", "L")}
+    summary["plan_by_hand"] = {h: plan_lines(summary["leaks"][h], summary, summary["tables"][h])
+                               for h in ("R", "L")}
     target = TARGETS.get(bid)
     cells = {(lk["count_group"], lk["pitch_group"], lk["region"]) for lk in summary["leaks"]["all"]}
     summary["target"] = ({k: target[k] for k in ("season", "next_season", "excess", "predicted",
@@ -979,9 +1078,13 @@ def player_card(summary, theme_name, out_path):
     y = 214
     card.text(RIGHT_X, y, "What to work on", size=22, weight="bold")
     y += 32
+    # a three-line plan (a framing line, or the contact line) is set tighter
+    # so the column below it keeps its place
+    dense = len(summary["plan"]) >= 3
     for line in summary["plan"]:
         card.ax.add_patch(Circle((RIGHT_X + 6, y - 6), 4, fc=t["ink"], ec="none"))
-        y = card.wrapped(RIGHT_X + 22, y, line, 80, size=16, line=22) + 4
+        y = card.wrapped(RIGHT_X + 22, y, line, 80, size=15 if dense else 16,
+                         line=20 if dense else 22) + (2 if dense else 4)
     if summary["coach_note"]:
         y += 4
         card.text(RIGHT_X, y, "COACH'S NOTE", size=12, color="muted", weight="bold")
@@ -994,7 +1097,7 @@ def player_card(summary, theme_name, out_path):
     y += 30
     if not summary["leaks"]["all"]:
         y += 24
-        card.text(RIGHT_X, y, "None worth a run per 600 PA.", size=16, color="ink2")
+        card.text(RIGHT_X, y, "None worth 0.75 runs per 600 PA.", size=16, color="ink2")
     for n, lk in enumerate(summary["leaks"]["all"], start=1):
         y += 30
         card.ax.add_patch(Circle((RIGHT_X + 12, y - 6), 12, fc=t["surface"], ec=t["ink"], lw=px(1.6)))
@@ -1056,7 +1159,9 @@ PLAYER_GUIDE = [
     "choices cost the most runs over a full season.",
     "The plan is one pitch per line. It is the pitch that is clearly a ball, never the "
     "borderline one; each line says how far off the plate the ones you swung at were. "
-    "Taking the clearly-off pitch is what counts. Keep swinging at strikes.",
+    "Taking the clearly-off pitch is what counts. Keep swinging at strikes. When no single "
+    "pitch explains what your choices cost, the first line says so and names the count to "
+    "start in.",
     "The target: everyone's worst spots look better the next season by themselves, with no "
     "work at all. The second number is where you would land if you changed nothing. Beating "
     "it is the fix. Matching it is not.",
@@ -1162,7 +1267,7 @@ def print_pages(summary, out_pdf, theme_name="light"):
                   ha="right")
         if not summary["leaks"]["all"]:
             y += 34
-            card.text(x0, y, "None worth a run per 600 PA.", size=16, color="ink2")
+            card.text(x0, y, "None worth 0.75 runs per 600 PA.", size=16, color="ink2")
         for n, lk in enumerate(summary["leaks"]["all"], start=1):
             y += 34
             card.ax.add_patch(Circle((x0 + 12, y - 6), 12, fc=t["surface"], ec=t["ink"], lw=px(1.6)))

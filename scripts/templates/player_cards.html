@@ -739,7 +739,7 @@ summary { cursor: pointer; font-weight: 700; }
       el("span", { class: "rate", text: `${pct(lk.rate)} vs ${pct(lk.league)} avg` }),
       el("span", { class: "runs", text: runs(lk.choices) }))));
     const leakSec = el("section", {}, el("div", { class: "sechead" }, el("h2", { text: "Biggest leaks" }), tabs));
-    leakSec.append(leaks.length ? list : el("p", { class: "empty", text: "None worth a run per 600 PA." }));
+    leakSec.append(leaks.length ? list : el("p", { class: "empty", text: "None worth 0.75 runs per 600 PA." }));
     leakSec.append(el("p", { class: "evidence", text: state.hand === "all" ? "Numbered on the All pitchers row. Runs are what the choices cost, per 600 PA." : "Runs are what the choices cost, per 600 PA." }));
     if (p.target && state.hand === "all") leakSec.append(el("p", { class: "evidence target", text: `Target: ${Math.round(p.target.excess * 100)} pts above the league in these spots in ${p.target.season}. Expected in ${p.target.next_season} with no change: ${Math.round(p.target.predicted * 100)} pts. Below that is a fix.` }));
     a.append(leakSec);

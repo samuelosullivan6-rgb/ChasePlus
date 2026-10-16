@@ -249,7 +249,16 @@ How to read it, top to bottom:
    You swung at 78% of them; hitters on average swing at 49%. The ones
    you swung at were typically 5 inches off the zone."
    That last sentence is on every plan line, so "let it go" is never
-   read as "take the borderline pitch".
+   read as "take the borderline pitch". The plan takes the card's first
+   two leaks. When those explain less than a quarter of a loss of three
+   runs or more, the plan opens by saying so and naming the count to
+   start in: Trea Turner chases a little more than the league in every
+   count and no one spot costs him a full run, so his first line says the
+   7 runs are spread out and to start when he is ahead. Every sentence of
+   the plan is written from the count table beside it, so a plan is empty
+   only when that table agrees that no count costs a run, and a hitter
+   who chases more with two strikes but produces there, like Luis Arráez,
+   is told there is nothing to take away.
 5. **The coach's note is for the staff.** It says where to start: breaking
    balls before two strikes, where a take costs nothing in strikeouts.
    A card says where a hitter chases, not why. The same leak can be
@@ -492,8 +501,8 @@ cards go from a file to a cage.
   recognition, timing, or a two-strike approach that protects too wide,
   and the drill is different for each. The card points the camera; it
   does not replace the video.
-- **It is the far-off pitch, every time.** Each plan line says how far
-  off the zone the chased pitches were. A take rule is for the pitch
+- **It is the far-off pitch, every time.** Each pitch line in the plan says
+  how far off the zone the chased pitches were. A take rule is for the pitch
   that is clearly a ball, never the borderline one, and a two-strike take
   of a borderline pitch is a called third strike.
 - **Check at midseason on the frozen cells.** The half-season pairs

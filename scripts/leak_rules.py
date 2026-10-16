@@ -51,8 +51,9 @@ COUNT_GROUPS = ["first", "ahead", "even", "two"]
 LEAK_CELL = ["count_group", "pitch_group", "region"]
 LEAK_MIN_PITCHES = 12
 LEAK_MIN_RUNS = 0.75            # runs per 600 PA, to be listed as a leak
-PLAN_MIN_RUNS = 1.0             # ...and to make the plan
-LEAK_TOP = 3
+LEAK_TOP = 3                    # the card lists this many; the plan takes the
+                                # first two, the backtest and the frozen targets
+                                # all three, so one scale runs through them
 
 # The backtest's league expectation for a pitch (steps 16 and 19): the
 # league's chase rate in the same season, count, distance bucket, pitch

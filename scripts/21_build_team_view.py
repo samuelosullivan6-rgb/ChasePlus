@@ -104,7 +104,8 @@ print(f"  wrote player_cards/team_view_{SEASON}.csv ({len(out)} hitters, "
 # full plan is on the card and in the CSV). Lines are joined with a space
 # in the CSV, so split where the next line's opener begins.
 OPENERS = ("With two strikes", "On the first pitch", "When you're ahead", "Early in the count",
-           "At 0-1 or 1-1", "Your bigger issue", "Nothing stands out")
+           "At 0-1 or 1-1", "Your bigger issue", "Nothing stands out", "No single pitch",
+           "Nothing to take away")
 SPLIT = re.compile(r"(?= (?:" + "|".join(re.escape(o) for o in OPENERS) + "))")
 
 
