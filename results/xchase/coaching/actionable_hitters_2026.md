@@ -95,8 +95,9 @@ better on execution than he is.
   Tovar, Zach Neto, Andrés Giménez, Jeremy Peña). Their far-off loss is
   as large as the subset's (10-13.5 runs), but their execution is also
   negative and the loss is spread across every count, pitch group and
-  side of the zone. There is no single pattern to drill; it is a general
-  discipline problem. They are the bottom-10 write-up's subject.
+  side of the zone. No single pattern explains the loss: each card names
+  the pitch to start with, and beyond it this is a general discipline
+  problem. They are the bottom-10 write-up's subject.
 - **Mixed hitters** losing 8-11 runs (Trea Turner, Brandon Lowe, Ty
   France, Royce Lewis). Nothing concentrated enough to name.
 
@@ -106,18 +107,19 @@ Cells are strikes x pitch group x side of the zone missed, far-off pitches
 only. "Excess" is how many more chases the hitter took than the league
 would have on the same pitches.
 
-**Salvador Pérez.** 78% of his far-off loss is breaking and offspeed below
-the zone, and it starts early: 37-39% chase on 0- and 1-strike breaking
-balls down-and-away against 14-20% league (22 excess chases, -2.6 runs),
-then 69% on 2-strike breaking balls down against 47% (12 excess, -3.9).
-He also chases 22% of 0-0 far-off pitches against 11% and 57% of 3-ball
-out-of-zone pitches against 36% (-2.9 runs). His chases produce +7.8
-execution runs, so the swing is fine. Draft, the same rule as the
-bottom-10 report and his card: breaking balls before two strikes, away
-and below the zone, are an automatic take; the first pitch is where to
-start (22% chase against 11%). He has done this before; his far-off chase
-rate with fewer than two strikes has sat at 31-34% for four years, so this
-is the baseline, not a slump.
+**Salvador Pérez.** 78% of his far-off loss is breaking and offspeed
+below the zone, and it starts early: 37-39% chase on 0- and 1-strike
+breaking balls down-and-away against 14-20% league (22 excess chases,
+-2.6 runs), then 69% on 2-strike breaking balls down against 47% (12
+excess, -3.9). He also chases 22% of 0-0 far-off pitches against 11% and
+57% of 3-ball out-of-zone pitches against 36% (-2.9 runs). His chases
+produce +7.8 execution runs, so the swing is fine. Draft, the same rule
+as the bottom-10 report and his card: breaking balls before two strikes,
+away and below the zone, are an automatic take, starting where his card
+starts, at 0-1 or 1-1 with breaking balls below the zone. The first
+pitch (22% chase against 11%) is the same habit one count earlier. He
+has done this before; his far-off chase rate with fewer than two strikes
+has sat at 31-34% for four years, so this is the baseline, not a slump.
 
 **Michael Harris II.** The loss is the most concentrated in the group:
 -8.9 of -16.8 far-off runs come with two strikes against right-handers,

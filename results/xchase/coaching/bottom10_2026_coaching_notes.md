@@ -91,12 +91,15 @@ Ordered worst to best. "Repeats?" compares with 2024 and 2025.
   out-of-zone pitches in 1-0, 1-1 and 1-2 against a league 34%.
 - Repeats? Yes. xChase+ 54, 77, 55 over 2024-26. Chase rate below the zone
   51%, 48%, 55%; above it 47%, 44%, 56%.
-- **Draft adjustment:** split it in two. Early in counts, take the fastball
-  above the letters; that alone is -2 to -3 runs with no strikeout cost.
-  With two strikes, the low breaking ball is both a decision and a contact
-  problem, so the realistic goal is the chase rate, not the whiff: get the
-  71% down to league. The combined two-strike cells below the zone and
-  fastball up are -8.4.
+- **Draft adjustment:** split it in two, as his card does. Early, the
+  card's first line: when he is ahead against right-handers, changeups and
+  splitters below the zone are a take, with no strikeout cost. With two
+  strikes, the card's second line: breaking balls below the zone against
+  right-handers, both a decision and a contact problem, so the realistic
+  goal is the chase rate, not the whiff: get the 71% down to league. The
+  early fastball above the zone (47% at 0 strikes against 23%) is real but
+  not on the card's plan; leave it until those two lines hold. The
+  combined two-strike cells below the zone and fastball up are -8.4.
 
 ### 2. Ezequiel Tovar (xChase+ 66, -19.2 runs)
 
@@ -114,9 +117,12 @@ Ordered worst to best. "Repeats?" compares with 2024 and 2025.
 - **Draft adjustment:** one rule, not several: anything that starts at the
   knees and is still dropping is a take, in every count. He has no fastball
   problem (+0.4 decision on fastballs), so a "sit hard, spit spin below the
-  zone" plan does not cost him anything up top. Two cheap places to start
-  are 0-0 (-3.8) and 3-2 (-3.9), where the league rarely chases and the
-  3-2 chase is the most expensive one in the game.
+  zone" plan does not cost him anything up top. Start where his card
+  starts: with two strikes, breaking balls below the zone (87%, 40 of 46),
+  which takes in the 3-2 chase, the most expensive one in the game (-3.9
+  in 44 pitches); the card's second line is changeups and splitters below
+  the zone with two strikes. After those, 0-0 (-3.8) is the cheap early
+  count, where the league rarely chases.
 
 ### 3. Andrés Giménez (xChase+ 67, -17.3 runs)
 
@@ -204,10 +210,14 @@ Ordered worst to best. "Repeats?" compares with 2024 and 2025.
   right-handers' sliders and sweepers below the zone 9 points above
   average in 2024, 5 in 2025 and 9 in 2026. What changed is volume: 290
   of them in 2026, 184 in 2024.
-- **Draft adjustment:** right-handed slider below the zone, period. His
-  fastball decisions are a strength, so this is a "sit fastball, take
-  anything that breaks below the knees" plan. The 2024 numbers do not show he
-  has done it before, so expect it to take work. The two-strike breaking-ball cells below the zone and
+- **Draft adjustment:** start where his card starts: with two strikes,
+  breaking balls below the zone, from either hand (about 40% of the
+  pitches in that leak come from left-handers). The right-handed slider
+  below the zone is the steady part of it, chased above the league three
+  years running; the card's second line is two-strike breaking balls down
+  and away from right-handers. His fastball decisions are a strength. The
+  2024 numbers do not show he has laid off these before, so expect it to
+  take work. The two-strike breaking-ball cells below the zone and
   down-and-away are -9.5 together.
 
 ### 7. Salvador Pérez (xChase+ 73, -15.5 runs)
@@ -227,7 +237,7 @@ Ordered worst to best. "Repeats?" compares with 2024 and 2025.
   over-swings there and gets nothing: 0-strike breaking balls away (51%
   chase vs 13.5%), 0-strike down-and-away (36% vs 17%), 1-strike away (66%
   vs 30%). Those three cells are about -5 runs and none of them risks a
-  strikeout; his card's plan leads with the same pitch at 0-1 and 1-1,
+  strikeout; his card's plan leads with the same pitch at 0-1 or 1-1,
   where its cells put it. The two-strike breaking ball below the zone is
   the next step:
   he chases 78% of them, and his good contact (+2.75) offsets only part of
@@ -288,8 +298,10 @@ Ordered worst to best. "Repeats?" compares with 2024 and 2025.
 - Above the zone he chases 61% (league 36%) but his execution there is
   +5.4, so across counts the high fastball nets out to about zero and is
   not a target in general. The two-strike fastball a ball above the zone
-  is still a net loss after contact and stays on his card's leak list;
-  the plan leads with the slider away and the early counts instead.
+  is still a net loss after contact, and it is his card's first line:
+  with two strikes, fastballs above the zone. The slider away and the
+  breaking ball below the zone at 0-1 or 1-1 are video items on the card
+  (most of those chases were within a ball of the zone), not take rules.
 - The leaks: RHP breaking balls away and down-and-away with two strikes
   (84% chase vs 47% on breaking balls away; 34% vs 26% down-and-away with
   whiffs, -8.6 for the two cells), and the first pitch (-4.1, 32% vs 17%
@@ -297,11 +309,15 @@ Ordered worst to best. "Repeats?" compares with 2024 and 2025.
 - Repeats? Yes. xChase+ 72, 85, 76. Breaking balls were the worst pitch
   group all three years (-10.7, -8.1, -16.9) at a 44-48% chase rate
   against a league 31-33%.
-- **Draft adjustment:** two rules. One, the first pitch: he chases 0-0 at
-  almost double the league rate for -4.1, and a 0-0 take costs nothing.
-  Two, the two-strike slider away from a right-hander: 27 of 32 swings on
-  breaking balls away with two strikes is a pattern a pitcher can plan an
-  at-bat around. His aggression up in the zone is fine and should stay.
+- **Draft adjustment:** start where his card starts: with two strikes,
+  fastballs a ball or more above the zone are the one clear take. The
+  two-strike slider away from a right-hander (27 of 32 swings on breaking
+  balls away with two strikes) is a pattern a pitcher can plan an at-bat
+  around, but those chases were mostly within a ball of the zone, so it
+  goes to video, not a take rule. The first pitch (0-0 at almost double
+  the league rate, -4.1) is real but not on the card's plan; leave it
+  until the card's line holds. His aggression up in the zone is fine and
+  should stay.
 
 ## Caveats
 

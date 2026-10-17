@@ -108,8 +108,12 @@ aside { display: grid; gap: 22px; align-content: start; min-width: 0; }
 aside section { display: grid; gap: 10px; min-width: 0; }
 aside h2 { font-size: 20px; font-weight: 800; }
 .plan { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; font-size: 16px; max-width: 68ch; }
-.plan li { display: grid; grid-template-columns: 26px minmax(0, 1fr); gap: 8px; align-items: start; }
+.plan li { display: grid; grid-template-columns: 26px minmax(0, 1fr) auto; gap: 8px; align-items: start; }
 .plan .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--ink); margin: 8px 0 0 8px; }
+/* a plan line's step is filled, so it is never read as a leak number; the leak's own number is the small tag */
+.plan .step { width: 24px; height: 24px; border-radius: 50%; background: var(--ink); color: var(--surface); display: grid; place-items: center; font-size: 13px; font-weight: 800; }
+.plan .leaktag { display: inline-flex; align-items: center; gap: 4px; color: var(--muted); font-size: 12px; white-space: nowrap; margin-top: 3px; }
+.plan .leaktag .num { width: 18px; height: 18px; font-size: 11px; border-width: 1.2px; border-color: var(--muted); color: var(--ink2); }
 .plan .keep { color: var(--ink2); font-size: 14px; }
 .state { color: var(--muted); font-size: 13px; margin: 0; }
 .zgrid .rowhead.whiff { border-top: 1px solid var(--axis); padding-top: 6px; }
@@ -214,6 +218,9 @@ summary { cursor: pointer; font-weight: 700; }
   .zfoot { padding-left: 0; }
   .leaks li { grid-template-columns: 26px minmax(0, 1fr) auto; }
   .leaks .rate { grid-column: 2; }
+  /* the leak tag goes under its line, so the line keeps the width */
+  .plan li { grid-template-columns: 26px minmax(0, 1fr); }
+  .plan .leaktag { grid-column: 2; margin-top: -4px; }
   .bars { grid-template-columns: auto 120px auto; }
 }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
@@ -723,9 +730,12 @@ summary { cursor: pointer; font-weight: 700; }
         ramp, el("div", { class: "ticks" }, el("span", { text: "−30 pts" }), el("span", { text: "average" }), el("span", { text: "+30 pts" })));
     }
     if (state.selFor !== p.slug || !panels[state.sel]) {
-      // open on the biggest leak, or two strikes on the first row
-      const lk = !p.reference && p.leaks.all && p.leaks.all[0];
-      const row = lk ? rows.findIndex((r) => r[2] === lk.side && r[4] === "chase") : -1;
+      // open on the plan's first line, on the row its marker is drawn on;
+      // with no pitch line, the biggest leak; else two strikes on the first row
+      const first = !p.reference && (p.plan_items || []).find((it) => it.kind === "pitch");
+      const lk = !p.reference && p.leaks.all && (first ? p.leaks.all[first.n - 1] : p.leaks.all[0]);
+      let row = lk ? rows.findIndex((r) => r[2] === lk.side && r[3] === (lk.hand || "all") && r[4] === "chase") : -1;
+      if (lk && row < 0) row = rows.findIndex((r) => r[2] === lk.side && r[4] === "chase");
       state.sel = (row >= 0 ? row : 0) + "|" + (lk && row >= 0 ? lk.count_group : "two");
       state.selFor = p.slug;
     }
@@ -898,8 +908,9 @@ summary { cursor: pointer; font-weight: 700; }
     const items = state.hand === "all" ? p.plan_items : ((p.plan_items_by_hand || {})[state.hand] || p.plan_items);
     items.forEach((it) => {
       if (it.kind === "keep") { plan.append(el("li", {}, el("span"), el("span", { class: "keep", text: it.text }))); return; }
-      const mark = it.kind === "pitch" ? el("span", { class: "num", text: String(it.n) }) : el("span", { class: "dot" });
-      plan.append(el("li", {}, mark, el("span", { text: it.text })));
+      if (it.kind !== "pitch") { plan.append(el("li", {}, el("span", { class: "dot" }), el("span", { text: it.text }))); return; }
+      plan.append(el("li", {}, el("span", { class: "step", text: String(it.step) }), el("span", { text: it.text }),
+        el("span", { class: "leaktag", title: "This line's leak, numbered on the pictures and in the list below" }, "leak", el("span", { class: "num", text: String(it.n) }))));
     });
     const sec = el("section", {}, el("h2", { text: state.hand === "all" ? "What to work on" : `What to work on vs ${state.hand === "R" ? "right-handers" : "left-handers"}` }), plan);
     if (state.hand !== "all") sec.append(el("p", { class: "evidence", text: "The plan for this pitcher hand only; pick All pitchers for the full plan. The target counts all pitchers." }));
@@ -915,7 +926,7 @@ summary { cursor: pointer; font-weight: 700; }
       el("span", { class: "runs", text: runs(lk.choices) }))));
     const leakSec = el("section", {}, el("div", { class: "sechead" }, el("h2", { text: state.hand === "all" ? "Biggest leaks" : `Biggest leaks vs ${state.hand === "R" ? "right-handers" : "left-handers"}` })));
     leakSec.append(leaks.length ? list : el("p", { class: "empty", text: "None worth 0.75 runs per 600 PA." }));
-    leakSec.append(el("p", { class: "evidence", text: (state.hand === "all" ? "Numbered on the pictures, on the row of the hand a leak names. " : "") + "Ranked by what the choices cost, per 600 PA; the plan is in the order to work on them." }));
+    leakSec.append(el("p", { class: "evidence", text: (state.hand === "all" ? "Numbered on the pictures, on the row of the hand a leak names. " : "") + "Ranked by what the choices cost, per 600 PA; the plan takes up to two, in the order to work on them, so it can leave a bigger one out." }));
     if (p.target_text && state.hand === "all") leakSec.append(el("p", { class: "evidence target", text: `Target: ${p.target_text}` }));
     a.append(leakSec);
     a.append(el("section", {}, el("h2", { text: "By count" }), countTable(p.tables[state.hand], false),
