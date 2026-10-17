@@ -79,7 +79,10 @@ button, input, select { font: inherit; color: inherit; }
 
 /* card */
 .card { background: var(--surface); border: 1px solid var(--hair); border-radius: 10px; padding: 24px; display: grid; gap: 20px; }
-.head { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 16px 32px; padding-bottom: 18px; border-bottom: 1px solid var(--hair); }
+/* the tiles sit beside the name while the name keeps 340px, and wrap under it below that: a grid with an
+   auto tiles column squeezed the name to nothing between phone and wide-desktop widths */
+.head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: start; gap: 16px 32px; padding-bottom: 18px; border-bottom: 1px solid var(--hair); }
+.head > :first-child { flex: 1 1 340px; min-width: 0; }
 .head h1 { font-size: clamp(28px, 4vw, 42px); font-weight: 800; letter-spacing: -.01em; }
 .head .sub { color: var(--ink2); font-size: 16px; }
 .tiles { display: flex; gap: 32px; flex-wrap: wrap; }
@@ -220,7 +223,6 @@ summary { cursor: pointer; font-weight: 700; }
   th.nar, td.nar { display: none; }
   .tablewrap.all th.nar, .tablewrap.all td.nar { display: table-cell; }
   .tablebtn { display: inline-block; }
-  .head { grid-template-columns: minmax(0, 1fr); }
   .zgrid { grid-template-columns: 58px repeat(4, minmax(0, 1fr)); gap: 4px; }
   .zgrid .colhead { font-size: 12px; }
   .zgrid .rowhead { font-size: 12px; }
