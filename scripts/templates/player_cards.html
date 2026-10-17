@@ -656,7 +656,8 @@ summary { cursor: pointer; font-weight: 700; }
     panels = {};
     const grid = document.getElementById("zgrid");
     grid.replaceChildren(el("div"));
-    GROUPS.forEach((g) => grid.append(el("div", { class: "colhead" }, g.label, el("span", { text: g.detail }))));
+    // non-breaking hyphens, so a narrow column breaks "0-1 or 1-1" at a space, never inside a count
+    GROUPS.forEach((g) => grid.append(el("div", { class: "colhead" }, g.label.replace(/-/g, "\u2011"), el("span", { text: g.detail }))));
     const rows = rowsFor(p);
     const placed = {};                       // "row|group" -> [[n, x, z]]
     if (!p.reference && state.metric === "chase" && state.pitch === "all") {
@@ -738,7 +739,8 @@ summary { cursor: pointer; font-weight: 700; }
       ramp.style.background = whiff ? `linear-gradient(90deg, ${T.whiffLess}, ${T.mid}, ${T.whiffMore})` : `linear-gradient(90deg, ${T.blue}, ${T.mid}, ${T.red})`;
       const words = whiff ? "Misses on chases vs the average hitter at the same spot and count. Green: fewer. Purple: more."
                           : "Chases vs the average hitter at the same spot and count. Blue: takes more. Red: chases more.";
-      legend.replaceChildren(el("span", { text: `${words} Gray: about average. Background: too few pitches to say. Outline: +15 pts.` }),
+      const dark = M.hexRgb(T.surface).reduce((x, y) => x + y, 0) < 1.5;   // the midpoint is a dark gray there
+      legend.replaceChildren(el("span", { text: `${words} ${dark ? "Dark gray" : "Gray"}: about average. Background: too few pitches to say. Outline: +15 pts.` }),
         ramp, el("div", { class: "ticks" }, el("span", { text: "−30 pts" }), el("span", { text: "average" }), el("span", { text: "+30 pts" })));
     }
     if (state.selFor !== p.slug || !panels[state.sel]) {
@@ -910,7 +912,7 @@ summary { cursor: pointer; font-weight: 700; }
     if (p.reference) {
       const guide = el("ol", { class: "guide" });
       const dark = M.hexRgb(T.surface).reduce((x, y) => x + y, 0) < 1.5;
-      D.guide.forEach((g) => guide.append(el("li", { text: g.replace("{more}", dark ? "brighter" : "darker") })));
+      D.guide.forEach((g) => guide.append(el("li", { text: g.replace("{more}", dark ? "brighter" : "darker").replace("{avg}", dark ? "Dark gray" : "Gray").replace("{none}", dark ? "The background showing through" : "White") })));
       a.append(el("section", {}, el("h2", { text: "How to read a player card" }), guide));
       a.append(el("section", {}, el("h2", { text: "The average, by count" }), countTable(p.table, true)));
       a.append(el("section", { class: "trend" }, el("h2", { text: "Far-off chase rate by season, every hitter" }), trendSvg([], "League far-off chase rate by season")));
@@ -1011,7 +1013,8 @@ summary { cursor: pointer; font-weight: 700; }
   const fold = (s) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
   const ROSTER = D.players.map((p) => {
     const top = (p.leaks.all || [])[0] || null, t = p.target;
-    const beat = !t ? "" : Math.round(t.predicted * 100) <= 2 ? "no target" : `under ${Math.round(t.predicted * 100)} (was ${Math.round(t.excess * 100)})`;
+    const beat = p.target_beat !== undefined ? p.target_beat
+      : !t ? "" : Math.round(t.predicted * 100) <= 2 ? "no target" : `under ${Math.round(t.predicted * 100)} (was ${Math.round(t.excess * 100)})`;
     return { slug: p.slug, player: p.name, key: fold(p.name), team: p.team, teams: p.teams, bats: p.bats,
              xchase: Math.round(p.xchase_plus), rank: p.rank, rank_txt: ordinal(p.rank), pa: p.pa,
              stake: r1(p.runs_at_stake), choices: r1(p.choices), contact: r1(p.contact),
@@ -1039,7 +1042,7 @@ summary { cursor: pointer; font-weight: 700; }
   };
   document.getElementById("roster-title").textContent = `Chase decisions by team, ${D.season}`;
   document.getElementById("roster-lede").textContent = `Every qualified hitter, sorted by the runs his swing choices on far-off pitches cost per 600 plate appearances. Tap a name for his decision card. Beat is the number to get under in ${D.season + 1}: what the frozen line expects with no change at all, with this season's number beside it. On a phone, tap a hitter for the rest of his row.`;
-  document.getElementById("roster-glossary").textContent = "Runs are per 600 plate appearances. Choices is what the swing decisions cost against an average hitter at the same spot, count and matchup; contact is what the chases produced compared with the average hitter's chases. Problem: the share of the loss that is choices (step 13). Top leak: the costliest count, pitcher hand, pitch group and side of the zone, with the hitter's rate against the league's and how far off the zone the chased pitches were (median inches). Count check: how he hits once the count reaches the leak's counts, shrunk for noise, against the league in the same counts. Beat: leak chasing in points above the league that the frozen line expects next season with no change, with this season's number beside it (step 19); a fix is anything under it. Start with: the plan's first pitch line, with the two rates and the inches off; the rest of the plan is on the card. A traded hitter lists every team, most plate appearances first, and is on each team's roster.";
+  document.getElementById("roster-glossary").textContent = "Runs are per 600 plate appearances. Choices is what the swing decisions cost, with each chase priced at what an average chase costs in the same count and at the same distance off the zone; contact is what his chases produced against that price. Problem: the share of the loss that is choices (step 13). Top leak: the costliest count, pitch group and side of the zone, with the pitcher hand when most of its pitches came from one (“mostly vs RHP”), and how far off the zone the chased pitches were (median inches). Count check: how he hits once the count reaches the leak's counts, shrunk for noise, against the league in the same counts. Beat: how far above the league's chase rate, in points, the frozen line expects the hitter to chase in all of the card's leaks next season with no change, with this season's number beside it (step 19); a fix is anything under it, and a card whose leaks are all video items has none. Start with: the plan's first pitch line, with the two rates when they print 5 or more points apart (otherwise what the swings cost) and the inches off; the rest of the plan is on the card. A traded hitter lists every team, most plate appearances first, and is on each team's roster.";
 
   function renderRoster() {
     const head = document.querySelector("#roster-table thead tr"); head.replaceChildren();

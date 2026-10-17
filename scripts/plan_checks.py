@@ -50,6 +50,16 @@ KINDS = {
     "framing misquoted": "a framing line's runs or level are not the hitter's",
     "plus count misquoted": "a plus-count sentence's runs are not the count table's",
     "keep line miscounts": "the closing line's 'pitch above' / 'pitches above' is not the plan's",
+    # The target can be read and tracked (evaluation item 4)
+    "target without unit or leaks": "the target sentence does not say it is points above the league's "
+                                    "chase rate, or which leaks it covers",
+    "retrospective target as a forecast": "a target set after the season reads as a forecast, or does "
+                                          "not say how the next season came out",
+    "number on a video-only card": "a card whose every leak is a video item prints a number to beat",
+    "target result misquoted": "the next season's number on a retrospective card is not step 20's",
+    # Labels a staff can trust (evaluation items 5 and 7)
+    "start line quotes near-identical rates": "the roster's start line quotes two rates under 5 points apart",
+    "hand overstated": "a line or leak name gives one pitcher hand for pitches the other hand threw too",
 }
 
 
@@ -159,6 +169,11 @@ def plan_problems(items, leaks, rows, player, all_pitchers=True):
     # numbers quoted in the pitch lines
     for it in pitches:
         lk = leaks[it["n"] - 1]
+        if all_pitchers and lk["hand"]:
+            share = lk["share_rhp"] if lk["hand"] == "R" else 1 - lk["share_rhp"]
+            opener = re.split(r", let | are one", it["text"])[0]
+            if share < 1 and "mostly" not in opener:
+                out.append(("hand overstated", opener))
         if tuple(it["cell"]) != (lk["count_group"], lk["pitch_group"], lk["region"]):
             out.append(("rates misquoted", f"line {it['n']} is not its leak's cell"))
             continue
@@ -174,22 +189,66 @@ def plan_problems(items, leaks, rows, player, all_pitchers=True):
     return out
 
 
+def leaks_named(n):
+    """Step 17's names for the leaks a target covers."""
+
+    return "leak 1" if n == 1 else ("leaks 1 and 2" if n == 2 else f"leaks 1 to {n}")
+
+
+def all_video(player):
+    leaks = player["leaks"]["all"]
+    return bool(leaks) and all(lk["depth_in"] < CLEARLY_OFF_IN for lk in leaks)
+
+
 def target_problems(player):
-    t = player.get("target_text") or ""
-    if ("No target" in t or "No chase target" in t) and "already" in t:
-        return [("no target says already", t[:60])]
-    return []
+    text = player.get("target_text") or ""
+    out = []
+    if ("No target" in text or "No chase target" in text) and "already" in text:
+        out.append(("no target says already", text[:60]))
+    t = player.get("target")
+    if not t or not text:
+        return out
+    if all_video(player):
+        if "Under" in text:
+            out.append(("number on a video-only card", text[:60]))
+        return out
+    if (not any(w in text for w in ("points above the league's chase rate", "about at the league's chase rate",
+                                    "points below the league's chase rate"))
+            or leaks_named(len(player["leaks"]["all"])) not in text.lower()):
+        out.append(("target without unit or leaks", text[:60]))
+    if t.get("out_of_sample") == "no":
+        if "you'd be" in text or "afterward" not in text or ("You were at" not in text
+                                                             and "Not scored" not in text
+                                                             and t.get("actual", 0) is not None):
+            out.append(("retrospective target as a forecast", text[:60]))
+        a = t.get("actual")
+        if a is not None and f"You were at {a * 100:.0f}" not in text and f"You were at {a * 100:.1f}" not in text:
+            out.append(("target result misquoted", f"actual {a * 100:.1f}: {text[-50:]}"))
+    return out
+
+
+def label_problems(player):
+    """The roster's start line and the hand in the leak names."""
+
+    out = []
+    m = re.search(r"\((\d+)% vs (\d+)%", player.get("start_with") or "")
+    if m and abs(int(m.group(1)) - int(m.group(2))) < 5:
+        out.append(("start line quotes near-identical rates", m.group(0)))
+    for lk in player["leaks"]["all"]:
+        share = lk["share_rhp"] if lk["hand"] == "R" else 1 - lk["share_rhp"]
+        if lk["hand"] and share < 1 and "mostly" not in lk.get("phrase", "mostly"):
+            out.append(("hand overstated", lk["phrase"]))
+    return out
 
 
 def problems(player):
-    """Every problem on one card: the all-pitchers plan and target, and
-    each pitcher-hand tab's plan."""
+    """Every problem on one card: the all-pitchers plan, the target and
+    the labels, and each pitcher-hand tab's plan. A plan without a pitch
+    line has no plan problems, but its target and labels are checked."""
 
     rows = {r["group"]: r for r in player["tables"]["all"]}
-    if not any(it["kind"] == "pitch" for it in player["plan_items"]):
-        return []
     out = plan_problems(player["plan_items"], player["leaks"]["all"], rows, player)
-    out += target_problems(player)
+    out += target_problems(player) + label_problems(player)
     for h, items in (player.get("plan_items_by_hand") or {}).items():
         hrows = {r["group"]: r for r in player["tables"][h]}
         out += [(kind, f"vs {h}HP: {detail}")

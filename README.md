@@ -250,7 +250,9 @@ How to read it, top to bottom:
    too few pitches to say anything. The outlines mark spots 15 points or
    more above average.
 3. **The numbers on the zones are the leaks**, ranked by runs, each with
-   the pitcher hand it belongs to and the pitch count behind the rate. The
+   the pitcher hand most of its pitches came from ("mostly vs RHP": its
+   rates count every pitch, so it says "mostly" unless that hand threw
+   them all) and the pitch count behind the rate. The
    worst is two-strike breaking balls below the zone: Pérez swings at 78%,
    where an average hitter on the same pitches swings at 49%.
 4. **The plan is written to the player**, in the words a hitter would use
@@ -320,13 +322,22 @@ How to read it, top to bottom:
    league rate of 18-22%. It is a habit, so the plan is worth the effort.
 8. **The target, beside the trend, is the number to get under.** Leaks
    are a hitter's worst-looking spots, so about half of the excess goes
-   away on its own next season (see step 16 below). The card says how far
-   above the league he chased in his leaks this season, what the frozen
-   line expects next season with no change at all, and that only under
-   that is a fix; that is the number step 20 scores. A hitter whose
+   away on its own next season (see step 16 below). The card names the
+   leaks the target covers, all of them and not only the plan's, and says
+   how far above the league's chase rate, in points, he chased in them
+   together this season, what the frozen line expects next season with no
+   change at all, and that only under that is a fix; that is the number
+   step 20 scores. It is on the backtest's scale, so it need not match any
+   one leak's rates on the list. Pérez: "Leaks 1 to 3 together: you
+   chased 24 points above the league's chase rate in 2026 ... with no
+   change you'd be about 13 in 2027. Under 13 is a fix." On the 2022 to
+   2025 cards the target was set afterward, from a line fit only on the
+   seasons through that one, so the card says so and shows how the next
+   season came out ("You were at 13: not under it"). A hitter whose
    forecast for next season is about at the league's rate gets no target
    rather than a negative one, and the sentence says it is the forecast:
-   the plan beside it can still quote a rate well above the league's.
+   the plan beside it can still quote a rate well above the league's. A
+   card whose leaks are all video items gets no number at all.
 
 **Does taking more pay?** Before putting "take that pitch" on a card, step
 14 checked what happened to real hitters who did it. Across 941 pairs of
@@ -940,8 +951,12 @@ video items says the staff takes it, "the biggest pieces" only when they
 are, no "already" in the no-target sentence, no "your fastball decisions
 are a strength" under a fastball line, a good chooser and a 0.0 far-off
 header explained, a first line in a count the table shows as a plus
-explained, and every rate, inch and run a sentence quotes equal to the
-one beside it. Step 17 stops and lists the cards when any fails. Run on
+explained, a target that names its unit and its leaks (and on an
+earlier season's card says it was set afterward and how the next season
+came out), no number on a card of video items only, no near-identical
+rates on the roster's start line, "mostly" wherever a leak's hand did not
+throw every pitch, and every rate, inch and run a sentence quotes equal
+to the one beside it. Step 17 stops and lists the cards when any fails. Run on
 a built page (`python scripts/plan_checks.py
 results/xchase/player_cards/2026/index.html`) it counts each kind
 instead.

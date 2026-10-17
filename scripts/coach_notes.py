@@ -58,14 +58,14 @@ NOTED = {
     "Luis García": ("easiest", "When he is ahead in the count, fastballs above the zone: the plan's first line. Three-ball counts sit inside it, and with three balls his choices cost about 5 runs, so swing only at strikes there; the card cannot show those counts on their own yet. With two strikes he chases nine fastballs above the zone in ten, but his contact there pays for it, so don't coach that one.", ("ahead", "fastball", "up")),
     "Hunter Goodman": ("easiest", "When he is ahead in the count, breaking balls below the zone: the plan's first line, and the free part, since the take costs nothing in strikeouts. Across every count before two strikes, not only ahead, he chases them 48% of the time against 30% on the same pitches, about 5 runs. Fastballs above the zone before two strikes look worse than they are: his contact nearly pays for them. The two-strike breaking ball, the plan's second line, may be contact as much as choice.", ("ahead", "breaking", "down")),
     # Biggest losses (step 12): the bottom 10 not already listed
-    "Mickey Moniak": ("biggest", "When he is ahead against right-handers, changeups and splitters below the zone: the plan's first line, a take that costs nothing in strikeouts. The second line, breaking balls below the zone with two strikes against right-handers, is the bigger leak; fix the early one first.", ("ahead", "offspeed", "down")),
+    "Mickey Moniak": ("biggest", "When he is ahead against right-handers, changeups and splitters below the zone: the plan's first line, a take that costs nothing in strikeouts. The second line, breaking balls below the zone with two strikes, mostly against right-handers, is the bigger leak; fix the early one first.", ("ahead", "offspeed", "down")),
     "Ezequiel Tovar": ("biggest", "With two strikes, breaking balls below the zone: the plan's first line, and a take in every count, so the earlier counts come next. With two strikes, changeups and splitters below the zone are the plan's second line. The fastball decisions are fine.", ("two", "breaking", "down")),
-    "Andrés Giménez": ("biggest", "With two strikes against right-handers, fastballs above the zone, then breaking balls below the zone: the plan's two lines, the cheap rules while the staff looks into the rest. Not new: xChase+ 69 and 74 in 2022-23, then 95 and 105, and back to 67, so find out what made 2024-25 work before any mechanical change. His biggest net loss by count is at 0-1 and 1-1, where none of his three biggest leaks sits, which is why the plan starts with two strikes.", ("two", "fastball", "up")),
-    "Jarren Duran": ("biggest", "With two strikes against right-handers, breaking balls below the zone: the plan's first line, a take even when he could reach it, since six chases in ten are misses. A contact problem, so his two-strike take line should be stricter than league norms.", ("two", "breaking", "down")),
-    "Colson Montgomery": ("biggest", "When he is ahead against right-handers, breaking balls below the zone: the plan's first take. A contact problem: two chases in three are misses, so a chase is close to a sure strike. With two strikes, the same pitch from right-handers is the plan's second line.", ("ahead", "breaking", "down")),
+    "Andrés Giménez": ("biggest", "With two strikes, mostly against right-handers, fastballs above the zone, then breaking balls below the zone: the plan's two lines, the cheap rules while the staff looks into the rest. Not new: xChase+ 69 and 74 in 2022-23, then 95 and 105, and back to 67, so find out what made 2024-25 work before any mechanical change. His biggest net loss by count is at 0-1 and 1-1, where none of his three biggest leaks sits, which is why the plan starts with two strikes.", ("two", "fastball", "up")),
+    "Jarren Duran": ("biggest", "With two strikes, mostly against right-handers, breaking balls below the zone: the plan's first line, a take even when he could reach it, since six chases in ten are misses. A contact problem, so his two-strike take line should be stricter than league norms.", ("two", "breaking", "down")),
+    "Colson Montgomery": ("biggest", "When he is ahead, mostly against right-handers, breaking balls below the zone: the plan's first take. A contact problem: two chases in three are misses, so a chase is close to a sure strike. With two strikes, the same pitch, mostly from right-handers, is the plan's second line.", ("ahead", "breaking", "down")),
     "Zach Neto": ("biggest", "With two strikes, breaking balls below the zone: the plan's first line, from either hand. The sliders among them from right-handers are the steady part: he chased those well above league in 2024 and 2025 too, and in 2026 pitchers threw him far more (290, up from 184). The fastball decisions are a strength.", ("two", "breaking", "down")),
-    "Oswald Peraza": ("biggest", "With two strikes, breaking balls below the zone: the plan's first line and his biggest leak. The second line is breaking balls down and away from right-handers. Three-ball counts are a separate piece the card cannot show on its own yet (62% chase against about 40%, about 5 runs in 45 pitches; they sit inside 'Ahead in the count' and the 3-2 part of 'Two strikes'): swing only at strikes there. Fewest plate appearances of the 17, so flag the sample on anything beyond these.", ("two", "breaking", "down")),
-    "Jeremy Peña": ("biggest", "With two strikes, fastballs above the zone: the plan's first line and the one clear take on his card. His contact pays for most of his chases on fastballs above the zone, so keep him swinging at strikes at the top of it. The two-strike slider away and the breaking ball below the zone at 0-1 or 1-1, both from right-handers, were mostly within a ball of the zone: video items, not take rules.", ("two", "fastball", "up")),
+    "Oswald Peraza": ("biggest", "With two strikes, breaking balls below the zone: the plan's first line and his biggest leak. The second line is breaking balls down and away, mostly from right-handers. Three-ball counts are a separate piece the card cannot show on its own yet (62% chase against about 40%, about 5 runs in 45 pitches; they sit inside 'Ahead in the count' and the 3-2 part of 'Two strikes'): swing only at strikes there. Fewest plate appearances of the 17, so flag the sample on anything beyond these.", ("two", "breaking", "down")),
+    "Jeremy Peña": ("biggest", "With two strikes, fastballs above the zone: the plan's first line and the one clear take on his card. His contact pays for most of his chases on fastballs above the zone, so keep him swinging at strikes at the top of it. The two-strike slider away and the breaking ball below the zone at 0-1 or 1-1, both mostly from right-handers, were mostly within a ball of the zone: video items, not take rules.", ("two", "fastball", "up")),
 }
 
 
@@ -169,19 +169,22 @@ def plan_pitches(player):
 def first_sentence_names(note, player):
     """The note's first sentence names the plan's first line in the plan's
     own words: the count, the pitch and its side of the zone as the line
-    prints them, and the pitcher hand when the line names one (and none
-    when it does not)."""
+    prints them, and the pitcher hand when the line names one, with
+    "mostly" when the line says it (and no hand when the line names none)."""
 
     first = plan_pitches(player)[0]
     lk = player["leaks"]["all"][first["n"] - 1]
     sentence = note.split(". ")[0].lower()
     line = first["text"].lower()
-    what = re.match(r"[^,]+, (?:let )?(.+?) (?:go\.|are one)", line).group(1)
+    what = re.match(r"(.+?), (?:mostly against (?:right|left)-handers, )?(?:let )?(.+?) (?:go\.|are one)",
+                    line).group(2)
     count = COUNT_KEYS[lk["count_group"]]
     missing = [w for w in (count, what) if w not in sentence or w not in line]
     if lk["hand"]:
         if HAND_KEYS[lk["hand"]] not in sentence:
             missing.append(HAND_KEYS[lk["hand"]])
+        if "mostly against" in line and "mostly" not in sentence:
+            missing.append("mostly (the line says the hand threw most, not all, of these)")
     elif "right-hand" in sentence or "left-hand" in sentence:
         missing.append("no hand (the line names none)")
     return holds(not missing, "missing: " + ", ".join(missing) if missing else f"{count}; {what}")
@@ -392,7 +395,7 @@ def claims(d):
     add("Oswald Peraza", "about 5 runs", about(d.net(t, "Oswald Peraza"), -5))
     add("Oswald Peraza", "in 45 pitches", holds(len(t) == 45, str(len(t))))
     biggest_leak("Oswald Peraza", "the plan's first line and his biggest leak")
-    second_line("Oswald Peraza", "the second line is breaking balls down and away from right-handers",
+    second_line("Oswald Peraza", "the second line is breaking balls down and away, mostly from right-handers",
                 ("two", "breaking", "down-away"))
     smallest = min(p[n]["pa"] for n in NOTED)
     add("Oswald Peraza", "fewest plate appearances of the 17", holds(p["Oswald Peraza"]["pa"] == smallest,
