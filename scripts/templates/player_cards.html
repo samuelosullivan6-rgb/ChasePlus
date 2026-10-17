@@ -169,12 +169,17 @@ summary { cursor: pointer; font-weight: 700; }
 .roster .rhead { padding: 0 24px; display: grid; gap: 6px; }
 .roster h1 { font-size: clamp(24px, 3vw, 32px); font-weight: 800; letter-spacing: -.01em; }
 .roster .lede { margin: 0; color: var(--ink2); max-width: 90ch; }
-.roster .scroll { overflow: auto; }
+/* the table scrolls in its own box, both ways, so the column heads stick to the box's top: a sticky head
+   sticks to its nearest scroll box, and the sideways scroll the wide table needs already makes this one.
+   Its height is the window less about the controls above it and the glossary below it, so the whole box
+   fits on screen and the heads stay in view at either end of the page. */
+.roster .scroll { overflow: auto; max-height: max(420px, calc(100vh - 340px)); }
 .roster table { border-collapse: collapse; width: 100%; min-width: 1560px; color: var(--ink); font-size: 14px; }
 .roster th, .roster td { padding: 7px 10px; text-align: left; border-bottom: 1px solid var(--hair); vertical-align: top; white-space: nowrap; }
 .roster th:first-child, .roster td:first-child { padding-left: 24px; }
 .roster th { font-size: 11px; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: .05em; cursor: pointer;
-             position: sticky; top: 0; background: var(--surface); user-select: none; vertical-align: bottom; }
+             position: sticky; top: 0; background: var(--surface); user-select: none; vertical-align: bottom;
+             border-bottom: 0; box-shadow: inset 0 -1px 0 var(--hair); }   /* a collapsed border stays behind when the head sticks; a shadow goes with it */
 .roster th.sorted { color: var(--ink); }
 .roster th .dir { font-size: 10px; margin-left: 3px; }
 .roster th.right, .roster td.right { text-align: right; font-variant-numeric: tabular-nums; }
@@ -189,6 +194,7 @@ summary { cursor: pointer; font-weight: 700; }
 .roster .none { padding: 0 24px 22px; color: var(--ink2); }
 /* phones: each hitter as a short card (team, name, runs, top leak, start with) that opens on a tap */
 @media (max-width: 720px) {
+  .roster .scroll { max-height: none; }   /* no heads to keep: the page scrolls */
   .roster table { min-width: 0; }
   .roster thead { display: none; }
   .roster tbody tr { display: block; padding: 10px 16px; border-bottom: 1px solid var(--hair); cursor: pointer; }
@@ -1043,6 +1049,7 @@ summary { cursor: pointer; font-weight: 700; }
       return (typeof x === "number" ? x - y : String(x).localeCompare(String(y))) * state.dir;
     });
     rosterRows = rows;
+    document.querySelector("#roster .scroll").scrollTop = 0;   // a new order or filter starts at its first row
     const body = document.querySelector("#roster-table tbody"); body.replaceChildren();
     for (const r of rows) {
       const tr = el("tr");
