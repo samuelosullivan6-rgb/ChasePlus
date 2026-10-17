@@ -6,9 +6,9 @@ the nine whose chase losses look easiest to fix
 bottom 10 by xChase+
 ([bottom10_2026_coaching_notes.md](../coaching/bottom10_2026_coaching_notes.md)).
 Every other qualified hitter has the same card in the interactive page,
-`results/xchase/player_cards/index.html` (hosted at
-[samuelosullivan6-rgb.github.io/ChasePlus](https://samuelosullivan6-rgb.github.io/ChasePlus/results/xchase/player_cards/index.html),
-or download it and open it in a browser). Each hitter below also has a printable
+`results/xchase/player_cards/2026/index.html` (hosted at
+[samuelosullivan6-rgb.github.io/ChasePlus](https://samuelosullivan6-rgb.github.io/ChasePlus/results/xchase/player_cards/2026/index.html),
+with a switcher to every other season). Each hitter below also has a printable
 two-page card in `print/`: the plan, the target, the pictures and the leaks, then a
 guide to the card in the player's own words. Every chased pitch in these hitters'
 leaks, with the date, the pitcher, the count, the pitch and how far off it was, is in
@@ -31,8 +31,8 @@ drill is different for each, so the card says where to point the camera. For
 what a normal card looks like, compare with the average hitter:
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="../player_cards/reference/average_rhb_dark.png">
-  <img alt="The average right-handed hitter's chase rate by location and count, with a guide to reading the cards" src="../player_cards/reference/average_rhb_light.png" width="900">
+  <source media="(prefers-color-scheme: dark)" srcset="../player_cards/2026/reference/average_rhb_dark.png">
+  <img alt="The average right-handed hitter's chase rate by location and count, with a guide to reading the cards" src="../player_cards/2026/reference/average_rhb_light.png" width="900">
 </picture>
 
 **Does fixing a leak pay?** Hitters who cut their leak chasing 10 points more than their numbers predicted gained 1.4 to 2.0 runs per 600 PA (xwOBA) and 4.3 to 4.7 xChase+ points, with only 0.3 to 0.5 pts fewer swings at strikes. It paid about the same whether or not they hit well in those counts. Two cautions before promising a player anything. Season to season, most of the payoff came from the other direction: hitters who chased more than predicted lost 2.9 ± 1.1 runs of offense, while those who cut more gained 7.5 xChase+ points but only 0.3 ± 1.2 runs (half to half, both sides show it: +3.4 and −3.1). So the first promise to a hitter is fewer wasted counts, not a better slash line. And leaks shrink on their own: how far above the league a hitter chases in his leaks halves the next season with nobody doing anything, so the target under each plan is the number to beat, not the hitter's current rate.

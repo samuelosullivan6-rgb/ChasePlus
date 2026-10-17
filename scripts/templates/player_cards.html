@@ -63,6 +63,7 @@ button, input, select { font: inherit; color: inherit; }
 .picker input, .picker select { background: var(--surface); border: 1px solid var(--axis); border-radius: 6px; padding: 7px 10px; min-width: 0; }
 .picker input { width: 220px; max-width: 100%; }
 .picker select { max-width: 320px; }
+.notice { color: var(--ink2); background: var(--surface); border: 1px solid var(--hair); border-radius: 8px; padding: 8px 12px; font-size: 14px; }
 .seg { display: inline-flex; border: 1px solid var(--axis); border-radius: 6px; overflow: hidden; background: var(--surface); }
 .seg input { position: absolute; opacity: 0; pointer-events: none; }
 .seg label { padding: 7px 12px; cursor: pointer; font-size: 14px; color: var(--ink2); text-transform: none; letter-spacing: 0; font-weight: 600; }
@@ -176,6 +177,10 @@ summary { cursor: pointer; font-weight: 700; }
 <div class="wrap">
   <div class="controls" role="group" aria-label="Card controls">
     <div class="control">
+      <label for="season">Season</label>
+      <div class="picker"><select id="season" aria-label="Choose a season"></select></div>
+    </div>
+    <div class="control">
       <label for="player-search">Hitter</label>
       <div class="picker">
         <input id="player-search" list="player-list" placeholder="Search by name" autocomplete="off">
@@ -216,6 +221,7 @@ summary { cursor: pointer; font-weight: 700; }
     </div>
   </div>
   <p class="state" id="state"></p>
+  <p class="notice" id="notice" hidden></p>
 
   <article class="card" id="card" aria-live="polite">
     <div class="head">
@@ -253,11 +259,11 @@ summary { cursor: pointer; font-weight: 700; }
 <div class="tip" id="tip" hidden></div>
 
 <script src="https://cdn.jsdelivr.net/npm/plotly.js-dist-min@2.35.2/plotly.min.js"></script>
+<script src="../seasons.js"></script>
 <script>/*__CARD_MATH__*/</script>
 <script type="application/json" id="card-data">/*__DATA__*/</script>
-<script type="text/plain" id="pitch-blob">/*__BLOB__*/</script>
 <script>
-(function () {
+(async function () {
   "use strict";
   const M = window.CardMath;
   const D = JSON.parse(document.getElementById("card-data").textContent);
@@ -269,10 +275,37 @@ summary { cursor: pointer; font-weight: 700; }
   const PITCH_NAMES = ["fastballs", "breaking balls", "changeups and splitters"];
   document.documentElement.style.setProperty("--panel-aspect", `${NX} / ${NZ}`);
 
-  // ---- pitches ----
-  const raw = atob(document.getElementById("pitch-blob").textContent.trim());
-  const bytes = new Uint8Array(raw.length);
-  for (let i = 0; i < raw.length; i++) bytes[i] = raw.charCodeAt(i);
+  // ---- seasons: one page per season; the switcher keeps the hitter in the hash ----
+  const seasonSel = document.getElementById("season");
+  const SEASONS = (Array.isArray(window.CHASE_SEASONS) && window.CHASE_SEASONS.length ? window.CHASE_SEASONS : (D.seasons || []))
+    .concat([D.season]).filter((y, i, a) => a.indexOf(y) === i).sort((a, b) => b - a);
+  for (const y of SEASONS) { const o = document.createElement("option"); o.value = String(y); o.textContent = String(y); seasonSel.append(o); }
+  seasonSel.value = String(D.season);
+  seasonSel.addEventListener("change", () => {
+    try { sessionStorage.setItem("chaseFrom", document.getElementById("name").textContent); } catch (e) {}
+    location.href = `../${seasonSel.value}/index.html${location.hash}`;
+  });
+
+  // ---- pitches: one 9-byte record each, in pitches.bin beside the page ----
+  async function loadPitches() {
+    const line = document.getElementById("state");
+    line.textContent = `Loading the ${D.season} pitches\u2026`;
+    try {
+      const res = await fetch(D.pitchFile);
+      if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+      return new Uint8Array(await res.arrayBuffer());
+    } catch (e) {
+      line.textContent = "";
+      document.getElementById("name").textContent = "The pitches did not load";
+      document.getElementById("line1").textContent = `This page reads ${D.pitchFile} from the folder beside it, and the browser would not load it (${e.message}).`;
+      document.getElementById("line2").textContent = location.protocol === "file:"
+        ? "A browser will not load it from a file on disk. Open the page from the hosted site, or serve the project folder with a local web server (python -m http.server) and open it from there."
+        : "Reload the page. If it keeps happening, the file is missing from the site.";
+      return null;
+    }
+  }
+  const bytes = await loadPitches();
+  if (!bytes) return;
   const REC = D.recordBytes, N = bytes.length / REC, dv = new DataView(bytes.buffer);
   const P = {
     x: new Float64Array(N), z: new Float64Array(N), chase: new Uint8Array(N), whiff: new Uint8Array(N),
@@ -303,7 +336,13 @@ summary { cursor: pointer; font-weight: 700; }
   const bySlug = new Map(everyone.map((p) => [p.slug, p]));
   const state = { slug: D.defaultSlug, base: "match", metric: "chase", pitch: "all", hand: "all", sel: null, selFor: null };
   let panels = {};                         // "row|group" -> what the 3D view needs
-  try { const h = location.hash.slice(1); if (bySlug.has(h)) state.slug = h; } catch (e) {}
+  let missing = null;                    // a hitter carried over from another season who has no card here
+  try {
+    const h = location.hash.slice(1);
+    let from = ""; try { from = sessionStorage.getItem("chaseFrom") || ""; sessionStorage.removeItem("chaseFrom"); } catch (e) {}
+    if (bySlug.has(h)) state.slug = h;
+    else if (h) { missing = from || h.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()); state.slug = D.references[0].slug; }
+  } catch (e) {}
 
   // ---- theme ----
   let T = {};
@@ -727,7 +766,7 @@ summary { cursor: pointer; font-weight: 700; }
       add("line", { x1: L, x2: W - R, y1: sy(t), y2: sy(t), stroke: "var(--hair)", "stroke-width": 1 });
       if (Math.round(t * 10) % 2 === 0) add("text", { x: L - 8, y: sy(t) + 4, "text-anchor": "end", "font-size": 12, fill: "var(--muted)" }, Math.round(t * 100) + "%");
     }
-    years.forEach((y) => add("text", { x: sx(y), y: H - 8, "text-anchor": "middle", "font-size": 12, fill: "var(--muted)" }, y));
+    years.forEach((y) => add("text", { x: sx(y), y: H - 8, "text-anchor": "middle", "font-size": 12, fill: y === D.season ? "var(--ink)" : "var(--muted)", "font-weight": y === D.season ? 800 : 400 }, y));   // the card's own season in bold: older cards show later seasons too
     const path = (pts) => pts.map(([y, v], k) => `${k ? "L" : "M"}${sx(y).toFixed(1)},${sy(v).toFixed(1)}`).join("");
     add("path", { d: path(D.leagueTrend), fill: "none", stroke: "var(--league)", "stroke-width": 2, "stroke-linecap": "round" });
     const lastL = D.leagueTrend[D.leagueTrend.length - 1];
@@ -864,6 +903,11 @@ summary { cursor: pointer; font-weight: 700; }
 
   readTheme();
   render();
+  if (missing) {
+    const n = document.getElementById("notice");
+    n.textContent = `${missing} has no ${D.season} card: he did not qualify that season. Showing ${bySlug.get(state.slug).name.toLowerCase()} instead.`;
+    n.hidden = false;
+  }
   const redrawAll = () => { readTheme(); if (lastRender) { zones(lastRender); aside(lastRender); } };
   try { window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", redrawAll); } catch (e) {}
   new MutationObserver(redrawAll).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });

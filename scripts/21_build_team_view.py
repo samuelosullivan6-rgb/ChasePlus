@@ -25,23 +25,32 @@ COLUMNS (from player_cards_<season>.csv, step 17, plus the team)
 
 OUTPUTS, in results/xchase/player_cards/
   team_view_<season>.csv   one row per qualified hitter, with team
-  teams.html               the page: filter by team, sort any column,
+  <season>/teams.html      the page: filter by team, sort any column,
                            search by name; each name links to the
-                           hitter's card in index.html
+                           hitter's card in index.html beside it. One
+                           page per season, with a season switcher.
+  teams.html, seasons.js   the old address, sent on to the newest
+                           season's page, and the list of seasons with
+                           a page (card_site.py)
 
 Options: --season (default 2026).
 
 Run after step 17. Needs the raw Statcast files in data/raw/ for the
-season (step 01), for the team columns.
+season (step 01), for the team columns. Step 22 runs this for every
+season.
 """
 
 import argparse
 import json
 from pathlib import Path
 import re
+import sys
 import unicodedata
 
 import pandas as pd
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import card_site  # noqa: E402
 
 PROJECT_DIR = Path(__file__).resolve().parents[1]
 RAW = PROJECT_DIR / "data" / "raw"
@@ -51,6 +60,7 @@ parser = argparse.ArgumentParser(description="The roster on one page.")
 parser.add_argument("--season", type=int, default=2026)
 args = parser.parse_args()
 SEASON = args.season
+SEASON_DIR = CARDS_DIR / str(SEASON)
 
 
 def slug(name):
@@ -170,6 +180,7 @@ page = f"""<!doctype html>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,800&display=swap">
+<script src="../seasons.js"></script>
 <style>
 :root {{
   --surface: #fcfcfb; --plane: #f4f3ef; --ink: #0b0b0b; --ink2: #52514e; --muted: #76746e;
@@ -237,8 +248,9 @@ td.leak {{ white-space: normal; min-width: 22ch; max-width: 28ch; }}
 </style>
 <div class="wrap">
   <h1>Chase decisions by team, {SEASON}</h1>
-  <p class="lede">Every qualified hitter, sorted by the runs his swing choices on far-off pitches cost per 600 plate appearances. Click a name for his decision card. Beat is the number to get under next season: what the frozen line expects with no change at all, with this season's number beside it. On a phone, tap a hitter for the rest of his row.</p>
+  <p class="lede">Every qualified hitter, sorted by the runs his swing choices on far-off pitches cost per 600 plate appearances. Click a name for his decision card. Beat is the number to get under in {SEASON + 1}: what the frozen line expects with no change at all, with this season's number beside it. On a phone, tap a hitter for the rest of his row.</p>
   <div class="controls">
+    <div class="control"><label for="season">Season</label><select id="season"></select></div>
     <div class="control"><label for="team">Team</label><select id="team"><option value="">All teams</option>{"".join(f'<option value="{t}">{t}</option>' for t in team_list)}</select></div>
     <div class="control"><label for="q">Search</label><input id="q" type="search" placeholder="Hitter name" autocomplete="off"></div>
     <div class="control"><label for="kind">Problem</label><select id="kind"><option value="">Any</option><option>choices</option><option>mostly choices</option><option>mixed</option><option>mostly contact</option><option>contact</option></select></div>
@@ -300,6 +312,11 @@ function render() {{
   }}
   document.getElementById("count").textContent = `${{rows.length}} of ${{ROWS.length}} hitters`;
 }}
+const seasonSel = document.getElementById("season");
+const SEASONS = (Array.isArray(window.CHASE_SEASONS) && window.CHASE_SEASONS.length ? window.CHASE_SEASONS : []).concat([{SEASON}]).filter((y, i, a) => a.indexOf(y) === i).sort((a, b) => b - a);
+SEASONS.forEach((y) => seasonSel.append(el("option", {{ value: y, text: String(y) }})));
+seasonSel.value = "{SEASON}";
+seasonSel.addEventListener("change", () => {{ location.href = `../${{seasonSel.value}}/teams.html${{location.search}}`; }});
 document.getElementById("team").addEventListener("change", (e) => {{ state.team = e.target.value; render(); }});
 document.getElementById("q").addEventListener("input", (e) => {{ state.q = e.target.value; render(); }});
 document.getElementById("kind").addEventListener("change", (e) => {{ state.kind = e.target.value; render(); }});
@@ -308,5 +325,10 @@ render();
 </script>
 </html>
 """
-(CARDS_DIR / "teams.html").write_text(page)
-print(f"  wrote player_cards/teams.html ({len(page) / 1e3:.0f} KB)")
+SEASON_DIR.mkdir(parents=True, exist_ok=True)
+(SEASON_DIR / "teams.html").write_text(page)
+print(f"  wrote player_cards/{SEASON}/teams.html ({len(page) / 1e3:.0f} KB)")
+seasons = card_site.write_seasons_js(SEASON)
+newest = max(card_site.built_seasons("teams.html"))
+card_site.write_redirect("teams.html", newest, "Chase Team View")
+print(f"  seasons with a page: {', '.join(map(str, seasons))}; player_cards/teams.html sends to {newest}")

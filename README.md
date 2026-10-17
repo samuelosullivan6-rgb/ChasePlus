@@ -207,7 +207,9 @@ a coach can hand it to a player and the player can read it alone.
 **Open them:** [samuelosullivan6-rgb.github.io/ChasePlus](https://samuelosullivan6-rgb.github.io/ChasePlus/)
 has every card ([the interactive page](https://samuelosullivan6-rgb.github.io/ChasePlus/results/xchase/player_cards/index.html))
 and [the roster on one page](https://samuelosullivan6-rgb.github.io/ChasePlus/results/xchase/player_cards/teams.html),
-served straight from this repository by GitHub Pages. No download needed.
+served straight from this repository by GitHub Pages, for every season
+since 2021: a switcher on each page moves between seasons with the hitter
+kept. No download needed.
 
 Start with the average hitter. This card is the baseline: how often an
 average right-handed hitter swings at a pitch outside the zone at each
@@ -215,8 +217,8 @@ spot, in each count, against each pitcher hand. Everyone chases more with
 two strikes, and nobody should be judged for that.
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="results/xchase/player_cards/reference/average_rhb_dark.png">
-  <img alt="The average right-handed hitter's chase rate by location, count and pitcher hand, with a numbered guide to reading a player card" src="results/xchase/player_cards/reference/average_rhb_light.png" width="900">
+  <source media="(prefers-color-scheme: dark)" srcset="results/xchase/player_cards/2026/reference/average_rhb_dark.png">
+  <img alt="The average right-handed hitter's chase rate by location, count and pitcher hand, with a numbered guide to reading a player card" src="results/xchase/player_cards/2026/reference/average_rhb_light.png" width="900">
 </picture>
 
 A player card shows the difference from that baseline instead: red where
@@ -553,9 +555,11 @@ the target, the pictures and the leaks on page 1, and on page 2 a guide
 to the card in the player's own words next to the average hitter's
 two-strike picture. Every qualified hitter's card, with switches for
 pitch type, the baseline and swing-and-miss, is in
-`results/xchase/player_cards/index.html` (hosted at the link above, or
-download it and open it in a browser); the plan there follows the
-pitcher-hand tabs. The roster on one page is `teams.html` beside it:
+`results/xchase/player_cards/<season>/index.html` (hosted at the link
+above; one page per season, with a switcher on the page, and the season's
+pitches in `pitches.bin` beside it, so it needs a web server rather than
+a double-click); the plan there follows the pitcher-hand tabs. The roster
+on one page is `teams.html` beside it:
 every hitter by team, sorted by runs at stake, with the top leak, the
 count check, the number to beat and the plan's first pitch line, linking
 to each card. Every card is drawn from the
@@ -644,10 +648,13 @@ MLB's ABS Challenge System.
   (`leak_predictions_<season>.csv`) and their scores on the next season
   (`leak_scores_<season>.csv`, one row per hitter, and
   `leak_scores_summary_<season>.csv`, with `_h1` for a midseason
-  check). `player_cards/` has every hitter's decision card
-  (`index.html`, with a 3D view of any zone picture), the roster page
-  (`teams.html`, with `team_view_<season>.csv` behind it), the
-  average-hitter reference cards and the 3D stills (`terrain/`);
+  check). `player_cards/<season>/` has every hitter's decision card for
+  that season (`index.html`, with a 3D view of any zone picture, and its
+  pitches in `pitches.bin`), the roster page (`teams.html`) and the
+  average-hitter reference cards; `player_cards/` itself has the CSVs
+  behind them (`player_cards_<season>.csv`, `team_view_<season>.csv`),
+  the season list the switchers read (`seasons.js`) and the 3D stills
+  (`terrain/`);
   `noted_players/` has the cards for the 17 hitters the coaching reports
   name and their printable versions (`print/`).
 - **Version:** the `stat_version` column of `chase_plus_league_scale.csv`
@@ -720,11 +727,12 @@ run touches the other's files.
 | 14 | `scripts/14_test_take_advice.py` | Checks whether hitters who cut far-off chases from one season to the next walked more, struck out less and gained xwOBA, and what it cost in swings at strikes |
 | 15 | `scripts/15_build_count_check.py` | The count check: each hitter's xwOBA once a plate appearance reaches each count group, against the league's in the same counts, shrunk for noise, and how much each part repeats (needs step 4 with `--expected-contact`) |
 | 16 | `scripts/16_backtest_leak_fixes.py` | Finds every hitter's card leaks in one season or half and checks what happened when he cut them the next: xChase+, offense runs, walks, strikeouts and swings at strikes, and whether the count check changes the payoff (needs step 15) |
-| 17 | `scripts/17_build_player_cards.py` | Draws a decision card for every qualified hitter: the interactive page, the noted hitters' cards and report, and the average-hitter reference cards (needs steps 13, 15 and 16; `--data-only` writes just the card data for an earlier season) |
+| 17 | `scripts/17_build_player_cards.py` | Draws a decision card for every qualified hitter in one season: the interactive page and its pitches (`player_cards/<season>/`), the noted hitters' cards and report, and the average-hitter reference cards (needs steps 13, 15 and 16; `--data-only` writes just the card data for an earlier season) |
 | 18 | `scripts/18_make_terrain_figures.py` | Draws the same surfaces in 3D as still images: the average hitter's chase terrain by count, and one hitter's costliest panel (needs step 17) |
 | 19 | `scripts/19_freeze_leak_predictions.py` | Writes down, before the 2027 season, a prediction for every 2026 card's leaks, for step 20 to score out of sample. Run once: a later run only checks the frozen file (needs steps 16 and 17). `--season 2025 --retrospective` writes the same file for 2025, marked as not out of sample, to test the loop |
 | 20 | `scripts/20_score_leak_predictions.py` | Scores a frozen file on the season that followed: is the actual leak chasing centered on the prediction, and did the frozen payoffs hold on the frozen cells? Run after the next season is in (needs step 19). `--period h1` scores the first half only, for a midseason check |
-| 21 | `scripts/21_build_team_view.py` | The roster on one page: every qualified hitter by team with the top leak, the count check and the target, as a filterable page (`teams.html`) and a CSV (needs step 17 and the raw files from step 01) |
+| 21 | `scripts/21_build_team_view.py` | The roster on one page: every qualified hitter by team with the top leak, the count check and the target, as a filterable page (`player_cards/<season>/teams.html`) and a CSV (needs step 17 and the raw files from step 01) |
+| 22 | `scripts/22_build_season_pages.py` | The card site for every season: runs steps 17 and 21 per season, freezing an earlier season's targets first (step 19 `--retrospective`) when its frozen file is missing, so every page carries the same wording and the same season switcher (needs the inputs of steps 17 and 21 for each season) |
 
 All together:
 
@@ -753,15 +761,19 @@ python scripts/13_build_actionability_profiles.py
 python scripts/14_test_take_advice.py
 python scripts/15_build_count_check.py
 python scripts/16_backtest_leak_fixes.py
-python scripts/17_build_player_cards.py
+python scripts/22_build_season_pages.py
 python scripts/18_make_terrain_figures.py
-python scripts/21_build_team_view.py
 ```
+
+Step 22 runs steps 17 and 21 for every season since 2021, so the pages
+agree; one season alone is `python scripts/17_build_player_cards.py
+--season 2026` and `python scripts/21_build_team_view.py --season 2026`.
 
 Step 19 is not in the list on purpose: it was run once, before 2027, and
 a rerun only checks that the frozen file still reproduces. Step 20 runs
 after 2027 is in the data (`python scripts/20_score_leak_predictions.py`).
-The retrospective test of that loop is three commands:
+The retrospective test of that loop is three commands (step 22 runs the
+first two for any earlier season whose frozen file is missing):
 
 ```
 python scripts/17_build_player_cards.py --season 2025 --data-only

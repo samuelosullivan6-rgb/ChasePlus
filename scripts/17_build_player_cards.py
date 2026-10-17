@@ -39,14 +39,26 @@ group from step 13) also get a whiff picture: how often they miss when
 they do chase, against the league on the same pitches.
 
 OUTPUTS
-  results/xchase/player_cards/index.html
+  results/xchase/player_cards/<season>/index.html
       every qualified hitter plus the average right- and left-handed
-      hitter, interactive and self-contained (open it in a browser)
+      hitter, interactive. One page per season; the season switcher on
+      the page moves between them with the hitter kept in the URL.
+  results/xchase/player_cards/<season>/pitches.bin
+      the season's pitches, one 9-byte record each, which the page loads
+      when it opens. Kept out of the HTML so that a change to the wording
+      re-commits the page (about 2.5 MB) and not the pitches. Browsers
+      will not load it from a file:// address: open the page from the
+      hosted site or a local web server (python -m http.server from the
+      project folder).
+  results/xchase/player_cards/<season>/reference/*.png
+      the average right- and left-handed hitter, for comparison
+  results/xchase/player_cards/index.html and seasons.js
+      the old address, sent on to the newest season's page with the
+      hitter kept, and the list of seasons with a page (card_site.py)
   results/xchase/noted_players/
       README.md, a card and a short write-up for the 17 hitters named in
-      the step 12 and 13 reports, and cards/*.png (light and dark)
-  results/xchase/player_cards/reference/*.png
-      the average right- and left-handed hitter, for comparison
+      the step 12 and 13 reports, and cards/*.png (light and dark); for
+      2026 only, the season the coach's notes describe
   results/xchase/player_cards/player_cards_<season>.csv
       one row per hitter: the numbers behind the header and plan
 
@@ -62,17 +74,18 @@ PDF in noted_players/print/ with the plan, the target, the all-pitchers
 pictures and the leaks on page 1, and on page 2 a guide to the card in
 the player's own words next to the average hitter's two-strike picture.
 --print NAME [NAME ...] draws the same for any hitter into
-player_cards/print/ (not committed).
+player_cards/<season>/print/ (not committed).
 
 Options: --season (default 2026), --static NAME [NAME ...] to also draw
 PNG cards for any hitters by name, --static-all to draw every hitter
-(into player_cards/static/, which is not committed), --print NAME
+(into player_cards/<season>/static/, which is not committed), --print NAME
 [NAME ...] for printable PDFs, --data-only to
 write just the card data (card_players_<season>.json, the CSV) for an
 earlier season, so step 19 can freeze it retrospectively and step 20
 score it. The coach's notes are for 2026 only.
 
-Needs steps 04 (--expected-contact), 13, 15 and 16 first.
+Needs steps 04 (--expected-contact), 13, 15 and 16 first. Step 22 runs
+this step and step 21 for every season, so the pages agree.
 """
 
 import argparse
@@ -95,6 +108,7 @@ import card_surfaces as cs  # noqa: E402
 import leak_rules as lr  # noqa: E402
 from coach_notes import NOTED  # noqa: E402
 import coach_notes  # noqa: E402
+import card_site  # noqa: E402
 
 PROJECT_DIR = Path(__file__).resolve().parents[1]
 CLEAN = PROJECT_DIR / "data" / "cleaned"
@@ -118,6 +132,7 @@ parser.add_argument("--data-only", action="store_true",
                          "no noted report (for freezing an earlier season retrospectively)")
 args = parser.parse_args()
 SEASON = args.season
+SEASON_DIR = CARDS_DIR / str(SEASON)    # this season's page, pitches and reference cards
 NOTED_SEASON = 2026             # the coach's notes describe the 2026 cards
 NOTES = NOTED if SEASON == NOTED_SEASON else {}
 NO_NOTE = (None, None, None)
@@ -1159,8 +1174,9 @@ def draw_trend(card, x, y, w, h, series, league):
         card.hline(x, x + w, sy(tick), color="hair")
         if round(tick * 10) % 2 == 0:
             card.text(x - 8, sy(tick) + 5, f"{tick * 100:.0f}%", size=12, color="muted", ha="right")
-    for yr in years:
-        card.text(sx(yr), y + h + 20, str(yr), size=12, color="muted", ha="center")
+    for yr in years:        # the card's own season in bold: older cards show later seasons too
+        card.text(sx(yr), y + h + 20, str(yr), size=12, color="ink" if yr == SEASON else "muted",
+                  ha="center", weight="bold" if yr == SEASON else "normal")
     card.ax.plot([sx(yr) for yr in years], [sy(league[yr]) for yr in years],
                  color=card.t["league"], lw=px(2), solid_capstyle="round")
     avg_y = sy(league[years[-1]]) + 5
@@ -1702,7 +1718,7 @@ def build_page():
                         | (bits(qualified["stand"] == "L") << 7))
     for col in ("e_all", "e_match", "w_all", "w_match"):
         records[col] = qualified[col + "_q"]
-    blob = base64.b64encode(records.tobytes()).decode()
+    pitch_bytes = records.tobytes()
 
     offsets = qualified.groupby("batter", sort=False).size()
     start = 0
@@ -1737,14 +1753,16 @@ def build_page():
                            "pitches": int(len(lg)), "chase": lg["is_chase"].mean(),
                            "table": table, "grids": grids})
 
+    seasons = card_site.write_seasons_js(SEASON)
+    default = README_EXAMPLE if any(p["name"] == README_EXAMPLE for p in players) else players[0]["name"]
     data = {
-        "season": SEASON, "gridStep": cs.GRID_STEP,
+        "season": SEASON, "seasons": seasons, "pitchFile": "pitches.bin", "gridStep": cs.GRID_STEP,
         "xs": XS.tolist(), "zs": ZS.tolist(), "recordBytes": RECORD.itemsize,
         "countGroups": [{"key": g, "label": COUNT_LABELS[g], "detail": COUNT_DETAIL[g]}
                         for g in COUNT_GROUPS],
         "leagueTrend": [[int(y), float(r)] for y, r in league_trend.items()],
         "players": page_players, "references": references,
-        "defaultSlug": slug(README_EXAMPLE), "guide": GUIDE, "evidence": EVIDENCE_LINE,
+        "defaultSlug": slug(default), "guide": GUIDE, "evidence": EVIDENCE_LINE,
         "countNote": GLOSSARY + " With a pitcher-hand tab, both sides face that hand.",
         "footer": (f"xChase+ 1.1 · Statcast {SEASON} · {len(players)} qualified hitters. "
                    "Every picture compares a hitter with the average hitter on pitches at the "
@@ -1757,12 +1775,15 @@ def build_page():
     payload = json.dumps(to_json_safe(data), ensure_ascii=False, separators=(",", ":"))
     payload = payload.replace("</", "<\\/")
     page = (template.replace("/*__CARD_MATH__*/", math_js)
-            .replace("/*__DATA__*/", payload)
-            .replace("/*__BLOB__*/", blob))
-    CARDS_DIR.mkdir(parents=True, exist_ok=True)
-    (CARDS_DIR / "index.html").write_text(page)
-    print(f"  wrote player_cards/index.html ({len(page) / 1e6:.1f} MB, "
-          f"{len(qualified):,} pitches, {len(page_players)} hitters)")
+            .replace("/*__DATA__*/", payload))
+    SEASON_DIR.mkdir(parents=True, exist_ok=True)
+    (SEASON_DIR / "index.html").write_text(page)
+    (SEASON_DIR / "pitches.bin").write_bytes(pitch_bytes)
+    print(f"  wrote player_cards/{SEASON}/index.html ({len(page) / 1e6:.1f} MB, {len(page_players)} hitters) "
+          f"and pitches.bin ({len(pitch_bytes) / 1e6:.1f} MB, {len(qualified):,} pitches)")
+    newest = max(seasons)
+    card_site.write_redirect("index.html", newest, "Chase Decision Cards")
+    print(f"  seasons with a page: {', '.join(map(str, seasons))}; player_cards/index.html sends to {newest}")
     return qualified
 
 
@@ -1773,7 +1794,7 @@ def check_javascript(qualified):
     if node is None:
         print("  node not found; skipped the JavaScript check")
         return
-    hitter = next(p for p in players if p["name"] == README_EXAMPLE)
+    hitter = next((p for p in players if p["name"] == README_EXAMPLE), players[0])
     frame = qualified[(qualified["batter"] == hitter["id"]) & (qualified["count_group"] == "two")]
     inputs = {"x": (frame["xq"] / 100).tolist(), "z": (frame["zq"] / 100).tolist(),
               "y": frame["is_chase"].astype(float).tolist(),
@@ -1791,7 +1812,7 @@ def check_javascript(qualified):
                 np.abs(np.array(js["evidence"]).reshape(py["evidence"].shape) - py["evidence"]).max())
     if worst > 1e-9:
         raise SystemExit(f"JavaScript and Python surfaces disagree by {worst:.2e}")
-    print(f"  JavaScript matches Python on {README_EXAMPLE}'s two-strike surface "
+    print(f"  JavaScript matches Python on {hitter['name']}'s two-strike surface "
           f"(largest difference {worst:.1e})")
 
 
@@ -1867,9 +1888,9 @@ def write_noted_report():
         "bottom 10 by xChase+",
         "([bottom10_2026_coaching_notes.md](../coaching/bottom10_2026_coaching_notes.md)).",
         "Every other qualified hitter has the same card in the interactive page,",
-        "`results/xchase/player_cards/index.html` (hosted at",
-        "[samuelosullivan6-rgb.github.io/ChasePlus](https://samuelosullivan6-rgb.github.io/ChasePlus/results/xchase/player_cards/index.html),",
-        "or download it and open it in a browser). Each hitter below also has a printable",
+        f"`results/xchase/player_cards/{SEASON}/index.html` (hosted at",
+        f"[samuelosullivan6-rgb.github.io/ChasePlus](https://samuelosullivan6-rgb.github.io/ChasePlus/results/xchase/player_cards/{SEASON}/index.html),",
+        "with a switcher to every other season). Each hitter below also has a printable",
         "two-page card in `print/`: the plan, the target, the pictures and the leaks, then a",
         "guide to the card in the player's own words. Every chased pitch in these hitters'",
         "leaks, with the date, the pitcher, the count, the pitch and how far off it was, is in",
@@ -1891,8 +1912,8 @@ def write_noted_report():
         "drill is different for each, so the card says where to point the camera. For",
         "what a normal card looks like, compare with the average hitter:",
         "",
-        picture("../player_cards/reference/average_rhb_light.png",
-                "../player_cards/reference/average_rhb_dark.png",
+        picture(f"../player_cards/{SEASON}/reference/average_rhb_light.png",
+                f"../player_cards/{SEASON}/reference/average_rhb_dark.png",
                 "The average right-handed hitter's chase rate by location and count, with a guide to reading the cards"),
         "",
         f"**{EVIDENCE_QUESTION}** " + EVIDENCE_DETAIL,
@@ -2011,7 +2032,7 @@ elif not args.skip_png:
     by_name = {p["name"]: p for p in players}
     for stand, word in (("R", "rhb"), ("L", "lhb")):
         for theme in THEMES:
-            league_card(stand, theme, CARDS_DIR / "reference" / f"average_{word}_{theme}.png")
+            league_card(stand, theme, SEASON_DIR / "reference" / f"average_{word}_{theme}.png")
     noted = [p for p in players if p["noted"]]
     for p in noted:
         for theme in THEMES:
@@ -2022,7 +2043,7 @@ elif not args.skip_png:
     print(f"  wrote {len(noted)} printable cards into noted_players/print/")
     for name in args.print_names:
         if name in by_name:
-            print_pages(by_name[name], CARDS_DIR / "print" / f"{slug(name)}.pdf")
+            print_pages(by_name[name], SEASON_DIR / "print" / f"{slug(name)}.pdf")
         else:
             print(f"  not found, no printable card: {name}")
     extra = players if args.static_all else [by_name[n] for n in args.static if n in by_name]
@@ -2031,8 +2052,11 @@ elif not args.skip_png:
         print(f"  not found, skipped: {unknown}")
     for p in extra:
         for theme in THEMES:
-            player_card(p, theme, CARDS_DIR / "static" / f"{slug(p['name'])}_{theme}.png")
+            player_card(p, theme, SEASON_DIR / "static" / f"{slug(p['name'])}_{theme}.png")
     if extra:
-        print(f"  drew {len(extra)} more cards into player_cards/static/")
-    write_leak_pitches()
-    write_noted_report()
+        print(f"  drew {len(extra)} more cards into player_cards/{SEASON}/static/")
+    if NOTES:
+        write_leak_pitches()
+        write_noted_report()
+    else:
+        print(f"  no noted report: the coach's notes are for {NOTED_SEASON}")

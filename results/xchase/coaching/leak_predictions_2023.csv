@@ -1,0 +1,858 @@
+season,rank_2023,player,batter,row,leaks,count_group,pitch_group,region,pitches_2023,chases_2023,chase_rate_2023,league_rate_2023,excess_2023,predicted_excess_2024,line_intercept,line_slope,card_league_rate_2023,choices_runs_per_600_2023,also_a_backtest_leak,count_xwoba_gap_2023,count_status_2023,freeze_date,made_from_commit,out_of_sample
+2023,1,Juan Soto,665742,hitter,1,,,,60,33,0.5500,0.5151,0.0349,-0.0199,-0.0467,0.7690,0.4318,-1.2669,yes,0.0679,productive,2026-10-16,6fc36f0-dirty,no
+2023,1,Juan Soto,665742,leak 1,,two,fastball,up,60,33,0.5500,0.5151,0.0349,,,,0.4318,-1.2669,yes,0.0679,productive,2026-10-16,6fc36f0-dirty,no
+2023,2,Lars Nootbaar,663457,hitter,0,,,,,,,,,,,,,,,,,2026-10-16,6fc36f0-dirty,no
+2023,3,Ha-Seong Kim,673490,hitter,1,,,,55,17,0.3091,0.2472,0.0619,0.0009,-0.0467,0.7690,0.2330,-0.8223,yes,0.0118,productive,2026-10-16,6fc36f0-dirty,no
+2023,3,Ha-Seong Kim,673490,leak 1,,two,breaking,down-away,55,17,0.3091,0.2472,0.0619,,,,0.2330,-0.8223,yes,0.0118,productive,2026-10-16,6fc36f0-dirty,no
+2023,4,Alex Bregman,608324,hitter,1,,,,25,12,0.4800,0.4135,0.0665,0.0044,-0.0467,0.7690,0.3828,-0.7756,yes,0.0483,productive,2026-10-16,6fc36f0-dirty,no
+2023,4,Alex Bregman,608324,leak 1,,two,offspeed,down,25,12,0.4800,0.4135,0.0665,,,,0.3828,-0.7756,yes,0.0483,productive,2026-10-16,6fc36f0-dirty,no
+2023,5,Will Smith,669257,hitter,0,,,,,,,,,,,,,,,,,2026-10-16,6fc36f0-dirty,no
+2023,6,Geraldo Perdomo,672695,hitter,0,,,,,,,,,,,,,,,,,2026-10-16,6fc36f0-dirty,no
+2023,7,Robbie Grossman,543257,hitter,0,,,,,,,,,,,,,,,,,2026-10-16,6fc36f0-dirty,no
+2023,8,Adley Rutschman,668939,hitter,1,,,,75,38,0.5067,0.5201,-0.0135,-0.0570,-0.0467,0.7690,0.4367,-1.7618,no,0.0567,productive,2026-10-16,6fc36f0-dirty,no
+2023,8,Adley Rutschman,668939,leak 1,,two,breaking,down,75,38,0.5067,0.5201,-0.0135,,,,0.4367,-1.7618,no,0.0567,productive,2026-10-16,6fc36f0-dirty,no
+2023,9,Mike Tauchman,643565,hitter,1,,,,35,17,0.4857,0.5316,-0.0459,-0.0820,-0.0467,0.7690,0.4728,-2.4653,no,0.0292,productive,2026-10-16,6fc36f0-dirty,no
+2023,9,Mike Tauchman,643565,leak 1,,two,breaking,down,35,17,0.4857,0.5316,-0.0459,,,,0.4728,-2.4653,no,0.0292,productive,2026-10-16,6fc36f0-dirty,no
+2023,10,Cavan Biggio,624415,hitter,0,,,,,,,,,,,,,,,,,2026-10-16,6fc36f0-dirty,no
+2023,11,Mookie Betts,605141,hitter,0,,,,,,,,,,,,,,,,,2026-10-16,6fc36f0-dirty,no
+2023,12,Connor Joe,656582,hitter,0,,,,,,,,,,,,,,,,,2026-10-16,6fc36f0-dirty,no
+2023,13,Andrew McCutchen,457705,hitter,0,,,,,,,,,,,,,,,,,2026-10-16,6fc36f0-dirty,no
+2023,14,Maikel García,672580,hitter,0,,,,,,,,,,,,,,,,,2026-10-16,6fc36f0-dirty,no
+2023,15,Edouard Julien,666397,hitter,0,,,,,,,,,,,,,,,,,2026-10-16,6fc36f0-dirty,no
+2023,16,Triston Casas,671213,hitter,1,,,,27,12,0.4444,0.3136,0.1309,0.0540,-0.0467,0.7690,0.2886,-0.9135,yes,0.0374,productive,2026-10-16,6fc36f0-dirty,no
+2023,16,Triston Casas,671213,leak 1,,ahead,fastball,in,27,12,0.4444,0.3136,0.1309,,,,0.2886,-0.9135,yes,0.0374,productive,2026-10-16,6fc36f0-dirty,no
+2023,17,Steven Kwan,680757,hitter,0,,,,,,,,,,,,,,,,,2026-10-16,6fc36f0-dirty,no
+2023,18,Kyle Tucker,663656,hitter,0,,,,,,,,,,,,,,,,,2026-10-16,6fc36f0-dirty,no
+2023,19,Alex Call,669743,hitter,1,,,,24,10,0.4167,0.4050,0.0117,-0.0377,-0.0467,0.7690,0.3958,-0.7866,yes,-0.0030,average,2026-10-16,6fc36f0-dirty,no
+2023,19,Alex Call,669743,leak 1,,two,offspeed,down,24,10,0.4167,0.4050,0.0117,,,,0.3958,-0.7866,yes,-0.0030,average,2026-10-16,6fc36f0-dirty,no
+2023,20,Brandon Nimmo,607043,hitter,0,,,,,,,,,,,,,,,,,2026-10-16,6fc36f0-dirty,no
+2023,21,Paul Goldschmidt,502671,hitter,2,,,,88,39,0.4432,0.3529,0.0902,0.0227,-0.0467,0.7690,0.3873,-1.6948,yes,0.0382,productive,2026-10-16,6fc36f0-dirty,no
+2023,21,Paul Goldschmidt,502671,leak 1,,ahead,fastball,in,40,18,0.4500,0.3316,0.1184,,,,0.3522,-0.9408,yes,0.0372,productive,2026-10-16,6fc36f0-dirty,no
+2023,21,Paul Goldschmidt,502671,leak 2,,two,fastball,in,48,21,0.4375,0.3707,0.0668,,,,0.4166,-0.7540,yes,0.0391,productive,2026-10-16,6fc36f0-dirty,no
+2023,22,Jack Suwinski,669261,hitter,0,,,,,,,,,,,,,,,,,2026-10-16,6fc36f0-dirty,no
+2023,23,Brandon Belt,474832,hitter,1,,,,35,17,0.4857,0.5733,-0.0875,-0.1140,-0.0467,0.7690,0.4843,-0.9353,no,0.0016,average,2026-10-16,6fc36f0-dirty,no
+2023,23,Brandon Belt,474832,leak 1,,two,breaking,down,35,17,0.4857,0.5733,-0.0875,,,,0.4843,-0.9353,no,0.0016,average,2026-10-16,6fc36f0-dirty,no
+2023,24,J. P. Crawford,641487,hitter,1,,,,34,22,0.6471,0.5611,0.0860,0.0194,-0.0467,0.7690,0.4964,-1.9368,yes,0.0097,average,2026-10-16,6fc36f0-dirty,no
+2023,24,J. P. Crawford,641487,leak 1,,two,breaking,down,34,22,0.6471,0.5611,0.0860,,,,0.4964,-1.9368,yes,0.0097,average,2026-10-16,6fc36f0-dirty,no
+2023,25,Taylor Walls,670764,hitter,0,,,,,,,,,,,,,,,,,2026-10-16,6fc36f0-dirty,no
+2023,26,Mark Canha,592192,hitter,0,,,,,,,,,,,,,,,,,2026-10-16,6fc36f0-dirty,no
+2023,27,Tony Kemp,643393,hitter,0,,,,,,,,,,,,,,,,,2026-10-16,6fc36f0-dirty,no
+2023,28,Seiya Suzuki,673548,hitter,0,,,,,,,,,,,,,,,,,2026-10-16,6fc36f0-dirty,no
+2023,29,Ronald Acuña,660670,hitter,1,,,,31,18,0.5806,0.5403,0.0403,-0.0157,-0.0467,0.7690,0.5382,-0.9718,yes,0.1209,productive,2026-10-16,6fc36f0-dirty,no
+2023,29,Ronald Acuña,660670,leak 1,,two,offspeed,down,31,18,0.5806,0.5403,0.0403,,,,0.5382,-0.9718,yes,0.1209,productive,2026-10-16,6fc36f0-dirty,no
+2023,30,Wilmer Flores,527038,hitter,2,,,,95,55,0.5789,0.4297,0.1493,0.0681,-0.0467,0.7690,0.3790,-4.0051,yes,0.0274,productive,2026-10-16,6fc36f0-dirty,no
+2023,30,Wilmer Flores,527038,leak 1,,two,fastball,up,69,45,0.6522,0.4926,0.1596,,,,0.4417,-3.1788,yes,0.0335,productive,2026-10-16,6fc36f0-dirty,no
+2023,30,Wilmer Flores,527038,leak 2,,ahead,fastball,up,26,10,0.3846,0.2627,0.1219,,,,0.2125,-0.8263,yes,0.0112,productive,2026-10-16,6fc36f0-dirty,no
+2023,31,Ian Happ,664023,hitter,2,,,,91,45,0.4945,0.4883,0.0062,-0.0419,-0.0467,0.7690,0.4166,-2.2457,no,0.0266,productive,2026-10-16,6fc36f0-dirty,no
+2023,31,Ian Happ,664023,leak 1,,two,breaking,down,54,32,0.5926,0.5625,0.0301,,,,0.4908,-1.4164,yes,0.0292,productive,2026-10-16,6fc36f0-dirty,no
+2023,31,Ian Happ,664023,leak 2,,ahead,offspeed,down,37,13,0.3514,0.3800,-0.0287,,,,0.3083,-0.8293,no,0.0229,productive,2026-10-16,6fc36f0-dirty,no
+2023,32,Justin Turner,457759,hitter,2,,,,68,40,0.5882,0.5016,0.0867,0.0200,-0.0467,0.7690,0.4433,-3.3522,yes,0.0214,productive,2026-10-16,6fc36f0-dirty,no
+2023,32,Justin Turner,457759,leak 1,,two,breaking,down,39,25,0.6410,0.5057,0.1353,,,,0.4081,-2.5689,yes,0.0214,productive,2026-10-16,6fc36f0-dirty,no
+2023,32,Justin Turner,457759,leak 2,,two,offspeed,down,29,15,0.5172,0.4961,0.0212,,,,0.4907,-0.7833,yes,0.0214,productive,2026-10-16,6fc36f0-dirty,no
+2023,33,Kyle Schwarber,656941,hitter,1,,,,79,47,0.5949,0.5176,0.0773,0.0128,-0.0467,0.7690,0.4616,-2.1873,yes,0.0204,productive,2026-10-16,6fc36f0-dirty,no
+2023,33,Kyle Schwarber,656941,leak 1,,two,fastball,up,79,47,0.5949,0.5176,0.0773,,,,0.4616,-2.1873,yes,0.0204,productive,2026-10-16,6fc36f0-dirty,no
+2023,34,Carlos Santana,467793,hitter,1,,,,49,24,0.4898,0.5221,-0.0323,-0.0715,-0.0467,0.7690,0.4700,-0.8122,no,0.0062,average,2026-10-16,6fc36f0-dirty,no
+2023,34,Carlos Santana,467793,leak 1,,two,breaking,down,49,24,0.4898,0.5221,-0.0323,,,,0.4700,-0.8122,no,0.0062,average,2026-10-16,6fc36f0-dirty,no
+2023,35,Mike Trout,545361,hitter,2,,,,61,35,0.5738,0.3804,0.1934,0.1020,-0.0467,0.7690,0.3426,-5.9875,yes,0.0312,productive,2026-10-16,6fc36f0-dirty,no
+2023,35,Mike Trout,545361,leak 1,,two,breaking,down,26,22,0.8462,0.5758,0.2704,,,,0.5230,-3.4197,yes,0.0312,productive,2026-10-16,6fc36f0-dirty,no
+2023,35,Mike Trout,545361,leak 2,,two,breaking,down-away,35,13,0.3714,0.2353,0.1361,,,,0.2086,-2.5678,yes,0.0312,productive,2026-10-16,6fc36f0-dirty,no
+2023,36,Marcus Semien,543760,hitter,0,,,,,,,,,,,,,,,,,2026-10-16,6fc36f0-dirty,no
+2023,37,Jonathan India,663697,hitter,0,,,,,,,,,,,,,,,,,2026-10-16,6fc36f0-dirty,no
+2023,38,Ketel Marte,606466,hitter,1,,,,56,28,0.5000,0.4551,0.0449,-0.0121,-0.0467,0.7690,0.3928,-0.9103,yes,0.0214,productive,2026-10-16,6fc36f0-dirty,no
+2023,38,Ketel Marte,606466,leak 1,,even,breaking,down,56,28,0.5000,0.4551,0.0449,,,,0.3928,-0.9103,yes,0.0214,productive,2026-10-16,6fc36f0-dirty,no
+2023,39,LaMonte Wade,664774,hitter,0,,,,,,,,,,,,,,,,,2026-10-16,6fc36f0-dirty,no
+2023,40,Nolan Jones,666134,hitter,3,,,,66,46,0.6970,0.4955,0.2015,0.1082,-0.0467,0.7690,0.4305,-5.5939,yes,0.0225,productive,2026-10-16,6fc36f0-dirty,no
+2023,40,Nolan Jones,666134,leak 1,,two,breaking,down,41,27,0.6585,0.5364,0.1222,,,,0.4569,-3.3321,yes,0.0207,productive,2026-10-16,6fc36f0-dirty,no
+2023,40,Nolan Jones,666134,leak 2,,ahead,breaking,down,12,9,0.7500,0.4432,0.3068,,,,0.3759,-1.2048,yes,0.0307,productive,2026-10-16,6fc36f0-dirty,no
+2023,40,Nolan Jones,666134,leak 3,,two,offspeed,down-away,13,10,0.7692,0.4149,0.3543,,,,0.3977,-1.0570,yes,0.0207,productive,2026-10-16,6fc36f0-dirty,no
+2023,41,Ryan Noda,676116,hitter,0,,,,,,,,,,,,,,,,,2026-10-16,6fc36f0-dirty,no
+2023,42,Nathaniel Lowe,663993,hitter,0,,,,,,,,,,,,,,,,,2026-10-16,6fc36f0-dirty,no
+2023,43,Yandy Díaz,650490,hitter,1,,,,56,16,0.2857,0.1996,0.0862,0.0196,-0.0467,0.7690,0.1786,-0.8902,yes,0.0579,productive,2026-10-16,6fc36f0-dirty,no
+2023,43,Yandy Díaz,650490,leak 1,,two,breaking,down-away,56,16,0.2857,0.1996,0.0862,,,,0.1786,-0.8902,yes,0.0579,productive,2026-10-16,6fc36f0-dirty,no
+2023,44,Luis Arráez,650333,hitter,2,,,,84,47,0.5595,0.3463,0.2132,0.1173,-0.0467,0.7690,0.2916,-2.4101,yes,0.0338,productive,2026-10-16,6fc36f0-dirty,no
+2023,44,Luis Arráez,650333,leak 1,,ahead,fastball,up,29,17,0.5862,0.3508,0.2354,,,,0.2998,-1.3560,yes,0.0275,productive,2026-10-16,6fc36f0-dirty,no
+2023,44,Luis Arráez,650333,leak 2,,even,fastball,up,55,30,0.5455,0.3440,0.2015,,,,0.2873,-1.0541,yes,0.0371,productive,2026-10-16,6fc36f0-dirty,no
+2023,45,Andrew Benintendi,643217,hitter,2,,,,84,49,0.5833,0.5226,0.0608,0.0001,-0.0467,0.7690,0.4622,-3.2285,yes,0.0139,productive,2026-10-16,6fc36f0-dirty,no
+2023,45,Andrew Benintendi,643217,leak 1,,two,breaking,down,54,33,0.6111,0.5518,0.0593,,,,0.4725,-1.9753,yes,0.0139,productive,2026-10-16,6fc36f0-dirty,no
+2023,45,Andrew Benintendi,643217,leak 2,,two,offspeed,down,30,16,0.5333,0.4698,0.0635,,,,0.4437,-1.2532,yes,0.0139,productive,2026-10-16,6fc36f0-dirty,no
+2023,46,Chris Taylor,621035,hitter,2,,,,40,15,0.3750,0.2861,0.0889,0.0217,-0.0467,0.7690,0.2358,-1.6294,yes,-0.0157,struggling,2026-10-16,6fc36f0-dirty,no
+2023,46,Chris Taylor,621035,leak 1,,two,breaking,down-away,28,8,0.2857,0.2162,0.0695,,,,0.1874,-0.8213,yes,-0.0194,struggling,2026-10-16,6fc36f0-dirty,no
+2023,46,Chris Taylor,621035,leak 2,,ahead,breaking,down,12,7,0.5833,0.4493,0.1340,,,,0.3487,-0.8081,yes,-0.0072,average,2026-10-16,6fc36f0-dirty,no
+2023,47,Mike Yastrzemski,573262,hitter,3,,,,77,41,0.5325,0.4696,0.0629,0.0017,-0.0467,0.7690,0.4246,-3.6735,yes,0.0031,average,2026-10-16,6fc36f0-dirty,no
+2023,47,Mike Yastrzemski,573262,leak 1,,two,breaking,down,26,18,0.6923,0.5945,0.0978,,,,0.5181,-1.7230,yes,0.0024,average,2026-10-16,6fc36f0-dirty,no
+2023,47,Mike Yastrzemski,573262,leak 2,,two,offspeed,down,32,15,0.4688,0.3972,0.0716,,,,0.4210,-0.9911,yes,0.0024,average,2026-10-16,6fc36f0-dirty,no
+2023,47,Mike Yastrzemski,573262,leak 3,,ahead,breaking,down,19,8,0.4211,0.4205,0.0005,,,,0.3029,-0.9594,yes,0.0052,average,2026-10-16,6fc36f0-dirty,no
+2023,48,Matt Thaiss,642136,hitter,2,,,,35,18,0.5143,0.4049,0.1094,0.0374,-0.0467,0.7690,0.4181,-2.4177,yes,0.0030,average,2026-10-16,6fc36f0-dirty,no
+2023,48,Matt Thaiss,642136,leak 1,,two,offspeed,down,22,9,0.4091,0.3738,0.0353,,,,0.4038,-1.4112,yes,-0.0003,average,2026-10-16,6fc36f0-dirty,no
+2023,48,Matt Thaiss,642136,leak 2,,ahead,fastball,in,13,9,0.6923,0.4576,0.2347,,,,0.4423,-1.0065,yes,0.0085,average,2026-10-16,6fc36f0-dirty,no
+2023,49,Matt Chapman,656305,hitter,0,,,,,,,,,,,,,,,,,2026-10-16,6fc36f0-dirty,no
+2023,50,Masataka Yoshida,807799,hitter,1,,,,14,10,0.7143,0.3365,0.3778,0.2438,-0.0467,0.7690,0.3041,-1.1895,yes,0.0086,average,2026-10-16,6fc36f0-dirty,no
+2023,50,Masataka Yoshida,807799,leak 1,,two,breaking,down-in,14,10,0.7143,0.3365,0.3778,,,,0.3041,-1.1895,yes,0.0086,average,2026-10-16,6fc36f0-dirty,no
+2023,51,Sean Murphy,669221,hitter,2,,,,50,25,0.5000,0.3284,0.1716,0.0853,-0.0467,0.7690,0.3256,-1.6633,yes,0.0332,productive,2026-10-16,6fc36f0-dirty,no
+2023,51,Sean Murphy,669221,leak 1,,two,fastball,up,36,19,0.5278,0.3821,0.1457,,,,0.3854,-0.8673,yes,0.0254,productive,2026-10-16,6fc36f0-dirty,no
+2023,51,Sean Murphy,669221,leak 2,,ahead,breaking,down-away,14,6,0.4286,0.1905,0.2381,,,,0.1717,-0.7960,yes,0.0532,productive,2026-10-16,6fc36f0-dirty,no
+2023,52,Michael Conforto,624424,hitter,0,,,,,,,,,,,,,,,,,2026-10-16,6fc36f0-dirty,no
+2023,53,Will Benson,666181,hitter,0,,,,,,,,,,,,,,,,,2026-10-16,6fc36f0-dirty,no
+2023,54,Brendan Donovan,680977,hitter,3,,,,71,34,0.4789,0.4198,0.0591,-0.0012,-0.0467,0.7690,0.3504,-3.1528,no,0.0262,productive,2026-10-16,6fc36f0-dirty,no
+2023,54,Brendan Donovan,680977,leak 1,,two,breaking,down-away,14,8,0.5714,0.2151,0.3563,,,,0.2260,-1.2586,yes,0.0264,productive,2026-10-16,6fc36f0-dirty,no
+2023,54,Brendan Donovan,680977,leak 2,,two,breaking,down,43,20,0.4651,0.5410,-0.0759,,,,0.4337,-1.0937,no,0.0264,productive,2026-10-16,6fc36f0-dirty,no
+2023,54,Brendan Donovan,680977,leak 3,,ahead,fastball,up,14,6,0.4286,0.2520,0.1766,,,,0.2190,-0.8005,yes,0.0254,productive,2026-10-16,6fc36f0-dirty,no
+2023,55,Trent Grisham,663757,hitter,1,,,,60,32,0.5333,0.5408,-0.0074,-0.0524,-0.0467,0.7690,0.4551,-2.7097,no,0.0041,average,2026-10-16,6fc36f0-dirty,no
+2023,55,Trent Grisham,663757,leak 1,,two,breaking,down,60,32,0.5333,0.5408,-0.0074,,,,0.4551,-2.7097,no,0.0041,average,2026-10-16,6fc36f0-dirty,no
+2023,56,Aaron Judge,592450,hitter,2,,,,46,20,0.4348,0.4030,0.0318,-0.0222,-0.0467,0.7690,0.3763,-2.5980,no,0.0970,productive,2026-10-16,6fc36f0-dirty,no
+2023,56,Aaron Judge,592450,leak 1,,two,offspeed,in,12,10,0.8333,0.5775,0.2559,,,,0.6115,-1.4452,yes,0.0694,productive,2026-10-16,6fc36f0-dirty,no
+2023,56,Aaron Judge,592450,leak 2,,ahead,offspeed,down,34,10,0.2941,0.3414,-0.0472,,,,0.2933,-1.1528,no,0.1068,productive,2026-10-16,6fc36f0-dirty,no
+2023,57,Myles Straw,664702,hitter,1,,,,54,34,0.6296,0.5200,0.1096,0.0376,-0.0467,0.7690,0.5348,-1.7082,yes,-0.0180,struggling,2026-10-16,6fc36f0-dirty,no
+2023,57,Myles Straw,664702,leak 1,,two,fastball,up,54,34,0.6296,0.5200,0.1096,,,,0.5348,-1.7082,yes,-0.0180,struggling,2026-10-16,6fc36f0-dirty,no
+2023,58,Wander Franco,677551,hitter,2,,,,45,31,0.6889,0.4493,0.2396,0.1375,-0.0467,0.7690,0.4405,-3.2790,yes,0.0410,productive,2026-10-16,6fc36f0-dirty,no
+2023,58,Wander Franco,677551,leak 1,,two,offspeed,down,33,22,0.6667,0.4585,0.2082,,,,0.4734,-2.3503,yes,0.0435,productive,2026-10-16,6fc36f0-dirty,no
+2023,58,Wander Franco,677551,leak 2,,ahead,fastball,in,12,9,0.7500,0.4241,0.3259,,,,0.3499,-0.9287,yes,0.0342,productive,2026-10-16,6fc36f0-dirty,no
+2023,59,Mitch Garver,641598,hitter,0,,,,,,,,,,,,,,,,,2026-10-16,6fc36f0-dirty,no
+2023,60,George Springer,543807,hitter,0,,,,,,,,,,,,,,,,,2026-10-16,6fc36f0-dirty,no
+2023,61,Miguel Vargas,678246,hitter,1,,,,14,8,0.5714,0.4985,0.0729,0.0094,-0.0467,0.7690,0.5076,-1.2559,yes,-0.0045,average,2026-10-16,6fc36f0-dirty,no
+2023,61,Miguel Vargas,678246,leak 1,,two,offspeed,down,14,8,0.5714,0.4985,0.0729,,,,0.5076,-1.2559,yes,-0.0045,average,2026-10-16,6fc36f0-dirty,no
+2023,62,Jace Peterson,607054,hitter,2,,,,64,30,0.4688,0.4735,-0.0047,-0.0503,-0.0467,0.7690,0.4059,-2.1384,no,-0.0074,average,2026-10-16,6fc36f0-dirty,no
+2023,62,Jace Peterson,607054,leak 1,,two,breaking,down,36,15,0.4167,0.4621,-0.0454,,,,0.4037,-1.3569,no,-0.0030,average,2026-10-16,6fc36f0-dirty,no
+2023,62,Jace Peterson,607054,leak 2,,even,breaking,down,28,15,0.5357,0.4882,0.0476,,,,0.4088,-0.7815,yes,-0.0131,struggling,2026-10-16,6fc36f0-dirty,no
+2023,63,Dan Vogelbach,596129,hitter,3,,,,50,19,0.3800,0.2454,0.1346,0.0568,-0.0467,0.7690,0.1918,-3.2124,no,0.0159,productive,2026-10-16,6fc36f0-dirty,no
+2023,63,Dan Vogelbach,596129,leak 1,,two,offspeed,away,12,9,0.7500,0.4401,0.3099,,,,0.3246,-1.3832,yes,0.0159,productive,2026-10-16,6fc36f0-dirty,no
+2023,63,Dan Vogelbach,596129,leak 2,,two,fastball,up-away,14,5,0.3571,0.0643,0.2929,,,,0.0808,-1.0136,yes,0.0159,productive,2026-10-16,6fc36f0-dirty,no
+2023,63,Dan Vogelbach,596129,leak 3,,two,breaking,down-in,24,5,0.2083,0.2536,-0.0453,,,,0.1901,-0.8156,no,0.0159,productive,2026-10-16,6fc36f0-dirty,no
+2023,64,Alejandro Kirk,672386,hitter,3,,,,107,70,0.6542,0.4808,0.1734,0.0867,-0.0467,0.7690,0.4228,-6.4037,yes,0.0297,productive,2026-10-16,6fc36f0-dirty,no
+2023,64,Alejandro Kirk,672386,leak 1,,two,fastball,up,61,37,0.6066,0.4764,0.1301,,,,0.4144,-2.9249,yes,0.0297,productive,2026-10-16,6fc36f0-dirty,no
+2023,64,Alejandro Kirk,672386,leak 2,,two,breaking,down,30,18,0.6000,0.4734,0.1266,,,,0.3611,-2.1369,yes,0.0297,productive,2026-10-16,6fc36f0-dirty,no
+2023,64,Alejandro Kirk,672386,leak 3,,two,fastball,in,16,15,0.9375,0.5110,0.4265,,,,0.5705,-1.3419,yes,0.0297,productive,2026-10-16,6fc36f0-dirty,no
+2023,65,Gleyber Torres,650402,hitter,2,,,,57,44,0.7719,0.3564,0.4155,0.2728,-0.0467,0.7690,0.3956,-1.7025,yes,0.0333,productive,2026-10-16,6fc36f0-dirty,no
+2023,65,Gleyber Torres,650402,leak 1,,even,fastball,in,29,25,0.8621,0.4277,0.4344,,,,0.4822,-0.9018,yes,0.0309,productive,2026-10-16,6fc36f0-dirty,no
+2023,65,Gleyber Torres,650402,leak 2,,first,fastball,in,28,19,0.6786,0.2826,0.3959,,,,0.3060,-0.8007,yes,0.0358,productive,2026-10-16,6fc36f0-dirty,no
+2023,66,JJ Bleday,668709,hitter,2,,,,43,20,0.4651,0.3476,0.1175,0.0437,-0.0467,0.7690,0.2926,-2.1697,yes,-0.0157,struggling,2026-10-16,6fc36f0-dirty,no
+2023,66,JJ Bleday,668709,leak 1,,ahead,offspeed,down,14,7,0.5000,0.3847,0.1153,,,,0.3029,-1.3871,yes,-0.0117,struggling,2026-10-16,6fc36f0-dirty,no
+2023,66,JJ Bleday,668709,leak 2,,even,offspeed,down,29,13,0.4483,0.3297,0.1186,,,,0.2877,-0.7826,yes,-0.0177,struggling,2026-10-16,6fc36f0-dirty,no
+2023,67,Matt Olson,621566,hitter,3,,,,162,93,0.5741,0.5061,0.0680,0.0056,-0.0467,0.7690,0.4370,-5.1750,no,0.0577,productive,2026-10-16,6fc36f0-dirty,no
+2023,67,Matt Olson,621566,leak 1,,two,breaking,down,86,47,0.5465,0.5531,-0.0066,,,,0.4644,-2.7334,no,0.0567,productive,2026-10-16,6fc36f0-dirty,no
+2023,67,Matt Olson,621566,leak 2,,ahead,breaking,down,35,17,0.4857,0.3874,0.0984,,,,0.2818,-1.2465,yes,0.0613,productive,2026-10-16,6fc36f0-dirty,no
+2023,67,Matt Olson,621566,leak 3,,two,fastball,in,41,29,0.7073,0.5087,0.1986,,,,0.5119,-1.1951,yes,0.0567,productive,2026-10-16,6fc36f0-dirty,no
+2023,68,Cedric Mullins,656775,hitter,0,,,,,,,,,,,,,,,,,2026-10-16,6fc36f0-dirty,no
+2023,69,Jorge Soler,624585,hitter,2,,,,44,18,0.4091,0.3886,0.0205,-0.0309,-0.0467,0.7690,0.2786,-1.6175,no,0.0420,productive,2026-10-16,6fc36f0-dirty,no
+2023,69,Jorge Soler,624585,leak 1,,ahead,offspeed,down,13,8,0.6154,0.4145,0.2009,,,,0.3079,-0.8210,yes,0.0420,productive,2026-10-16,6fc36f0-dirty,no
+2023,69,Jorge Soler,624585,leak 2,,ahead,breaking,down,31,10,0.3226,0.3777,-0.0551,,,,0.2663,-0.7965,no,0.0420,productive,2026-10-16,6fc36f0-dirty,no
+2023,70,DJ LeMahieu,518934,hitter,0,,,,,,,,,,,,,,,,,2026-10-16,6fc36f0-dirty,no
+2023,71,Taylor Ward,621493,hitter,1,,,,15,6,0.4000,0.3953,0.0047,-0.0430,-0.0467,0.7690,0.2801,-0.8451,yes,0.0154,productive,2026-10-16,6fc36f0-dirty,no
+2023,71,Taylor Ward,621493,leak 1,,ahead,breaking,down,15,6,0.4000,0.3953,0.0047,,,,0.2801,-0.8451,yes,0.0154,productive,2026-10-16,6fc36f0-dirty,no
+2023,72,Andruw Monasterio,655316,hitter,2,,,,51,28,0.5490,0.4590,0.0900,0.0226,-0.0467,0.7690,0.4801,-2.9528,yes,0.0087,average,2026-10-16,6fc36f0-dirty,no
+2023,72,Andruw Monasterio,655316,leak 1,,two,fastball,up,36,20,0.5556,0.4688,0.0868,,,,0.4797,-1.8208,yes,0.0153,productive,2026-10-16,6fc36f0-dirty,no
+2023,72,Andruw Monasterio,655316,leak 2,,ahead,fastball,in,15,8,0.5333,0.4355,0.0978,,,,0.4809,-1.1320,yes,-0.0071,average,2026-10-16,6fc36f0-dirty,no
+2023,73,Tommy Pham,502054,hitter,1,,,,33,17,0.5152,0.5119,0.0032,-0.0442,-0.0467,0.7690,0.4840,-1.0729,yes,0.0231,productive,2026-10-16,6fc36f0-dirty,no
+2023,73,Tommy Pham,502054,leak 1,,two,offspeed,down,33,17,0.5152,0.5119,0.0032,,,,0.4840,-1.0729,yes,0.0231,productive,2026-10-16,6fc36f0-dirty,no
+2023,74,Rowdy Tellez,642133,hitter,3,,,,81,48,0.5926,0.5034,0.0892,0.0219,-0.0467,0.7690,0.4557,-5.8031,no,0.0041,average,2026-10-16,6fc36f0-dirty,no
+2023,74,Rowdy Tellez,642133,leak 1,,two,breaking,down,41,27,0.6585,0.5739,0.0847,,,,0.5353,-3.4368,yes,0.0084,average,2026-10-16,6fc36f0-dirty,no
+2023,74,Rowdy Tellez,642133,leak 2,,two,fastball,up,19,14,0.7368,0.4552,0.2816,,,,0.4572,-1.3591,yes,0.0084,average,2026-10-16,6fc36f0-dirty,no
+2023,74,Rowdy Tellez,642133,leak 3,,ahead,offspeed,down,21,7,0.3333,0.4095,-0.0761,,,,0.2991,-1.0072,no,-0.0080,average,2026-10-16,6fc36f0-dirty,no
+2023,75,Alex Verdugo,657077,hitter,0,,,,,,,,,,,,,,,,,2026-10-16,6fc36f0-dirty,no
+2023,76,Josh Rojas,668942,hitter,1,,,,32,20,0.6250,0.5292,0.0958,0.0270,-0.0467,0.7690,0.4496,-2.5674,yes,-0.0136,struggling,2026-10-16,6fc36f0-dirty,no
+2023,76,Josh Rojas,668942,leak 1,,two,breaking,down,32,20,0.6250,0.5292,0.0958,,,,0.4496,-2.5674,yes,-0.0136,struggling,2026-10-16,6fc36f0-dirty,no
+2023,77,Matt McLain,680574,hitter,3,,,,115,57,0.4957,0.3684,0.1272,0.0512,-0.0467,0.7690,0.3593,-5.7906,yes,0.0087,average,2026-10-16,6fc36f0-dirty,no
+2023,77,Matt McLain,680574,leak 1,,two,fastball,up,55,31,0.5636,0.4125,0.1511,,,,0.3902,-3.4489,yes,0.0082,average,2026-10-16,6fc36f0-dirty,no
+2023,77,Matt McLain,680574,leak 2,,ahead,fastball,in,24,12,0.5000,0.3897,0.1103,,,,0.4347,-1.5527,yes,0.0091,average,2026-10-16,6fc36f0-dirty,no
+2023,77,Matt McLain,680574,leak 3,,ahead,fastball,up,36,14,0.3889,0.2869,0.1020,,,,0.2619,-0.7890,yes,0.0091,average,2026-10-16,6fc36f0-dirty,no
+2023,78,Joc Pederson,592626,hitter,2,,,,47,23,0.4894,0.3788,0.1106,0.0384,-0.0467,0.7690,0.2750,-2.6553,yes,0.0315,productive,2026-10-16,6fc36f0-dirty,no
+2023,78,Joc Pederson,592626,leak 1,,ahead,breaking,down,23,13,0.5652,0.3853,0.1799,,,,0.2705,-1.5747,yes,0.0341,productive,2026-10-16,6fc36f0-dirty,no
+2023,78,Joc Pederson,592626,leak 2,,two,breaking,down-in,24,10,0.4167,0.3725,0.0441,,,,0.2794,-1.0806,yes,0.0290,productive,2026-10-16,6fc36f0-dirty,no
+2023,79,Xander Bogaerts,593428,hitter,1,,,,26,17,0.6538,0.4099,0.2440,0.1409,-0.0467,0.7690,0.4662,-1.1781,yes,0.0052,average,2026-10-16,6fc36f0-dirty,no
+2023,79,Xander Bogaerts,593428,leak 1,,two,fastball,in,26,17,0.6538,0.4099,0.2440,,,,0.4662,-1.1781,yes,0.0052,average,2026-10-16,6fc36f0-dirty,no
+2023,80,Cody Bellinger,641355,hitter,2,,,,76,41,0.5395,0.3974,0.1421,0.0626,-0.0467,0.7690,0.4152,-1.9464,yes,0.0090,average,2026-10-16,6fc36f0-dirty,no
+2023,80,Cody Bellinger,641355,leak 1,,two,fastball,up,38,24,0.6316,0.5190,0.1126,,,,0.5594,-1.1877,yes,0.0126,productive,2026-10-16,6fc36f0-dirty,no
+2023,80,Cody Bellinger,641355,leak 2,,first,fastball,in,38,17,0.4474,0.2758,0.1715,,,,0.2709,-0.7587,yes,0.0054,average,2026-10-16,6fc36f0-dirty,no
+2023,81,Eugenio Suárez,553993,hitter,0,,,,,,,,,,,,,,,,,2026-10-16,6fc36f0-dirty,no
+2023,82,Christian Yelich,592885,hitter,1,,,,70,37,0.5286,0.5704,-0.0419,-0.0789,-0.0467,0.7690,0.4829,-1.0896,no,0.0106,productive,2026-10-16,6fc36f0-dirty,no
+2023,82,Christian Yelich,592885,leak 1,,two,breaking,down,70,37,0.5286,0.5704,-0.0419,,,,0.4829,-1.0896,no,0.0106,productive,2026-10-16,6fc36f0-dirty,no
+2023,83,Bobby Witt,677951,hitter,2,,,,104,58,0.5577,0.4591,0.0985,0.0291,-0.0467,0.7690,0.4733,-2.6540,yes,0.0509,productive,2026-10-16,6fc36f0-dirty,no
+2023,83,Bobby Witt,677951,leak 1,,two,fastball,up,72,38,0.5278,0.4526,0.0752,,,,0.4721,-1.3920,yes,0.0509,productive,2026-10-16,6fc36f0-dirty,no
+2023,83,Bobby Witt,677951,leak 2,,two,offspeed,down,32,20,0.6250,0.4739,0.1511,,,,0.4759,-1.2620,yes,0.0509,productive,2026-10-16,6fc36f0-dirty,no
+2023,84,James Outman,681546,hitter,2,,,,98,52,0.5306,0.5215,0.0091,-0.0396,-0.0467,0.7690,0.4730,-2.5044,yes,0.0026,average,2026-10-16,6fc36f0-dirty,no
+2023,84,James Outman,681546,leak 1,,two,breaking,down,63,36,0.5714,0.5583,0.0132,,,,0.4926,-1.7531,yes,0.0026,average,2026-10-16,6fc36f0-dirty,no
+2023,84,James Outman,681546,leak 2,,two,offspeed,down,35,16,0.4571,0.4553,0.0019,,,,0.4376,-0.7513,yes,0.0026,average,2026-10-16,6fc36f0-dirty,no
+2023,85,Freddie Freeman,518692,hitter,3,,,,120,67,0.5583,0.4661,0.0922,0.0242,-0.0467,0.7690,0.3730,-5.4348,yes,0.0572,productive,2026-10-16,6fc36f0-dirty,no
+2023,85,Freddie Freeman,518692,leak 1,,two,breaking,down,69,40,0.5797,0.5325,0.0472,,,,0.4360,-3.2231,yes,0.0486,productive,2026-10-16,6fc36f0-dirty,no
+2023,85,Freddie Freeman,518692,leak 2,,ahead,breaking,down,25,16,0.6400,0.3984,0.2416,,,,0.3006,-1.4332,yes,0.0688,productive,2026-10-16,6fc36f0-dirty,no
+2023,85,Freddie Freeman,518692,leak 3,,ahead,offspeed,down,26,11,0.4231,0.3549,0.0681,,,,0.2756,-0.7785,yes,0.0688,productive,2026-10-16,6fc36f0-dirty,no
+2023,86,Randy Arozarena,668227,hitter,3,,,,157,70,0.4459,0.3344,0.1115,0.0391,-0.0467,0.7690,0.2819,-5.0046,yes,0.0194,productive,2026-10-16,6fc36f0-dirty,no
+2023,86,Randy Arozarena,668227,leak 1,,two,breaking,down,57,36,0.6316,0.5298,0.1018,,,,0.4587,-2.8348,yes,0.0192,productive,2026-10-16,6fc36f0-dirty,no
+2023,86,Randy Arozarena,668227,leak 2,,two,breaking,down-away,86,28,0.3256,0.2314,0.0942,,,,0.1916,-1.3563,yes,0.0192,productive,2026-10-16,6fc36f0-dirty,no
+2023,86,Randy Arozarena,668227,leak 3,,ahead,breaking,down-away,14,6,0.4286,0.1715,0.2571,,,,0.1172,-0.8135,yes,0.0210,productive,2026-10-16,6fc36f0-dirty,no
+2023,87,Spencer Steer,668715,hitter,3,,,,115,66,0.5739,0.5011,0.0728,0.0093,-0.0467,0.7690,0.4409,-3.8677,no,0.0239,productive,2026-10-16,6fc36f0-dirty,no
+2023,87,Spencer Steer,668715,leak 1,,two,offspeed,down,42,25,0.5952,0.4822,0.1130,,,,0.4729,-1.7649,yes,0.0275,productive,2026-10-16,6fc36f0-dirty,no
+2023,87,Spencer Steer,668715,leak 2,,two,breaking,down,47,26,0.5532,0.5711,-0.0179,,,,0.4817,-1.3158,no,0.0275,productive,2026-10-16,6fc36f0-dirty,no
+2023,87,Spencer Steer,668715,leak 3,,even,breaking,down,26,15,0.5769,0.4051,0.1718,,,,0.3154,-0.7870,yes,0.0114,productive,2026-10-16,6fc36f0-dirty,no
+2023,88,Bryson Stott,681082,hitter,3,,,,161,104,0.6460,0.4939,0.1520,0.0702,-0.0467,0.7690,0.4383,-7.0421,yes,0.0158,productive,2026-10-16,6fc36f0-dirty,no
+2023,88,Bryson Stott,681082,leak 1,,two,fastball,up,80,55,0.6875,0.5124,0.1751,,,,0.4739,-3.2809,yes,0.0209,productive,2026-10-16,6fc36f0-dirty,no
+2023,88,Bryson Stott,681082,leak 2,,two,breaking,down,52,37,0.7115,0.5687,0.1428,,,,0.4887,-2.9501,yes,0.0209,productive,2026-10-16,6fc36f0-dirty,no
+2023,88,Bryson Stott,681082,leak 3,,ahead,fastball,up,29,12,0.4138,0.3088,0.1050,,,,0.2496,-0.8111,yes,-0.0075,average,2026-10-16,6fc36f0-dirty,no
+2023,89,Jon Berti,542932,hitter,2,,,,35,21,0.6000,0.5087,0.0913,0.0235,-0.0467,0.7690,0.4923,-1.9539,yes,0.0027,average,2026-10-16,6fc36f0-dirty,no
+2023,89,Jon Berti,542932,leak 1,,two,offspeed,down,17,10,0.5882,0.4672,0.1211,,,,0.5035,-0.9878,yes,0.0027,average,2026-10-16,6fc36f0-dirty,no
+2023,89,Jon Berti,542932,leak 2,,two,breaking,down,18,11,0.6111,0.5479,0.0632,,,,0.4817,-0.9661,yes,0.0027,average,2026-10-16,6fc36f0-dirty,no
+2023,90,Shohei Ohtani,660271,hitter,3,,,,140,77,0.5500,0.4985,0.0515,-0.0071,-0.0467,0.7690,0.4204,-4.8641,yes,0.0633,productive,2026-10-16,6fc36f0-dirty,no
+2023,90,Shohei Ohtani,660271,leak 1,,two,breaking,down,56,34,0.6071,0.5373,0.0698,,,,0.4597,-2.0257,yes,0.0565,productive,2026-10-16,6fc36f0-dirty,no
+2023,90,Shohei Ohtani,660271,leak 2,,two,fastball,up,53,30,0.5660,0.5213,0.0448,,,,0.4521,-1.5957,yes,0.0565,productive,2026-10-16,6fc36f0-dirty,no
+2023,90,Shohei Ohtani,660271,leak 3,,ahead,offspeed,down,31,13,0.4194,0.3895,0.0298,,,,0.2954,-1.2427,yes,0.0871,productive,2026-10-16,6fc36f0-dirty,no
+2023,91,Yordan Álvarez,670541,hitter,3,,,,120,67,0.5583,0.4747,0.0837,0.0177,-0.0467,0.7690,0.3861,-5.5869,yes,0.0733,productive,2026-10-16,6fc36f0-dirty,no
+2023,91,Yordan Álvarez,670541,leak 1,,two,breaking,down,57,34,0.5965,0.4975,0.0990,,,,0.3961,-3.1894,yes,0.0703,productive,2026-10-16,6fc36f0-dirty,no
+2023,91,Yordan Álvarez,670541,leak 2,,ahead,breaking,down,21,10,0.4762,0.4041,0.0720,,,,0.2595,-1.2365,yes,0.0872,productive,2026-10-16,6fc36f0-dirty,no
+2023,91,Yordan Álvarez,670541,leak 3,,two,fastball,up,42,23,0.5476,0.4789,0.0688,,,,0.4359,-1.1610,yes,0.0703,productive,2026-10-16,6fc36f0-dirty,no
+2023,92,Dansby Swanson,621020,hitter,2,,,,67,36,0.5373,0.4121,0.1252,0.0496,-0.0467,0.7690,0.4344,-2.1877,yes,0.0190,productive,2026-10-16,6fc36f0-dirty,no
+2023,92,Dansby Swanson,621020,leak 1,,two,offspeed,down,37,21,0.5676,0.4582,0.1094,,,,0.4765,-1.3197,yes,0.0191,productive,2026-10-16,6fc36f0-dirty,no
+2023,92,Dansby Swanson,621020,leak 2,,ahead,fastball,in,30,15,0.5000,0.3553,0.1447,,,,0.3825,-0.8680,yes,0.0189,productive,2026-10-16,6fc36f0-dirty,no
+2023,93,Isiah Kiner-Falefa,643396,hitter,1,,,,30,17,0.5667,0.5387,0.0279,-0.0252,-0.0467,0.7690,0.5095,-1.2548,yes,-0.0018,average,2026-10-16,6fc36f0-dirty,no
+2023,93,Isiah Kiner-Falefa,643396,leak 1,,two,breaking,down,30,17,0.5667,0.5387,0.0279,,,,0.5095,-1.2548,yes,-0.0018,average,2026-10-16,6fc36f0-dirty,no
+2023,94,Isaac Paredes,670623,hitter,3,,,,152,98,0.6447,0.4908,0.1540,0.0717,-0.0467,0.7690,0.4538,-7.0374,no,0.0085,average,2026-10-16,6fc36f0-dirty,no
+2023,94,Isaac Paredes,670623,leak 1,,two,fastball,up,67,48,0.7164,0.4393,0.2771,,,,0.4209,-3.5436,yes,0.0085,average,2026-10-16,6fc36f0-dirty,no
+2023,94,Isaac Paredes,670623,leak 2,,two,breaking,down,44,30,0.6818,0.5697,0.1121,,,,0.5077,-2.3781,yes,0.0085,average,2026-10-16,6fc36f0-dirty,no
+2023,94,Isaac Paredes,670623,leak 3,,two,offspeed,down,41,20,0.4878,0.4902,-0.0024,,,,0.4496,-1.1157,no,0.0085,average,2026-10-16,6fc36f0-dirty,no
+2023,95,Jurickson Profar,595777,hitter,3,,,,98,47,0.4796,0.4129,0.0667,0.0046,-0.0467,0.7690,0.3522,-2.9218,yes,0.0059,average,2026-10-16,6fc36f0-dirty,no
+2023,95,Jurickson Profar,595777,leak 1,,two,fastball,up,59,29,0.4915,0.4636,0.0280,,,,0.4097,-1.2661,yes,0.0080,average,2026-10-16,6fc36f0-dirty,no
+2023,95,Jurickson Profar,595777,leak 2,,two,breaking,down-in,27,10,0.3704,0.2746,0.0958,,,,0.2268,-0.8840,yes,0.0080,average,2026-10-16,6fc36f0-dirty,no
+2023,95,Jurickson Profar,595777,leak 3,,ahead,breaking,down,12,8,0.6667,0.4752,0.1915,,,,0.3518,-0.7717,yes,-0.0090,average,2026-10-16,6fc36f0-dirty,no
+2023,96,Nico Hoerner,663538,hitter,2,,,,88,56,0.6364,0.5113,0.1251,0.0495,-0.0467,0.7690,0.4440,-2.6831,yes,0.0086,average,2026-10-16,6fc36f0-dirty,no
+2023,96,Nico Hoerner,663538,leak 1,,two,breaking,down,53,32,0.6038,0.5430,0.0608,,,,0.4526,-1.5033,yes,0.0086,average,2026-10-16,6fc36f0-dirty,no
+2023,96,Nico Hoerner,663538,leak 2,,two,breaking,away,35,24,0.6857,0.4633,0.2225,,,,0.4309,-1.1798,yes,0.0086,average,2026-10-16,6fc36f0-dirty,no
+2023,97,Matt Vierling,663837,hitter,0,,,,,,,,,,,,,,,,,2026-10-16,6fc36f0-dirty,no
+2023,98,Spencer Torkelson,679529,hitter,2,,,,93,55,0.5914,0.4972,0.0942,0.0257,-0.0467,0.7690,0.4454,-2.0935,no,0.0221,productive,2026-10-16,6fc36f0-dirty,no
+2023,98,Spencer Torkelson,679529,leak 1,,two,breaking,away,50,33,0.6600,0.4526,0.2074,,,,0.4133,-1.2391,yes,0.0221,productive,2026-10-16,6fc36f0-dirty,no
+2023,98,Spencer Torkelson,679529,leak 2,,two,breaking,down,43,22,0.5116,0.5491,-0.0375,,,,0.4828,-0.8544,no,0.0221,productive,2026-10-16,6fc36f0-dirty,no
+2023,99,Max Muncy,571970,hitter,0,,,,,,,,,,,,,,,,,2026-10-16,6fc36f0-dirty,no
+2023,100,Aaron Hicks,543305,hitter,1,,,,12,4,0.3333,0.4140,-0.0806,-0.1087,-0.0467,0.7690,0.2934,-0.7587,no,-0.0228,struggling,2026-10-16,6fc36f0-dirty,no
+2023,100,Aaron Hicks,543305,leak 1,,ahead,breaking,down,12,4,0.3333,0.4140,-0.0806,,,,0.2934,-0.7587,no,-0.0228,struggling,2026-10-16,6fc36f0-dirty,no
+2023,101,Rafael Devers,646240,hitter,2,,,,43,22,0.5116,0.3188,0.1928,0.1016,-0.0467,0.7690,0.2188,-1.5649,yes,0.0483,productive,2026-10-16,6fc36f0-dirty,no
+2023,101,Rafael Devers,646240,leak 1,,ahead,breaking,down,16,8,0.5000,0.4132,0.0868,,,,0.2807,-0.8013,yes,0.0472,productive,2026-10-16,6fc36f0-dirty,no
+2023,101,Rafael Devers,646240,leak 2,,first,breaking,down,27,14,0.5185,0.2628,0.2557,,,,0.1821,-0.7636,yes,0.0490,productive,2026-10-16,6fc36f0-dirty,no
+2023,102,Anthony Volpe,683011,hitter,1,,,,47,23,0.4894,0.5150,-0.0257,-0.0664,-0.0467,0.7690,0.4197,-1.0911,no,-0.0269,struggling,2026-10-16,6fc36f0-dirty,no
+2023,102,Anthony Volpe,683011,leak 1,,two,breaking,down,47,23,0.4894,0.5150,-0.0257,,,,0.4197,-1.0911,no,-0.0269,struggling,2026-10-16,6fc36f0-dirty,no
+2023,103,Brice Turang,668930,hitter,2,,,,57,42,0.7368,0.5141,0.2228,0.1246,-0.0467,0.7690,0.4745,-2.4927,yes,-0.0155,struggling,2026-10-16,6fc36f0-dirty,no
+2023,103,Brice Turang,668930,leak 1,,two,fastball,up,45,32,0.7111,0.4997,0.2114,,,,0.4775,-1.7060,yes,-0.0155,struggling,2026-10-16,6fc36f0-dirty,no
+2023,103,Brice Turang,668930,leak 2,,two,breaking,in,12,10,0.8333,0.5680,0.2653,,,,0.4632,-0.7867,yes,-0.0155,struggling,2026-10-16,6fc36f0-dirty,no
+2023,104,Ryan McMahon,641857,hitter,3,,,,146,87,0.5959,0.4921,0.1038,0.0331,-0.0467,0.7690,0.4490,-5.3487,yes,0.0255,productive,2026-10-16,6fc36f0-dirty,no
+2023,104,Ryan McMahon,641857,leak 1,,two,breaking,down,72,45,0.6250,0.5329,0.0921,,,,0.4558,-3.1544,yes,0.0290,productive,2026-10-16,6fc36f0-dirty,no
+2023,104,Ryan McMahon,641857,leak 2,,two,offspeed,down,45,23,0.5111,0.4339,0.0773,,,,0.4386,-1.3358,yes,0.0290,productive,2026-10-16,6fc36f0-dirty,no
+2023,104,Ryan McMahon,641857,leak 3,,ahead,fastball,in,29,19,0.6552,0.4812,0.1740,,,,0.4485,-0.8585,yes,0.0115,productive,2026-10-16,6fc36f0-dirty,no
+2023,105,Luis García,671277,hitter,1,,,,44,17,0.3864,0.3494,0.0369,-0.0183,-0.0467,0.7690,0.3548,-1.6491,yes,0.0137,productive,2026-10-16,6fc36f0-dirty,no
+2023,105,Luis García,671277,leak 1,,two,offspeed,down,44,17,0.3864,0.3494,0.0369,,,,0.3548,-1.6491,yes,0.0137,productive,2026-10-16,6fc36f0-dirty,no
+2023,106,Tommy Edman,669242,hitter,2,,,,69,31,0.4493,0.3767,0.0726,0.0091,-0.0467,0.7690,0.3347,-2.5796,no,-0.0113,struggling,2026-10-16,6fc36f0-dirty,no
+2023,106,Tommy Edman,669242,leak 1,,two,breaking,down,40,19,0.4750,0.4761,-0.0011,,,,0.4320,-1.7810,no,-0.0151,struggling,2026-10-16,6fc36f0-dirty,no
+2023,106,Tommy Edman,669242,leak 2,,ahead,fastball,up,29,12,0.4138,0.2397,0.1741,,,,0.2006,-0.7986,yes,-0.0060,average,2026-10-16,6fc36f0-dirty,no
+2023,107,Adam Frazier,624428,hitter,2,,,,95,63,0.6632,0.4882,0.1749,0.0878,-0.0467,0.7690,0.4377,-5.7461,yes,0.0121,productive,2026-10-16,6fc36f0-dirty,no
+2023,107,Adam Frazier,624428,leak 1,,two,fastball,up,52,36,0.6923,0.4530,0.2393,,,,0.4053,-3.6429,yes,0.0121,productive,2026-10-16,6fc36f0-dirty,no
+2023,107,Adam Frazier,624428,leak 2,,two,breaking,down,43,27,0.6279,0.5308,0.0971,,,,0.4769,-2.1032,yes,0.0121,productive,2026-10-16,6fc36f0-dirty,no
+2023,108,Enrique Hernández,571771,hitter,1,,,,51,32,0.6275,0.5698,0.0577,-0.0023,-0.0467,0.7690,0.4760,-1.6412,yes,-0.0125,struggling,2026-10-16,6fc36f0-dirty,no
+2023,108,Enrique Hernández,571771,leak 1,,two,breaking,down,51,32,0.6275,0.5698,0.0577,,,,0.4760,-1.6412,yes,-0.0125,struggling,2026-10-16,6fc36f0-dirty,no
+2023,109,Alec Bohm,664761,hitter,1,,,,41,20,0.4878,0.3320,0.1558,0.0731,-0.0467,0.7690,0.3463,-0.9355,yes,0.0183,productive,2026-10-16,6fc36f0-dirty,no
+2023,109,Alec Bohm,664761,leak 1,,ahead,fastball,in,41,20,0.4878,0.3320,0.1558,,,,0.3463,-0.9355,yes,0.0183,productive,2026-10-16,6fc36f0-dirty,no
+2023,110,Max Kepler,596146,hitter,2,,,,88,52,0.5909,0.5147,0.0762,0.0119,-0.0467,0.7690,0.4743,-3.9682,yes,0.0255,productive,2026-10-16,6fc36f0-dirty,no
+2023,110,Max Kepler,596146,leak 1,,two,breaking,down,50,28,0.5600,0.5322,0.0278,,,,0.4565,-2.5575,yes,0.0255,productive,2026-10-16,6fc36f0-dirty,no
+2023,110,Max Kepler,596146,leak 2,,two,offspeed,down,38,24,0.6316,0.4917,0.1398,,,,0.4978,-1.4107,yes,0.0255,productive,2026-10-16,6fc36f0-dirty,no
+2023,111,Jonah Heim,641680,hitter,3,,,,128,80,0.6250,0.5143,0.1107,0.0384,-0.0467,0.7690,0.4842,-4.6023,yes,0.0175,productive,2026-10-16,6fc36f0-dirty,no
+2023,111,Jonah Heim,641680,leak 1,,two,breaking,down,39,25,0.6410,0.5046,0.1365,,,,0.4393,-1.9491,yes,0.0175,productive,2026-10-16,6fc36f0-dirty,no
+2023,111,Jonah Heim,641680,leak 2,,two,fastball,up,66,39,0.5909,0.5161,0.0749,,,,0.4949,-1.5677,yes,0.0175,productive,2026-10-16,6fc36f0-dirty,no
+2023,111,Jonah Heim,641680,leak 3,,two,offspeed,down,23,16,0.6957,0.5259,0.1698,,,,0.5296,-1.0855,yes,0.0175,productive,2026-10-16,6fc36f0-dirty,no
+2023,112,Jorge Polanco,593871,hitter,2,,,,81,47,0.5802,0.4985,0.0817,0.0162,-0.0467,0.7690,0.4288,-5.1414,yes,0.0206,productive,2026-10-16,6fc36f0-dirty,no
+2023,112,Jorge Polanco,593871,leak 1,,two,breaking,down,52,34,0.6538,0.5480,0.1058,,,,0.4915,-4.2344,yes,0.0148,productive,2026-10-16,6fc36f0-dirty,no
+2023,112,Jorge Polanco,593871,leak 2,,even,breaking,down,29,13,0.4483,0.4097,0.0385,,,,0.3165,-0.9070,yes,0.0311,productive,2026-10-16,6fc36f0-dirty,no
+2023,113,Jeff McNeil,643446,hitter,3,,,,108,70,0.6481,0.4808,0.1674,0.0820,-0.0467,0.7690,0.4593,-3.3536,yes,0.0030,average,2026-10-16,6fc36f0-dirty,no
+2023,113,Jeff McNeil,643446,leak 1,,two,offspeed,away,25,19,0.7600,0.5471,0.2129,,,,0.4314,-1.2169,yes,0.0030,average,2026-10-16,6fc36f0-dirty,no
+2023,113,Jeff McNeil,643446,leak 2,,two,fastball,away,38,27,0.7105,0.4114,0.2992,,,,0.4830,-1.1340,yes,0.0030,average,2026-10-16,6fc36f0-dirty,no
+2023,113,Jeff McNeil,643446,leak 3,,two,breaking,down,45,24,0.5333,0.5025,0.0308,,,,0.4548,-1.0027,yes,0.0030,average,2026-10-16,6fc36f0-dirty,no
+2023,114,Marcell Ozuna,542303,hitter,2,,,,100,50,0.5000,0.4905,0.0095,-0.0394,-0.0467,0.7690,0.4281,-2.7175,no,0.0343,productive,2026-10-16,6fc36f0-dirty,no
+2023,114,Marcell Ozuna,542303,leak 1,,two,breaking,down,75,37,0.4933,0.5276,-0.0343,,,,0.4367,-1.7228,no,0.0343,productive,2026-10-16,6fc36f0-dirty,no
+2023,114,Marcell Ozuna,542303,leak 2,,two,offspeed,down,25,13,0.5200,0.3792,0.1408,,,,0.4025,-0.9947,yes,0.0343,productive,2026-10-16,6fc36f0-dirty,no
+2023,115,Riley Greene,682985,hitter,3,,,,102,64,0.6275,0.4662,0.1612,0.0773,-0.0467,0.7690,0.4159,-7.6258,yes,0.0315,productive,2026-10-16,6fc36f0-dirty,no
+2023,115,Riley Greene,682985,leak 1,,two,breaking,down,49,34,0.6939,0.4905,0.2034,,,,0.4180,-5.3028,yes,0.0303,productive,2026-10-16,6fc36f0-dirty,no
+2023,115,Riley Greene,682985,leak 2,,two,offspeed,down,28,18,0.6429,0.4909,0.1519,,,,0.5149,-1.4019,yes,0.0303,productive,2026-10-16,6fc36f0-dirty,no
+2023,115,Riley Greene,682985,leak 3,,even,breaking,down,25,12,0.4800,0.3911,0.0889,,,,0.3008,-0.9211,yes,0.0354,productive,2026-10-16,6fc36f0-dirty,no
+2023,116,Miguel Cabrera,408234,hitter,3,,,,86,44,0.5116,0.4045,0.1071,0.0357,-0.0467,0.7690,0.3392,-3.3143,yes,-0.0093,average,2026-10-16,6fc36f0-dirty,no
+2023,116,Miguel Cabrera,408234,leak 1,,two,breaking,down,32,19,0.5938,0.5444,0.0494,,,,0.4596,-1.4344,yes,-0.0109,struggling,2026-10-16,6fc36f0-dirty,no
+2023,116,Miguel Cabrera,408234,leak 2,,two,breaking,down-away,34,13,0.3824,0.2260,0.1564,,,,0.2107,-1.0872,yes,-0.0109,struggling,2026-10-16,6fc36f0-dirty,no
+2023,116,Miguel Cabrera,408234,leak 3,,even,breaking,down,20,12,0.6000,0.4841,0.1159,,,,0.3651,-0.7927,yes,-0.0041,average,2026-10-16,6fc36f0-dirty,no
+2023,117,Adolis García,666969,hitter,2,,,,60,34,0.5667,0.4792,0.0875,0.0206,-0.0467,0.7690,0.3725,-2.3822,yes,0.0308,productive,2026-10-16,6fc36f0-dirty,no
+2023,117,Adolis García,666969,leak 1,,two,breaking,down,42,23,0.5476,0.5140,0.0336,,,,0.4196,-1.2125,yes,0.0283,productive,2026-10-16,6fc36f0-dirty,no
+2023,117,Adolis García,666969,leak 2,,ahead,breaking,down,18,11,0.6111,0.3979,0.2132,,,,0.2627,-1.1697,yes,0.0366,productive,2026-10-16,6fc36f0-dirty,no
+2023,118,Charlie Blackmon,453568,hitter,2,,,,52,31,0.5962,0.4920,0.1041,0.0334,-0.0467,0.7690,0.4660,-3.0248,yes,0.0184,productive,2026-10-16,6fc36f0-dirty,no
+2023,118,Charlie Blackmon,453568,leak 1,,two,breaking,down,32,19,0.5938,0.5162,0.0776,,,,0.4762,-2.1060,yes,0.0184,productive,2026-10-16,6fc36f0-dirty,no
+2023,118,Charlie Blackmon,453568,leak 2,,two,offspeed,down,20,12,0.6000,0.4534,0.1466,,,,0.4497,-0.9188,yes,0.0184,productive,2026-10-16,6fc36f0-dirty,no
+2023,119,Chas McCormick,676801,hitter,2,,,,71,48,0.6761,0.5217,0.1544,0.0720,-0.0467,0.7690,0.5096,-2.8653,yes,0.0107,productive,2026-10-16,6fc36f0-dirty,no
+2023,119,Chas McCormick,676801,leak 1,,two,breaking,down,40,24,0.6000,0.5860,0.0140,,,,0.4941,-1.7028,yes,0.0107,productive,2026-10-16,6fc36f0-dirty,no
+2023,119,Chas McCormick,676801,leak 2,,two,fastball,in,31,24,0.7742,0.4387,0.3355,,,,0.5295,-1.1625,yes,0.0107,productive,2026-10-16,6fc36f0-dirty,no
+2023,120,MJ Melendez,669004,hitter,2,,,,89,47,0.5281,0.4749,0.0532,-0.0057,-0.0467,0.7690,0.4159,-2.6353,no,-0.0036,average,2026-10-16,6fc36f0-dirty,no
+2023,120,MJ Melendez,669004,leak 1,,two,breaking,down,62,30,0.4839,0.5043,-0.0205,,,,0.4260,-1.6258,no,-0.0036,average,2026-10-16,6fc36f0-dirty,no
+2023,120,MJ Melendez,669004,leak 2,,two,breaking,away,27,17,0.6296,0.4072,0.2224,,,,0.3926,-1.0095,yes,-0.0036,average,2026-10-16,6fc36f0-dirty,no
+2023,121,Leody Taveras,665750,hitter,2,,,,68,41,0.6029,0.4688,0.1341,0.0565,-0.0467,0.7690,0.4090,-4.0383,yes,0.0096,average,2026-10-16,6fc36f0-dirty,no
+2023,121,Leody Taveras,665750,leak 1,,two,breaking,down,52,32,0.6154,0.4967,0.1186,,,,0.4497,-3.1606,yes,0.0124,productive,2026-10-16,6fc36f0-dirty,no
+2023,121,Leody Taveras,665750,leak 2,,ahead,breaking,down,16,9,0.5625,0.3780,0.1845,,,,0.2766,-0.8777,yes,0.0003,average,2026-10-16,6fc36f0-dirty,no
+2023,122,Luis Rengifo,650859,hitter,1,,,,30,18,0.6000,0.4451,0.1549,0.0724,-0.0467,0.7690,0.3512,-1.1494,yes,0.0024,average,2026-10-16,6fc36f0-dirty,no
+2023,122,Luis Rengifo,650859,leak 1,,even,breaking,down,30,18,0.6000,0.4451,0.1549,,,,0.3512,-1.1494,yes,0.0024,average,2026-10-16,6fc36f0-dirty,no
+2023,123,Corbin Carroll,682998,hitter,3,,,,96,69,0.7188,0.5246,0.1942,0.1026,-0.0467,0.7690,0.4445,-4.4044,yes,0.0124,productive,2026-10-16,6fc36f0-dirty,no
+2023,123,Corbin Carroll,682998,leak 1,,two,breaking,down,42,30,0.7143,0.5323,0.1820,,,,0.4435,-2.1119,yes,0.0104,productive,2026-10-16,6fc36f0-dirty,no
+2023,123,Corbin Carroll,682998,leak 2,,two,offspeed,down,34,23,0.6765,0.5595,0.1170,,,,0.5266,-1.4931,yes,0.0104,productive,2026-10-16,6fc36f0-dirty,no
+2023,123,Corbin Carroll,682998,leak 3,,even,breaking,down,20,16,0.8000,0.4490,0.3510,,,,0.3069,-0.7994,yes,0.0200,productive,2026-10-16,6fc36f0-dirty,no
+2023,124,William Contreras,661388,hitter,0,,,,,,,,,,,,,,,,,2026-10-16,6fc36f0-dirty,no
+2023,125,TJ Friedl,670770,hitter,2,,,,92,47,0.5109,0.4180,0.0929,0.0248,-0.0467,0.7690,0.3583,-3.1282,yes,-0.0092,average,2026-10-16,6fc36f0-dirty,no
+2023,125,TJ Friedl,670770,leak 1,,two,fastball,up,45,31,0.6889,0.5686,0.1202,,,,0.5001,-2.2219,yes,0.0081,average,2026-10-16,6fc36f0-dirty,no
+2023,125,TJ Friedl,670770,leak 2,,ahead,fastball,up,47,16,0.3404,0.2737,0.0667,,,,0.2226,-0.9063,yes,-0.0258,struggling,2026-10-16,6fc36f0-dirty,no
+2023,126,Zach Neto,687263,hitter,1,,,,23,12,0.5217,0.4551,0.0666,0.0046,-0.0467,0.7690,0.4083,-1.4561,yes,0.0034,average,2026-10-16,6fc36f0-dirty,no
+2023,126,Zach Neto,687263,leak 1,,two,breaking,away,23,12,0.5217,0.4551,0.0666,,,,0.4083,-1.4561,yes,0.0034,average,2026-10-16,6fc36f0-dirty,no
+2023,127,Austin Riley,663586,hitter,3,,,,152,79,0.5197,0.4462,0.0735,0.0099,-0.0467,0.7690,0.4572,-3.5434,no,0.0406,productive,2026-10-16,6fc36f0-dirty,no
+2023,127,Austin Riley,663586,leak 1,,two,fastball,in,40,26,0.6500,0.4308,0.2192,,,,0.5267,-1.4737,yes,0.0423,productive,2026-10-16,6fc36f0-dirty,no
+2023,127,Austin Riley,663586,leak 2,,two,breaking,down,62,30,0.4839,0.5313,-0.0474,,,,0.4603,-1.0536,no,0.0423,productive,2026-10-16,6fc36f0-dirty,no
+2023,127,Austin Riley,663586,leak 3,,ahead,fastball,in,50,23,0.4600,0.3531,0.1069,,,,0.3977,-1.0161,yes,0.0371,productive,2026-10-16,6fc36f0-dirty,no
+2023,128,Vladimir Guerrero,665489,hitter,2,,,,52,25,0.4808,0.3630,0.1177,0.0439,-0.0467,0.7690,0.3349,-1.8265,yes,0.0482,productive,2026-10-16,6fc36f0-dirty,no
+2023,128,Vladimir Guerrero,665489,leak 1,,ahead,breaking,down,17,11,0.6471,0.4554,0.1916,,,,0.3200,-0.9785,yes,0.0482,productive,2026-10-16,6fc36f0-dirty,no
+2023,128,Vladimir Guerrero,665489,leak 2,,ahead,fastball,in,35,14,0.4000,0.3182,0.0818,,,,0.3421,-0.8480,yes,0.0482,productive,2026-10-16,6fc36f0-dirty,no
+2023,129,Jake Rogers,668670,hitter,1,,,,29,18,0.6207,0.5672,0.0535,-0.0056,-0.0467,0.7690,0.5108,-1.8109,yes,-0.0018,average,2026-10-16,6fc36f0-dirty,no
+2023,129,Jake Rogers,668670,leak 1,,two,breaking,down,29,18,0.6207,0.5672,0.0535,,,,0.5108,-1.8109,yes,-0.0018,average,2026-10-16,6fc36f0-dirty,no
+2023,130,Alec Burleson,676475,hitter,3,,,,78,53,0.6795,0.4622,0.2173,0.1204,-0.0467,0.7690,0.4297,-7.8598,yes,0.0204,productive,2026-10-16,6fc36f0-dirty,no
+2023,130,Alec Burleson,676475,leak 1,,two,fastball,up,30,27,0.9000,0.4918,0.4082,,,,0.5132,-4.5585,yes,0.0219,productive,2026-10-16,6fc36f0-dirty,no
+2023,130,Alec Burleson,676475,leak 2,,two,breaking,down,31,16,0.5161,0.4875,0.0286,,,,0.4091,-1.8313,yes,0.0219,productive,2026-10-16,6fc36f0-dirty,no
+2023,130,Alec Burleson,676475,leak 3,,ahead,fastball,up,17,10,0.5882,0.3637,0.2245,,,,0.3200,-1.4700,yes,0.0148,productive,2026-10-16,6fc36f0-dirty,no
+2023,131,Ramón Urías,602104,hitter,3,,,,78,44,0.5641,0.4440,0.1201,0.0457,-0.0467,0.7690,0.4291,-3.5466,yes,-0.0261,struggling,2026-10-16,6fc36f0-dirty,no
+2023,131,Ramón Urías,602104,leak 1,,two,fastball,up,36,23,0.6389,0.4941,0.1448,,,,0.4602,-1.5350,yes,-0.0261,struggling,2026-10-16,6fc36f0-dirty,no
+2023,131,Ramón Urías,602104,leak 2,,two,offspeed,down,22,13,0.5909,0.5094,0.0815,,,,0.4946,-1.1689,yes,-0.0261,struggling,2026-10-16,6fc36f0-dirty,no
+2023,131,Ramón Urías,602104,leak 3,,ahead,fastball,up,20,8,0.4000,0.2819,0.1181,,,,0.3011,-0.8427,yes,-0.0260,struggling,2026-10-16,6fc36f0-dirty,no
+2023,132,Gabriel Moreno,672515,hitter,3,,,,95,68,0.7158,0.5189,0.1969,0.1048,-0.0467,0.7690,0.4912,-6.5849,yes,0.0064,average,2026-10-16,6fc36f0-dirty,no
+2023,132,Gabriel Moreno,672515,leak 1,,two,breaking,down,41,29,0.7073,0.5126,0.1947,,,,0.4413,-4.4711,yes,0.0064,average,2026-10-16,6fc36f0-dirty,no
+2023,132,Gabriel Moreno,672515,leak 2,,two,fastball,up,37,26,0.7027,0.5493,0.1534,,,,0.5812,-1.2129,yes,0.0064,average,2026-10-16,6fc36f0-dirty,no
+2023,132,Gabriel Moreno,672515,leak 3,,two,breaking,away,17,13,0.7647,0.4675,0.2972,,,,0.4158,-0.9009,yes,0.0064,average,2026-10-16,6fc36f0-dirty,no
+2023,133,Dominic Smith,642086,hitter,2,,,,128,74,0.5781,0.4824,0.0958,0.0270,-0.0467,0.7690,0.4026,-3.8068,no,0.0129,productive,2026-10-16,6fc36f0-dirty,no
+2023,133,Dominic Smith,642086,leak 1,,two,fastball,up,75,46,0.6133,0.4382,0.1751,,,,0.3922,-2.7284,yes,0.0129,productive,2026-10-16,6fc36f0-dirty,no
+2023,133,Dominic Smith,642086,leak 2,,two,breaking,down,53,28,0.5283,0.5448,-0.0165,,,,0.4174,-1.0784,no,0.0129,productive,2026-10-16,6fc36f0-dirty,no
+2023,134,Patrick Wisdom,621550,hitter,3,,,,69,29,0.4203,0.3765,0.0438,-0.0130,-0.0467,0.7690,0.3572,-4.3509,no,0.0184,productive,2026-10-16,6fc36f0-dirty,no
+2023,134,Patrick Wisdom,621550,leak 1,,two,breaking,down,29,16,0.5517,0.5381,0.0136,,,,0.5000,-2.5214,yes,0.0216,productive,2026-10-16,6fc36f0-dirty,no
+2023,134,Patrick Wisdom,621550,leak 2,,ahead,fastball,in,19,9,0.4737,0.3269,0.1468,,,,0.3426,-0.9969,yes,0.0099,average,2026-10-16,6fc36f0-dirty,no
+2023,134,Patrick Wisdom,621550,leak 3,,two,breaking,down-away,21,4,0.1905,0.1983,-0.0078,,,,0.1732,-0.8326,no,0.0216,productive,2026-10-16,6fc36f0-dirty,no
+2023,135,Jake Cronenworth,630105,hitter,1,,,,42,23,0.5476,0.4971,0.0505,-0.0079,-0.0467,0.7690,0.4072,-1.4319,yes,-0.0030,average,2026-10-16,6fc36f0-dirty,no
+2023,135,Jake Cronenworth,630105,leak 1,,two,breaking,down,42,23,0.5476,0.4971,0.0505,,,,0.4072,-1.4319,yes,-0.0030,average,2026-10-16,6fc36f0-dirty,no
+2023,136,Akil Baddoo,668731,hitter,2,,,,66,31,0.4697,0.4941,-0.0244,-0.0655,-0.0467,0.7690,0.4097,-1.8588,no,-0.0177,struggling,2026-10-16,6fc36f0-dirty,no
+2023,136,Akil Baddoo,668731,leak 1,,two,fastball,up,39,18,0.4615,0.4617,-0.0001,,,,0.3918,-1.0733,no,-0.0177,struggling,2026-10-16,6fc36f0-dirty,no
+2023,136,Akil Baddoo,668731,leak 2,,two,breaking,down,27,13,0.4815,0.5410,-0.0595,,,,0.4355,-0.7855,no,-0.0177,struggling,2026-10-16,6fc36f0-dirty,no
+2023,137,Jeimer Candelario,600869,hitter,2,,,,102,59,0.5784,0.4791,0.0994,0.0297,-0.0467,0.7690,0.3765,-4.7250,yes,0.0017,average,2026-10-16,6fc36f0-dirty,no
+2023,137,Jeimer Candelario,600869,leak 1,,two,breaking,down,66,39,0.5909,0.5074,0.0835,,,,0.4058,-3.7687,yes,-0.0012,average,2026-10-16,6fc36f0-dirty,no
+2023,137,Jeimer Candelario,600869,leak 2,,even,breaking,down,36,20,0.5556,0.4271,0.1285,,,,0.3228,-0.9563,yes,0.0070,average,2026-10-16,6fc36f0-dirty,no
+2023,138,Bo Bichette,666182,hitter,3,,,,147,81,0.5510,0.3408,0.2102,0.1150,-0.0467,0.7690,0.3085,-7.3464,yes,0.0148,productive,2026-10-16,6fc36f0-dirty,no
+2023,138,Bo Bichette,666182,leak 1,,two,breaking,down,48,40,0.8333,0.4789,0.3544,,,,0.4427,-4.0586,yes,0.0148,productive,2026-10-16,6fc36f0-dirty,no
+2023,138,Bo Bichette,666182,leak 2,,two,breaking,down-away,81,29,0.3580,0.2427,0.1154,,,,0.2066,-2.0144,yes,0.0148,productive,2026-10-16,6fc36f0-dirty,no
+2023,138,Bo Bichette,666182,leak 3,,two,offspeed,down,18,12,0.6667,0.4140,0.2527,,,,0.4091,-1.2734,yes,0.0148,productive,2026-10-16,6fc36f0-dirty,no
+2023,139,Jake Fraley,641584,hitter,3,,,,93,48,0.5161,0.4647,0.0514,-0.0071,-0.0467,0.7690,0.4368,-3.7516,no,0.0029,average,2026-10-16,6fc36f0-dirty,no
+2023,139,Jake Fraley,641584,leak 1,,two,fastball,up,44,24,0.5455,0.5298,0.0157,,,,0.5023,-1.7235,yes,0.0021,average,2026-10-16,6fc36f0-dirty,no
+2023,139,Jake Fraley,641584,leak 2,,ahead,fastball,up,23,11,0.4783,0.2810,0.1973,,,,0.2693,-1.1404,yes,0.0055,average,2026-10-16,6fc36f0-dirty,no
+2023,139,Jake Fraley,641584,leak 3,,two,breaking,down,26,13,0.5000,0.5172,-0.0172,,,,0.4742,-0.8877,no,0.0021,average,2026-10-16,6fc36f0-dirty,no
+2023,140,Brandon Marsh,669016,hitter,3,,,,108,58,0.5370,0.4375,0.0995,0.0299,-0.0467,0.7690,0.3824,-4.7159,yes,0.0011,average,2026-10-16,6fc36f0-dirty,no
+2023,140,Brandon Marsh,669016,leak 1,,two,offspeed,down,36,24,0.6667,0.5308,0.1359,,,,0.4930,-2.0107,yes,0.0001,average,2026-10-16,6fc36f0-dirty,no
+2023,140,Brandon Marsh,669016,leak 2,,two,breaking,down,31,20,0.6452,0.5317,0.1134,,,,0.4259,-1.8248,yes,0.0001,average,2026-10-16,6fc36f0-dirty,no
+2023,140,Brandon Marsh,669016,leak 3,,ahead,fastball,up,41,14,0.3415,0.2844,0.0571,,,,0.2523,-0.8804,yes,0.0027,average,2026-10-16,6fc36f0-dirty,no
+2023,141,Bryan Reynolds,668804,hitter,3,,,,159,84,0.5283,0.3537,0.1746,0.0876,-0.0467,0.7690,0.3002,-5.8045,yes,0.0252,productive,2026-10-16,6fc36f0-dirty,no
+2023,141,Bryan Reynolds,668804,leak 1,,two,fastball,up,71,41,0.5775,0.4599,0.1175,,,,0.4155,-2.9728,yes,0.0230,productive,2026-10-16,6fc36f0-dirty,no
+2023,141,Bryan Reynolds,668804,leak 2,,ahead,fastball,up,50,22,0.4400,0.2445,0.1955,,,,0.1788,-1.9626,yes,0.0315,productive,2026-10-16,6fc36f0-dirty,no
+2023,141,Bryan Reynolds,668804,leak 3,,even,fastball,up,38,21,0.5526,0.2989,0.2537,,,,0.2444,-0.8691,yes,0.0211,productive,2026-10-16,6fc36f0-dirty,no
+2023,142,Zach McKinstry,656716,hitter,3,,,,77,53,0.6883,0.4212,0.2671,0.1587,-0.0467,0.7690,0.3716,-5.7814,yes,-0.0083,average,2026-10-16,6fc36f0-dirty,no
+2023,142,Zach McKinstry,656716,leak 1,,two,breaking,down,41,29,0.7073,0.5148,0.1925,,,,0.4295,-3.3751,yes,-0.0083,average,2026-10-16,6fc36f0-dirty,no
+2023,142,Zach McKinstry,656716,leak 2,,two,breaking,down-in,21,14,0.6667,0.3339,0.3328,,,,0.3048,-1.4721,yes,-0.0083,average,2026-10-16,6fc36f0-dirty,no
+2023,142,Zach McKinstry,656716,leak 3,,two,offspeed,down-away,15,10,0.6667,0.2879,0.3788,,,,0.3070,-0.9342,yes,-0.0083,average,2026-10-16,6fc36f0-dirty,no
+2023,143,J. D. Davis,605204,hitter,2,,,,69,40,0.5797,0.4496,0.1301,0.0534,-0.0467,0.7690,0.3911,-2.5395,yes,-0.0060,average,2026-10-16,6fc36f0-dirty,no
+2023,143,J. D. Davis,605204,leak 1,,two,breaking,down,46,26,0.5652,0.5320,0.0332,,,,0.4773,-1.6725,yes,-0.0116,struggling,2026-10-16,6fc36f0-dirty,no
+2023,143,J. D. Davis,605204,leak 2,,first,breaking,down,23,14,0.6087,0.2846,0.3240,,,,0.2186,-0.8670,yes,0.0053,average,2026-10-16,6fc36f0-dirty,no
+2023,144,Bryan De La Cruz,650559,hitter,1,,,,48,33,0.6875,0.4779,0.2096,0.1145,-0.0467,0.7690,0.4447,-1.4137,yes,0.0218,productive,2026-10-16,6fc36f0-dirty,no
+2023,144,Bryan De La Cruz,650559,leak 1,,two,fastball,up,48,33,0.6875,0.4779,0.2096,,,,0.4447,-1.4137,yes,0.0218,productive,2026-10-16,6fc36f0-dirty,no
+2023,145,Jake Meyers,676694,hitter,2,,,,52,28,0.5385,0.3750,0.1634,0.0790,-0.0467,0.7690,0.3622,-3.2514,yes,-0.0223,struggling,2026-10-16,6fc36f0-dirty,no
+2023,145,Jake Meyers,676694,leak 1,,two,fastball,up,35,16,0.4571,0.3675,0.0897,,,,0.3445,-2.4314,yes,-0.0224,struggling,2026-10-16,6fc36f0-dirty,no
+2023,145,Jake Meyers,676694,leak 2,,even,fastball,in,17,12,0.7059,0.3906,0.3153,,,,0.3986,-0.8200,yes,-0.0221,struggling,2026-10-16,6fc36f0-dirty,no
+2023,146,Christian Walker,572233,hitter,2,,,,74,40,0.5405,0.5078,0.0328,-0.0215,-0.0467,0.7690,0.4199,-2.5491,no,0.0322,productive,2026-10-16,6fc36f0-dirty,no
+2023,146,Christian Walker,572233,leak 1,,two,breaking,down,42,20,0.4762,0.5165,-0.0403,,,,0.4493,-1.7756,no,0.0390,productive,2026-10-16,6fc36f0-dirty,no
+2023,146,Christian Walker,572233,leak 2,,even,breaking,down,32,20,0.6250,0.4963,0.1287,,,,0.3814,-0.7735,yes,0.0233,productive,2026-10-16,6fc36f0-dirty,no
+2023,147,Gunnar Henderson,683002,hitter,3,,,,128,66,0.5156,0.4639,0.0518,-0.0069,-0.0467,0.7690,0.4204,-4.6015,yes,0.0073,average,2026-10-16,6fc36f0-dirty,no
+2023,147,Gunnar Henderson,683002,leak 1,,two,breaking,down,60,30,0.5000,0.4992,0.0008,,,,0.4309,-2.1474,yes,0.0041,average,2026-10-16,6fc36f0-dirty,no
+2023,147,Gunnar Henderson,683002,leak 2,,two,offspeed,down,43,24,0.5581,0.4547,0.1035,,,,0.4656,-1.3762,yes,0.0041,average,2026-10-16,6fc36f0-dirty,no
+2023,147,Gunnar Henderson,683002,leak 3,,ahead,breaking,down,25,12,0.4800,0.3949,0.0851,,,,0.3172,-1.0779,yes,0.0205,productive,2026-10-16,6fc36f0-dirty,no
+2023,148,Manny Machado,592518,hitter,2,,,,83,40,0.4819,0.4772,0.0047,-0.0431,-0.0467,0.7690,0.4039,-2.5758,no,0.0242,productive,2026-10-16,6fc36f0-dirty,no
+2023,148,Manny Machado,592518,leak 1,,two,breaking,down,57,29,0.5088,0.5246,-0.0159,,,,0.4683,-1.5853,no,0.0301,productive,2026-10-16,6fc36f0-dirty,no
+2023,148,Manny Machado,592518,leak 2,,ahead,breaking,down,26,11,0.4231,0.3732,0.0498,,,,0.2627,-0.9905,yes,0.0113,productive,2026-10-16,6fc36f0-dirty,no
+2023,149,Lourdes Gurriel,666971,hitter,3,,,,94,56,0.5957,0.5097,0.0860,0.0195,-0.0467,0.7690,0.5017,-4.2192,yes,0.0082,average,2026-10-16,6fc36f0-dirty,no
+2023,149,Lourdes Gurriel,666971,leak 1,,two,breaking,down,38,24,0.6316,0.5627,0.0689,,,,0.4969,-2.3011,yes,0.0082,average,2026-10-16,6fc36f0-dirty,no
+2023,149,Lourdes Gurriel,666971,leak 2,,two,offspeed,down,39,22,0.5641,0.4672,0.0969,,,,0.4851,-1.1431,yes,0.0082,average,2026-10-16,6fc36f0-dirty,no
+2023,149,Lourdes Gurriel,666971,leak 3,,two,fastball,in,17,10,0.5882,0.4890,0.0993,,,,0.5503,-0.7750,yes,0.0082,average,2026-10-16,6fc36f0-dirty,no
+2023,150,Edward Olivares,658668,hitter,2,,,,60,41,0.6833,0.4954,0.1879,0.0978,-0.0467,0.7690,0.5119,-3.2809,yes,0.0092,average,2026-10-16,6fc36f0-dirty,no
+2023,150,Edward Olivares,658668,leak 1,,two,offspeed,down,24,15,0.6250,0.4190,0.2060,,,,0.3998,-1.9880,yes,0.0092,average,2026-10-16,6fc36f0-dirty,no
+2023,150,Edward Olivares,658668,leak 2,,two,fastball,up,36,26,0.7222,0.5464,0.1758,,,,0.5866,-1.2929,yes,0.0092,average,2026-10-16,6fc36f0-dirty,no
+2023,151,Francisco Lindor,596019,hitter,3,,,,184,100,0.5435,0.4834,0.0600,-0.0005,-0.0467,0.7690,0.4596,-5.4652,yes,0.0082,average,2026-10-16,6fc36f0-dirty,no
+2023,151,Francisco Lindor,596019,leak 1,,two,breaking,down,73,42,0.5753,0.4841,0.0912,,,,0.4216,-3.7496,yes,0.0082,average,2026-10-16,6fc36f0-dirty,no
+2023,151,Francisco Lindor,596019,leak 2,,two,fastball,up,66,36,0.5455,0.4969,0.0486,,,,0.4962,-0.8761,yes,0.0082,average,2026-10-16,6fc36f0-dirty,no
+2023,151,Francisco Lindor,596019,leak 3,,two,offspeed,down,45,22,0.4889,0.4627,0.0262,,,,0.4674,-0.8395,yes,0.0082,average,2026-10-16,6fc36f0-dirty,no
+2023,152,Carlos Correa,621043,hitter,2,,,,126,47,0.3730,0.3553,0.0177,-0.0330,-0.0467,0.7690,0.3127,-3.0420,no,0.0107,productive,2026-10-16,6fc36f0-dirty,no
+2023,152,Carlos Correa,621043,leak 1,,two,breaking,down,49,26,0.5306,0.5498,-0.0192,,,,0.4777,-2.0661,no,0.0107,productive,2026-10-16,6fc36f0-dirty,no
+2023,152,Carlos Correa,621043,leak 2,,two,breaking,down-away,77,21,0.2727,0.2315,0.0412,,,,0.2077,-0.9759,yes,0.0107,productive,2026-10-16,6fc36f0-dirty,no
+2023,153,CJ Abrams,682928,hitter,3,,,,120,70,0.5833,0.5010,0.0824,0.0167,-0.0467,0.7690,0.4497,-4.1896,yes,-0.0160,struggling,2026-10-16,6fc36f0-dirty,no
+2023,153,CJ Abrams,682928,leak 1,,two,breaking,down,66,41,0.6212,0.5422,0.0790,,,,0.4751,-2.2288,yes,-0.0166,struggling,2026-10-16,6fc36f0-dirty,no
+2023,153,CJ Abrams,682928,leak 2,,two,offspeed,down,32,16,0.5000,0.4748,0.0252,,,,0.4995,-1.0790,yes,-0.0166,struggling,2026-10-16,6fc36f0-dirty,no
+2023,153,CJ Abrams,682928,leak 3,,ahead,breaking,down,22,13,0.5909,0.4152,0.1757,,,,0.3009,-0.8818,yes,-0.0134,struggling,2026-10-16,6fc36f0-dirty,no
+2023,154,David Peralta,444482,hitter,3,,,,104,62,0.5962,0.4814,0.1148,0.0416,-0.0467,0.7690,0.4181,-4.1110,yes,-0.0055,average,2026-10-16,6fc36f0-dirty,no
+2023,154,David Peralta,444482,leak 1,,even,breaking,down,25,20,0.8000,0.4430,0.3570,,,,0.3586,-1.5341,yes,-0.0016,average,2026-10-16,6fc36f0-dirty,no
+2023,154,David Peralta,444482,leak 2,,two,breaking,down,46,27,0.5870,0.5309,0.0560,,,,0.4487,-1.3995,yes,-0.0068,average,2026-10-16,6fc36f0-dirty,no
+2023,154,David Peralta,444482,leak 3,,two,offspeed,down,33,15,0.4545,0.4413,0.0132,,,,0.4205,-1.1774,yes,-0.0068,average,2026-10-16,6fc36f0-dirty,no
+2023,155,Pete Alonso,624413,hitter,3,,,,140,74,0.5286,0.4263,0.1023,0.0320,-0.0467,0.7690,0.3908,-5.1516,yes,0.0143,productive,2026-10-16,6fc36f0-dirty,no
+2023,155,Pete Alonso,624413,leak 1,,two,breaking,down,51,34,0.6667,0.5728,0.0939,,,,0.5126,-2.0330,yes,0.0143,productive,2026-10-16,6fc36f0-dirty,no
+2023,155,Pete Alonso,624413,leak 2,,two,breaking,down-away,47,18,0.3830,0.2169,0.1661,,,,0.1891,-1.7268,yes,0.0143,productive,2026-10-16,6fc36f0-dirty,no
+2023,155,Pete Alonso,624413,leak 3,,two,offspeed,down,42,22,0.5238,0.4826,0.0412,,,,0.4686,-1.3918,yes,0.0143,productive,2026-10-16,6fc36f0-dirty,no
+2023,156,Yoán Moncada,660162,hitter,2,,,,37,16,0.4324,0.2878,0.1446,0.0645,-0.0467,0.7690,0.2224,-2.0691,yes,-0.0148,struggling,2026-10-16,6fc36f0-dirty,no
+2023,156,Yoán Moncada,660162,leak 1,,two,breaking,down-in,25,9,0.3600,0.2321,0.1279,,,,0.1696,-1.1448,yes,-0.0206,struggling,2026-10-16,6fc36f0-dirty,no
+2023,156,Yoán Moncada,660162,leak 2,,ahead,offspeed,down,12,7,0.5833,0.4040,0.1793,,,,0.3325,-0.9243,yes,-0.0028,average,2026-10-16,6fc36f0-dirty,no
+2023,157,Anthony Santander,623993,hitter,3,,,,212,96,0.4528,0.4080,0.0448,-0.0122,-0.0467,0.7690,0.3778,-5.5539,yes,0.0197,productive,2026-10-16,6fc36f0-dirty,no
+2023,157,Anthony Santander,623993,leak 1,,two,breaking,down-in,55,21,0.3818,0.2499,0.1319,,,,0.2110,-2.3175,yes,0.0197,productive,2026-10-16,6fc36f0-dirty,no
+2023,157,Anthony Santander,623993,leak 2,,two,offspeed,down,56,27,0.4821,0.4577,0.0244,,,,0.4433,-1.9866,yes,0.0197,productive,2026-10-16,6fc36f0-dirty,no
+2023,157,Anthony Santander,623993,leak 3,,two,fastball,up,101,48,0.4752,0.4665,0.0087,,,,0.4324,-1.2498,yes,0.0197,productive,2026-10-16,6fc36f0-dirty,no
+2023,158,Patrick Bailey,672275,hitter,2,,,,69,43,0.6232,0.4767,0.1465,0.0660,-0.0467,0.7690,0.4028,-5.3226,yes,-0.0109,struggling,2026-10-16,6fc36f0-dirty,no
+2023,158,Patrick Bailey,672275,leak 1,,two,breaking,down,38,25,0.6579,0.5073,0.1506,,,,0.4082,-3.5053,yes,-0.0109,struggling,2026-10-16,6fc36f0-dirty,no
+2023,158,Patrick Bailey,672275,leak 2,,two,fastball,up,31,18,0.5806,0.4391,0.1415,,,,0.3961,-1.8173,yes,-0.0109,struggling,2026-10-16,6fc36f0-dirty,no
+2023,159,Corey Julks,667452,hitter,3,,,,69,47,0.6812,0.5319,0.1493,0.0681,-0.0467,0.7690,0.5115,-5.2651,yes,-0.0179,struggling,2026-10-16,6fc36f0-dirty,no
+2023,159,Corey Julks,667452,leak 1,,two,breaking,down,22,17,0.7727,0.6188,0.1539,,,,0.5380,-2.5297,yes,-0.0179,struggling,2026-10-16,6fc36f0-dirty,no
+2023,159,Corey Julks,667452,leak 2,,two,fastball,in,16,11,0.6875,0.4687,0.2188,,,,0.5137,-1.4702,yes,-0.0179,struggling,2026-10-16,6fc36f0-dirty,no
+2023,159,Corey Julks,667452,leak 3,,two,fastball,up,31,19,0.6129,0.5029,0.1100,,,,0.4915,-1.2652,yes,-0.0179,struggling,2026-10-16,6fc36f0-dirty,no
+2023,160,Ke'Bryan Hayes,663647,hitter,3,,,,97,59,0.6082,0.4448,0.1634,0.0790,-0.0467,0.7690,0.3938,-4.2790,yes,0.0016,average,2026-10-16,6fc36f0-dirty,no
+2023,160,Ke'Bryan Hayes,663647,leak 1,,two,fastball,up,40,29,0.7250,0.5125,0.2125,,,,0.4840,-2.5647,yes,-0.0027,average,2026-10-16,6fc36f0-dirty,no
+2023,160,Ke'Bryan Hayes,663647,leak 2,,ahead,fastball,up,25,10,0.4000,0.2851,0.1149,,,,0.2677,-0.8577,yes,0.0014,average,2026-10-16,6fc36f0-dirty,no
+2023,160,Ke'Bryan Hayes,663647,leak 3,,even,breaking,down,32,20,0.6250,0.4850,0.1400,,,,0.3795,-0.8566,yes,0.0072,average,2026-10-16,6fc36f0-dirty,no
+2023,161,Austin Hays,669720,hitter,3,,,,59,37,0.6271,0.3423,0.2848,0.1723,-0.0467,0.7690,0.3346,-3.5653,yes,-0.0097,average,2026-10-16,6fc36f0-dirty,no
+2023,161,Austin Hays,669720,leak 1,,ahead,fastball,in,34,21,0.6176,0.3227,0.2950,,,,0.3632,-1.7263,yes,-0.0087,average,2026-10-16,6fc36f0-dirty,no
+2023,161,Austin Hays,669720,leak 2,,two,fastball,up-in,12,8,0.6667,0.3023,0.3644,,,,0.2847,-0.9860,yes,-0.0135,struggling,2026-10-16,6fc36f0-dirty,no
+2023,161,Austin Hays,669720,leak 3,,ahead,breaking,down,13,8,0.6154,0.4308,0.1846,,,,0.3058,-0.8530,yes,-0.0087,average,2026-10-16,6fc36f0-dirty,no
+2023,162,Donovan Solano,456781,hitter,1,,,,23,13,0.5652,0.4080,0.1572,0.0742,-0.0467,0.7690,0.2759,-0.8779,yes,0.0227,productive,2026-10-16,6fc36f0-dirty,no
+2023,162,Donovan Solano,456781,leak 1,,even,breaking,down,23,13,0.5652,0.4080,0.1572,,,,0.2759,-0.8779,yes,0.0227,productive,2026-10-16,6fc36f0-dirty,no
+2023,163,Josh Bell,605137,hitter,3,,,,132,65,0.4924,0.4560,0.0364,-0.0186,-0.0467,0.7690,0.4482,-3.3578,yes,0.0098,average,2026-10-16,6fc36f0-dirty,no
+2023,163,Josh Bell,605137,leak 1,,two,offspeed,down,60,31,0.5167,0.4889,0.0277,,,,0.5084,-1.5721,yes,0.0065,average,2026-10-16,6fc36f0-dirty,no
+2023,163,Josh Bell,605137,leak 2,,ahead,breaking,down,35,14,0.4000,0.3786,0.0214,,,,0.3076,-0.9523,yes,0.0189,productive,2026-10-16,6fc36f0-dirty,no
+2023,163,Josh Bell,605137,leak 3,,two,fastball,up,37,20,0.5405,0.4757,0.0649,,,,0.4835,-0.8334,yes,0.0065,average,2026-10-16,6fc36f0-dirty,no
+2023,164,Elvis Andrus,462101,hitter,3,,,,81,51,0.6296,0.3692,0.2604,0.1536,-0.0467,0.7690,0.3634,-6.8262,yes,-0.0293,struggling,2026-10-16,6fc36f0-dirty,no
+2023,164,Elvis Andrus,462101,leak 1,,two,fastball,up,40,31,0.7750,0.4525,0.3225,,,,0.4507,-4.0345,yes,-0.0228,struggling,2026-10-16,6fc36f0-dirty,no
+2023,164,Elvis Andrus,462101,leak 2,,ahead,fastball,up,21,10,0.4762,0.2550,0.2212,,,,0.2214,-1.4168,yes,-0.0356,struggling,2026-10-16,6fc36f0-dirty,no
+2023,164,Elvis Andrus,462101,leak 3,,ahead,fastball,in,20,10,0.5000,0.3226,0.1774,,,,0.3377,-1.3749,yes,-0.0356,struggling,2026-10-16,6fc36f0-dirty,no
+2023,165,Gavin Sheets,657757,hitter,2,,,,43,28,0.6512,0.2841,0.3670,0.2356,-0.0467,0.7690,0.2139,-3.5674,yes,-0.0264,struggling,2026-10-16,6fc36f0-dirty,no
+2023,165,Gavin Sheets,657757,leak 1,,ahead,fastball,up,20,13,0.6500,0.2821,0.3679,,,,0.2015,-2.0223,yes,-0.0317,struggling,2026-10-16,6fc36f0-dirty,no
+2023,165,Gavin Sheets,657757,leak 2,,even,fastball,up,23,15,0.6522,0.2859,0.3663,,,,0.2246,-1.5451,yes,-0.0217,struggling,2026-10-16,6fc36f0-dirty,no
+2023,166,José Abreu,547989,hitter,3,,,,115,65,0.5652,0.3969,0.1683,0.0827,-0.0467,0.7690,0.3434,-4.1463,yes,0.0085,average,2026-10-16,6fc36f0-dirty,no
+2023,166,José Abreu,547989,leak 1,,two,breaking,down,52,35,0.6731,0.5412,0.1318,,,,0.4773,-1.9696,yes,0.0099,average,2026-10-16,6fc36f0-dirty,no
+2023,166,José Abreu,547989,leak 2,,two,breaking,down-away,51,20,0.3922,0.2427,0.1494,,,,0.2180,-1.2104,yes,0.0099,average,2026-10-16,6fc36f0-dirty,no
+2023,166,José Abreu,547989,leak 3,,ahead,breaking,down,12,10,0.8333,0.4268,0.4065,,,,0.2960,-0.9663,yes,-0.0034,average,2026-10-16,6fc36f0-dirty,no
+2023,167,Francisco Álvarez,682626,hitter,0,,,,,,,,,,,,,,,,,2026-10-16,6fc36f0-dirty,no
+2023,168,Jarren Duran,680776,hitter,3,,,,84,43,0.5119,0.4712,0.0407,-0.0154,-0.0467,0.7690,0.4190,-4.4115,no,-0.0048,average,2026-10-16,6fc36f0-dirty,no
+2023,168,Jarren Duran,680776,leak 1,,two,offspeed,down,25,15,0.6000,0.4502,0.1498,,,,0.4573,-1.8622,yes,-0.0048,average,2026-10-16,6fc36f0-dirty,no
+2023,168,Jarren Duran,680776,leak 2,,two,fastball,up,25,10,0.4000,0.4323,-0.0323,,,,0.3983,-1.3725,no,-0.0048,average,2026-10-16,6fc36f0-dirty,no
+2023,168,Jarren Duran,680776,leak 3,,two,breaking,down,34,18,0.5294,0.5153,0.0141,,,,0.4061,-1.1768,yes,-0.0048,average,2026-10-16,6fc36f0-dirty,no
+2023,169,Yasmani Grandal,518735,hitter,2,,,,72,42,0.5833,0.4959,0.0874,0.0206,-0.0467,0.7690,0.4490,-2.5048,yes,-0.0158,struggling,2026-10-16,6fc36f0-dirty,no
+2023,169,Yasmani Grandal,518735,leak 1,,two,fastball,up,46,27,0.5870,0.4930,0.0939,,,,0.4294,-1.5255,yes,-0.0158,struggling,2026-10-16,6fc36f0-dirty,no
+2023,169,Yasmani Grandal,518735,leak 2,,two,offspeed,down,26,15,0.5769,0.5009,0.0760,,,,0.4838,-0.9793,yes,-0.0158,struggling,2026-10-16,6fc36f0-dirty,no
+2023,170,Blake Sabol,666165,hitter,2,,,,26,12,0.4615,0.3585,0.1030,0.0326,-0.0467,0.7690,0.3167,-1.5445,no,-0.0233,struggling,2026-10-16,6fc36f0-dirty,no
+2023,170,Blake Sabol,666165,leak 1,,two,offspeed,down-away,12,7,0.5833,0.3460,0.2373,,,,0.3355,-0.7920,yes,-0.0201,struggling,2026-10-16,6fc36f0-dirty,no
+2023,170,Blake Sabol,666165,leak 2,,ahead,offspeed,down,14,5,0.3571,0.3692,-0.0120,,,,0.3006,-0.7525,no,-0.0260,struggling,2026-10-16,6fc36f0-dirty,no
+2023,171,Jason Heyward,518792,hitter,3,,,,81,48,0.5926,0.4460,0.1466,0.0661,-0.0467,0.7690,0.4001,-5.5605,yes,0.0085,average,2026-10-16,6fc36f0-dirty,no
+2023,171,Jason Heyward,518792,leak 1,,two,breaking,down,41,23,0.5610,0.4840,0.0770,,,,0.4260,-2.4581,yes,0.0104,productive,2026-10-16,6fc36f0-dirty,no
+2023,171,Jason Heyward,518792,leak 2,,ahead,breaking,down,20,13,0.6500,0.3941,0.2559,,,,0.3161,-1.8279,yes,0.0028,average,2026-10-16,6fc36f0-dirty,no
+2023,171,Jason Heyward,518792,leak 3,,two,offspeed,down,20,12,0.6000,0.4199,0.1801,,,,0.4309,-1.2745,yes,0.0104,productive,2026-10-16,6fc36f0-dirty,no
+2023,172,Ryan Jeffers,680777,hitter,3,,,,72,48,0.6667,0.4208,0.2459,0.1424,-0.0467,0.7690,0.3773,-5.0328,yes,0.0034,average,2026-10-16,6fc36f0-dirty,no
+2023,172,Ryan Jeffers,680777,leak 1,,two,fastball,up,36,24,0.6667,0.4347,0.2319,,,,0.4213,-2.7611,yes,0.0014,average,2026-10-16,6fc36f0-dirty,no
+2023,172,Ryan Jeffers,680777,leak 2,,ahead,fastball,up,19,12,0.6316,0.3377,0.2939,,,,0.3185,-1.3899,yes,0.0111,productive,2026-10-16,6fc36f0-dirty,no
+2023,172,Ryan Jeffers,680777,leak 3,,even,breaking,down,17,12,0.7059,0.4840,0.2218,,,,0.3500,-0.8818,yes,-0.0008,average,2026-10-16,6fc36f0-dirty,no
+2023,173,Tyler Stephenson,663886,hitter,1,,,,62,33,0.5323,0.4467,0.0856,0.0191,-0.0467,0.7690,0.4302,-1.7983,yes,0.0026,average,2026-10-16,6fc36f0-dirty,no
+2023,173,Tyler Stephenson,663886,leak 1,,two,fastball,up,62,33,0.5323,0.4467,0.0856,,,,0.4302,-1.7983,yes,0.0026,average,2026-10-16,6fc36f0-dirty,no
+2023,174,Mike Moustakas,519058,hitter,3,,,,99,66,0.6667,0.4802,0.1865,0.0967,-0.0467,0.7690,0.4571,-8.2625,yes,-0.0062,average,2026-10-16,6fc36f0-dirty,no
+2023,174,Mike Moustakas,519058,leak 1,,two,fastball,up,42,30,0.7143,0.4821,0.2322,,,,0.5037,-4.2158,yes,-0.0062,average,2026-10-16,6fc36f0-dirty,no
+2023,174,Mike Moustakas,519058,leak 2,,two,breaking,down,35,21,0.6000,0.4818,0.1182,,,,0.3875,-2.4064,yes,-0.0062,average,2026-10-16,6fc36f0-dirty,no
+2023,174,Mike Moustakas,519058,leak 3,,two,offspeed,down,22,15,0.6818,0.4740,0.2078,,,,0.4789,-1.6403,yes,-0.0062,average,2026-10-16,6fc36f0-dirty,no
+2023,175,José Altuve,514888,hitter,3,,,,83,58,0.6988,0.4593,0.2395,0.1375,-0.0467,0.7690,0.4452,-5.6963,yes,0.0026,average,2026-10-16,6fc36f0-dirty,no
+2023,175,José Altuve,514888,leak 1,,two,fastball,up,49,35,0.7143,0.5062,0.2081,,,,0.4468,-3.6146,yes,0.0026,average,2026-10-16,6fc36f0-dirty,no
+2023,175,José Altuve,514888,leak 2,,two,fastball,in,20,15,0.7500,0.4869,0.2631,,,,0.5761,-1.0658,yes,0.0026,average,2026-10-16,6fc36f0-dirty,no
+2023,175,José Altuve,514888,leak 3,,two,breaking,down-in,14,8,0.5714,0.2557,0.3157,,,,0.2526,-1.0159,yes,0.0026,average,2026-10-16,6fc36f0-dirty,no
+2023,176,Nolan Gorman,669357,hitter,3,,,,97,66,0.6804,0.4886,0.1918,0.1008,-0.0467,0.7690,0.4436,-7.8489,yes,0.0244,productive,2026-10-16,6fc36f0-dirty,no
+2023,176,Nolan Gorman,669357,leak 1,,two,breaking,down,44,28,0.6364,0.4869,0.1494,,,,0.4309,-4.2471,yes,0.0242,productive,2026-10-16,6fc36f0-dirty,no
+2023,176,Nolan Gorman,669357,leak 2,,two,offspeed,down,30,22,0.7333,0.5325,0.2008,,,,0.5300,-2.2183,yes,0.0242,productive,2026-10-16,6fc36f0-dirty,no
+2023,176,Nolan Gorman,669357,leak 3,,ahead,breaking,down,23,16,0.6957,0.4345,0.2612,,,,0.3551,-1.3835,yes,0.0250,productive,2026-10-16,6fc36f0-dirty,no
+2023,177,Ramón Laureano,657656,hitter,0,,,,,,,,,,,,,,,,,2026-10-16,6fc36f0-dirty,no
+2023,178,Whit Merrifield,593160,hitter,0,,,,,,,,,,,,,,,,,2026-10-16,6fc36f0-dirty,no
+2023,179,Daulton Varsho,662139,hitter,1,,,,84,46,0.5476,0.4272,0.1205,0.0460,-0.0467,0.7690,0.4130,-2.4025,yes,0.0122,productive,2026-10-16,6fc36f0-dirty,no
+2023,179,Daulton Varsho,662139,leak 1,,two,fastball,up,84,46,0.5476,0.4272,0.1205,,,,0.4130,-2.4025,yes,0.0122,productive,2026-10-16,6fc36f0-dirty,no
+2023,180,Willson Contreras,575929,hitter,3,,,,110,48,0.4364,0.3935,0.0428,-0.0137,-0.0467,0.7690,0.3258,-4.1268,no,0.0359,productive,2026-10-16,6fc36f0-dirty,no
+2023,180,Willson Contreras,575929,leak 1,,ahead,breaking,down,20,13,0.6500,0.4970,0.1530,,,,0.3407,-1.5674,yes,0.0406,productive,2026-10-16,6fc36f0-dirty,no
+2023,180,Willson Contreras,575929,leak 2,,two,breaking,down-away,48,13,0.2708,0.2194,0.0514,,,,0.1964,-1.2815,yes,0.0349,productive,2026-10-16,6fc36f0-dirty,no
+2023,180,Willson Contreras,575929,leak 3,,two,breaking,down,42,22,0.5238,0.5433,-0.0194,,,,0.4667,-1.2779,no,0.0349,productive,2026-10-16,6fc36f0-dirty,no
+2023,181,Jazz Chisholm,665862,hitter,3,,,,96,50,0.5208,0.4328,0.0880,0.0210,-0.0467,0.7690,0.3867,-7.6830,yes,-0.0178,struggling,2026-10-16,6fc36f0-dirty,no
+2023,181,Jazz Chisholm,665862,leak 1,,two,breaking,down,46,27,0.5870,0.4543,0.1327,,,,0.4014,-4.3889,yes,-0.0193,struggling,2026-10-16,6fc36f0-dirty,no
+2023,181,Jazz Chisholm,665862,leak 2,,two,offspeed,down,37,17,0.4595,0.4258,0.0336,,,,0.4062,-2.2374,yes,-0.0193,struggling,2026-10-16,6fc36f0-dirty,no
+2023,181,Jazz Chisholm,665862,leak 3,,ahead,breaking,down,13,6,0.4615,0.3768,0.0847,,,,0.2795,-1.0567,yes,-0.0084,average,2026-10-16,6fc36f0-dirty,no
+2023,182,Brent Rooker,667670,hitter,3,,,,124,55,0.4435,0.3751,0.0684,0.0059,-0.0467,0.7690,0.3252,-3.4107,yes,0.0054,average,2026-10-16,6fc36f0-dirty,no
+2023,182,Brent Rooker,667670,leak 1,,ahead,offspeed,down,22,14,0.6364,0.3657,0.2707,,,,0.3153,-1.4013,yes,0.0167,productive,2026-10-16,6fc36f0-dirty,no
+2023,182,Brent Rooker,667670,leak 2,,two,breaking,down,45,25,0.5556,0.5536,0.0019,,,,0.4595,-1.2047,yes,0.0030,average,2026-10-16,6fc36f0-dirty,no
+2023,182,Brent Rooker,667670,leak 3,,two,breaking,down-away,57,16,0.2807,0.2379,0.0428,,,,0.2230,-0.8047,yes,0.0030,average,2026-10-16,6fc36f0-dirty,no
+2023,183,Ty France,664034,hitter,2,,,,64,37,0.5781,0.4144,0.1638,0.0793,-0.0467,0.7690,0.3700,-2.3743,yes,0.0196,productive,2026-10-16,6fc36f0-dirty,no
+2023,183,Ty France,664034,leak 1,,two,breaking,down,34,22,0.6471,0.5340,0.1130,,,,0.4463,-1.4754,yes,0.0236,productive,2026-10-16,6fc36f0-dirty,no
+2023,183,Ty France,664034,leak 2,,ahead,fastball,up,30,15,0.5000,0.2787,0.2213,,,,0.2835,-0.8989,yes,0.0150,productive,2026-10-16,6fc36f0-dirty,no
+2023,184,Lane Thomas,657041,hitter,2,,,,126,65,0.5159,0.4834,0.0325,-0.0217,-0.0467,0.7690,0.4194,-2.4589,no,-0.0122,struggling,2026-10-16,6fc36f0-dirty,no
+2023,184,Lane Thomas,657041,leak 1,,two,fastball,up,79,40,0.5063,0.4414,0.0649,,,,0.3928,-1.4978,yes,-0.0122,struggling,2026-10-16,6fc36f0-dirty,no
+2023,184,Lane Thomas,657041,leak 2,,two,breaking,down,47,25,0.5319,0.5539,-0.0219,,,,0.4641,-0.9611,no,-0.0122,struggling,2026-10-16,6fc36f0-dirty,no
+2023,185,Michael Massey,686681,hitter,3,,,,133,78,0.5865,0.4238,0.1626,0.0784,-0.0467,0.7690,0.4068,-10.4808,yes,0.0193,productive,2026-10-16,6fc36f0-dirty,no
+2023,185,Michael Massey,686681,leak 1,,two,breaking,down,60,42,0.7000,0.5186,0.1814,,,,0.4690,-5.1449,yes,0.0193,productive,2026-10-16,6fc36f0-dirty,no
+2023,185,Michael Massey,686681,leak 2,,two,offspeed,down,43,24,0.5581,0.4419,0.1162,,,,0.4692,-3.0719,yes,0.0193,productive,2026-10-16,6fc36f0-dirty,no
+2023,185,Michael Massey,686681,leak 3,,two,breaking,down-in,30,12,0.4000,0.2084,0.1916,,,,0.1930,-2.2640,yes,0.0193,productive,2026-10-16,6fc36f0-dirty,no
+2023,186,Mauricio Dubón,643289,hitter,3,,,,75,47,0.6267,0.4716,0.1550,0.0725,-0.0467,0.7690,0.4513,-3.2830,yes,0.0016,average,2026-10-16,6fc36f0-dirty,no
+2023,186,Mauricio Dubón,643289,leak 1,,two,breaking,down,21,14,0.6667,0.5878,0.0789,,,,0.4824,-1.3242,yes,0.0065,average,2026-10-16,6fc36f0-dirty,no
+2023,186,Mauricio Dubón,643289,leak 2,,two,fastball,up,34,20,0.5882,0.4394,0.1488,,,,0.4422,-1.0511,yes,0.0065,average,2026-10-16,6fc36f0-dirty,no
+2023,186,Mauricio Dubón,643289,leak 3,,ahead,fastball,in,20,13,0.6500,0.4045,0.2455,,,,0.4341,-0.9077,yes,-0.0118,struggling,2026-10-16,6fc36f0-dirty,no
+2023,187,José Ramírez,608070,hitter,3,,,,166,95,0.5723,0.4651,0.1072,0.0358,-0.0467,0.7690,0.4318,-7.3230,yes,0.0284,productive,2026-10-16,6fc36f0-dirty,no
+2023,187,José Ramírez,608070,leak 1,,two,offspeed,down,52,33,0.6346,0.4681,0.1665,,,,0.4428,-3.3074,yes,0.0284,productive,2026-10-16,6fc36f0-dirty,no
+2023,187,José Ramírez,608070,leak 2,,two,breaking,down,52,32,0.6154,0.5258,0.0896,,,,0.4433,-2.3564,yes,0.0284,productive,2026-10-16,6fc36f0-dirty,no
+2023,187,José Ramírez,608070,leak 3,,two,fastball,up,62,30,0.4839,0.4117,0.0721,,,,0.4129,-1.6592,yes,0.0284,productive,2026-10-16,6fc36f0-dirty,no
+2023,188,Joey Wiemer,686894,hitter,2,,,,74,51,0.6892,0.4983,0.1909,0.1001,-0.0467,0.7690,0.4642,-4.4740,yes,-0.0341,struggling,2026-10-16,6fc36f0-dirty,no
+2023,188,Joey Wiemer,686894,leak 1,,two,breaking,down,33,26,0.7879,0.5588,0.2291,,,,0.4906,-3.0147,yes,-0.0341,struggling,2026-10-16,6fc36f0-dirty,no
+2023,188,Joey Wiemer,686894,leak 2,,two,fastball,up,41,25,0.6098,0.4497,0.1601,,,,0.4429,-1.4593,yes,-0.0341,struggling,2026-10-16,6fc36f0-dirty,no
+2023,189,Kris Bryant,592178,hitter,3,,,,64,27,0.4219,0.4596,-0.0377,-0.0757,-0.0467,0.7690,0.3486,-2.6093,no,0.0021,average,2026-10-16,6fc36f0-dirty,no
+2023,189,Kris Bryant,592178,leak 1,,two,offspeed,down,24,10,0.4167,0.4318,-0.0151,,,,0.4022,-0.8990,no,0.0015,average,2026-10-16,6fc36f0-dirty,no
+2023,189,Kris Bryant,592178,leak 2,,two,breaking,down,23,9,0.3913,0.5162,-0.1249,,,,0.3530,-0.8771,no,0.0015,average,2026-10-16,6fc36f0-dirty,no
+2023,189,Kris Bryant,592178,leak 3,,ahead,breaking,down,17,8,0.4706,0.4221,0.0484,,,,0.2669,-0.8332,yes,0.0036,average,2026-10-16,6fc36f0-dirty,no
+2023,190,Manuel Margot,622534,hitter,2,,,,51,29,0.5686,0.3727,0.1959,0.1040,-0.0467,0.7690,0.3142,-3.9025,yes,-0.0050,average,2026-10-16,6fc36f0-dirty,no
+2023,190,Manuel Margot,622534,leak 1,,two,breaking,down,23,19,0.8261,0.5494,0.2767,,,,0.4672,-2.3298,yes,-0.0050,average,2026-10-16,6fc36f0-dirty,no
+2023,190,Manuel Margot,622534,leak 2,,two,breaking,down-away,28,10,0.3571,0.2275,0.1296,,,,0.1886,-1.5727,yes,-0.0050,average,2026-10-16,6fc36f0-dirty,no
+2023,191,Alex Kirilloff,666135,hitter,3,,,,85,49,0.5765,0.4800,0.0965,0.0275,-0.0467,0.7690,0.3927,-7.6937,no,0.0072,average,2026-10-16,6fc36f0-dirty,no
+2023,191,Alex Kirilloff,666135,leak 1,,two,breaking,down,42,27,0.6429,0.5266,0.1162,,,,0.4244,-5.1475,yes,0.0058,average,2026-10-16,6fc36f0-dirty,no
+2023,191,Alex Kirilloff,666135,leak 2,,two,offspeed,down,25,14,0.5600,0.4241,0.1359,,,,0.4005,-1.6119,yes,0.0058,average,2026-10-16,6fc36f0-dirty,no
+2023,191,Alex Kirilloff,666135,leak 3,,ahead,breaking,down,18,8,0.4444,0.4486,-0.0042,,,,0.3079,-0.9343,no,0.0123,productive,2026-10-16,6fc36f0-dirty,no
+2023,192,Kerry Carpenter,681481,hitter,3,,,,138,81,0.5870,0.4751,0.1119,0.0393,-0.0467,0.7690,0.4350,-6.4531,yes,0.0026,average,2026-10-16,6fc36f0-dirty,no
+2023,192,Kerry Carpenter,681481,leak 1,,two,fastball,up,60,35,0.5833,0.4330,0.1503,,,,0.3838,-2.8187,yes,0.0026,average,2026-10-16,6fc36f0-dirty,no
+2023,192,Kerry Carpenter,681481,leak 2,,two,breaking,down,48,30,0.6250,0.5472,0.0778,,,,0.4865,-2.1259,yes,0.0026,average,2026-10-16,6fc36f0-dirty,no
+2023,192,Kerry Carpenter,681481,leak 3,,two,offspeed,down,30,16,0.5333,0.4439,0.0894,,,,0.4550,-1.5085,yes,0.0026,average,2026-10-16,6fc36f0-dirty,no
+2023,193,Christopher Morel,666624,hitter,3,,,,63,38,0.6032,0.4739,0.1293,0.0528,-0.0467,0.7690,0.4735,-3.4714,yes,-0.0042,average,2026-10-16,6fc36f0-dirty,no
+2023,193,Christopher Morel,666624,leak 1,,two,breaking,down,26,17,0.6538,0.6005,0.0533,,,,0.5396,-1.6907,yes,-0.0137,struggling,2026-10-16,6fc36f0-dirty,no
+2023,193,Christopher Morel,666624,leak 2,,ahead,fastball,in,20,12,0.6000,0.3808,0.2192,,,,0.4364,-0.9868,yes,0.0161,productive,2026-10-16,6fc36f0-dirty,no
+2023,193,Christopher Morel,666624,leak 3,,two,offspeed,down,17,9,0.5294,0.3896,0.1399,,,,0.4160,-0.7939,yes,-0.0137,struggling,2026-10-16,6fc36f0-dirty,no
+2023,194,Garrett Cooper,643265,hitter,3,,,,94,72,0.7660,0.4739,0.2920,0.1779,-0.0467,0.7690,0.4305,-7.9884,yes,-0.0092,average,2026-10-16,6fc36f0-dirty,no
+2023,194,Garrett Cooper,643265,leak 1,,two,breaking,down,48,35,0.7292,0.5135,0.2156,,,,0.4376,-3.8453,yes,-0.0165,struggling,2026-10-16,6fc36f0-dirty,no
+2023,194,Garrett Cooper,643265,leak 2,,ahead,fastball,in,29,24,0.8276,0.4473,0.3803,,,,0.5123,-2.2258,yes,-0.0016,average,2026-10-16,6fc36f0-dirty,no
+2023,194,Garrett Cooper,643265,leak 3,,ahead,breaking,down,17,13,0.7647,0.4075,0.3572,,,,0.2711,-1.9173,yes,-0.0016,average,2026-10-16,6fc36f0-dirty,no
+2023,195,Josh Jung,673962,hitter,3,,,,97,59,0.6082,0.4700,0.1382,0.0596,-0.0467,0.7690,0.4264,-7.0873,yes,0.0075,average,2026-10-16,6fc36f0-dirty,no
+2023,195,Josh Jung,673962,leak 1,,two,breaking,down,53,34,0.6415,0.5178,0.1237,,,,0.4596,-4.1907,yes,0.0067,average,2026-10-16,6fc36f0-dirty,no
+2023,195,Josh Jung,673962,leak 2,,ahead,breaking,down,20,13,0.6500,0.4242,0.2258,,,,0.3119,-1.5699,yes,0.0107,productive,2026-10-16,6fc36f0-dirty,no
+2023,195,Josh Jung,673962,leak 3,,two,offspeed,down,24,12,0.5000,0.4026,0.0974,,,,0.4486,-1.3267,yes,0.0067,average,2026-10-16,6fc36f0-dirty,no
+2023,196,Byron Buxton,621439,hitter,0,,,,,,,,,,,,,,,,,2026-10-16,6fc36f0-dirty,no
+2023,197,Willi Castro,650489,hitter,3,,,,98,63,0.6429,0.4684,0.1744,0.0875,-0.0467,0.7690,0.4298,-5.6708,yes,-0.0029,average,2026-10-16,6fc36f0-dirty,no
+2023,197,Willi Castro,650489,leak 1,,two,breaking,down,52,36,0.6923,0.5510,0.1413,,,,0.5035,-3.6672,yes,-0.0029,average,2026-10-16,6fc36f0-dirty,no
+2023,197,Willi Castro,650489,leak 2,,even,breaking,down,18,13,0.7222,0.3980,0.3242,,,,0.3391,-1.0816,yes,-0.0029,average,2026-10-16,6fc36f0-dirty,no
+2023,197,Willi Castro,650489,leak 3,,even,offspeed,down,28,14,0.5000,0.3603,0.1397,,,,0.3511,-0.9220,yes,-0.0029,average,2026-10-16,6fc36f0-dirty,no
+2023,198,Randal Grichuk,545341,hitter,3,,,,104,49,0.4712,0.3254,0.1457,0.0654,-0.0467,0.7690,0.3065,-4.0349,yes,0.0120,productive,2026-10-16,6fc36f0-dirty,no
+2023,198,Randal Grichuk,545341,leak 1,,two,fastball,up,39,23,0.5897,0.4411,0.1487,,,,0.4284,-1.7675,yes,0.0148,productive,2026-10-16,6fc36f0-dirty,no
+2023,198,Randal Grichuk,545341,leak 2,,ahead,fastball,up,27,12,0.4444,0.2470,0.1974,,,,0.2327,-1.2773,yes,0.0040,average,2026-10-16,6fc36f0-dirty,no
+2023,198,Randal Grichuk,545341,leak 3,,two,breaking,down-away,38,14,0.3684,0.2624,0.1060,,,,0.2339,-0.9901,yes,0.0148,productive,2026-10-16,6fc36f0-dirty,no
+2023,199,Joey Gallo,608336,hitter,2,,,,56,27,0.4821,0.4682,0.0139,-0.0360,-0.0467,0.7690,0.4020,-2.1685,no,-0.0286,struggling,2026-10-16,6fc36f0-dirty,no
+2023,199,Joey Gallo,608336,leak 1,,two,breaking,down,31,14,0.4516,0.5337,-0.0820,,,,0.4369,-1.1948,no,-0.0330,struggling,2026-10-16,6fc36f0-dirty,no
+2023,199,Joey Gallo,608336,leak 2,,even,offspeed,down,25,13,0.5200,0.3871,0.1329,,,,0.3588,-0.9737,yes,-0.0232,struggling,2026-10-16,6fc36f0-dirty,no
+2023,200,J. D. Martinez,502110,hitter,3,,,,81,45,0.5556,0.4836,0.0720,0.0087,-0.0467,0.7690,0.4000,-3.9813,yes,0.0238,productive,2026-10-16,6fc36f0-dirty,no
+2023,200,J. D. Martinez,502110,leak 1,,two,breaking,down,43,24,0.5581,0.5379,0.0202,,,,0.4747,-2.3632,yes,0.0130,productive,2026-10-16,6fc36f0-dirty,no
+2023,200,J. D. Martinez,502110,leak 2,,even,breaking,down,23,14,0.6087,0.4368,0.1719,,,,0.3549,-0.8391,yes,0.0352,productive,2026-10-16,6fc36f0-dirty,no
+2023,200,J. D. Martinez,502110,leak 3,,ahead,breaking,down,15,7,0.4667,0.3997,0.0670,,,,0.2548,-0.7790,yes,0.0371,productive,2026-10-16,6fc36f0-dirty,no
+2023,201,Brandon Crawford,543063,hitter,3,,,,64,40,0.6250,0.4325,0.1925,0.1014,-0.0467,0.7690,0.4111,-3.9445,yes,-0.0203,struggling,2026-10-16,6fc36f0-dirty,no
+2023,201,Brandon Crawford,543063,leak 1,,two,offspeed,down,30,17,0.5667,0.4809,0.0857,,,,0.4621,-1.4448,yes,-0.0192,struggling,2026-10-16,6fc36f0-dirty,no
+2023,201,Brandon Crawford,543063,leak 2,,ahead,fastball,in,14,10,0.7143,0.3613,0.3530,,,,0.3482,-1.3958,yes,-0.0172,struggling,2026-10-16,6fc36f0-dirty,no
+2023,201,Brandon Crawford,543063,leak 3,,even,offspeed,down,20,13,0.6500,0.4097,0.2403,,,,0.3786,-1.1039,yes,-0.0240,struggling,2026-10-16,6fc36f0-dirty,no
+2023,202,J. T. Realmuto,592663,hitter,3,,,,111,66,0.5946,0.4690,0.1256,0.0499,-0.0467,0.7690,0.4748,-4.7462,yes,-0.0087,average,2026-10-16,6fc36f0-dirty,no
+2023,202,J. T. Realmuto,592663,leak 1,,two,breaking,down,49,28,0.5714,0.5075,0.0639,,,,0.4744,-2.0771,yes,-0.0087,average,2026-10-16,6fc36f0-dirty,no
+2023,202,J. T. Realmuto,592663,leak 2,,two,offspeed,down,32,18,0.5625,0.4273,0.1352,,,,0.4563,-1.6805,yes,-0.0087,average,2026-10-16,6fc36f0-dirty,no
+2023,202,J. T. Realmuto,592663,leak 3,,two,fastball,up,30,20,0.6667,0.4508,0.2159,,,,0.4953,-0.9886,yes,-0.0087,average,2026-10-16,6fc36f0-dirty,no
+2023,203,Michael Harris,671739,hitter,3,,,,110,82,0.7455,0.4834,0.2620,0.1548,-0.0467,0.7690,0.4478,-6.0536,yes,0.0409,productive,2026-10-16,6fc36f0-dirty,no
+2023,203,Michael Harris,671739,leak 1,,two,breaking,down,45,38,0.8444,0.5446,0.2999,,,,0.4858,-3.2078,yes,0.0415,productive,2026-10-16,6fc36f0-dirty,no
+2023,203,Michael Harris,671739,leak 2,,two,fastball,up,40,26,0.6500,0.4731,0.1769,,,,0.4896,-1.6147,yes,0.0415,productive,2026-10-16,6fc36f0-dirty,no
+2023,203,Michael Harris,671739,leak 3,,even,breaking,down,25,18,0.7200,0.3900,0.3300,,,,0.3124,-1.2311,yes,0.0390,productive,2026-10-16,6fc36f0-dirty,no
+2023,204,Bryce Harper,547180,hitter,3,,,,118,68,0.5763,0.4228,0.1534,0.0713,-0.0467,0.7690,0.3324,-5.8222,yes,0.0370,productive,2026-10-16,6fc36f0-dirty,no
+2023,204,Bryce Harper,547180,leak 1,,two,breaking,down,51,31,0.6078,0.5284,0.0795,,,,0.4300,-2.6676,yes,0.0281,productive,2026-10-16,6fc36f0-dirty,no
+2023,204,Bryce Harper,547180,leak 2,,two,offspeed,down,34,16,0.4706,0.4083,0.0623,,,,0.3465,-1.8359,yes,0.0281,productive,2026-10-16,6fc36f0-dirty,no
+2023,204,Bryce Harper,547180,leak 3,,first,breaking,down,33,21,0.6364,0.2747,0.3616,,,,0.1671,-1.3187,yes,0.0601,productive,2026-10-16,6fc36f0-dirty,no
+2023,205,Eduardo Escobar,500871,hitter,3,,,,103,63,0.6117,0.4621,0.1496,0.0684,-0.0467,0.7690,0.3980,-8.9752,yes,-0.0281,struggling,2026-10-16,6fc36f0-dirty,no
+2023,205,Eduardo Escobar,500871,leak 1,,two,fastball,up,52,29,0.5577,0.4590,0.0987,,,,0.4089,-3.6496,yes,-0.0281,struggling,2026-10-16,6fc36f0-dirty,no
+2023,205,Eduardo Escobar,500871,leak 2,,two,breaking,down-in,19,11,0.5789,0.2823,0.2967,,,,0.2309,-2.8991,yes,-0.0281,struggling,2026-10-16,6fc36f0-dirty,no
+2023,205,Eduardo Escobar,500871,leak 3,,two,breaking,down,32,23,0.7188,0.5739,0.1449,,,,0.4796,-2.4265,yes,-0.0281,struggling,2026-10-16,6fc36f0-dirty,no
+2023,206,Alek Thomas,677950,hitter,3,,,,65,35,0.5385,0.3963,0.1422,0.0627,-0.0467,0.7690,0.3682,-4.3117,no,-0.0026,average,2026-10-16,6fc36f0-dirty,no
+2023,206,Alek Thomas,677950,leak 1,,two,fastball,up,31,19,0.6129,0.5295,0.0834,,,,0.4995,-1.7346,yes,0.0036,average,2026-10-16,6fc36f0-dirty,no
+2023,206,Alek Thomas,677950,leak 2,,ahead,fastball,up,18,12,0.6667,0.2906,0.3761,,,,0.2816,-1.6763,yes,-0.0188,struggling,2026-10-16,6fc36f0-dirty,no
+2023,206,Alek Thomas,677950,leak 3,,two,breaking,down-in,16,4,0.2500,0.2571,-0.0071,,,,0.2113,-0.9008,no,0.0036,average,2026-10-16,6fc36f0-dirty,no
+2023,207,Andy Ibáñez,628451,hitter,2,,,,64,40,0.6250,0.4799,0.1451,0.0649,-0.0467,0.7690,0.4683,-3.5903,yes,0.0076,average,2026-10-16,6fc36f0-dirty,no
+2023,207,Andy Ibáñez,628451,leak 1,,two,fastball,up,47,27,0.5745,0.4697,0.1048,,,,0.4661,-2.1249,yes,0.0076,average,2026-10-16,6fc36f0-dirty,no
+2023,207,Andy Ibáñez,628451,leak 2,,two,offspeed,down,17,13,0.7647,0.5082,0.2565,,,,0.4744,-1.4654,yes,0.0076,average,2026-10-16,6fc36f0-dirty,no
+2023,208,Brett Baty,683146,hitter,3,,,,78,53,0.6795,0.4717,0.2078,0.1131,-0.0467,0.7690,0.4284,-6.6926,yes,-0.0136,struggling,2026-10-16,6fc36f0-dirty,no
+2023,208,Brett Baty,683146,leak 1,,two,breaking,down,40,24,0.6000,0.5576,0.0424,,,,0.4932,-2.7559,yes,-0.0158,struggling,2026-10-16,6fc36f0-dirty,no
+2023,208,Brett Baty,683146,leak 2,,two,offspeed,down,15,11,0.7333,0.3359,0.3975,,,,0.4274,-2.1682,yes,-0.0158,struggling,2026-10-16,6fc36f0-dirty,no
+2023,208,Brett Baty,683146,leak 3,,even,breaking,down,23,18,0.7826,0.4107,0.3719,,,,0.3164,-1.7685,yes,-0.0084,average,2026-10-16,6fc36f0-dirty,no
+2023,209,Ryan Mountcastle,663624,hitter,3,,,,118,62,0.5254,0.3531,0.1723,0.0858,-0.0467,0.7690,0.3129,-5.4760,yes,0.0181,productive,2026-10-16,6fc36f0-dirty,no
+2023,209,Ryan Mountcastle,663624,leak 1,,two,offspeed,down,38,23,0.6053,0.4199,0.1854,,,,0.4353,-2.0931,yes,0.0126,productive,2026-10-16,6fc36f0-dirty,no
+2023,209,Ryan Mountcastle,663624,leak 2,,two,breaking,down-away,42,16,0.3810,0.2232,0.1577,,,,0.1850,-1.8116,yes,0.0126,productive,2026-10-16,6fc36f0-dirty,no
+2023,209,Ryan Mountcastle,663624,leak 3,,even,breaking,down,38,23,0.6053,0.4299,0.1753,,,,0.3319,-1.5713,yes,0.0296,productive,2026-10-16,6fc36f0-dirty,no
+2023,210,Corey Seager,608369,hitter,1,,,,15,11,0.7333,0.4757,0.2576,0.1514,-0.0467,0.7690,0.3788,-1.2200,yes,0.0694,productive,2026-10-16,6fc36f0-dirty,no
+2023,210,Corey Seager,608369,leak 1,,ahead,offspeed,down,15,11,0.7333,0.4757,0.2576,,,,0.3788,-1.2200,yes,0.0694,productive,2026-10-16,6fc36f0-dirty,no
+2023,211,Jarred Kelenic,672284,hitter,3,,,,60,34,0.5667,0.3708,0.1959,0.1040,-0.0467,0.7690,0.2806,-4.7240,yes,0.0103,productive,2026-10-16,6fc36f0-dirty,no
+2023,211,Jarred Kelenic,672284,leak 1,,ahead,breaking,down,22,12,0.5455,0.3908,0.1546,,,,0.2834,-2.0178,yes,0.0103,productive,2026-10-16,6fc36f0-dirty,no
+2023,211,Jarred Kelenic,672284,leak 2,,ahead,offspeed,down,25,14,0.5600,0.3837,0.1763,,,,0.3164,-1.8082,yes,0.0103,productive,2026-10-16,6fc36f0-dirty,no
+2023,211,Jarred Kelenic,672284,leak 3,,ahead,offspeed,away,13,8,0.6154,0.3121,0.3033,,,,0.2068,-0.8980,yes,0.0103,productive,2026-10-16,6fc36f0-dirty,no
+2023,212,Brandon Lowe,664040,hitter,2,,,,55,30,0.5455,0.3902,0.1552,0.0727,-0.0467,0.7690,0.3833,-2.3503,yes,0.0115,productive,2026-10-16,6fc36f0-dirty,no
+2023,212,Brandon Lowe,664040,leak 1,,two,offspeed,down,37,19,0.5135,0.4384,0.0751,,,,0.4733,-1.4813,yes,0.0092,average,2026-10-16,6fc36f0-dirty,no
+2023,212,Brandon Lowe,664040,leak 2,,first,breaking,down,18,11,0.6111,0.2912,0.3199,,,,0.1983,-0.8690,yes,0.0161,productive,2026-10-16,6fc36f0-dirty,no
+2023,213,Orlando Arcia,606115,hitter,2,,,,79,37,0.4684,0.4613,0.0070,-0.0413,-0.0467,0.7690,0.4127,-2.1396,no,0.0011,average,2026-10-16,6fc36f0-dirty,no
+2023,213,Orlando Arcia,606115,leak 1,,ahead,fastball,in,30,15,0.5000,0.3491,0.1509,,,,0.3809,-1.2663,yes,-0.0138,struggling,2026-10-16,6fc36f0-dirty,no
+2023,213,Orlando Arcia,606115,leak 2,,two,breaking,down,49,22,0.4490,0.5300,-0.0810,,,,0.4322,-0.8733,no,0.0102,productive,2026-10-16,6fc36f0-dirty,no
+2023,214,Anthony Rizzo,519203,hitter,3,,,,105,66,0.6286,0.4765,0.1520,0.0702,-0.0467,0.7690,0.4279,-6.0647,yes,-0.0004,average,2026-10-16,6fc36f0-dirty,no
+2023,214,Anthony Rizzo,519203,leak 1,,two,breaking,down,49,31,0.6327,0.5324,0.1002,,,,0.4830,-2.8612,yes,-0.0008,average,2026-10-16,6fc36f0-dirty,no
+2023,214,Anthony Rizzo,519203,leak 2,,even,breaking,down,37,25,0.6757,0.4258,0.2499,,,,0.3555,-1.9883,yes,0.0003,average,2026-10-16,6fc36f0-dirty,no
+2023,214,Anthony Rizzo,519203,leak 3,,two,offspeed,down,19,10,0.5263,0.4311,0.0952,,,,0.4267,-1.2152,yes,-0.0008,average,2026-10-16,6fc36f0-dirty,no
+2023,215,Jihwan Bae,678225,hitter,3,,,,107,51,0.4766,0.3514,0.1252,0.0496,-0.0467,0.7690,0.3292,-4.4486,yes,-0.0267,struggling,2026-10-16,6fc36f0-dirty,no
+2023,215,Jihwan Bae,678225,leak 1,,two,fastball,up,56,27,0.4821,0.4457,0.0364,,,,0.3890,-2.5695,yes,-0.0236,struggling,2026-10-16,6fc36f0-dirty,no
+2023,215,Jihwan Bae,678225,leak 2,,first,fastball,up,33,14,0.4242,0.1917,0.2326,,,,0.1678,-1.0679,yes,-0.0336,struggling,2026-10-16,6fc36f0-dirty,no
+2023,215,Jihwan Bae,678225,leak 3,,two,fastball,away,18,10,0.5556,0.3510,0.2046,,,,0.4391,-0.8112,yes,-0.0236,struggling,2026-10-16,6fc36f0-dirty,no
+2023,216,Ezequiel Duran,677649,hitter,3,,,,89,58,0.6517,0.4618,0.1899,0.0994,-0.0467,0.7690,0.3908,-5.2881,yes,-0.0007,average,2026-10-16,6fc36f0-dirty,no
+2023,216,Ezequiel Duran,677649,leak 1,,two,breaking,down,37,26,0.7027,0.5262,0.1765,,,,0.4500,-2.8782,yes,-0.0041,average,2026-10-16,6fc36f0-dirty,no
+2023,216,Ezequiel Duran,677649,leak 2,,ahead,fastball,in,19,15,0.7895,0.4132,0.3763,,,,0.4127,-1.2121,yes,0.0004,average,2026-10-16,6fc36f0-dirty,no
+2023,216,Ezequiel Duran,677649,leak 3,,even,breaking,down,33,17,0.5152,0.4176,0.0976,,,,0.3119,-1.1978,yes,0.0024,average,2026-10-16,6fc36f0-dirty,no
+2023,217,Keibert Ruiz,660688,hitter,3,,,,114,91,0.7982,0.4442,0.3541,0.2256,-0.0467,0.7690,0.4174,-8.2456,yes,0.0114,productive,2026-10-16,6fc36f0-dirty,no
+2023,217,Keibert Ruiz,660688,leak 1,,two,breaking,down,53,38,0.7170,0.4771,0.2399,,,,0.4042,-3.7204,yes,0.0124,productive,2026-10-16,6fc36f0-dirty,no
+2023,217,Keibert Ruiz,660688,leak 2,,two,fastball,up,33,29,0.8788,0.4518,0.4270,,,,0.4521,-3.2379,yes,0.0124,productive,2026-10-16,6fc36f0-dirty,no
+2023,217,Keibert Ruiz,660688,leak 3,,even,fastball,up,28,24,0.8571,0.3730,0.4842,,,,0.4014,-1.2873,yes,0.0085,average,2026-10-16,6fc36f0-dirty,no
+2023,218,Cal Raleigh,663728,hitter,3,,,,193,107,0.5544,0.4756,0.0788,0.0139,-0.0467,0.7690,0.4726,-7.6581,yes,0.0060,average,2026-10-16,6fc36f0-dirty,no
+2023,218,Cal Raleigh,663728,leak 1,,two,breaking,down,69,43,0.6232,0.5245,0.0987,,,,0.4667,-3.9450,yes,0.0060,average,2026-10-16,6fc36f0-dirty,no
+2023,218,Cal Raleigh,663728,leak 2,,two,offspeed,down,58,27,0.4655,0.4123,0.0532,,,,0.4539,-2.5376,yes,0.0060,average,2026-10-16,6fc36f0-dirty,no
+2023,218,Cal Raleigh,663728,leak 3,,two,fastball,up,66,37,0.5606,0.4802,0.0804,,,,0.4951,-1.1755,yes,0.0060,average,2026-10-16,6fc36f0-dirty,no
+2023,219,Gabriel Arias,672356,hitter,3,,,,90,54,0.6000,0.4420,0.1580,0.0749,-0.0467,0.7690,0.4525,-4.1269,yes,-0.0202,struggling,2026-10-16,6fc36f0-dirty,no
+2023,219,Gabriel Arias,672356,leak 1,,two,fastball,up,52,27,0.5192,0.4074,0.1119,,,,0.3860,-1.7798,yes,-0.0202,struggling,2026-10-16,6fc36f0-dirty,no
+2023,219,Gabriel Arias,672356,leak 2,,two,breaking,in,17,14,0.8235,0.5370,0.2866,,,,0.5487,-1.2077,yes,-0.0202,struggling,2026-10-16,6fc36f0-dirty,no
+2023,219,Gabriel Arias,672356,leak 3,,two,fastball,in,21,13,0.6190,0.4507,0.1684,,,,0.5391,-1.1394,yes,-0.0202,struggling,2026-10-16,6fc36f0-dirty,no
+2023,220,Jordan Walker,691023,hitter,3,,,,85,53,0.6235,0.4313,0.1922,0.1011,-0.0467,0.7690,0.3934,-4.7894,yes,0.0065,average,2026-10-16,6fc36f0-dirty,no
+2023,220,Jordan Walker,691023,leak 1,,two,breaking,down,39,24,0.6154,0.5265,0.0888,,,,0.4626,-2.1341,yes,0.0045,average,2026-10-16,6fc36f0-dirty,no
+2023,220,Jordan Walker,691023,leak 2,,two,fastball,in,18,15,0.8333,0.4877,0.3457,,,,0.5656,-1.6775,yes,0.0045,average,2026-10-16,6fc36f0-dirty,no
+2023,220,Jordan Walker,691023,leak 3,,first,breaking,down,28,14,0.5000,0.2624,0.2376,,,,0.1864,-0.9778,yes,0.0107,productive,2026-10-16,6fc36f0-dirty,no
+2023,221,Hunter Renfroe,592669,hitter,3,,,,123,76,0.6179,0.4732,0.1447,0.0646,-0.0467,0.7690,0.3752,-5.2500,yes,-0.0210,struggling,2026-10-16,6fc36f0-dirty,no
+2023,221,Hunter Renfroe,592669,leak 1,,two,breaking,down,57,36,0.6316,0.5238,0.1078,,,,0.4343,-2.4567,yes,-0.0167,struggling,2026-10-16,6fc36f0-dirty,no
+2023,221,Hunter Renfroe,592669,leak 2,,ahead,breaking,down,28,16,0.5714,0.4040,0.1674,,,,0.2849,-1.5562,yes,-0.0237,struggling,2026-10-16,6fc36f0-dirty,no
+2023,221,Hunter Renfroe,592669,leak 3,,even,breaking,down,38,24,0.6316,0.4483,0.1833,,,,0.3532,-1.2371,yes,-0.0255,struggling,2026-10-16,6fc36f0-dirty,no
+2023,222,Kevin Kiermaier,595281,hitter,1,,,,25,14,0.5600,0.4314,0.1286,0.0522,-0.0467,0.7690,0.4220,-1.1677,yes,-0.0143,struggling,2026-10-16,6fc36f0-dirty,no
+2023,222,Kevin Kiermaier,595281,leak 1,,ahead,fastball,in,25,14,0.5600,0.4314,0.1286,,,,0.4220,-1.1677,yes,-0.0143,struggling,2026-10-16,6fc36f0-dirty,no
+2023,223,Seth Brown,664913,hitter,3,,,,94,49,0.5213,0.4441,0.0772,0.0127,-0.0467,0.7690,0.3821,-5.6052,yes,0.0019,average,2026-10-16,6fc36f0-dirty,no
+2023,223,Seth Brown,664913,leak 1,,two,breaking,down,40,22,0.5500,0.4945,0.0555,,,,0.3991,-2.7882,yes,0.0015,average,2026-10-16,6fc36f0-dirty,no
+2023,223,Seth Brown,664913,leak 2,,two,offspeed,down,40,17,0.4250,0.4001,0.0249,,,,0.3692,-1.6141,yes,0.0015,average,2026-10-16,6fc36f0-dirty,no
+2023,223,Seth Brown,664913,leak 3,,ahead,offspeed,down,14,10,0.7143,0.4258,0.2885,,,,0.3702,-1.2029,yes,0.0039,average,2026-10-16,6fc36f0-dirty,no
+2023,224,Michael Taylor,572191,hitter,2,,,,70,30,0.4286,0.3340,0.0946,0.0261,-0.0467,0.7690,0.2805,-1.8017,yes,-0.0169,struggling,2026-10-16,6fc36f0-dirty,no
+2023,224,Michael Taylor,572191,leak 1,,two,breaking,down-away,43,16,0.3721,0.2605,0.1116,,,,0.2248,-0.9534,yes,-0.0223,struggling,2026-10-16,6fc36f0-dirty,no
+2023,224,Michael Taylor,572191,leak 2,,even,breaking,down,27,14,0.5185,0.4509,0.0676,,,,0.3691,-0.8483,yes,-0.0083,average,2026-10-16,6fc36f0-dirty,no
+2023,225,Joey Meneses,608841,hitter,2,,,,106,52,0.4906,0.4662,0.0244,-0.0279,-0.0467,0.7690,0.3788,-3.4629,yes,-0.0052,average,2026-10-16,6fc36f0-dirty,no
+2023,225,Joey Meneses,608841,leak 1,,two,breaking,down,81,41,0.5062,0.5023,0.0039,,,,0.4237,-2.5214,yes,0.0007,average,2026-10-16,6fc36f0-dirty,no
+2023,225,Joey Meneses,608841,leak 2,,ahead,breaking,down,25,11,0.4400,0.3491,0.0909,,,,0.2332,-0.9415,yes,-0.0244,struggling,2026-10-16,6fc36f0-dirty,no
+2023,226,Esteury Ruiz,665923,hitter,3,,,,74,42,0.5676,0.4064,0.1612,0.0773,-0.0467,0.7690,0.3338,-3.1846,yes,-0.0235,struggling,2026-10-16,6fc36f0-dirty,no
+2023,226,Esteury Ruiz,665923,leak 1,,two,breaking,down,33,19,0.5758,0.5076,0.0681,,,,0.3969,-1.4720,yes,-0.0174,struggling,2026-10-16,6fc36f0-dirty,no
+2023,226,Esteury Ruiz,665923,leak 2,,ahead,fastball,in,17,11,0.6471,0.4033,0.2437,,,,0.4295,-0.8692,yes,-0.0294,struggling,2026-10-16,6fc36f0-dirty,no
+2023,226,Esteury Ruiz,665923,leak 3,,first,breaking,down,24,12,0.5000,0.2693,0.2307,,,,0.1791,-0.8434,yes,-0.0277,struggling,2026-10-16,6fc36f0-dirty,no
+2023,227,Jesús Sánchez,660821,hitter,3,,,,89,54,0.6067,0.4537,0.1530,0.0710,-0.0467,0.7690,0.4181,-6.3261,yes,0.0100,productive,2026-10-16,6fc36f0-dirty,no
+2023,227,Jesús Sánchez,660821,leak 1,,two,breaking,down,33,25,0.7576,0.5612,0.1964,,,,0.5155,-2.9486,yes,0.0100,average,2026-10-16,6fc36f0-dirty,no
+2023,227,Jesús Sánchez,660821,leak 2,,two,breaking,down-in,31,16,0.5161,0.3164,0.1997,,,,0.2702,-1.9604,yes,0.0100,average,2026-10-16,6fc36f0-dirty,no
+2023,227,Jesús Sánchez,660821,leak 3,,two,offspeed,down,25,13,0.5200,0.4821,0.0379,,,,0.4728,-1.4171,yes,0.0100,average,2026-10-16,6fc36f0-dirty,no
+2023,228,Harold Ramírez,623912,hitter,3,,,,96,78,0.8125,0.3926,0.4199,0.2762,-0.0467,0.7690,0.3700,-7.6736,yes,0.0003,average,2026-10-16,6fc36f0-dirty,no
+2023,228,Harold Ramírez,623912,leak 1,,two,breaking,away,45,34,0.7556,0.4278,0.3277,,,,0.3973,-3.4178,yes,-0.0007,average,2026-10-16,6fc36f0-dirty,no
+2023,228,Harold Ramírez,623912,leak 2,,even,fastball,up,37,30,0.8108,0.2977,0.5131,,,,0.2968,-2.6204,yes,0.0018,average,2026-10-16,6fc36f0-dirty,no
+2023,228,Harold Ramírez,623912,leak 3,,two,offspeed,away,14,14,1.0000,0.5300,0.4700,,,,0.4758,-1.6354,yes,-0.0007,average,2026-10-16,6fc36f0-dirty,no
+2023,229,Josh Naylor,647304,hitter,3,,,,136,95,0.6985,0.4113,0.2873,0.1742,-0.0467,0.7690,0.3523,-9.3322,yes,0.0185,productive,2026-10-16,6fc36f0-dirty,no
+2023,229,Josh Naylor,647304,leak 1,,two,fastball,up,55,42,0.7636,0.3670,0.3966,,,,0.3052,-4.8215,yes,0.0187,productive,2026-10-16,6fc36f0-dirty,no
+2023,229,Josh Naylor,647304,leak 2,,two,breaking,down,49,28,0.5714,0.5287,0.0427,,,,0.4587,-2.6925,yes,0.0187,productive,2026-10-16,6fc36f0-dirty,no
+2023,229,Josh Naylor,647304,leak 3,,even,fastball,up,32,25,0.7812,0.3075,0.4737,,,,0.2703,-1.8182,yes,0.0177,productive,2026-10-16,6fc36f0-dirty,no
+2023,230,Brian Anderson,605119,hitter,2,,,,48,27,0.5625,0.4734,0.0891,0.0218,-0.0467,0.7690,0.3791,-2.8394,yes,-0.0158,struggling,2026-10-16,6fc36f0-dirty,no
+2023,230,Brian Anderson,605119,leak 1,,two,breaking,down,30,16,0.5333,0.5098,0.0236,,,,0.4160,-1.8735,yes,-0.0170,struggling,2026-10-16,6fc36f0-dirty,no
+2023,230,Brian Anderson,605119,leak 2,,even,breaking,down,18,11,0.6111,0.4128,0.1983,,,,0.3176,-0.9659,yes,-0.0137,struggling,2026-10-16,6fc36f0-dirty,no
+2023,231,Yan Gomes,543228,hitter,3,,,,117,70,0.5983,0.4054,0.1929,0.1016,-0.0467,0.7690,0.3718,-6.5770,yes,0.0057,average,2026-10-16,6fc36f0-dirty,no
+2023,231,Yan Gomes,543228,leak 1,,two,breaking,down,25,20,0.8000,0.5318,0.2682,,,,0.4768,-2.9957,yes,0.0057,average,2026-10-16,6fc36f0-dirty,no
+2023,231,Yan Gomes,543228,leak 2,,two,fastball,up,50,36,0.7200,0.4656,0.2544,,,,0.4379,-2.4383,yes,0.0057,average,2026-10-16,6fc36f0-dirty,no
+2023,231,Yan Gomes,543228,leak 3,,two,breaking,down-away,42,14,0.3333,0.2586,0.0747,,,,0.2305,-1.1430,yes,0.0057,average,2026-10-16,6fc36f0-dirty,no
+2023,232,Salvador Pérez,521692,hitter,3,,,,132,107,0.8106,0.4406,0.3700,0.2378,-0.0467,0.7690,0.3956,-9.6048,yes,0.0022,average,2026-10-16,6fc36f0-dirty,no
+2023,232,Salvador Pérez,521692,leak 1,,two,breaking,down,50,44,0.8800,0.5130,0.3670,,,,0.4664,-5.0570,yes,0.0027,average,2026-10-16,6fc36f0-dirty,no
+2023,232,Salvador Pérez,521692,leak 2,,two,breaking,away,50,37,0.7400,0.3479,0.3921,,,,0.3239,-3.1358,yes,0.0027,average,2026-10-16,6fc36f0-dirty,no
+2023,232,Salvador Pérez,521692,leak 3,,even,breaking,down,32,26,0.8125,0.4725,0.3400,,,,0.3968,-1.4120,yes,0.0005,average,2026-10-16,6fc36f0-dirty,no
+2023,233,Christian Vázquez,543877,hitter,3,,,,89,59,0.6629,0.4144,0.2485,0.1444,-0.0467,0.7690,0.4184,-4.6647,yes,-0.0334,struggling,2026-10-16,6fc36f0-dirty,no
+2023,233,Christian Vázquez,543877,leak 1,,ahead,fastball,in,24,18,0.7500,0.4601,0.2899,,,,0.5030,-1.9333,yes,-0.0352,struggling,2026-10-16,6fc36f0-dirty,no
+2023,233,Christian Vázquez,543877,leak 2,,first,fastball,in,24,17,0.7083,0.2765,0.4318,,,,0.3225,-1.4023,yes,-0.0335,struggling,2026-10-16,6fc36f0-dirty,no
+2023,233,Christian Vázquez,543877,leak 3,,two,fastball,up,41,24,0.5854,0.4684,0.1170,,,,0.4251,-1.3291,yes,-0.0322,struggling,2026-10-16,6fc36f0-dirty,no
+2023,234,Miguel Rojas,500743,hitter,3,,,,86,43,0.5000,0.4056,0.0944,0.0259,-0.0467,0.7690,0.3722,-2.9258,yes,-0.0180,struggling,2026-10-16,6fc36f0-dirty,no
+2023,234,Miguel Rojas,500743,leak 1,,two,breaking,down,24,14,0.5833,0.5554,0.0279,,,,0.4939,-1.3045,yes,-0.0180,struggling,2026-10-16,6fc36f0-dirty,no
+2023,234,Miguel Rojas,500743,leak 2,,two,breaking,away,29,19,0.6552,0.4989,0.1563,,,,0.4754,-0.8330,yes,-0.0180,struggling,2026-10-16,6fc36f0-dirty,no
+2023,234,Miguel Rojas,500743,leak 3,,two,breaking,down-away,33,10,0.3030,0.2146,0.0885,,,,0.1930,-0.7883,yes,-0.0180,struggling,2026-10-16,6fc36f0-dirty,no
+2023,235,Willy Adames,642715,hitter,3,,,,158,79,0.5000,0.4404,0.0596,-0.0008,-0.0467,0.7690,0.3493,-3.2948,no,0.0127,productive,2026-10-16,6fc36f0-dirty,no
+2023,235,Willy Adames,642715,leak 1,,two,breaking,down,75,35,0.4667,0.5037,-0.0370,,,,0.4028,-1.4607,no,0.0126,productive,2026-10-16,6fc36f0-dirty,no
+2023,235,Willy Adames,642715,leak 2,,even,breaking,down,38,24,0.6316,0.4770,0.1545,,,,0.3895,-0.9818,yes,0.0129,productive,2026-10-16,6fc36f0-dirty,no
+2023,235,Willy Adames,642715,leak 3,,first,breaking,down,45,20,0.4444,0.3039,0.1405,,,,0.2261,-0.8523,yes,0.0127,productive,2026-10-16,6fc36f0-dirty,no
+2023,236,Elly De La Cruz,682829,hitter,3,,,,111,64,0.5766,0.4319,0.1447,0.0646,-0.0467,0.7690,0.3849,-7.4185,yes,-0.0298,struggling,2026-10-16,6fc36f0-dirty,no
+2023,236,Elly De La Cruz,682829,leak 1,,two,breaking,down,60,37,0.6167,0.5038,0.1128,,,,0.4673,-3.7788,yes,-0.0298,struggling,2026-10-16,6fc36f0-dirty,no
+2023,236,Elly De La Cruz,682829,leak 2,,two,breaking,down-in,34,15,0.4412,0.2613,0.1799,,,,0.2113,-2.3812,yes,-0.0298,struggling,2026-10-16,6fc36f0-dirty,no
+2023,236,Elly De La Cruz,682829,leak 3,,two,offspeed,away,17,12,0.7059,0.5190,0.1868,,,,0.4411,-1.2585,yes,-0.0298,struggling,2026-10-16,6fc36f0-dirty,no
+2023,237,Josh Lowe,666139,hitter,3,,,,137,96,0.7007,0.4954,0.2053,0.1112,-0.0467,0.7690,0.4601,-10.1468,yes,-0.0009,average,2026-10-16,6fc36f0-dirty,no
+2023,237,Josh Lowe,666139,leak 1,,two,offspeed,down,52,35,0.6731,0.4788,0.1943,,,,0.5122,-4.7859,yes,-0.0060,average,2026-10-16,6fc36f0-dirty,no
+2023,237,Josh Lowe,666139,leak 2,,two,breaking,down,50,39,0.7800,0.5781,0.2019,,,,0.5152,-3.9794,yes,-0.0060,average,2026-10-16,6fc36f0-dirty,no
+2023,237,Josh Lowe,666139,leak 3,,even,breaking,down,35,22,0.6286,0.4019,0.2267,,,,0.3039,-1.3815,yes,0.0139,productive,2026-10-16,6fc36f0-dirty,no
+2023,238,Jean Segura,516416,hitter,3,,,,87,48,0.5517,0.4015,0.1502,0.0688,-0.0467,0.7690,0.3405,-6.1715,yes,0.0141,productive,2026-10-16,6fc36f0-dirty,no
+2023,238,Jean Segura,516416,leak 1,,two,breaking,down,24,16,0.6667,0.5416,0.1251,,,,0.4488,-2.2490,yes,0.0141,productive,2026-10-16,6fc36f0-dirty,no
+2023,238,Jean Segura,516416,leak 2,,two,breaking,down-away,30,12,0.4000,0.2208,0.1792,,,,0.1946,-2.0637,yes,0.0141,productive,2026-10-16,6fc36f0-dirty,no
+2023,238,Jean Segura,516416,leak 3,,two,fastball,up,33,20,0.6061,0.4639,0.1421,,,,0.3943,-1.8588,yes,0.0141,productive,2026-10-16,6fc36f0-dirty,no
+2023,239,Kyle Farmer,571657,hitter,3,,,,87,55,0.6322,0.4760,0.1562,0.0735,-0.0467,0.7690,0.4560,-4.4623,no,0.0061,average,2026-10-16,6fc36f0-dirty,no
+2023,239,Kyle Farmer,571657,leak 1,,two,breaking,down,32,23,0.7188,0.5460,0.1728,,,,0.4978,-2.7442,yes,0.0061,average,2026-10-16,6fc36f0-dirty,no
+2023,239,Kyle Farmer,571657,leak 2,,two,fastball,up,27,15,0.5556,0.4547,0.1009,,,,0.4747,-0.8855,yes,0.0061,average,2026-10-16,6fc36f0-dirty,no
+2023,239,Kyle Farmer,571657,leak 3,,two,breaking,away,28,17,0.6071,0.4164,0.1907,,,,0.3901,-0.8326,no,0.0061,average,2026-10-16,6fc36f0-dirty,no
+2023,240,Fernando Tatís,665487,hitter,1,,,,50,28,0.5600,0.4882,0.0718,0.0086,-0.0467,0.7690,0.3964,-2.5348,yes,0.0010,average,2026-10-16,6fc36f0-dirty,no
+2023,240,Fernando Tatís,665487,leak 1,,two,breaking,down,50,28,0.5600,0.4882,0.0718,,,,0.3964,-2.5348,yes,0.0010,average,2026-10-16,6fc36f0-dirty,no
+2023,241,Will Brennan,686823,hitter,3,,,,87,68,0.7816,0.5307,0.2509,0.1463,-0.0467,0.7690,0.5092,-6.9015,yes,0.0124,productive,2026-10-16,6fc36f0-dirty,no
+2023,241,Will Brennan,686823,leak 1,,two,breaking,down,27,20,0.7407,0.4970,0.2437,,,,0.4355,-2.5393,yes,0.0124,productive,2026-10-16,6fc36f0-dirty,no
+2023,241,Will Brennan,686823,leak 2,,two,offspeed,down,20,19,0.9500,0.5653,0.3847,,,,0.5879,-2.2088,yes,0.0124,productive,2026-10-16,6fc36f0-dirty,no
+2023,241,Will Brennan,686823,leak 3,,two,fastball,up,40,29,0.7250,0.5361,0.1889,,,,0.5195,-2.1534,yes,0.0124,productive,2026-10-16,6fc36f0-dirty,no
+2023,242,Eloy Jiménez,650391,hitter,3,,,,78,48,0.6154,0.3910,0.2244,0.1259,-0.0467,0.7690,0.3954,-4.0426,yes,-0.0110,struggling,2026-10-16,6fc36f0-dirty,no
+2023,242,Eloy Jiménez,650391,leak 1,,ahead,fastball,in,31,18,0.5806,0.3514,0.2293,,,,0.4197,-1.5979,yes,-0.0047,average,2026-10-16,6fc36f0-dirty,no
+2023,242,Eloy Jiménez,650391,leak 2,,ahead,breaking,down,18,11,0.6111,0.3603,0.2509,,,,0.2437,-1.2830,yes,-0.0047,average,2026-10-16,6fc36f0-dirty,no
+2023,242,Eloy Jiménez,650391,leak 3,,two,fastball,up,29,19,0.6552,0.4525,0.2027,,,,0.4637,-1.1617,yes,-0.0216,struggling,2026-10-16,6fc36f0-dirty,no
+2023,243,Drew Waters,671221,hitter,3,,,,97,57,0.5876,0.4344,0.1532,0.0711,-0.0467,0.7690,0.4089,-7.8075,yes,-0.0261,struggling,2026-10-16,6fc36f0-dirty,no
+2023,243,Drew Waters,671221,leak 1,,two,breaking,down,52,34,0.6538,0.4981,0.1557,,,,0.4370,-4.5711,yes,-0.0261,struggling,2026-10-16,6fc36f0-dirty,no
+2023,243,Drew Waters,671221,leak 2,,two,offspeed,down,24,14,0.5833,0.4232,0.1602,,,,0.4736,-1.9609,yes,-0.0261,struggling,2026-10-16,6fc36f0-dirty,no
+2023,243,Drew Waters,671221,leak 3,,two,breaking,down-in,21,9,0.4286,0.2896,0.1390,,,,0.2654,-1.2755,yes,-0.0261,struggling,2026-10-16,6fc36f0-dirty,no
+2023,244,Nick Pratto,668472,hitter,3,,,,82,43,0.5244,0.3912,0.1332,0.0557,-0.0467,0.7690,0.3334,-5.4971,yes,-0.0151,struggling,2026-10-16,6fc36f0-dirty,no
+2023,244,Nick Pratto,668472,leak 1,,two,breaking,down,40,22,0.5500,0.5165,0.0335,,,,0.4469,-2.6548,yes,-0.0123,struggling,2026-10-16,6fc36f0-dirty,no
+2023,244,Nick Pratto,668472,leak 2,,two,breaking,down-away,20,8,0.4000,0.1466,0.2534,,,,0.1452,-1.5157,yes,-0.0123,struggling,2026-10-16,6fc36f0-dirty,no
+2023,244,Nick Pratto,668472,leak 3,,even,breaking,down,22,13,0.5909,0.3860,0.2049,,,,0.2980,-1.3266,yes,-0.0227,struggling,2026-10-16,6fc36f0-dirty,no
+2023,245,Shea Langeliers,669127,hitter,3,,,,111,55,0.4955,0.5195,-0.0240,-0.0651,-0.0467,0.7690,0.4586,-3.0632,no,-0.0223,struggling,2026-10-16,6fc36f0-dirty,no
+2023,245,Shea Langeliers,669127,leak 1,,two,fastball,up,58,30,0.5172,0.5544,-0.0371,,,,0.5134,-1.3998,no,-0.0239,struggling,2026-10-16,6fc36f0-dirty,no
+2023,245,Shea Langeliers,669127,leak 2,,ahead,fastball,up,20,9,0.4500,0.3198,0.1302,,,,0.2604,-0.8803,yes,-0.0148,struggling,2026-10-16,6fc36f0-dirty,no
+2023,245,Shea Langeliers,669127,leak 3,,two,breaking,down,33,16,0.4848,0.5793,-0.0945,,,,0.4825,-0.7831,no,-0.0239,struggling,2026-10-16,6fc36f0-dirty,no
+2023,246,Yainer Diaz,673237,hitter,3,,,,89,68,0.7640,0.4223,0.3418,0.2161,-0.0467,0.7690,0.4010,-8.8284,yes,0.0109,productive,2026-10-16,6fc36f0-dirty,no
+2023,246,Yainer Diaz,673237,leak 1,,two,fastball,up,43,36,0.8372,0.4280,0.4092,,,,0.4277,-4.8971,yes,0.0109,productive,2026-10-16,6fc36f0-dirty,no
+2023,246,Yainer Diaz,673237,leak 2,,two,breaking,away,33,22,0.6667,0.3978,0.2688,,,,0.3763,-2.2440,yes,0.0109,productive,2026-10-16,6fc36f0-dirty,no
+2023,246,Yainer Diaz,673237,leak 3,,two,breaking,down,13,10,0.7692,0.4654,0.3038,,,,0.3756,-1.6873,yes,0.0109,productive,2026-10-16,6fc36f0-dirty,no
+2023,247,Nolan Arenado,571448,hitter,3,,,,148,83,0.5608,0.3880,0.1728,0.0862,-0.0467,0.7690,0.3303,-7.1702,yes,0.0028,average,2026-10-16,6fc36f0-dirty,no
+2023,247,Nolan Arenado,571448,leak 1,,two,breaking,down,53,42,0.7925,0.5509,0.2416,,,,0.4682,-3.7049,yes,0.0028,average,2026-10-16,6fc36f0-dirty,no
+2023,247,Nolan Arenado,571448,leak 2,,two,offspeed,down,27,17,0.6296,0.4418,0.1878,,,,0.3847,-1.7766,yes,0.0028,average,2026-10-16,6fc36f0-dirty,no
+2023,247,Nolan Arenado,571448,leak 3,,two,breaking,down-away,68,24,0.3529,0.2396,0.1133,,,,0.2012,-1.6887,yes,0.0028,average,2026-10-16,6fc36f0-dirty,no
+2023,248,Giancarlo Stanton,519317,hitter,2,,,,78,30,0.3846,0.3434,0.0412,-0.0150,-0.0467,0.7690,0.3132,-3.0113,no,-0.0041,average,2026-10-16,6fc36f0-dirty,no
+2023,248,Giancarlo Stanton,519317,leak 1,,two,breaking,down-away,53,17,0.3208,0.2480,0.0728,,,,0.2226,-2.2401,yes,-0.0041,average,2026-10-16,6fc36f0-dirty,no
+2023,248,Giancarlo Stanton,519317,leak 2,,two,offspeed,down,25,13,0.5200,0.5458,-0.0258,,,,0.5052,-0.7712,no,-0.0041,average,2026-10-16,6fc36f0-dirty,no
+2023,249,Adam Duvall,594807,hitter,3,,,,90,52,0.5778,0.3969,0.1809,0.0924,-0.0467,0.7690,0.3609,-6.3954,yes,-0.0225,struggling,2026-10-16,6fc36f0-dirty,no
+2023,249,Adam Duvall,594807,leak 1,,two,fastball,up,30,22,0.7333,0.4762,0.2572,,,,0.4667,-3.3237,yes,-0.0225,struggling,2026-10-16,6fc36f0-dirty,no
+2023,249,Adam Duvall,594807,leak 2,,two,breaking,down,26,16,0.6154,0.5333,0.0821,,,,0.4666,-1.5859,yes,-0.0225,struggling,2026-10-16,6fc36f0-dirty,no
+2023,249,Adam Duvall,594807,leak 3,,two,breaking,down-away,34,14,0.4118,0.2227,0.1890,,,,0.1866,-1.4858,yes,-0.0225,struggling,2026-10-16,6fc36f0-dirty,no
+2023,250,José Siri,642350,hitter,3,,,,83,48,0.5783,0.3382,0.2401,0.1380,-0.0467,0.7690,0.2779,-5.9040,yes,-0.0431,struggling,2026-10-16,6fc36f0-dirty,no
+2023,250,José Siri,642350,leak 1,,ahead,offspeed,down,14,12,0.8571,0.3708,0.4863,,,,0.2970,-2.0605,yes,-0.0157,struggling,2026-10-16,6fc36f0-dirty,no
+2023,250,José Siri,642350,leak 2,,two,breaking,down,26,20,0.7692,0.5603,0.2089,,,,0.4756,-2.0361,yes,-0.0487,struggling,2026-10-16,6fc36f0-dirty,no
+2023,250,José Siri,642350,leak 3,,two,breaking,down-away,43,16,0.3721,0.1932,0.1789,,,,0.1522,-1.8074,yes,-0.0487,struggling,2026-10-16,6fc36f0-dirty,no
+2023,251,Teoscar Hernández,606192,hitter,3,,,,220,106,0.4818,0.4003,0.0815,0.0160,-0.0467,0.7690,0.3479,-5.1977,yes,0.0018,average,2026-10-16,6fc36f0-dirty,no
+2023,251,Teoscar Hernández,606192,leak 1,,two,breaking,down,86,51,0.5930,0.5313,0.0617,,,,0.4408,-3.2754,yes,0.0018,average,2026-10-16,6fc36f0-dirty,no
+2023,251,Teoscar Hernández,606192,leak 2,,two,breaking,down-away,85,27,0.3176,0.2280,0.0896,,,,0.2066,-0.9878,yes,0.0018,average,2026-10-16,6fc36f0-dirty,no
+2023,251,Teoscar Hernández,606192,leak 3,,two,breaking,away,49,28,0.5714,0.4694,0.1020,,,,0.4301,-0.9345,yes,0.0018,average,2026-10-16,6fc36f0-dirty,no
+2023,252,Ryan O'Hearn,656811,hitter,3,,,,94,62,0.6596,0.5075,0.1521,0.0703,-0.0467,0.7690,0.4776,-6.4987,no,-0.0043,average,2026-10-16,6fc36f0-dirty,no
+2023,252,Ryan O'Hearn,656811,leak 1,,two,fastball,up,43,33,0.7674,0.6041,0.1633,,,,0.5902,-2.6813,yes,-0.0060,average,2026-10-16,6fc36f0-dirty,no
+2023,252,Ryan O'Hearn,656811,leak 2,,ahead,fastball,up,19,13,0.6842,0.2422,0.4420,,,,0.2438,-2.3693,yes,0.0025,average,2026-10-16,6fc36f0-dirty,no
+2023,252,Ryan O'Hearn,656811,leak 3,,two,breaking,down,32,16,0.5000,0.5351,-0.0351,,,,0.4651,-1.4481,no,-0.0060,average,2026-10-16,6fc36f0-dirty,no
+2023,253,Tim Anderson,641313,hitter,3,,,,149,83,0.5570,0.3694,0.1877,0.0977,-0.0467,0.7690,0.3372,-5.2283,yes,-0.0406,struggling,2026-10-16,6fc36f0-dirty,no
+2023,253,Tim Anderson,641313,leak 1,,two,breaking,down,39,28,0.7179,0.5400,0.1780,,,,0.4925,-2.2130,yes,-0.0406,struggling,2026-10-16,6fc36f0-dirty,no
+2023,253,Tim Anderson,641313,leak 2,,two,breaking,down-away,67,26,0.3881,0.2265,0.1616,,,,0.1987,-1.6871,yes,-0.0406,struggling,2026-10-16,6fc36f0-dirty,no
+2023,253,Tim Anderson,641313,leak 3,,two,breaking,away,43,29,0.6744,0.4373,0.2371,,,,0.4123,-1.3282,yes,-0.0406,struggling,2026-10-16,6fc36f0-dirty,no
+2023,254,Ozzie Albies,645277,hitter,3,,,,111,74,0.6667,0.4012,0.2655,0.1575,-0.0467,0.7690,0.3713,-5.5693,yes,0.0269,productive,2026-10-16,6fc36f0-dirty,no
+2023,254,Ozzie Albies,645277,leak 1,,two,offspeed,down,49,33,0.6735,0.4411,0.2324,,,,0.3986,-2.4797,yes,0.0299,productive,2026-10-16,6fc36f0-dirty,no
+2023,254,Ozzie Albies,645277,leak 2,,ahead,fastball,down,27,15,0.5556,0.1744,0.3812,,,,0.2866,-1.5590,yes,0.0175,productive,2026-10-16,6fc36f0-dirty,no
+2023,254,Ozzie Albies,645277,leak 3,,two,offspeed,away,35,26,0.7429,0.5202,0.2227,,,,0.3983,-1.5306,yes,0.0299,productive,2026-10-16,6fc36f0-dirty,no
+2023,255,Andrew Vaughn,683734,hitter,3,,,,128,84,0.6562,0.4916,0.1647,0.0799,-0.0467,0.7690,0.4559,-6.5272,yes,-0.0117,struggling,2026-10-16,6fc36f0-dirty,no
+2023,255,Andrew Vaughn,683734,leak 1,,two,fastball,up,55,39,0.7091,0.4441,0.2650,,,,0.4496,-3.1992,yes,-0.0117,struggling,2026-10-16,6fc36f0-dirty,no
+2023,255,Andrew Vaughn,683734,leak 2,,two,breaking,down,38,26,0.6842,0.5532,0.1310,,,,0.4472,-2.1349,yes,-0.0117,struggling,2026-10-16,6fc36f0-dirty,no
+2023,255,Andrew Vaughn,683734,leak 3,,two,offspeed,down,35,19,0.5429,0.4993,0.0436,,,,0.4752,-1.1931,yes,-0.0117,struggling,2026-10-16,6fc36f0-dirty,no
+2023,256,Julio Rodríguez,677594,hitter,3,,,,134,65,0.4851,0.3831,0.1019,0.0317,-0.0467,0.7690,0.3644,-3.3935,yes,0.0143,productive,2026-10-16,6fc36f0-dirty,no
+2023,256,Julio Rodríguez,677594,leak 1,,two,fastball,up,68,31,0.4559,0.4260,0.0299,,,,0.4088,-1.2198,yes,0.0142,productive,2026-10-16,6fc36f0-dirty,no
+2023,256,Julio Rodríguez,677594,leak 2,,two,offspeed,down,30,18,0.6000,0.4529,0.1471,,,,0.4541,-1.1121,yes,0.0142,productive,2026-10-16,6fc36f0-dirty,no
+2023,256,Julio Rodríguez,677594,leak 3,,ahead,fastball,up,36,16,0.4444,0.2440,0.2004,,,,0.2058,-1.0616,yes,0.0145,productive,2026-10-16,6fc36f0-dirty,no
+2023,257,Starling Marte,516782,hitter,3,,,,73,47,0.6438,0.3859,0.2580,0.1517,-0.0467,0.7690,0.3508,-7.8315,yes,-0.0083,average,2026-10-16,6fc36f0-dirty,no
+2023,257,Starling Marte,516782,leak 1,,two,breaking,down,31,21,0.6774,0.4780,0.1995,,,,0.4362,-2.9915,yes,-0.0083,average,2026-10-16,6fc36f0-dirty,no
+2023,257,Starling Marte,516782,leak 2,,two,breaking,down-away,29,15,0.5172,0.2652,0.2521,,,,0.2376,-2.8969,yes,-0.0083,average,2026-10-16,6fc36f0-dirty,no
+2023,257,Starling Marte,516782,leak 3,,two,breaking,away,13,11,0.8462,0.4355,0.4106,,,,0.3998,-1.9431,yes,-0.0083,average,2026-10-16,6fc36f0-dirty,no
+2023,258,Jorge Mateo,622761,hitter,3,,,,78,56,0.7179,0.4830,0.2350,0.1340,-0.0467,0.7690,0.4253,-6.8212,yes,-0.0114,struggling,2026-10-16,6fc36f0-dirty,no
+2023,258,Jorge Mateo,622761,leak 1,,two,fastball,up,34,24,0.7059,0.4394,0.2664,,,,0.4225,-3.3401,yes,-0.0109,struggling,2026-10-16,6fc36f0-dirty,no
+2023,258,Jorge Mateo,622761,leak 2,,two,breaking,down,22,18,0.8182,0.5683,0.2499,,,,0.4823,-2.5763,yes,-0.0109,struggling,2026-10-16,6fc36f0-dirty,no
+2023,258,Jorge Mateo,622761,leak 3,,even,breaking,down,22,14,0.6364,0.4648,0.1715,,,,0.3726,-0.9048,yes,-0.0126,struggling,2026-10-16,6fc36f0-dirty,no
+2023,259,Trea Turner,607208,hitter,3,,,,121,72,0.5950,0.4990,0.0960,0.0271,-0.0467,0.7690,0.4403,-4.0989,yes,0.0178,productive,2026-10-16,6fc36f0-dirty,no
+2023,259,Trea Turner,607208,leak 1,,two,breaking,down,65,37,0.5692,0.5418,0.0274,,,,0.4443,-2.0846,yes,0.0197,productive,2026-10-16,6fc36f0-dirty,no
+2023,259,Trea Turner,607208,leak 2,,two,fastball,in,33,22,0.6667,0.4486,0.2180,,,,0.5324,-1.0986,yes,0.0197,productive,2026-10-16,6fc36f0-dirty,no
+2023,259,Trea Turner,607208,leak 3,,ahead,breaking,down,23,13,0.5652,0.4506,0.1147,,,,0.2971,-0.9157,yes,0.0095,average,2026-10-16,6fc36f0-dirty,no
+2023,260,Amed Rosario,642708,hitter,3,,,,92,62,0.6739,0.5056,0.1683,0.0828,-0.0467,0.7690,0.4151,-3.8090,yes,-0.0076,average,2026-10-16,6fc36f0-dirty,no
+2023,260,Amed Rosario,642708,leak 1,,two,breaking,down,44,26,0.5909,0.5533,0.0376,,,,0.4717,-1.4305,yes,-0.0060,average,2026-10-16,6fc36f0-dirty,no
+2023,260,Amed Rosario,642708,leak 2,,even,breaking,down,34,25,0.7353,0.4725,0.2628,,,,0.3821,-1.2563,yes,-0.0082,average,2026-10-16,6fc36f0-dirty,no
+2023,260,Amed Rosario,642708,leak 3,,ahead,breaking,down,14,11,0.7857,0.4360,0.3497,,,,0.3172,-1.1222,yes,-0.0110,struggling,2026-10-16,6fc36f0-dirty,no
+2023,261,Andrés Giménez,665926,hitter,3,,,,173,117,0.6763,0.4439,0.2324,0.1321,-0.0467,0.7690,0.4026,-7.3298,yes,-0.0064,average,2026-10-16,6fc36f0-dirty,no
+2023,261,Andrés Giménez,665926,leak 1,,two,fastball,up,81,59,0.7284,0.4615,0.2668,,,,0.4447,-4.4768,yes,-0.0041,average,2026-10-16,6fc36f0-dirty,no
+2023,261,Andrés Giménez,665926,leak 2,,even,fastball,up,45,33,0.7333,0.3555,0.3778,,,,0.3062,-1.4729,yes,-0.0131,struggling,2026-10-16,6fc36f0-dirty,no
+2023,261,Andrés Giménez,665926,leak 3,,two,breaking,down,47,25,0.5319,0.4979,0.0340,,,,0.4222,-1.3801,yes,-0.0041,average,2026-10-16,6fc36f0-dirty,no
+2023,262,Brandon Drury,592273,hitter,3,,,,154,73,0.4740,0.3408,0.1332,0.0558,-0.0467,0.7690,0.3044,-4.5059,yes,-0.0050,average,2026-10-16,6fc36f0-dirty,no
+2023,262,Brandon Drury,592273,leak 1,,two,breaking,down,54,34,0.6296,0.5190,0.1106,,,,0.4242,-2.8215,yes,-0.0067,average,2026-10-16,6fc36f0-dirty,no
+2023,262,Brandon Drury,592273,leak 2,,first,fastball,in,39,20,0.5128,0.2695,0.2433,,,,0.2920,-0.8521,yes,0.0000,average,2026-10-16,6fc36f0-dirty,no
+2023,262,Brandon Drury,592273,leak 3,,two,breaking,down-away,61,19,0.3115,0.2286,0.0829,,,,0.2064,-0.8323,yes,-0.0067,average,2026-10-16,6fc36f0-dirty,no
+2023,263,Thairo Estrada,642731,hitter,3,,,,146,75,0.5137,0.3991,0.1146,0.0414,-0.0467,0.7690,0.3536,-5.0650,yes,-0.0222,struggling,2026-10-16,6fc36f0-dirty,no
+2023,263,Thairo Estrada,642731,leak 1,,two,breaking,down,57,34,0.5965,0.4986,0.0979,,,,0.4289,-2.8891,yes,-0.0222,struggling,2026-10-16,6fc36f0-dirty,no
+2023,263,Thairo Estrada,642731,leak 2,,two,fastball,up,36,22,0.6111,0.4560,0.1551,,,,0.4271,-1.2434,yes,-0.0222,struggling,2026-10-16,6fc36f0-dirty,no
+2023,263,Thairo Estrada,642731,leak 3,,two,breaking,down-away,53,19,0.3585,0.2535,0.1050,,,,0.2228,-0.9325,yes,-0.0222,struggling,2026-10-16,6fc36f0-dirty,no
+2023,264,Connor Wong,657136,hitter,3,,,,64,47,0.7344,0.5102,0.2242,0.1257,-0.0467,0.7690,0.4638,-4.4233,yes,-0.0364,struggling,2026-10-16,6fc36f0-dirty,no
+2023,264,Connor Wong,657136,leak 1,,two,breaking,down,32,26,0.8125,0.6307,0.1818,,,,0.5752,-2.4206,yes,-0.0431,struggling,2026-10-16,6fc36f0-dirty,no
+2023,264,Connor Wong,657136,leak 2,,even,breaking,down,19,14,0.7368,0.4399,0.2969,,,,0.3485,-1.0974,yes,-0.0279,struggling,2026-10-16,6fc36f0-dirty,no
+2023,264,Connor Wong,657136,leak 3,,ahead,fastball,in,13,7,0.5385,0.3163,0.2221,,,,0.3580,-0.9053,yes,-0.0325,struggling,2026-10-16,6fc36f0-dirty,no
+2023,265,Jeremy Peña,665161,hitter,3,,,,137,88,0.6423,0.4225,0.2198,0.1224,-0.0467,0.7690,0.3702,-6.0985,yes,-0.0104,struggling,2026-10-16,6fc36f0-dirty,no
+2023,265,Jeremy Peña,665161,leak 1,,two,breaking,down,58,39,0.6724,0.5214,0.1511,,,,0.4722,-2.9261,yes,-0.0125,struggling,2026-10-16,6fc36f0-dirty,no
+2023,265,Jeremy Peña,665161,leak 2,,two,breaking,away,33,25,0.7576,0.4312,0.3264,,,,0.4024,-2.0339,yes,-0.0125,struggling,2026-10-16,6fc36f0-dirty,no
+2023,265,Jeremy Peña,665161,leak 3,,first,breaking,down,46,24,0.5217,0.2917,0.2300,,,,0.2184,-1.1385,yes,-0.0061,average,2026-10-16,6fc36f0-dirty,no
+2023,266,Elías Díaz,553869,hitter,3,,,,91,56,0.6154,0.4567,0.1587,0.0753,-0.0467,0.7690,0.4099,-4.2574,yes,-0.0176,struggling,2026-10-16,6fc36f0-dirty,no
+2023,266,Elías Díaz,553869,leak 1,,two,breaking,down,38,22,0.5789,0.5231,0.0559,,,,0.4180,-1.8468,yes,-0.0173,struggling,2026-10-16,6fc36f0-dirty,no
+2023,266,Elías Díaz,553869,leak 2,,two,breaking,away,37,22,0.5946,0.4342,0.1604,,,,0.4102,-1.2957,yes,-0.0173,struggling,2026-10-16,6fc36f0-dirty,no
+2023,266,Elías Díaz,553869,leak 3,,ahead,fastball,in,16,12,0.7500,0.3513,0.3987,,,,0.3902,-1.1149,yes,-0.0189,struggling,2026-10-16,6fc36f0-dirty,no
+2023,267,Brenton Doyle,686668,hitter,3,,,,81,45,0.5556,0.4470,0.1086,0.0368,-0.0467,0.7690,0.4330,-3.0054,yes,-0.0521,struggling,2026-10-16,6fc36f0-dirty,no
+2023,267,Brenton Doyle,686668,leak 1,,even,breaking,down,30,18,0.6000,0.4309,0.1691,,,,0.3632,-1.1952,yes,-0.0494,struggling,2026-10-16,6fc36f0-dirty,no
+2023,267,Brenton Doyle,686668,leak 2,,two,offspeed,down,27,15,0.5556,0.5079,0.0477,,,,0.5268,-0.9755,yes,-0.0614,struggling,2026-10-16,6fc36f0-dirty,no
+2023,267,Brenton Doyle,686668,leak 3,,ahead,fastball,in,24,12,0.5000,0.3986,0.1014,,,,0.4146,-0.8347,yes,-0.0449,struggling,2026-10-16,6fc36f0-dirty,no
+2023,268,Eddie Rosario,592696,hitter,3,,,,144,97,0.6736,0.4386,0.2350,0.1341,-0.0467,0.7690,0.3851,-8.8364,yes,-0.0057,average,2026-10-16,6fc36f0-dirty,no
+2023,268,Eddie Rosario,592696,leak 1,,two,breaking,down,63,44,0.6984,0.4606,0.2378,,,,0.3837,-4.9103,yes,-0.0057,average,2026-10-16,6fc36f0-dirty,no
+2023,268,Eddie Rosario,592696,leak 2,,two,fastball,up,55,39,0.7091,0.5059,0.2031,,,,0.4721,-2.0558,yes,-0.0057,average,2026-10-16,6fc36f0-dirty,no
+2023,268,Eddie Rosario,592696,leak 3,,two,breaking,down-in,26,14,0.5385,0.2426,0.2958,,,,0.2044,-1.8703,yes,-0.0057,average,2026-10-16,6fc36f0-dirty,no
+2023,269,Harrison Bader,664056,hitter,3,,,,76,58,0.7632,0.4465,0.3167,0.1969,-0.0467,0.7690,0.4044,-6.4544,yes,-0.0062,average,2026-10-16,6fc36f0-dirty,no
+2023,269,Harrison Bader,664056,leak 1,,two,fastball,up,30,23,0.7667,0.3888,0.3778,,,,0.3650,-3.1761,yes,-0.0050,average,2026-10-16,6fc36f0-dirty,no
+2023,269,Harrison Bader,664056,leak 2,,two,breaking,down,21,15,0.7143,0.6010,0.1132,,,,0.5350,-1.6516,yes,-0.0050,average,2026-10-16,6fc36f0-dirty,no
+2023,269,Harrison Bader,664056,leak 3,,even,fastball,up,25,20,0.8000,0.3857,0.4143,,,,0.3420,-1.6267,yes,-0.0088,average,2026-10-16,6fc36f0-dirty,no
+2023,270,Ezequiel Tovar,678662,hitter,3,,,,177,100,0.5650,0.3703,0.1946,0.1030,-0.0467,0.7690,0.3120,-5.2843,yes,-0.0317,struggling,2026-10-16,6fc36f0-dirty,no
+2023,270,Ezequiel Tovar,678662,leak 1,,two,breaking,down,57,39,0.6842,0.5126,0.1716,,,,0.4104,-2.2231,yes,-0.0317,struggling,2026-10-16,6fc36f0-dirty,no
+2023,270,Ezequiel Tovar,678662,leak 2,,two,breaking,down-away,74,27,0.3649,0.2142,0.1507,,,,0.1751,-1.6274,yes,-0.0317,struggling,2026-10-16,6fc36f0-dirty,no
+2023,270,Ezequiel Tovar,678662,leak 3,,two,breaking,away,46,34,0.7391,0.4453,0.2938,,,,0.4102,-1.4338,yes,-0.0317,struggling,2026-10-16,6fc36f0-dirty,no
+2023,271,Paul DeJong,657557,hitter,3,,,,88,54,0.6136,0.4753,0.1383,0.0597,-0.0467,0.7690,0.4718,-4.7439,yes,-0.0422,struggling,2026-10-16,6fc36f0-dirty,no
+2023,271,Paul DeJong,657557,leak 1,,two,fastball,up,46,32,0.6957,0.5353,0.1603,,,,0.5569,-2.3773,yes,-0.0470,struggling,2026-10-16,6fc36f0-dirty,no
+2023,271,Paul DeJong,657557,leak 2,,two,offspeed,down,19,11,0.5789,0.4184,0.1606,,,,0.4438,-1.5233,yes,-0.0470,struggling,2026-10-16,6fc36f0-dirty,no
+2023,271,Paul DeJong,657557,leak 3,,even,breaking,down,23,11,0.4783,0.4022,0.0761,,,,0.3248,-0.8433,yes,-0.0285,struggling,2026-10-16,6fc36f0-dirty,no
+2023,272,Martín Maldonado,455117,hitter,3,,,,94,60,0.6383,0.3684,0.2699,0.1608,-0.0467,0.7690,0.3510,-6.3975,yes,-0.0362,struggling,2026-10-16,6fc36f0-dirty,no
+2023,272,Martín Maldonado,455117,leak 1,,two,fastball,up,53,30,0.5660,0.4109,0.1552,,,,0.3892,-2.8862,yes,-0.0345,struggling,2026-10-16,6fc36f0-dirty,no
+2023,272,Martín Maldonado,455117,leak 2,,ahead,fastball,up,22,14,0.6364,0.2482,0.3881,,,,0.2417,-2.2500,yes,-0.0358,struggling,2026-10-16,6fc36f0-dirty,no
+2023,272,Martín Maldonado,455117,leak 3,,even,fastball,up,19,16,0.8421,0.3892,0.4529,,,,0.3709,-1.2613,yes,-0.0415,struggling,2026-10-16,6fc36f0-dirty,no
+2023,273,Luke Raley,670042,hitter,2,,,,77,39,0.5065,0.4380,0.0685,0.0060,-0.0467,0.7690,0.3954,-3.1473,no,-0.0052,average,2026-10-16,6fc36f0-dirty,no
+2023,273,Luke Raley,670042,leak 1,,two,breaking,down,44,19,0.4318,0.5049,-0.0731,,,,0.4275,-1.9340,no,-0.0118,struggling,2026-10-16,6fc36f0-dirty,no
+2023,273,Luke Raley,670042,leak 2,,even,fastball,up,33,20,0.6061,0.3488,0.2572,,,,0.3525,-1.2133,yes,0.0037,average,2026-10-16,6fc36f0-dirty,no
+2023,274,Luis Robert,673357,hitter,3,,,,202,92,0.4554,0.3011,0.1543,0.0720,-0.0467,0.7690,0.2685,-6.5376,yes,0.0175,productive,2026-10-16,6fc36f0-dirty,no
+2023,274,Luis Robert,673357,leak 1,,two,breaking,down,57,38,0.6667,0.5134,0.1532,,,,0.4598,-3.8810,yes,0.0160,productive,2026-10-16,6fc36f0-dirty,no
+2023,274,Luis Robert,673357,leak 2,,two,breaking,down-away,96,31,0.3229,0.2333,0.0896,,,,0.2031,-1.4068,yes,0.0160,productive,2026-10-16,6fc36f0-dirty,no
+2023,274,Luis Robert,673357,leak 3,,even,breaking,down-away,49,23,0.4694,0.1870,0.2824,,,,0.1742,-1.2498,yes,0.0220,productive,2026-10-16,6fc36f0-dirty,no
+2023,275,Nick Castellanos,592206,hitter,3,,,,131,83,0.6336,0.4834,0.1502,0.0688,-0.0467,0.7690,0.4375,-5.3704,yes,-0.0157,struggling,2026-10-16,6fc36f0-dirty,no
+2023,275,Nick Castellanos,592206,leak 1,,two,breaking,down,71,45,0.6338,0.5372,0.0966,,,,0.4891,-2.8493,yes,-0.0192,struggling,2026-10-16,6fc36f0-dirty,no
+2023,275,Nick Castellanos,592206,leak 2,,ahead,breaking,down,23,17,0.7391,0.3876,0.3515,,,,0.3071,-1.4716,yes,0.0010,average,2026-10-16,6fc36f0-dirty,no
+2023,275,Nick Castellanos,592206,leak 3,,two,breaking,away,37,21,0.5676,0.4396,0.1280,,,,0.4194,-1.0495,yes,-0.0192,struggling,2026-10-16,6fc36f0-dirty,no
+2023,276,Jake Burger,669394,hitter,3,,,,125,69,0.5520,0.4286,0.1234,0.0482,-0.0467,0.7690,0.4108,-5.5071,no,0.0224,productive,2026-10-16,6fc36f0-dirty,no
+2023,276,Jake Burger,669394,leak 1,,two,breaking,down,46,23,0.5000,0.5281,-0.0281,,,,0.4539,-2.1316,no,0.0197,productive,2026-10-16,6fc36f0-dirty,no
+2023,276,Jake Burger,669394,leak 2,,two,fastball,up,44,24,0.5455,0.3907,0.1548,,,,0.3916,-1.7795,yes,0.0197,productive,2026-10-16,6fc36f0-dirty,no
+2023,276,Jake Burger,669394,leak 3,,ahead,fastball,in,35,22,0.6286,0.3454,0.2832,,,,0.3784,-1.5960,yes,0.0294,productive,2026-10-16,6fc36f0-dirty,no
+2023,277,Mickey Moniak,666160,hitter,3,,,,88,50,0.5682,0.4117,0.1565,0.0736,-0.0467,0.7690,0.3541,-6.2373,yes,-0.0225,struggling,2026-10-16,6fc36f0-dirty,no
+2023,277,Mickey Moniak,666160,leak 1,,two,breaking,down,28,18,0.6429,0.5467,0.0962,,,,0.4615,-2.2793,yes,-0.0225,struggling,2026-10-16,6fc36f0-dirty,no
+2023,277,Mickey Moniak,666160,leak 2,,two,fastball,up,41,22,0.5366,0.4047,0.1319,,,,0.3579,-1.9906,yes,-0.0225,struggling,2026-10-16,6fc36f0-dirty,no
+2023,277,Mickey Moniak,666160,leak 3,,two,breaking,down-in,19,10,0.5263,0.2279,0.2984,,,,0.1878,-1.9674,yes,-0.0225,struggling,2026-10-16,6fc36f0-dirty,no
+2023,278,Christian Bethancourt,542194,hitter,3,,,,74,49,0.6622,0.4864,0.1757,0.0885,-0.0467,0.7690,0.4619,-5.8650,yes,-0.0322,struggling,2026-10-16,6fc36f0-dirty,no
+2023,278,Christian Bethancourt,542194,leak 1,,two,offspeed,down,14,12,0.8571,0.4990,0.3581,,,,0.5168,-2.2946,yes,-0.0322,struggling,2026-10-16,6fc36f0-dirty,no
+2023,278,Christian Bethancourt,542194,leak 2,,two,fastball,up,25,18,0.7200,0.4327,0.2873,,,,0.4574,-1.9162,yes,-0.0322,struggling,2026-10-16,6fc36f0-dirty,no
+2023,278,Christian Bethancourt,542194,leak 3,,two,breaking,down,35,19,0.5429,0.5197,0.0231,,,,0.4432,-1.6542,yes,-0.0322,struggling,2026-10-16,6fc36f0-dirty,no
+2023,279,Elehuris Montero,660707,hitter,3,,,,119,64,0.5378,0.3640,0.1738,0.0870,-0.0467,0.7690,0.3121,-9.6400,yes,-0.0436,struggling,2026-10-16,6fc36f0-dirty,no
+2023,279,Elehuris Montero,660707,leak 1,,two,breaking,down,39,28,0.7179,0.5130,0.2049,,,,0.4258,-4.7603,yes,-0.0436,struggling,2026-10-16,6fc36f0-dirty,no
+2023,279,Elehuris Montero,660707,leak 2,,two,breaking,down-away,53,21,0.3962,0.2353,0.1609,,,,0.1939,-2.6948,yes,-0.0436,struggling,2026-10-16,6fc36f0-dirty,no
+2023,279,Elehuris Montero,660707,leak 3,,two,offspeed,down,27,15,0.5556,0.4012,0.1544,,,,0.3800,-2.1849,yes,-0.0436,struggling,2026-10-16,6fc36f0-dirty,no
+2023,280,Javier Báez,595879,hitter,3,,,,126,74,0.5873,0.3303,0.2570,0.1510,-0.0467,0.7690,0.2900,-7.7099,yes,-0.0218,struggling,2026-10-16,6fc36f0-dirty,no
+2023,280,Javier Báez,595879,leak 1,,two,breaking,down-away,67,37,0.5522,0.2359,0.3163,,,,0.1938,-4.8719,yes,-0.0196,struggling,2026-10-16,6fc36f0-dirty,no
+2023,280,Javier Báez,595879,leak 2,,two,breaking,down,32,20,0.6250,0.4873,0.1377,,,,0.4110,-1.5085,yes,-0.0196,struggling,2026-10-16,6fc36f0-dirty,no
+2023,280,Javier Báez,595879,leak 3,,ahead,fastball,in,27,17,0.6296,0.3783,0.2513,,,,0.3851,-1.3295,yes,-0.0297,struggling,2026-10-16,6fc36f0-dirty,no
