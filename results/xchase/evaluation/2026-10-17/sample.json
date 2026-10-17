@@ -1,0 +1,62 @@
+[
+ {
+  "how": "noted: easiest",
+  "name": "José Caballero",
+  "slug": "jose_caballero"
+ },
+ {
+  "how": "noted: easiest",
+  "name": "Angel Martínez",
+  "slug": "angel_martinez"
+ },
+ {
+  "how": "noted: biggest",
+  "name": "Zach Neto",
+  "slug": "zach_neto"
+ },
+ {
+  "how": "noted: biggest",
+  "name": "Colson Montgomery",
+  "slug": "colson_montgomery"
+ },
+ {
+  "how": "random: pitch: two-strike take x mixed (pool 70)",
+  "name": "Curtis Mead",
+  "slug": "curtis_mead"
+ },
+ {
+  "how": "random: pitch: two-strike take x decision-led/decision-only (pool 17)",
+  "name": "Samuel Basallo",
+  "slug": "samuel_basallo"
+ },
+ {
+  "how": "random: pitch: take before two strikes x mixed (pool 56)",
+  "name": "Wade Meckler",
+  "slug": "wade_meckler"
+ },
+ {
+  "how": "random: pitch: take before two strikes x decision-only (pool 11)",
+  "name": "Konnor Griffin",
+  "slug": "konnor_griffin"
+ },
+ {
+  "how": "random: contact line x execution-led (pool 41)",
+  "name": "Nolan Gorman",
+  "slug": "nolan_gorman"
+ },
+ {
+  "how": "random: nothing stands out|nothing to change x mixed (pool 29)",
+  "name": "Miguel Vargas",
+  "slug": "miguel_vargas"
+ },
+ {
+  "how": "random: pitch: video item x mixed (pool 15)",
+  "name": "Nick Loftin",
+  "slug": "nick_loftin"
+ },
+ {
+  "how": "random: spread line x decision-only/mixed (pool 5)",
+  "name": "Yainer Diaz",
+  "slug": "yainer_diaz"
+ }
+]

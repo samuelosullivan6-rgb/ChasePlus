@@ -57,3 +57,8 @@ results/xchase/player_cards/*/static/
 
 # Printable PDFs for hitters beyond the 17 noted ones (step 17 --print).
 results/xchase/player_cards/*/print/
+
+# Screenshots behind each card evaluation (results/xchase/evaluation/<date>/),
+# about 50 MB a review. Kept locally beside the write-up, which names every
+# file it cites and the commit the pictures were taken from.
+results/xchase/evaluation/*/screenshots/
