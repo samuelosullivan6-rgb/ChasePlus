@@ -47,9 +47,12 @@
   color-scheme: dark;
 }
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 body { background: var(--plane); color: var(--ink); font-family: var(--font); font-size: 15px;
        line-height: 1.45; padding-inline: 16px; padding-block: 20px 40px; }
 .wrap { max-width: 1440px; margin: 0 auto; display: grid; gap: 16px; }
+/* two views of the same page: the controls each one does not use are hidden */
+body[data-view="roster"] .card-only, body[data-view="card"] .roster-only { display: none; }
 h1, h2, h3 { margin: 0; text-wrap: balance; }
 .eyebrow { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
 button, input, select { font: inherit; color: inherit; }
@@ -153,6 +156,48 @@ summary { cursor: pointer; font-weight: 700; }
        border-radius: 6px; padding: 8px 10px; font-size: 13px; box-shadow: 0 4px 16px rgba(0,0,0,.18); max-width: 240px; }
 .tip strong { font-size: 15px; }
 .tip .k { color: var(--muted); }
+.back { margin: 0; font-size: 14px; }
+.back a { color: var(--blue); text-decoration: none; }
+.back a:hover { text-decoration: underline; }
+
+/* the roster: every hitter on one page, sorted by runs at stake, each name opening his card */
+.roster { background: var(--surface); border: 1px solid var(--hair); border-radius: 10px; display: grid; gap: 14px; padding-top: 22px; overflow: hidden; }
+.roster .rhead { padding: 0 24px; display: grid; gap: 6px; }
+.roster h1 { font-size: clamp(24px, 3vw, 32px); font-weight: 800; letter-spacing: -.01em; }
+.roster .lede { margin: 0; color: var(--ink2); max-width: 90ch; }
+.roster .scroll { overflow: auto; }
+.roster table { border-collapse: collapse; width: 100%; min-width: 1560px; color: var(--ink); font-size: 14px; }
+.roster th, .roster td { padding: 7px 10px; text-align: left; border-bottom: 1px solid var(--hair); vertical-align: top; white-space: nowrap; }
+.roster th:first-child, .roster td:first-child { padding-left: 24px; }
+.roster th { font-size: 11px; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: .05em; cursor: pointer;
+             position: sticky; top: 0; background: var(--surface); user-select: none; vertical-align: bottom; }
+.roster th.sorted { color: var(--ink); }
+.roster th .dir { font-size: 10px; margin-left: 3px; }
+.roster th.right, .roster td.right { text-align: right; font-variant-numeric: tabular-nums; }
+.roster td.plan { white-space: normal; min-width: 30ch; max-width: 40ch; color: var(--ink2); font-size: 13px; }
+.roster td.leak { white-space: normal; min-width: 22ch; max-width: 28ch; }
+.roster td.neg { color: var(--red); }
+.roster td.pos { color: var(--blue); }
+.roster a { color: var(--blue); text-decoration: none; }
+.roster a:hover { text-decoration: underline; }
+.roster .tag { display: inline-block; font-size: 11px; padding: 1px 6px; border-radius: 10px; background: var(--plane); color: var(--ink2); }
+.roster .glossary { margin: 0; padding: 0 24px 22px; color: var(--muted); font-size: 13px; max-width: 110ch; }
+.roster .none { padding: 0 24px 22px; color: var(--ink2); }
+/* phones: each hitter as a short card (team, name, runs, top leak, start with) that opens on a tap */
+@media (max-width: 720px) {
+  .roster table { min-width: 0; }
+  .roster thead { display: none; }
+  .roster tbody tr { display: block; padding: 10px 16px; border-bottom: 1px solid var(--hair); cursor: pointer; }
+  .roster tbody td { display: flex; justify-content: space-between; gap: 12px; border: 0; padding: 2px 0; white-space: normal; text-align: left; }
+  .roster tbody td:first-child { padding-left: 0; font-weight: 700; }
+  .roster tbody td::before { content: attr(data-label); color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .05em; flex: 0 0 auto; padding-top: 3px; }
+  .roster tbody td.right { text-align: right; }
+  .roster tbody td.plan { display: block; min-width: 0; max-width: none; padding-top: 6px; }
+  .roster tbody td.plan::before { display: block; margin-bottom: 2px; }
+  .roster tbody td.leak { min-width: 0; max-width: none; }
+  .roster tbody td.more { display: none; }
+  .roster tbody tr.open td.more { display: flex; }
+}
 
 /* one column: the plan, leaks and table come before the pictures, so a phone opens on the plan */
 @media (max-width: 1100px) { .body { grid-template-columns: minmax(0, 1fr); } aside { order: -1; } }
@@ -174,13 +219,25 @@ summary { cursor: pointer; font-weight: 700; }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
 
+<body data-view="card">
 <div class="wrap">
-  <div class="controls" role="group" aria-label="Card controls">
+  <div class="controls" role="group" aria-label="Page controls">
     <div class="control">
       <label for="season">Season</label>
       <div class="picker"><select id="season" aria-label="Choose a season"></select></div>
     </div>
     <div class="control">
+      <span class="label" id="lab-view">View</span>
+      <div class="seg" role="radiogroup" aria-labelledby="lab-view" id="seg-view">
+        <input type="radio" name="view" id="view-roster" value="roster"><label for="view-roster">Roster</label>
+        <input type="radio" name="view" id="view-card" value="card" checked><label for="view-card">Card</label>
+      </div>
+    </div>
+    <div class="control">
+      <label for="team">Team</label>
+      <div class="picker"><select id="team" aria-label="Choose a team"><option value="">All teams</option></select></div>
+    </div>
+    <div class="control card-only">
       <label for="player-search">Hitter</label>
       <div class="picker">
         <input id="player-search" list="player-list" placeholder="Search by name" autocomplete="off">
@@ -188,21 +245,29 @@ summary { cursor: pointer; font-weight: 700; }
         <select id="player" aria-label="Choose a hitter"></select>
       </div>
     </div>
-    <div class="control">
+    <div class="control roster-only">
+      <label for="q">Search</label>
+      <div class="picker"><input id="q" type="search" placeholder="Hitter name" autocomplete="off"></div>
+    </div>
+    <div class="control roster-only">
+      <label for="kind">Problem</label>
+      <div class="picker"><select id="kind" aria-label="Filter by the kind of problem"><option value="">Any</option><option>choices</option><option>mostly choices</option><option>mixed</option><option>mostly contact</option><option>contact</option></select></div>
+    </div>
+    <div class="control card-only">
       <span class="label" id="lab-base">Compare with</span>
       <div class="seg" role="radiogroup" aria-labelledby="lab-base" id="seg-base">
         <input type="radio" name="base" id="base-match" value="match" checked><label for="base-match">Same side and hand</label>
         <input type="radio" name="base" id="base-all" value="all"><label for="base-all">All hitters</label>
       </div>
     </div>
-    <div class="control">
+    <div class="control card-only">
       <span class="label" id="lab-metric">Show</span>
       <div class="seg" role="radiogroup" aria-labelledby="lab-metric" id="seg-metric">
         <input type="radio" name="metric" id="metric-chase" value="chase" checked><label for="metric-chase">Chase choices</label>
         <input type="radio" name="metric" id="metric-whiff" value="whiff"><label for="metric-whiff">Misses on chases</label>
       </div>
     </div>
-    <div class="control">
+    <div class="control card-only">
       <span class="label" id="lab-pitch">Pitches</span>
       <div class="seg" role="radiogroup" aria-labelledby="lab-pitch" id="seg-pitch">
         <input type="radio" name="pitch" id="pitch-all" value="all" checked><label for="pitch-all">All</label>
@@ -211,7 +276,7 @@ summary { cursor: pointer; font-weight: 700; }
         <input type="radio" name="pitch" id="pitch-offspeed" value="2"><label for="pitch-offspeed">Changeups</label>
       </div>
     </div>
-    <div class="control">
+    <div class="control card-only">
       <span class="label" id="lab-hand">Plan, leaks and table</span>
       <div class="seg" role="radiogroup" aria-labelledby="lab-hand" id="seg-hand">
         <input type="radio" name="hand" id="hand-all" value="all" checked><label for="hand-all">All pitchers</label>
@@ -222,8 +287,9 @@ summary { cursor: pointer; font-weight: 700; }
   </div>
   <p class="state" id="state"></p>
   <p class="notice" id="notice" hidden></p>
+  <p class="back" id="back" hidden><a id="back-link" href="#roster">&larr; Back to the roster</a></p>
 
-  <article class="card" id="card" aria-live="polite">
+  <article class="card" id="card" aria-live="polite" hidden>
     <div class="head">
       <div>
         <h1 id="name"></h1>
@@ -254,16 +320,25 @@ summary { cursor: pointer; font-weight: 700; }
       <aside id="aside"></aside>
     </div>
   </article>
+
+  <section class="roster" id="roster" aria-label="The roster" hidden>
+    <div class="rhead">
+      <h1 id="roster-title"></h1>
+      <p class="lede" id="roster-lede"></p>
+    </div>
+    <div class="scroll"><table id="roster-table"><thead><tr></tr></thead><tbody></tbody></table></div>
+    <p class="none" id="roster-none" hidden>No hitter matches. Clear the search, the team or the problem filter.</p>
+    <p class="glossary" id="roster-glossary"></p>
+  </section>
   <p class="footer" id="footer"></p>
 </div>
 <div class="tip" id="tip" hidden></div>
 
-<script src="https://cdn.jsdelivr.net/npm/plotly.js-dist-min@2.35.2/plotly.min.js"></script>
 <script src="../seasons.js"></script>
 <script>/*__CARD_MATH__*/</script>
 <script type="application/json" id="card-data">/*__DATA__*/</script>
 <script>
-(async function () {
+(function () {
   "use strict";
   const M = window.CardMath;
   const D = JSON.parse(document.getElementById("card-data").textContent);
@@ -274,52 +349,6 @@ summary { cursor: pointer; font-weight: 700; }
   const GROUPS = D.countGroups;           // [{key,label,detail}]
   const PITCH_NAMES = ["fastballs", "breaking balls", "changeups and splitters"];
   document.documentElement.style.setProperty("--panel-aspect", `${NX} / ${NZ}`);
-
-  // ---- seasons: one page per season; the switcher keeps the hitter in the hash ----
-  const seasonSel = document.getElementById("season");
-  const SEASONS = (Array.isArray(window.CHASE_SEASONS) && window.CHASE_SEASONS.length ? window.CHASE_SEASONS : (D.seasons || []))
-    .concat([D.season]).filter((y, i, a) => a.indexOf(y) === i).sort((a, b) => b - a);
-  for (const y of SEASONS) { const o = document.createElement("option"); o.value = String(y); o.textContent = String(y); seasonSel.append(o); }
-  seasonSel.value = String(D.season);
-  seasonSel.addEventListener("change", () => {
-    try { sessionStorage.setItem("chaseFrom", document.getElementById("name").textContent); } catch (e) {}
-    location.href = `../${seasonSel.value}/index.html${location.hash}`;
-  });
-
-  // ---- pitches: one 9-byte record each, in pitches.bin beside the page ----
-  async function loadPitches() {
-    const line = document.getElementById("state");
-    line.textContent = `Loading the ${D.season} pitches\u2026`;
-    try {
-      const res = await fetch(D.pitchFile);
-      if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
-      return new Uint8Array(await res.arrayBuffer());
-    } catch (e) {
-      line.textContent = "";
-      document.getElementById("name").textContent = "The pitches did not load";
-      document.getElementById("line1").textContent = `This page reads ${D.pitchFile} from the folder beside it, and the browser would not load it (${e.message}).`;
-      document.getElementById("line2").textContent = location.protocol === "file:"
-        ? "A browser will not load it from a file on disk. Open the page from the hosted site, or serve the project folder with a local web server (python -m http.server) and open it from there."
-        : "Reload the page. If it keeps happening, the file is missing from the site.";
-      return null;
-    }
-  }
-  const bytes = await loadPitches();
-  if (!bytes) return;
-  const REC = D.recordBytes, N = bytes.length / REC, dv = new DataView(bytes.buffer);
-  const P = {
-    x: new Float64Array(N), z: new Float64Array(N), chase: new Uint8Array(N), whiff: new Uint8Array(N),
-    rhp: new Uint8Array(N), lhb: new Uint8Array(N), group: new Uint8Array(N), pitch: new Uint8Array(N),
-    eAll: new Float64Array(N), eMatch: new Float64Array(N), wAll: new Float64Array(N), wMatch: new Float64Array(N),
-  };
-  for (let i = 0; i < N; i++) {
-    const o = i * REC, f = bytes[o + 4];
-    P.x[i] = dv.getInt16(o, true) / 100; P.z[i] = dv.getInt16(o + 2, true) / 100;
-    P.chase[i] = f & 1; P.whiff[i] = (f >> 1) & 1; P.rhp[i] = (f >> 2) & 1; P.lhb[i] = (f >> 7) & 1;
-    P.group[i] = (f >> 3) & 3; P.pitch[i] = (f >> 5) & 3;
-    P.eAll[i] = bytes[o + 5] / 255; P.eMatch[i] = bytes[o + 6] / 255;
-    P.wAll[i] = bytes[o + 7] / 255; P.wMatch[i] = bytes[o + 8] / 255;
-  }
 
   // ---- state ----
   for (const r of D.references) {
@@ -334,15 +363,83 @@ summary { cursor: pointer; font-weight: 700; }
   }
   const everyone = D.players.concat(D.references);
   const bySlug = new Map(everyone.map((p) => [p.slug, p]));
-  const state = { slug: D.defaultSlug, base: "match", metric: "chase", pitch: "all", hand: "all", sel: null, selFor: null };
+  const TEAMS = Array.from(new Set(D.players.flatMap((p) => p.teams))).sort();
+  // Two views of one page: the roster (every hitter, by team) and a card.
+  // The URL hash says which: #roster, #roster/NYY, or #<hitter>.
+  const state = { view: "card", team: "", slug: D.defaultSlug, base: "match", metric: "chase", pitch: "all", hand: "all", sel: null, selFor: null,
+                  q: "", kind: "", sort: "stake", dir: -1 };
   let panels = {};                         // "row|group" -> what the 3D view needs
-  let missing = null;                    // a hitter carried over from another season who has no card here
-  try {
-    const h = location.hash.slice(1);
-    let from = ""; try { from = sessionStorage.getItem("chaseFrom") || ""; sessionStorage.removeItem("chaseFrom"); } catch (e) {}
-    if (bySlug.has(h)) state.slug = h;
-    else if (h) { missing = from || h.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()); state.slug = D.references[0].slug; }
-  } catch (e) {}
+  function parseHash() {
+    let h = location.hash.slice(1);
+    try { h = decodeURIComponent(h); } catch (e) {}
+    if (h === "roster" || h.startsWith("roster/")) return { view: "roster", team: h.slice(7).trim().toUpperCase() };
+    return { view: "card", slug: h };
+  }
+  const rosterHash = (team) => "#roster" + (team ? "/" + team : "");
+  const ownHash = () => (state.view === "roster" ? rosterHash(state.team) : "#" + state.slug);
+
+  // ---- seasons: one page per season; the switcher keeps the view, the hitter or the team in the hash ----
+  const seasonSel = document.getElementById("season");
+  const SEASONS = (Array.isArray(window.CHASE_SEASONS) && window.CHASE_SEASONS.length ? window.CHASE_SEASONS : (D.seasons || []))
+    .concat([D.season]).filter((y, i, a) => a.indexOf(y) === i).sort((a, b) => b - a);
+  for (const y of SEASONS) { const o = document.createElement("option"); o.value = String(y); o.textContent = String(y); seasonSel.append(o); }
+  seasonSel.value = String(D.season);
+  seasonSel.addEventListener("change", () => {
+    if (state.view === "card") { try { sessionStorage.setItem("chaseFrom", document.getElementById("name").textContent); } catch (e) {} }
+    location.href = `../${seasonSel.value}/index.html${ownHash()}`;
+  });
+
+  // ---- pitches: one 9-byte record each, in pitches.bin beside the page, fetched for the first card (the roster does without) ----
+  let P = null, pitchesPromise = null;
+  function ensurePitches() {
+    if (P) return Promise.resolve(true);
+    if (pitchesPromise) return pitchesPromise;
+    pitchesPromise = fetch(D.pitchFile).then(async (res) => {
+      if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+      const bytes = new Uint8Array(await res.arrayBuffer());
+      const REC = D.recordBytes, N = bytes.length / REC, dv = new DataView(bytes.buffer);
+      const Q = {
+        x: new Float64Array(N), z: new Float64Array(N), chase: new Uint8Array(N), whiff: new Uint8Array(N),
+        rhp: new Uint8Array(N), lhb: new Uint8Array(N), group: new Uint8Array(N), pitch: new Uint8Array(N),
+        eAll: new Float64Array(N), eMatch: new Float64Array(N), wAll: new Float64Array(N), wMatch: new Float64Array(N),
+      };
+      for (let i = 0; i < N; i++) {
+        const o = i * REC, f = bytes[o + 4];
+        Q.x[i] = dv.getInt16(o, true) / 100; Q.z[i] = dv.getInt16(o + 2, true) / 100;
+        Q.chase[i] = f & 1; Q.whiff[i] = (f >> 1) & 1; Q.rhp[i] = (f >> 2) & 1; Q.lhb[i] = (f >> 7) & 1;
+        Q.group[i] = (f >> 3) & 3; Q.pitch[i] = (f >> 5) & 3;
+        Q.eAll[i] = bytes[o + 5] / 255; Q.eMatch[i] = bytes[o + 6] / 255;
+        Q.wAll[i] = bytes[o + 7] / 255; Q.wMatch[i] = bytes[o + 8] / 255;
+      }
+      P = Q;
+      return true;
+    }).catch((e) => {
+      pitchesPromise = null;               // a view switch and back tries again
+      document.getElementById("state").textContent = "";
+      document.getElementById("card").hidden = state.view !== "card";
+      document.getElementById("name").textContent = "The pitches did not load";
+      document.getElementById("line1").textContent = `This page reads ${D.pitchFile} from the folder beside it, and the browser would not load it (${e.message}).`;
+      document.getElementById("line2").textContent = location.protocol === "file:"
+        ? "A browser will not load it from a file on disk. Open the page from the hosted site, or serve the project folder with a local web server (python -m http.server) and open it from there."
+        : "Reload the page. If it keeps happening, the file is missing from the site.";
+      return false;
+    });
+    return pitchesPromise;
+  }
+
+  // ---- the 3D view's library, loaded with the first card rather than with the page ----
+  let plotlyPromise = null;
+  function ensurePlotly() {
+    if (window.Plotly) return Promise.resolve();
+    if (!plotlyPromise) plotlyPromise = new Promise((resolve, reject) => {
+      const s = document.createElement("script");
+      s.src = "https://cdn.jsdelivr.net/npm/plotly.js-dist-min@2.35.2/plotly.min.js";
+      s.onload = () => resolve();
+      s.onerror = () => { plotlyPromise = null; reject(new Error("plotly.js did not load")); };
+      document.head.append(s);
+    });
+    return plotlyPromise;
+  }
 
   // ---- theme ----
   let T = {};
@@ -496,7 +593,7 @@ summary { cursor: pointer; font-weight: 700; }
     const bats = { R: "Bats right", L: "Bats left", S: "Switch hitter" }[p.bats];
     const height = p.height_in ? ` \u00b7 ${Math.floor(p.height_in / 12)}'${p.height_in % 12}"` : "";
     document.getElementById("line1").textContent =
-      `${bats}${height} \u00b7 ${D.season} \u00b7 ${p.pa} PA \u00b7 xChase+ ${Math.round(p.xchase_plus)}, ${ordinal(p.rank)} of ${p.of}`;
+      `${bats}${height} \u00b7 ${(p.teams || [p.team]).join(" / ")} ${D.season} \u00b7 ${p.pa} PA \u00b7 xChase+ ${Math.round(p.xchase_plus)}, ${ordinal(p.rank)} of ${p.of}`;
     document.getElementById("line2").textContent =
       `Swings at ${pct(p.chase)} of pitches outside the zone. Hitters on average swing at ${pct(p.chase_league)} of the same pitches.`;
     const stake = el("div", { class: "tile" }, el("div", { class: "eyebrow", text: "Cost of far-off chases" }),
@@ -649,8 +746,11 @@ summary { cursor: pointer; font-weight: 700; }
     if (!panel) return;
     if (!document.getElementById("terrain-box").open) return;
     if (!window.Plotly) {
-      note.textContent = "The 3D view loads a charting library from the internet and could not reach it. The flat pictures above show the same thing.";
+      note.textContent = "Loading the 3D view…";
       box.hidden = true;
+      ensurePlotly().then(
+        () => { if (state.view === "card" && state.slug === p.slug) drawTerrain(p); },
+        () => { note.textContent = "The 3D view loads a charting library from the internet and could not reach it. The flat pictures above show the same thing."; });
       return;
     }
     box.hidden = false;
@@ -869,30 +969,183 @@ summary { cursor: pointer; font-weight: 700; }
   function render() {
     const p = bySlug.get(state.slug) || bySlug.get(D.defaultSlug);
     state.slug = p.slug;
+    // the team filter never hides the hitter on the card
+    if (!p.reference && state.team && !p.teams.includes(state.team)) { state.team = ""; document.getElementById("team").value = ""; document.getElementById("back-link").href = rosterHash(""); }
+    fillHitters();
     ZONE = p.zone;
     MASK = M.zoneMask(XS, ZS, ZONE[0], ZONE[1]);
-    document.getElementById("player").value = p.slug;
     setSegEnabled("seg-base", !p.reference); setSegEnabled("seg-metric", !p.reference); setSegEnabled("seg-pitch", !p.reference); setSegEnabled("seg-hand", !p.reference);
+    document.getElementById("card").hidden = false;
     header(p); zones(p); aside(p); numbersTable(p); stateLine(p);
     lastRender = p;
-    try { history.replaceState(null, "", "#" + p.slug); } catch (e) {}
+    try { if (location.hash !== "#" + p.slug) history.replaceState(null, "", "#" + p.slug); } catch (e) {}
+  }
+
+  // ---- the roster: every hitter on one page, from the same card data ----
+  const ARCHETYPE_WORDS = { "decision-only": "choices", "decision-led": "mostly choices", mixed: "mixed", "execution-led": "mostly contact", "execution-only": "contact" };
+  const STATUS_WORDS = { struggling: "struggling", average: "average", productive: "hitting well" };
+  const r1 = (v) => Math.round(v * 10) / 10;
+  const fold = (s) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+  const ROSTER = D.players.map((p) => {
+    const top = (p.leaks.all || [])[0] || null, t = p.target;
+    const beat = !t ? "" : Math.round(t.predicted * 100) <= 2 ? "no target" : `under ${Math.round(t.predicted * 100)} (was ${Math.round(t.excess * 100)})`;
+    return { slug: p.slug, player: p.name, key: fold(p.name), team: p.team, teams: p.teams, bats: p.bats,
+             xchase: Math.round(p.xchase_plus), rank: p.rank, rank_txt: ordinal(p.rank), pa: p.pa,
+             stake: r1(p.runs_at_stake), choices: r1(p.choices), contact: r1(p.contact),
+             kind: ARCHETYPE_WORDS[p.archetype] || p.archetype, noted: !!p.noted,
+             leak: top ? top.phrase : "", leak_runs: top ? r1(top.choices) : null,
+             check: top ? (STATUS_WORDS[top.count_status] || "") : "", depth: top ? Math.round(top.depth_in) : null,
+             target: beat, excess: t ? Math.round(t.excess * 100) : null,
+             plan: p.start_with || (p.plan_items && p.plan_items.length ? p.plan_items[0].text : "") };
+  });
+  const COLS = [
+    ["team", "Team", false], ["player", "Hitter", false], ["bats", "Bats", false],
+    ["xchase", "xChase+ · rank", true], ["pa", "PA", true],
+    ["stake", "Runs at stake", true], ["choices", "Choices", true], ["contact", "Contact", true],
+    ["kind", "Problem", false], ["leak", "Top leak", false], ["leak_runs", "Leak runs", true],
+    ["depth", "Inches off", true], ["check", "Count check", false], ["target", "Beat", true],
+    ["plan", "Start with", false],
+  ];
+  const PHONE = new Set(["team", "player", "stake", "leak", "plan"]);   // the rest opens on a tap
+  let rosterRows = [];                     // the rows as last shown, in order
+  const fmtCell = (k, v) => {
+    if (v === null || v === undefined || v === "") return "";
+    if (k === "choices" || k === "contact" || k === "leak_runs") return (v > 0 ? "+" : v < 0 ? "−" : "") + Math.abs(v).toFixed(1);
+    if (k === "stake") return v.toFixed(1);
+    return String(v);
+  };
+  document.getElementById("roster-title").textContent = `Chase decisions by team, ${D.season}`;
+  document.getElementById("roster-lede").textContent = `Every qualified hitter, sorted by the runs his swing choices on far-off pitches cost per 600 plate appearances. Tap a name for his decision card. Beat is the number to get under in ${D.season + 1}: what the frozen line expects with no change at all, with this season's number beside it. On a phone, tap a hitter for the rest of his row.`;
+  document.getElementById("roster-glossary").textContent = "Runs are per 600 plate appearances. Choices is what the swing decisions cost against an average hitter at the same spot, count and matchup; contact is what the chases produced compared with the average hitter's chases. Problem: the share of the loss that is choices (step 13). Top leak: the costliest count, pitcher hand, pitch group and side of the zone, with the hitter's rate against the league's and how far off the zone the chased pitches were (median inches). Count check: how he hits once the count reaches the leak's counts, shrunk for noise, against the league in the same counts. Beat: leak chasing in points above the league that the frozen line expects next season with no change, with this season's number beside it (step 19); a fix is anything under it. Start with: the plan's first pitch line, with the two rates and the inches off; the rest of the plan is on the card. A traded hitter lists every team, most plate appearances first, and is on each team's roster.";
+
+  function renderRoster() {
+    const head = document.querySelector("#roster-table thead tr"); head.replaceChildren();
+    for (const [k, label, num] of COLS) {
+      const th = el("th", { class: (num ? "right " : "") + (state.sort === k ? "sorted" : ""), text: label, tabindex: "0",
+                            "aria-sort": state.sort === k ? (state.dir < 0 ? "descending" : "ascending") : "none" });
+      if (state.sort === k) th.append(el("span", { class: "dir", text: state.dir < 0 ? "▼" : "▲" }));
+      const sortBy = () => { if (state.sort === k) state.dir = -state.dir; else { state.sort = k; state.dir = num ? -1 : 1; } renderRoster(); };
+      th.addEventListener("click", sortBy);
+      th.addEventListener("keydown", (ev) => { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); sortBy(); } });
+      head.append(th);
+    }
+    const q = fold(state.q.trim());
+    let rows = ROSTER.filter((r) => (!state.team || r.teams.includes(state.team)) && (!q || r.key.includes(q)) && (!state.kind || r.kind === state.kind));
+    const key = state.sort === "target" ? "excess" : state.sort;
+    rows = rows.slice().sort((a, b) => {
+      const x = a[key], y = b[key];
+      if (x === null || x === undefined || x === "") return 1;
+      if (y === null || y === undefined || y === "") return -1;
+      return (typeof x === "number" ? x - y : String(x).localeCompare(String(y))) * state.dir;
+    });
+    rosterRows = rows;
+    const body = document.querySelector("#roster-table tbody"); body.replaceChildren();
+    for (const r of rows) {
+      const tr = el("tr");
+      tr.addEventListener("click", (e) => { if (!e.target.closest("a")) tr.classList.toggle("open"); });
+      for (const [k, label, num] of COLS) {
+        const td = el("td", { class: [num ? "right" : "", k === "plan" ? "plan" : "", k === "leak" ? "leak" : "", PHONE.has(k) ? "" : "more"].filter(Boolean).join(" "), "data-label": label });
+        if (k === "player") { td.append(el("a", { href: "#" + r.slug, text: r.player })); if (r.noted) td.append(" ", el("span", { class: "tag", text: "noted" })); }
+        else if (k === "team") td.textContent = r.teams.join(", ");
+        else if (k === "xchase") td.textContent = `${r.xchase} · ${r.rank_txt}`;
+        else if (k === "choices" || k === "contact" || k === "leak_runs") { td.textContent = fmtCell(k, r[k]); if (r[k] < -0.05) td.classList.add("neg"); else if (r[k] > 0.05) td.classList.add("pos"); }
+        else td.textContent = fmtCell(k, r[k]);
+        tr.append(td);
+      }
+      body.append(tr);
+    }
+    document.getElementById("roster-none").hidden = rows.length > 0;
+    const phone = window.matchMedia("(max-width: 720px)").matches;   // no column heads to click there
+    document.getElementById("state").textContent = `${rows.length} of ${ROSTER.length} hitters${state.team ? ` · ${state.team}` : ""} · sorted by ${COLS.find((c) => c[0] === state.sort)[1].toLowerCase()}${state.dir < 0 ? ", most first" : ""}.${phone ? "" : " Click a column to sort by it."}`;
+  }
+
+  // ---- the views ----
+  const sel = document.getElementById("player"), list = document.getElementById("player-list"), teamSel = document.getElementById("team");
+  TEAMS.forEach((t) => teamSel.append(el("option", { value: t, text: t })));
+  const og = (label, people) => { const g = el("optgroup", { label }); people.forEach((p) => g.append(el("option", { value: p.slug, text: p.reference ? p.name : `${p.name} (${Math.round(p.xchase_plus)})` }))); return g; };
+  let filledFor = null;
+  function fillHitters() {                 // the hitter dropdown, narrowed to the team when one is picked
+    if (filledFor !== state.team) {
+      const mine = state.team ? D.players.filter((p) => p.teams.includes(state.team)) : D.players;
+      sel.replaceChildren(og("Reference", D.references));
+      for (const [key, label] of [["easiest", "Noted: easiest to improve"], ["biggest", "Noted: biggest losses"]]) {
+        const group = mine.filter((p) => p.noted === key);
+        if (group.length) sel.append(og(label, group));
+      }
+      sel.append(og(`${state.team ? state.team + " hitters" : "Every qualified hitter"}, by xChase+ (${mine.length})`, mine));
+      list.replaceChildren(...mine.concat(D.references).map((p) => el("option", { value: p.name })));
+      filledFor = state.team;
+    }
+    sel.value = state.slug;
+  }
+  function showView() {
+    document.body.dataset.view = state.view;
+    document.getElementById("roster").hidden = state.view !== "roster";
+    document.getElementById("back").hidden = state.view !== "card";
+    if (state.view === "roster") { document.getElementById("card").hidden = true; document.getElementById("tip").hidden = true; }
+    document.querySelectorAll('input[name="view"]').forEach((r) => (r.checked = r.value === state.view));
+    teamSel.value = state.team;
+    document.getElementById("back-link").href = rosterHash(state.team);
+  }
+  function showCard() {
+    ensurePlotly().catch(() => {});
+    if (P) { render(); return; }
+    document.getElementById("card").hidden = true;
+    document.getElementById("state").textContent = `Loading the ${D.season} pitches…`;
+    ensurePitches().then((ok) => { if (ok && state.view === "card") render(); });
+  }
+  function applyHash() {
+    const h = parseHash();
+    let note = null;
+    if (h.view === "roster") {
+      state.view = "roster";
+      state.team = TEAMS.includes(h.team) ? h.team : "";
+      if (h.team && !state.team) { note = `No ${h.team} in ${D.season}: showing every team.`; try { history.replaceState(null, "", rosterHash("")); } catch (e) {} }
+      showView(); fillHitters(); renderRoster();
+    } else {
+      state.view = "card";
+      let from = ""; try { from = sessionStorage.getItem("chaseFrom") || ""; sessionStorage.removeItem("chaseFrom"); } catch (e) {}
+      if (bySlug.has(h.slug)) state.slug = h.slug;
+      else if (h.slug) {                   // a hitter carried over from another season who has no card here
+        const who = from || h.slug.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+        state.slug = D.references[0].slug;
+        note = `${who} has no ${D.season} card: he did not qualify that season. Showing ${bySlug.get(state.slug).name.toLowerCase()} instead.`;
+      } else if (!bySlug.has(state.slug)) state.slug = D.defaultSlug;
+      showView(); showCard();
+    }
+    const n = document.getElementById("notice");
+    n.textContent = note || ""; n.hidden = !note;
   }
 
   // ---- controls ----
-  const sel = document.getElementById("player"), list = document.getElementById("player-list");
-  const og = (label, people) => { const g = el("optgroup", { label }); people.forEach((p) => g.append(el("option", { value: p.slug, text: p.reference ? p.name : `${p.name} (${Math.round(p.xchase_plus)})` }))); return g; };
-  sel.append(og("Reference", D.references));
-  sel.append(og("Noted: easiest to improve", D.players.filter((p) => p.noted === "easiest")));
-  sel.append(og("Noted: biggest losses", D.players.filter((p) => p.noted === "biggest")));
-  sel.append(og(`Every qualified hitter, by xChase+ (${D.players.length})`, D.players));
-  everyone.forEach((p) => list.append(el("option", { value: p.name })));
   sel.addEventListener("change", () => { state.slug = sel.value; render(); });
   const search = document.getElementById("player-search");
   search.addEventListener("change", () => {
-    const q = search.value.trim().toLowerCase();
-    const hit = everyone.find((p) => p.name.toLowerCase() === q) || everyone.find((p) => p.name.toLowerCase().includes(q));
+    const q = fold(search.value.trim());
+    if (!q) return;
+    const hit = everyone.find((p) => fold(p.name) === q) || everyone.find((p) => fold(p.name).includes(q));
     if (hit) { state.slug = hit.slug; render(); search.value = ""; }
   });
+  document.querySelectorAll('input[name="view"]').forEach((r) => r.addEventListener("change", () => {
+    if (!r.checked) return;
+    // Roster to Card opens the first hitter listed unless the card's hitter is on the list
+    if (r.value === "card" && state.view === "roster" && rosterRows.length && !rosterRows.some((x) => x.slug === state.slug)) state.slug = rosterRows[0].slug;
+    const next = r.value === "roster" ? rosterHash(state.team) : "#" + state.slug;
+    if (location.hash === next) applyHash(); else location.hash = next;
+  }));
+  teamSel.addEventListener("change", () => {
+    state.team = teamSel.value;
+    document.getElementById("back-link").href = rosterHash(state.team);
+    if (state.view === "roster") { try { history.replaceState(null, "", rosterHash(state.team)); } catch (e) {} renderRoster(); return; }
+    fillHitters();
+    const p = bySlug.get(state.slug);
+    if (state.team && p && !p.reference && !p.teams.includes(state.team)) {
+      const first = D.players.find((q) => q.teams.includes(state.team));   // the team's first hitter in the dropdown
+      if (first) { state.slug = first.slug; render(); }
+    }
+  });
+  document.getElementById("q").addEventListener("input", (e) => { state.q = e.target.value; renderRoster(); });
+  document.getElementById("kind").addEventListener("change", (e) => { state.kind = e.target.value; renderRoster(); });
   for (const [name, key] of [["base", "base"], ["metric", "metric"], ["pitch", "pitch"]])
     document.querySelectorAll(`input[name="${name}"]`).forEach((r) => r.addEventListener("change", () => { state[key] = r.value; render(); }));
   document.querySelectorAll('input[name="hand"]').forEach((r) => r.addEventListener("change", () => { state.hand = r.value; if (lastRender) { aside(lastRender); stateLine(lastRender); } }));
@@ -900,15 +1153,11 @@ summary { cursor: pointer; font-weight: 700; }
   document.getElementById("mesh").addEventListener("change", () => lastRender && drawTerrain(lastRender));
   document.getElementById("terrain-box").addEventListener("toggle", () => { if (lastRender && document.getElementById("terrain-box").open) drawTerrain(lastRender); });
   document.getElementById("footer").textContent = D.footer;
+  window.addEventListener("hashchange", applyHash);
 
   readTheme();
-  render();
-  if (missing) {
-    const n = document.getElementById("notice");
-    n.textContent = `${missing} has no ${D.season} card: he did not qualify that season. Showing ${bySlug.get(state.slug).name.toLowerCase()} instead.`;
-    n.hidden = false;
-  }
-  const redrawAll = () => { readTheme(); if (lastRender) { zones(lastRender); aside(lastRender); } };
+  applyHash();
+  const redrawAll = () => { readTheme(); if (lastRender && state.view === "card") { zones(lastRender); aside(lastRender); } };
   try { window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", redrawAll); } catch (e) {}
   new MutationObserver(redrawAll).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
   let resizeTimer;

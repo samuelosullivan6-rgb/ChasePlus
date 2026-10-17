@@ -1,10 +1,10 @@
 """
 Step 22: the card site, every season.
 
-Steps 17 and 21 build one season's pages, results/xchase/player_cards/
-<season>/ (the decision cards, their pitches, the reference cards and the
-team page). This step runs them for every season, so the pages agree: the
-same wording on every card and the same season list in every switcher. A
+Step 17 builds one season's page, results/xchase/player_cards/<season>/
+(the decision cards and the roster view, their pitches and the reference
+cards). This step runs it for every season, so the pages agree: the same
+wording on every card and the same season list in every switcher. A
 change to the plan's wording in step 17 is a run of this step, not of step
 17 alone; the 2025 card data once went stale because only 2026 had been
 rebuilt.
@@ -20,20 +20,20 @@ For each season, oldest first:
      such pairs, so its cards carry no target. The newest season is never
      frozen here: that is step 19 run by hand before the next season starts,
      and a frozen file is never rewritten.
-  2. step 17 --season <season>: the page, pitches.bin, the reference cards,
-     and for 2026 the noted hitters' cards and report.
-  3. step 21 --season <season>: the team page.
+  2. step 17 --season <season>: the page (cards and roster), pitches.bin,
+     the reference cards, and for 2026 the noted hitters' cards and report.
 
 The season switcher on every page reads player_cards/seasons.js, which
-steps 17 and 21 rewrite from the folders on disk, so a season built later
+step 17 rewrites from the folders on disk, so a season built later
 appears in every page's switcher without rebuilding the others.
 
 Options: --seasons 2024 2025 (default: every season with an xChase+
 leaderboard), --skip-freeze (build the pages with whatever frozen files
 exist), --skip-png (passed to step 17: no reference or noted cards).
 
-Needs the inputs of steps 17 and 21 for each season: steps 04
-(--expected-contact), 13, 15 and 16, and the raw Statcast files.
+Needs the inputs of step 17 for each season: steps 04
+(--expected-contact), 13, 15 and 16, and the raw Statcast files (step 01)
+for the teams.
 """
 
 import argparse
@@ -104,9 +104,7 @@ for season in seasons:
                 raise SystemExit(f"step 19 --retrospective failed for {season}")
     if run("17", "--season", str(season), *(["--skip-png"] if args.skip_png else [])).returncode:
         raise SystemExit(f"step 17 failed for {season}")
-    if run("21", "--season", str(season)).returncode:
-        raise SystemExit(f"step 21 failed for {season}")
 
 print(f"\nBuilt {len(seasons)} season{'s' if len(seasons) != 1 else ''} "
       f"({', '.join(map(str, seasons))}) in {(time.time() - started) / 60:.1f} min. "
-      f"player_cards/index.html and teams.html send to the newest.")
+      f"player_cards/index.html sends to the newest; teams.html into its roster view.")

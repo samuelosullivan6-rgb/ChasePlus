@@ -4,9 +4,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="light dark">
 <meta name="robots" content="noindex">
-<title>Chase Team View</title>
-<script>location.replace("2026/teams.html" + location.search + location.hash);</script>
-<meta http-equiv="refresh" content="0; url=2026/teams.html">
-<p style="font-family: system-ui, sans-serif; padding: 24px">One page per season now.
-The newest is <a href="2026/teams.html">2026/teams.html</a>; the season switcher is on the page.</p>
+<title>Chase Decision Cards</title>
+<script>
+var team = new URLSearchParams(location.search).get("team");
+location.replace("2026/index.html#roster" + (team ? "/" + encodeURIComponent(team.trim().toUpperCase()) : ""));
+</script>
+<meta http-equiv="refresh" content="0; url=2026/index.html#roster">
+<p style="font-family: system-ui, sans-serif; padding: 24px">The roster is a view of the cards page now:
+<a href="2026/index.html#roster">2026/index.html#roster</a>. The team filter and the season switcher are on the page.</p>
 </html>

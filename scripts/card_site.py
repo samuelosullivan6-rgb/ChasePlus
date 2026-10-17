@@ -1,13 +1,15 @@
 """
-The card site's season folders. Steps 17 and 21 write one page per season
-into results/xchase/player_cards/<season>/ and share three small things:
+The card site's season folders. Step 17 writes one page per season into
+results/xchase/player_cards/<season>/ and uses three small things:
 
-  built_seasons(page)   the seasons that already have that page
-  write_seasons_js()    player_cards/seasons.js, the list every season's
-                        pages read for their season switcher
-  write_redirect(page)  player_cards/<page>, which sends the old address
-                        to the newest season's page, keeping the hitter
-                        in the URL hash and any query string
+  built_seasons(page)        the seasons that already have that page
+  write_seasons_js()         player_cards/seasons.js, the list every
+                             season's page reads for its season switcher
+  write_redirect(page)       player_cards/<page>, which sends the old
+                             address to the newest season's page, keeping
+                             the hitter in the URL hash and any query
+  write_roster_redirect()    the roster's old page, teams.html, sent into
+                             the page's roster view with its ?team= kept
 """
 
 import re
@@ -25,11 +27,11 @@ def built_seasons(page):
 
 
 def write_seasons_js(*extra):
-    """Every season with a cards page or a team page, plus any given
-    (the one being built, whose page may not be written yet)."""
-    seasons = sorted(set(built_seasons("index.html")) | set(built_seasons("teams.html")) | set(extra))
+    """Every season with a cards page, plus any given (the one being
+    built, whose page may not be written yet)."""
+    seasons = sorted(set(built_seasons("index.html")) | set(extra))
     (CARDS_DIR / "seasons.js").write_text(
-        "// Written by steps 17 and 21: the seasons with a page in this folder.\n"
+        "// Written by step 17: the seasons with a page in this folder.\n"
         f"window.CHASE_SEASONS = {seasons};\n")
     return seasons
 
@@ -48,5 +50,27 @@ def write_redirect(page, season, title):
 <meta http-equiv="refresh" content="0; url={target}">
 <p style="font-family: system-ui, sans-serif; padding: 24px">One page per season now.
 The newest is <a href="{target}">{target}</a>; the season switcher is on the page.</p>
+</html>
+""")
+
+
+def write_roster_redirect(path, target):
+    """<path> -> <target>#roster, or #roster/<TEAM> when the old address
+    carried ?team=<team>. The roster was its own page, teams.html, until
+    October 2026; it is a view of the cards page now."""
+    path.write_text(f"""<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="robots" content="noindex">
+<title>Chase Decision Cards</title>
+<script>
+var team = new URLSearchParams(location.search).get("team");
+location.replace("{target}#roster" + (team ? "/" + encodeURIComponent(team.trim().toUpperCase()) : ""));
+</script>
+<meta http-equiv="refresh" content="0; url={target}#roster">
+<p style="font-family: system-ui, sans-serif; padding: 24px">The roster is a view of the cards page now:
+<a href="{target}#roster">{target}#roster</a>. The team filter and the season switcher are on the page.</p>
 </html>
 """)

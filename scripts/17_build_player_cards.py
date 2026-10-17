@@ -38,29 +38,50 @@ Hitters whose problem is contact rather than choices (the execution-led
 group from step 13) also get a whiff picture: how often they miss when
 they do chase, against the league on the same pitches.
 
+TEAM
+  Statcast's pitch file has no batter team, only the home and away
+  teams of each game (in the raw files from step 01). A hitter's team
+  on a pitch is the home team when he bats in the bottom of the inning
+  and the away team otherwise. His team for the season is the one he
+  had the most plate appearances for; a traded hitter lists every team,
+  most plate appearances first, and appears under each of them in the
+  page's team filter.
+
 OUTPUTS
   results/xchase/player_cards/<season>/index.html
       every qualified hitter plus the average right- and left-handed
-      hitter, interactive. One page per season; the season switcher on
-      the page moves between them with the hitter kept in the URL.
+      hitter, interactive, in two views. Card: one hitter's pictures,
+      leaks, plan and tables (#<hitter>). Roster: every hitter on one
+      page, by team, sorted by the runs at stake, with the top leak,
+      the count check, the number to beat and the plan's first pitch
+      line, each name opening the card (#roster, or #roster/NYY for one
+      team). One page per season; the season switcher on the page moves
+      between them with the view, the hitter or the team kept in the URL.
   results/xchase/player_cards/<season>/pitches.bin
-      the season's pitches, one 9-byte record each, which the page loads
-      when it opens. Kept out of the HTML so that a change to the wording
+      the season's pitches, one 9-byte record each, which the page
+      fetches when it first shows a card, so the roster opens without
+      them. Kept out of the HTML so that a change to the wording
       re-commits the page (about 2.5 MB) and not the pitches. Browsers
       will not load it from a file:// address: open the page from the
       hosted site or a local web server (python -m http.server from the
       project folder).
   results/xchase/player_cards/<season>/reference/*.png
       the average right- and left-handed hitter, for comparison
-  results/xchase/player_cards/index.html and seasons.js
-      the old address, sent on to the newest season's page with the
-      hitter kept, and the list of seasons with a page (card_site.py)
+  results/xchase/player_cards/index.html, teams.html and seasons.js,
+  results/xchase/player_cards/<season>/teams.html
+      the old addresses, sent on to the page (index.html to the newest
+      season with the hitter kept; teams.html, the roster's old page,
+      into the roster view with its ?team= kept), and the list of
+      seasons with a page (card_site.py)
   results/xchase/noted_players/
       README.md, a card and a short write-up for the 17 hitters named in
       the step 12 and 13 reports, and cards/*.png (light and dark); for
       2026 only, the season the coach's notes describe
   results/xchase/player_cards/player_cards_<season>.csv
-      one row per hitter: the numbers behind the header and plan
+      one row per hitter: the team and the numbers behind the header
+      and plan
+  results/xchase/player_cards/team_view_<season>.csv
+      the roster's columns, one row per hitter, sorted by runs at stake
 
 Each leak also says how far off the zone the chased pitches were (the
 median, in inches), so "let it go" is never read as "take borderline
@@ -84,8 +105,9 @@ write just the card data (card_players_<season>.json, the CSV) for an
 earlier season, so step 19 can freeze it retrospectively and step 20
 score it. The coach's notes are for 2026 only.
 
-Needs steps 04 (--expected-contact), 13, 15 and 16 first. Step 22 runs
-this step and step 21 for every season, so the pages agree.
+Needs steps 04 (--expected-contact), 13, 15 and 16 first, and the raw
+Statcast files from step 01 for the teams. Step 22 runs this step for
+every season, so the pages agree.
 """
 
 import argparse
@@ -111,6 +133,7 @@ import coach_notes  # noqa: E402
 import card_site  # noqa: E402
 
 PROJECT_DIR = Path(__file__).resolve().parents[1]
+RAW = PROJECT_DIR / "data" / "raw"
 CLEAN = PROJECT_DIR / "data" / "cleaned"
 XCHASE = PROJECT_DIR / "results" / "xchase"
 CARDS_DIR = XCHASE / "player_cards"
@@ -324,6 +347,27 @@ sides = df.groupby(["batter", "stand"]).size().unstack(fill_value=0)
 sides["share_min"] = sides.min(axis=1) / sides.sum(axis=1)
 switch = set(sides.index[sides["share_min"] >= SWITCH_SHARE])
 main_side = sides[["L", "R"]].idxmax(axis=1)
+
+# Each hitter's teams, from the raw files: the home team when he bats in
+# the bottom of the inning, else the away team, most plate appearances first.
+raw_files = sorted(RAW.glob(f"statcast_{SEASON}-*.parquet"))
+if not raw_files:
+    raise SystemExit(f"No raw Statcast files for {SEASON} in data/raw/ (run step 01); "
+                     "the cards need them for each hitter's team.")
+raw = pd.concat([pd.read_parquet(f, columns=["batter", "game_pk", "at_bat_number", "home_team",
+                                             "away_team", "inning_topbot"]) for f in raw_files],
+                ignore_index=True)
+raw = raw[raw["batter"].isin(board["batter"])].drop_duplicates(["game_pk", "at_bat_number", "batter"])
+raw["team"] = raw["home_team"].where(raw["inning_topbot"] == "Bot", raw["away_team"])
+by_team = raw.groupby(["batter", "team"]).size().rename("pa").reset_index()
+by_team = by_team.sort_values(["batter", "pa"], ascending=[True, False])
+TEAMS = by_team.groupby("batter")["team"].agg(list)
+no_team = [n for b, n in zip(board["batter"], board["player"]) if b not in TEAMS.index]
+if no_team:
+    raise SystemExit(f"No team in the raw files for {len(no_team)} hitters on the {SEASON} "
+                     f"leaderboard: {no_team[:5]}")
+print(f"  teams from {len(raw_files)} raw files: {by_team['team'].nunique()} teams, "
+      f"{int((TEAMS.str.len() > 1).sum())} hitters with more than one")
 
 league_chase = df["is_chase"].mean()
 league_whiff = df.loc[df["is_chase"] == 1, "whiff"].mean()
@@ -781,6 +825,7 @@ for _, row in board.sort_values("xchase_plus", ascending=False).iterrows():
     ch = p[p["is_chase"] == 1]
     summary = {
         "id": bid, "name": row["player"],
+        "team": TEAMS[bid][0], "teams": list(TEAMS[bid]),
         "bats": "S" if bid in switch else main_side.get(bid, "R"),
         "rank": int(row["xchase_plus_rank"]), "of": n_qualified,
         "pa": int(row["plate_appearances"]), "xchase_plus": float(row["xchase_plus"]),
@@ -1783,7 +1828,11 @@ def build_page():
           f"and pitches.bin ({len(pitch_bytes) / 1e6:.1f} MB, {len(qualified):,} pitches)")
     newest = max(seasons)
     card_site.write_redirect("index.html", newest, "Chase Decision Cards")
-    print(f"  seasons with a page: {', '.join(map(str, seasons))}; player_cards/index.html sends to {newest}")
+    # the roster's old page, this season's and the root one, into the roster view
+    card_site.write_roster_redirect(SEASON_DIR / "teams.html", "index.html")
+    card_site.write_roster_redirect(CARDS_DIR / "teams.html", f"{newest}/index.html")
+    print(f"  seasons with a page: {', '.join(map(str, seasons))}; player_cards/index.html sends to {newest}, "
+          f"teams.html into its roster view")
     return qualified
 
 
@@ -1986,7 +2035,7 @@ keep = ["batter", "stand", "p_throws", "count_group", "pitch_group", "region", "
 df[keep].to_parquet(CLEAN / f"card_pitches_{SEASON}.parquet", index=False)
 (CLEAN / f"card_players_{SEASON}.json").write_text(json.dumps(to_json_safe({
     "season": SEASON, "zone_height": ZONE_HEIGHT, "average_zone": AVERAGE_ZONE,
-    "players": [{k: p[k] for k in ("id", "name", "bats", "rank", "of", "pa", "xchase_plus",
+    "players": [{k: p[k] for k in ("id", "name", "team", "teams", "bats", "rank", "of", "pa", "xchase_plus",
                                    "archetype", "noted", "runs_at_stake", "choices", "contact",
                                    "zone", "height_in", "side_pitches", "leaks", "target",
                                    "target_text", "plan_items", "start_with")}
@@ -2001,7 +2050,8 @@ for p in players:
     t = {r["group"]: r for r in p["tables"]["all"]}
     top = p["leaks"]["all"][0] if p["leaks"]["all"] else None
     summary_rows.append({
-        "player": p["name"], "batter": p["id"], "bats": p["bats"], "xchase_plus_rank": p["rank"],
+        "player": p["name"], "batter": p["id"], "team": p["team"], "teams": ", ".join(p["teams"]),
+        "bats": p["bats"], "xchase_plus_rank": p["rank"],
         "xchase_plus": round(p["xchase_plus"], 1), "plate_appearances": p["pa"],
         "archetype": p["archetype"], "noted": p["noted"] or "",
         "chase_rate": round(p["chase"], 4), "league_chase_rate_same_pitches": round(p["chase_league"], 4),
@@ -2023,8 +2073,19 @@ for p in players:
         "start_with": p["start_with"],
         "plan": " ".join(p["plan"]),
     })
-pd.DataFrame(summary_rows).to_csv(CARDS_DIR / f"player_cards_{SEASON}.csv", index=False)
-print(f"  wrote player_cards/player_cards_{SEASON}.csv")
+cards_csv = pd.DataFrame(summary_rows)
+cards_csv.to_csv(CARDS_DIR / f"player_cards_{SEASON}.csv", index=False)
+# the roster's columns, sorted the way the roster view opens
+roster_csv = cards_csv.assign(slug=cards_csv["player"].map(slug)).sort_values("runs_at_stake_far_off", ascending=False)
+roster_csv = roster_csv[["team", "teams", "player", "batter", "slug", "bats", "xchase_plus", "xchase_plus_rank",
+                         "plate_appearances", "runs_at_stake_far_off", "choices_runs_per_600",
+                         "contact_runs_per_600", "archetype", "noted", "chase_rate",
+                         "league_chase_rate_same_pitches", "top_leak", "top_leak_runs",
+                         "top_leak_count_status", "top_leak_chase_depth_in", "leak_excess_vs_league",
+                         "leak_excess_predicted_next", "target_text", "start_with", "plan"]]
+roster_csv.to_csv(CARDS_DIR / f"team_view_{SEASON}.csv", index=False)
+print(f"  wrote player_cards/player_cards_{SEASON}.csv and team_view_{SEASON}.csv "
+      f"({len(cards_csv)} hitters, {cards_csv['team'].nunique()} teams)")
 
 if args.data_only:
     print("  --data-only: no page, PNGs or noted report")
