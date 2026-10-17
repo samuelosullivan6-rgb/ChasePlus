@@ -1,0 +1,41 @@
+season,scored_on,period,out_of_sample,group,measure,test,value,se,n_hitters
+2022,2023,full,no,all,xchase_plus,reference payoff per 10-pt cut,4.67216,1.31070,
+2022,2023,full,no,all,offense_runs,reference payoff per 10-pt cut,2.04177,1.27323,
+2022,2023,full,no,all,woba_runs,reference payoff per 10-pt cut,0.75505,1.62570,
+2022,2023,full,no,all,bb_rate,reference payoff per 10-pt cut,0.00836,0.00180,
+2022,2023,full,no,all,k_rate,reference payoff per 10-pt cut,-0.00178,0.00302,
+2022,2023,full,no,all,zone_swing_rate,reference payoff per 10-pt cut,-0.00460,0.00331,
+2022,2023,full,no,all,far_off_chase_rate,reference payoff per 10-pt cut,-0.01667,0.00336,
+2022,2023,full,no,all,accounting,reference offense runs per run of leak choices recovered,1.49589,0.77626,
+2022,2023,full,no,all,leak_excess,"mean excess, frozen season",0.12300,,159.00000
+2022,2023,full,no,all,leak_excess,mean predicted excess,0.04073,,159.00000
+2022,2023,full,no,all,leak_excess,mean actual excess,0.06137,0.00868,159.00000
+2022,2023,full,no,all,leak_excess,actual minus predicted,0.02065,0.00690,159.00000
+2022,2023,full,no,all,leak_excess,calibration intercept (actual on predicted),0.01887,0.00903,159.00000
+2022,2023,full,no,all,leak_excess,calibration slope (actual on predicted),1.04374,0.12195,159.00000
+2022,2023,full,no,main: every leak also a backtest leak,leak_excess,"mean excess, frozen season",0.14692,,126.00000
+2022,2023,full,no,main: every leak also a backtest leak,leak_excess,mean predicted excess,0.05797,,126.00000
+2022,2023,full,no,main: every leak also a backtest leak,leak_excess,mean actual excess,0.07410,0.00948,126.00000
+2022,2023,full,no,main: every leak also a backtest leak,leak_excess,actual minus predicted,0.01614,0.00746,126.00000
+2022,2023,full,no,main: every leak also a backtest leak,leak_excess,calibration intercept (actual on predicted),0.00376,0.01088,126.00000
+2022,2023,full,no,main: every leak also a backtest leak,leak_excess,calibration slope (actual on predicted),1.21347,0.13974,126.00000
+2022,2023,full,no,some leak not,leak_excess,"mean excess, frozen season",0.03168,,33.00000
+2022,2023,full,no,some leak not,leak_excess,mean predicted excess,-0.02511,,33.00000
+2022,2023,full,no,some leak not,leak_excess,mean actual excess,0.01277,0.01896,33.00000
+2022,2023,full,no,some leak not,leak_excess,actual minus predicted,0.03787,0.01708,33.00000
+2022,2023,full,no,some leak not,leak_excess,calibration intercept (actual on predicted),0.03626,0.01577,33.00000
+2022,2023,full,no,some leak not,leak_excess,calibration slope (actual on predicted),0.93552,0.31569,33.00000
+2022,2023,full,no,all,xchase_plus,payoff per 10-pt cut beyond predicted,6.00165,1.16901,159.00000
+2022,2023,full,no,all,offense_runs,payoff per 10-pt cut beyond predicted,2.13893,0.97454,159.00000
+2022,2023,full,no,all,woba_runs,payoff per 10-pt cut beyond predicted,2.80772,1.28892,159.00000
+2022,2023,full,no,all,bb_rate,payoff per 10-pt cut beyond predicted,0.00949,0.00150,159.00000
+2022,2023,full,no,all,k_rate,payoff per 10-pt cut beyond predicted,0.00186,0.00273,159.00000
+2022,2023,full,no,all,zone_swing_rate,payoff per 10-pt cut beyond predicted,-0.00420,0.00250,159.00000
+2022,2023,full,no,all,far_off_chase_rate,payoff per 10-pt cut beyond predicted,-0.02295,0.00253,159.00000
+2022,2023,full,no,all,offense_runs,offense runs per run of leak choices recovered,1.34473,0.72032,159.00000
+2022,2023,full,no,all,offense_runs,"payoff per 10-pt cut beyond predicted, average in the counts",0.84989,1.58944,57.00000
+2022,2023,full,no,all,xchase_plus,"payoff per 10-pt cut beyond predicted, average in the counts",4.53601,2.04993,57.00000
+2022,2023,full,no,all,offense_runs,"payoff per 10-pt cut beyond predicted, productive in the counts",3.81254,1.50097,77.00000
+2022,2023,full,no,all,xchase_plus,"payoff per 10-pt cut beyond predicted, productive in the counts",6.62611,1.72401,77.00000
+2022,2023,full,no,all,offense_runs,"payoff per 10-pt cut beyond predicted, struggling in the counts",-0.26524,1.94739,25.00000
+2022,2023,full,no,all,xchase_plus,"payoff per 10-pt cut beyond predicted, struggling in the counts",5.68173,2.76370,25.00000

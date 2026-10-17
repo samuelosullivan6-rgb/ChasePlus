@@ -463,40 +463,99 @@ that the backtest's simpler baseline puts at or below the league, so the
 line may not fit them. The file marks them, and the main test is the
 other 188.
 
-**The loop, tested once on 2025 (step 20).** The 2027 test needs 2027.
-To check that the freeze-and-score loop works before then, the same
-three steps were run on 2025: the 2025 cards' leaks were frozen with a
-line fit only on the season pairs that end by 2025
-([`leak_predictions_2025.csv`](results/xchase/coaching/leak_predictions_2025.csv),
-marked `out_of_sample = no`, since the method itself was built with 2026
-in view), and step 20 scored them on 2026 for the 160 hitters who
-qualified again and saw at least 10 pitches in their frozen cells
-([`leak_scores_2026.csv`](results/xchase/coaching/leak_scores_2026.csv)).
-The prediction was centered: 12.8 points above the league in the 2025
-leaks, 5.6 predicted for 2026, 5.0 actual (−0.6 ± 0.7), and actual
-against predicted came out as a line with slope 1.02 ± 0.12. The
-reference payoffs, refit on the pairs ending by 2025, also held, and in
-this pair came out larger:
+**The loop, tested on four pairs of seasons (step 20).** The 2027 test
+needs 2027. To check that the freeze-and-score loop works before then,
+the same three steps were run on every earlier season that has a next
+one. Each season's cards' leaks were frozen with a line fit only on the
+season pairs that end by that season
+([`leak_predictions_2022.csv`](results/xchase/coaching/leak_predictions_2022.csv)
+through `leak_predictions_2025.csv`, marked `out_of_sample = no`, since
+the method itself was built with every season in view), and step 20
+scored each file on the season that followed, for the 159 to 161
+hitters per pair who qualified again and saw at least 10 pitches in
+their frozen cells
+([`leak_scores_2023.csv`](results/xchase/coaching/leak_scores_2023.csv)
+through `leak_scores_2026.csv`, with every quoted number in
+`leak_scores_summary_<season>.csv`). Each pair's reference payoffs are
+the backtest refit on the season pairs ending by the frozen season, so
+the scored season is in neither the line nor the reference.
 
-| Per 10-point cut beyond predicted | Scored on 2026 | Reference (pairs to 2025) |
-|---|---:|---:|
-| xChase+ | +7.5 ± 1.5 | +4.1 ± 0.6 |
-| Offense, runs per 600 PA (xwOBA) | +3.6 ± 1.0 | +0.9 ± 0.6 |
-| Walk rate | +1.1 pts | +0.7 pts |
-| Strikeout rate | −0.1 pts | −0.0 pts |
-| Swing rate at strikes | −0.7 pts | −0.4 pts |
-| Offense runs per run of leak choices recovered | 0.78 ± 0.59 | 0.73 ± 0.36 |
+**The slope held in all four pairs; the level held in two.** Actual
+leak chasing against predicted, actual = a + b × predicted, came out
+with b near 1 every time. In the two most recent pairs the prediction
+was centered. In the two earliest, whose lines were fit on only one and
+two pairs of seasons, hitters chased about 2 points more than the line
+predicted:
 
-One pair of seasons and 160 hitters is a noisy test of the size, and
-2026 is the first season with zones set from height, so the size is not
-the point; the direction, the centering and the run accounting are. One
-thing to watch in 2027: in this pair the payoff was concentrated in
-hitters who were struggling or average in the leak's counts (+7.2 ± 3.0
-and +5.0 ± 1.5 runs per 10-point cut) and small for those hitting well
-there (+0.6 ± 1.6), where the pooled backtest found no difference. The
-cards keep every leak in the plan and show the count check as context,
-which is the right call on the pooled evidence, but if 2027 repeats the
-split, the productive group's leaks should move down the plan.
+| Leak chasing, points above the league | 2022 on 2023 | 2023 on 2024 | 2024 on 2025 | 2025 on 2026 |
+|---|---:|---:|---:|---:|
+| Hitters scored | 159 | 161 | 160 | 160 |
+| Frozen season | 12.3 | 12.4 | 13.9 | 12.8 |
+| Predicted next season | 4.1 | 4.8 | 6.5 | 5.6 |
+| Actual next season | 6.1 ± 0.9 | 7.1 ± 0.8 | 6.5 ± 0.9 | 5.0 ± 0.8 |
+| Actual − predicted | +2.1 ± 0.7 | +2.3 ± 0.7 | +0.0 ± 0.7 | −0.6 ± 0.7 |
+| Actual − predicted, main group | +1.6 ± 0.7 (126) | +2.1 ± 0.8 (129) | +0.2 ± 0.8 (130) | −1.1 ± 0.8 (130) |
+| a | +1.9 ± 0.9 | +3.3 ± 0.9 | −0.9 ± 1.1 | −0.8 ± 1.0 |
+| b | 1.04 ± 0.12 | 0.78 ± 0.12 | 1.14 ± 0.12 | 1.02 ± 0.12 |
+
+The main group is the hitters whose card leaks the backtest's rule would
+also have listed, which step 19 calls the main test. The hitters step 19
+marks, 30 to 33 per pair, chased more than the line predicted in three
+of the four pairs (+3.8 ± 1.7, +2.9 ± 1.5, −0.5 ± 1.5 and +1.5 ± 1.5).
+
+**The payoff held in all four pairs for what the cards promise first,
+and in two of four for offense.** Per 10-point cut beyond predicted,
+with the frozen season's levels held fixed, next to the range of the
+four references:
+
+| Per 10-point cut beyond predicted | 2022 on 2023 | 2023 on 2024 | 2024 on 2025 | 2025 on 2026 | Reference, pairs to the frozen season |
+|---|---:|---:|---:|---:|---:|
+| xChase+ | +6.0 ± 1.2 | +6.0 ± 1.4 | +3.3 ± 1.1 | +7.5 ± 1.5 | +4.1 to +5.1 |
+| Offense, runs per 600 PA (xwOBA) | +2.1 ± 1.0 | +0.1 ± 1.1 | +1.1 ± 1.3 | +3.6 ± 1.0 | +0.9 to +2.0 |
+| Offense, runs per 600 PA (wOBA) | +2.8 ± 1.3 | −1.1 ± 1.4 | +0.3 ± 1.2 | +3.1 ± 1.1 | +0.5 to +1.6 |
+| Walk rate | +0.9 pts | +0.7 pts | +0.7 pts | +1.1 pts | +0.7 to +0.8 pts |
+| Strikeout rate | +0.2 pts | −0.1 pts | −0.0 pts | −0.1 pts | −0.2 to −0.0 pts |
+| Swing rate at strikes | −0.4 pts | −0.2 pts | −0.6 pts | −0.7 pts | −0.5 to −0.4 pts |
+| Offense runs per run of leak choices recovered | 1.34 ± 0.72 | 0.70 ± 0.76 | 0.27 ± 0.73 | 0.78 ± 0.59 | 0.73 to 1.50 |
+
+xChase+ went up in every pair, by more than twice its standard error
+each time, and in three of the four pairs within one standard error of
+its reference; in 2025 on 2026 it came out larger, +7.5 against +4.1.
+Walks rose and strikeouts did not move in all four. Offense is noisier.
+xwOBA runs came out positive in all four pairs but clearly above zero in
+two (2022 on 2023 and 2025 on 2026) and within a standard error of zero
+in the other two; the average of the four, +1.7 runs, sits next to the
+backtest's pooled +1.4 ± 0.5. The wOBA version, which keeps the
+ball-in-play luck, is clearly positive in the same two pairs and not in
+the other two. The run accounting is positive in all four and consistent
+with 1 in all four, but with standard errors of 0.6 to 0.8 no single
+pair pins it down. So the four pairs say what the pooled backtest says:
+a hitter who cuts a leak beyond what regression gives him chases less,
+walks more and strikes out no more every season, and gains offense on
+average but not in every season. Any one pair of 160 hitters is a noisy
+test of the size, and 2026 is the first season with zones set from
+height, so the last column's sizes are the least settled; the direction,
+the slope and the run accounting are what the four pairs show. The 2027
+score should look like one of these columns: a slope near 1, xChase+ and
+walks up, and an offense number anywhere from zero to a few runs per
+10-point cut.
+
+**The split by the count check does not repeat.** In 2025 on 2026 the
+offense payoff was concentrated in hitters who were struggling or
+average in the leak's counts and small for those hitting well there.
+The three earlier pairs do not show it, and in 2022 on 2023 it ran the
+other way:
+
+| Offense runs per 10-point cut, by the count check in the frozen season | 2022 on 2023 | 2023 on 2024 | 2024 on 2025 | 2025 on 2026 |
+|---|---:|---:|---:|---:|
+| Struggling | −0.3 ± 1.9 (25) | +0.6 ± 1.4 (27) | +3.0 ± 2.9 (22) | +7.2 ± 3.0 (23) |
+| Average | +0.8 ± 1.6 (57) | −0.5 ± 2.2 (55) | +0.9 ± 2.1 (65) | +5.0 ± 1.5 (65) |
+| Productive | +3.8 ± 1.5 (77) | +0.2 ± 1.7 (79) | +1.1 ± 1.8 (73) | +0.5 ± 1.5 (72) |
+
+With 22 to 27 struggling hitters per pair, one pair cannot show a split,
+and the four together agree with the pooled backtest, which found none.
+The cards keep every leak in the plan and show the count check as
+context, and that call stands.
 
 The midseason check works the same way. Scored on the first half of 2026
 only (`--period h1`, 157 hitters,
@@ -733,7 +792,7 @@ run touches the other's files.
 | 16 | `scripts/16_backtest_leak_fixes.py` | Finds every hitter's card leaks in one season or half and checks what happened when he cut them the next: xChase+, offense runs, walks, strikeouts and swings at strikes, and whether the count check changes the payoff (needs step 15) |
 | 17 | `scripts/17_build_player_cards.py` | Draws a decision card for every qualified hitter in one season: the interactive page, with its roster view, and its pitches (`player_cards/<season>/`), the CSVs behind them with each hitter's team, the noted hitters' cards and report, and the average-hitter reference cards (needs steps 13, 15 and 16, and the raw files from step 01 for the teams; `--data-only` writes just the card data for an earlier season) |
 | 18 | `scripts/18_make_terrain_figures.py` | Draws the same surfaces in 3D as still images: the average hitter's chase terrain by count, and one hitter's costliest panel (needs step 17) |
-| 19 | `scripts/19_freeze_leak_predictions.py` | Writes down, before the 2027 season, a prediction for every 2026 card's leaks, for step 20 to score out of sample. Run once: a later run only checks the frozen file (needs steps 16 and 17). `--season 2025 --retrospective` writes the same file for 2025, marked as not out of sample, to test the loop |
+| 19 | `scripts/19_freeze_leak_predictions.py` | Writes down, before the 2027 season, a prediction for every 2026 card's leaks, for step 20 to score out of sample. Run once: a later run only checks the frozen file (needs steps 16 and 17). `--season <year> --retrospective` writes the same file for an earlier season (2022 to 2025), marked as not out of sample, to test the loop |
 | 20 | `scripts/20_score_leak_predictions.py` | Scores a frozen file on the season that followed: is the actual leak chasing centered on the prediction, and did the frozen payoffs hold on the frozen cells? Run after the next season is in (needs step 19). `--period h1` scores the first half only, for a midseason check |
 | 22 | `scripts/22_build_season_pages.py` | The card site for every season: runs step 17 per season, freezing an earlier season's targets first (step 19 `--retrospective`) when its frozen file is missing, so every page carries the same wording and the same season switcher (needs the inputs of step 17 for each season) |
 
@@ -780,8 +839,9 @@ one season alone is `python scripts/17_build_player_cards.py --season
 Step 19 is not in the list on purpose: it was run once, before 2027, and
 a rerun only checks that the frozen file still reproduces. Step 20 runs
 after 2027 is in the data (`python scripts/20_score_leak_predictions.py`).
-The retrospective test of that loop is three commands (step 22 runs the
-first two for any earlier season whose frozen file is missing):
+The retrospective test of that loop is three commands per season, run
+for 2022 through 2025 (step 22 runs the first two for any earlier season
+whose frozen file is missing):
 
 ```
 python scripts/17_build_player_cards.py --season 2025 --data-only
