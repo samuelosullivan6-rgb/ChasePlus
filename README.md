@@ -640,6 +640,8 @@ cards go from a file to a cage.
   feed, re-fit the run values, the called-strike model and the league
   baselines on that league's data before trusting any card. The league
   comparison is what makes a card fair, and it has to be that league.
+  For TrackMan files, `scripts/college_build.py` does the refitting (see
+  [TrackMan files: the college path](#trackman-files-the-college-path)).
 
 The cards for the 17 hitters named in the two coaching reports are in
 [`results/xchase/noted_players/`](results/xchase/noted_players/README.md),
@@ -960,6 +962,105 @@ to the one beside it. Step 17 stops and lists the cards when any fails. Run on
 a built page (`python scripts/plan_checks.py
 results/xchase/player_cards/2026/index.html`) it counts each kind
 instead.
+
+## TrackMan files: the college path
+
+The method ports to any league with pitch tracking, but the numbers have
+to be refit on that league's own pitches. `scripts/college_build.py` does
+that for TrackMan, the system many college programs run. Give it a season of
+TrackMan game CSVs and a roster of heights, and it builds the same
+leaderboard and the same decision cards, roster view included, from
+those files alone:
+
+```
+python scripts/college_build.py --name clemson_2026 \
+    --trackman college/clemson_2026/trackman --heights college/clemson_2026/heights.csv
+```
+
+It takes about 15 seconds for a 60-game season. `college/<name>/BUILD.md`
+lists what it found and fit, and the cards are in
+`college/<name>/results/xchase/player_cards/<season>/index.html`. Open
+them through a local web server (`cd college/<name> && python -m
+http.server 8000`), as with the MLB cards.
+
+**What it needs.**
+
+- TrackMan's standard per-pitch CSV export, one file per game with both
+  teams' pitches, every game of the season the program has. The adapter
+  (`scripts/trackman_adapter.py`) reads the count (Balls, Strikes), the
+  location (PlateLocSide, PlateLocHeight), the call and the result
+  (PitchCall, KorBB, PlayResult, OutsOnPlay, RunsScored, TaggedHitType),
+  the batted ball (ExitSpeed, Angle), the pitch type (TaggedPitchType, or
+  AutoPitchType where it is blank), the players and their hands (Batter,
+  BatterId, BatterSide, Pitcher, PitcherThrows, HomeTeam, AwayTeam) and
+  the game state (Date, GameUID or GameID, PitchNo, Inning, Top/Bottom,
+  Outs, PAofInning). It stops and names any column that is missing.
+- A roster CSV with each hitter's height: BatterId or Batter ("Last,
+  First" or "First Last"), and HeightIn, or Height as 6-2 or 6'2".
+  TrackMan has no strike zone, so each hitter's zone is set from his
+  height the way MLB's 2026 zone is (top at 53.5% of his height, bottom at
+  27%). A hitter missing from the roster gets its median height and is
+  named in BUILD.md.
+
+**What it fits on the files.** The league is every hitter in the files:
+for one team's season, the team and all its opponents. Each piece the
+MLB build fits on the whole league is refit on them: run values from the
+files' own plate appearances (with the runners on base rebuilt play by
+play, since TrackMan does not record them), wOBA weights from those run
+values, an xwOBA from the files' own exit speeds and launch angles
+(college bats are metal, so Savant's MLB model does not apply), the
+called-strike model on the files' takes, and the league baseline. The
+adapter reads the sign of PlateLocSide off the files' hit-by-pitches,
+since TrackMan does not state it. A college season is about 17,500
+pitches, so qualifying drops to 100 plate appearances and 200 out-of-zone
+pitches, and the spread between hitters is fit on everyone with 40 or
+more out-of-zone pitches; `scripts/college_method.py` gives the reason
+for each choice. The league baseline keeps step 04's 48 cells: tested on
+every MLB team's first 60 games, coarser cells moved hitters further from
+the MLB build, not closer. Steps 02, 13, 15 and 17 are the MLB scripts, run
+from copies in `college/<name>/scripts/`; a copy that differs lists the
+lines at its top (the season kept, no coach's notes, "TrackMan" in the
+page footer).
+
+**How it was tested.** There is no college data in the repository, so
+`scripts/trackman_roundtrip.py` makes some: every MLB team's first 60
+games of 2026 written as TrackMan CSVs (no zone, no runners, no xwOBA,
+PlateLocSide mirrored), built exactly as a college season would be, and
+compared with the MLB build on the same pitches. The full comparison is
+in [results/trackman_roundtrip/](results/trackman_roundtrip/README.md).
+In short: with step 04's settings, the college code gives back steps 03
+and 04 exactly. The adapter read the sign right for all 30 teams, matched
+Savant's zone call on 99.8% or more of pitches and rebuilt the runners
+exactly at the start of 90% to 94% of plate appearances. Across 296
+qualified hitters, the college cards' xChase+ was 6.0 points from the MLB
+build's for the same pitches (RMSE), and named the same top leak for 92%
+of the hitters both builds found a leak for.
+About half of that gap is a shift every hitter on a team shares, because
+the college league is the team's own games rather than all 30 teams; it
+leaves the order of a team's hitters (rank correlation 0.95 within a
+team) and their leaks as they are. Predicting the same hitters' next 100
+games, the college build did as well as the MLB build with the whole
+league behind it (8.5 runs per 600 PA, RMSE, both).
+
+**Keeping team data private.** Everything goes into `college/<name>/`,
+which is in `.gitignore`: the TrackMan files, the roster and every file
+built from them, cards included. The build writes nothing into the
+repository's own `data/` or `results/`, so no commit can carry a team's data, and GitHub Pages
+serves only what is committed, so it cannot publish one. Never
+`git add -f` anything under `college/`. To share the cards with a staff,
+hand them the folder, or serve it on a laptop.
+
+**Reading the first real build.** Read BUILD.md before the cards. Check
+the PlateLocSide sign it found, the hitters missing from the roster, the
+pitches with no location or pitch type, and the share of balls in play
+with no exit speed (those get their hit type's average). The round trip
+was written from Statcast, so it cannot show how one program's operators
+record a foul tip, a bunt or an out on the bases. The adapter takes
+outs from the Outs column, not OutsOnPlay, and reports where the two
+disagree. Two parts of every card still speak for MLB. The footer's "Does
+fixing a leak pay?" quotes the MLB backtest, since step 16 needs back-to-back
+seasons. The roster's Beat column stays empty, since step 19 has no
+college line to freeze a target with.
 
 ## Appendix: Chase+ vs xChase+
 

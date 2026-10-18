@@ -1,0 +1,10 @@
+check,max_abs_difference
+count run values,8.326672684688674e-17
+event run values,8.326672684688674e-17
+called_strike_rate,0.0
+chase_cost,2.220446049250313e-16
+expected_cost_per_pitch,4.163336342344337e-17
+runs_saved,4.440892098500626e-16
+xChase+,2.842170943040401e-14
+pitches priced (college method / step 04),0.0
+qualified hitters (college method / step 04),0.0
