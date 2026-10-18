@@ -30,8 +30,13 @@ and what is it costing me?" for one hitter-season:
     plan_checks.py stops the build when a sentence contradicts the lines
     or numbers beside it. For the 17 noted hitters the coach's note
     names the leak the plan must lead with, so the player and the staff
-    start in the same place. At the foot of the card, what step 16 found
-    when hitters fixed their leaks, in one plain sentence.
+    start in the same place. The card has one plan: the vs RHP and vs LHP
+    tabs show it unchanged, with each pitch line's pitches from that hand
+    under it, and switch only the leaks and the count table to that hand
+    (a tab that rebuilt its own plan from one hand's pitches could give
+    the opposite instruction on the same pitch). At the foot of the card,
+    what step 16 found when hitters fixed their leaks, in one plain
+    sentence.
 
 The leak rule, the labels and the choices / contact split come from
 leak_rules.py, which steps 15 and 16 share. The coach's notes for the 17
@@ -613,11 +618,10 @@ def is_video(lk):
     return lk["depth_in"] < CLEARLY_OFF_IN
 
 
-def pitch_line(lk, view="all"):
-    """One pitch, written to the player. On a pitcher-hand tab the hand is
-    the tab's, so the line does not repeat it."""
+def pitch_line(lk):
+    """One pitch, written to the player."""
 
-    hand = hand_phrase(lk) if view == "all" else ""
+    hand = hand_phrase(lk)
     opener = (GROUP_WORDS_SHORT if hand else GROUP_WORDS)[lk["count_group"]]
     what = f"{PITCH_WORDS[lk['pitch_group']]} {REGION_WORDS[lk['region']]}"
     if is_video(lk):
@@ -784,8 +788,9 @@ def framing_line(summary, chosen):
 
 def keep_line(summary, chosen):
     """Every other line is a take; this one says what to keep doing. The
-    fastball clause is left out when a plan line is a fastball, and a plan
-    of video items only says the staff takes it from here."""
+    fastball clause is left out when any leak on the card is a fastball,
+    on the plan or not and on any pitcher-hand tab's list, and a plan of
+    video items only says the staff takes it from here."""
 
     one = len(chosen) == 1
     if all(is_video(lk) for _, lk in chosen):
@@ -794,18 +799,21 @@ def keep_line(summary, chosen):
     else:
         only = ("The only change on this card is the pitch above." if one
                 else "The only changes on this card are the pitches above.")
-    fastball_line = any(lk["pitch_group"] == "fastball" for _, lk in chosen)
-    if summary["fastball_choices"] >= 1 and not fastball_line:
+    fastball_leak = any(lk["pitch_group"] == "fastball" for view in summary["leaks"].values() for lk in view)
+    if summary["fastball_choices"] >= 1 and not fastball_leak:
         return f"Keep swinging at strikes; your fastball decisions are a strength. {only}"
     return f"Keep swinging at strikes. {only}"
 
 
-def plan_items(leak_list, summary, table, view="all", start=None):
-    """The plan for one view (all pitchers, or one pitcher hand) as a list
-    of items: kind (pitch / frame / contact / keep / fallback), and for a
-    pitch line its step in the order to work on them (printed as 1, 2),
-    the leak's number on the list and the pictures (n, printed as a small
-    tag), its cell, whether it is a video item, and the text.
+def plan_items(leak_list, summary, table, start=None):
+    """The card's one plan, from the all-pitchers leaks and table, as a
+    list of items: kind (pitch / frame / contact / keep / fallback), and
+    for a pitch line its step in the order to work on them (printed as 1,
+    2), the leak's number on the list and the pictures (n, printed as a
+    small tag), its cell, whether it is a video item, and the text. The
+    pitcher-hand tabs show this same plan, with each pitch line's pitches
+    from that hand under it (hand_counts), so the card never gives two
+    plans.
 
     The first printed line is the first thing to do: the pitch lines come
     first, the framing line after them, and a contact hitter's reason is
@@ -817,7 +825,7 @@ def plan_items(leak_list, summary, table, view="all", start=None):
     costly = [g for g in COUNT_GROUPS if rows[g]["choices"] <= -COSTLY_COUNT_RUNS]
     chosen = plan_pitch_items(leak_list, start)
     items = [{"kind": "pitch", "n": n, "step": step, "cell": leak_cell(lk), "video": is_video(lk),
-              "text": pitch_line(lk, view)}
+              "text": pitch_line(lk)}
              for step, (n, lk) in enumerate(chosen, start=1)]
     takes = [it for it in items if not it["video"]]
     contact_led = summary["archetype"] == "execution-led"
@@ -846,8 +854,22 @@ def plan_items(leak_list, summary, table, view="all", start=None):
     return items
 
 
-def plan_lines(leak_list, summary, table, view="all", start=None):
-    return [it["text"] for it in plan_items(leak_list, summary, table, view, start)]
+def plan_lines(leak_list, summary, table, start=None):
+    return [it["text"] for it in plan_items(leak_list, summary, table, start)]
+
+
+def hand_counts(p, cell, scale):
+    """A plan line's pitches from one pitcher hand: how many, how many he
+    chased, the league's rate on the same pitches and what the choices
+    cost, for the line's note on that hand's tab. The rule that made the
+    line a leak is not applied again to the slice, so a tab can never
+    turn the card's take into something else."""
+
+    s = p[(p["count_group"] == cell[0]) & (p["pitch_group"] == cell[1]) & (p["region"] == cell[2])]
+    return {"pitches": int(len(s)), "chases": int(s["is_chase"].sum()),
+            "rate": float(s["is_chase"].mean()) if len(s) else None,
+            "league": float(s["e_match"].mean()) if len(s) else None,
+            "choices": float(s["choices"].sum() * scale)}
 
 
 def start_with(items, leak_list):
@@ -1055,19 +1077,24 @@ for _, row in board.sort_values("xchase_plus", ascending=False).iterrows():
     }
     summary["tables"] = {h: count_table(hand_view(p, h), scale, bid, h) for h in HANDS}
     summary["leaks"] = {h: leaks(hand_view(p, h), scale, bid) for h in HANDS}
+    all_cells = [leak_cell(lk) for lk in summary["leaks"]["all"]]
     for h in HANDS:
         for lk in summary["leaks"][h]:
             lk["phrase"] = leak_phrase(lk)
+            # a hand tab's leak carries the card's number for the same pitch (the
+            # one on the pictures and the plan), or none when the leak shows up
+            # against that hand only
+            if h != "all":
+                lk["all_n"] = all_cells.index(leak_cell(lk)) + 1 if leak_cell(lk) in all_cells else None
     summary["plan_items"] = plan_items(summary["leaks"]["all"], summary, summary["tables"]["all"],
                                        start=summary["note_start"])
+    # The hand tabs show this plan, with each pitch line's pitches from that
+    # hand under it (for a switch hitter the hand is also mostly his side).
+    for it in summary["plan_items"]:
+        if it["kind"] == "pitch":
+            it["by_hand"] = {h: hand_counts(hand_view(p, h), it["cell"], scale) for h in ("R", "L")}
     summary["plan"] = [it["text"] for it in summary["plan_items"]]
     summary["start_with"] = start_with(summary["plan_items"], summary["leaks"]["all"])
-    # the same plan for one pitcher hand (the page shows it on the hand tabs;
-    # for a switch hitter the hand tab is also his side of the plate)
-    summary["plan_items_by_hand"] = {h: plan_items(summary["leaks"][h], summary, summary["tables"][h], view=h)
-                                     for h in ("R", "L")}
-    summary["plan_by_hand"] = {h: [it["text"] for it in summary["plan_items_by_hand"][h]]
-                               for h in ("R", "L")}
     target = TARGETS.get(bid)
     cells = {(lk["count_group"], lk["pitch_group"], lk["region"]) for lk in summary["leaks"]["all"]}
     summary["target"] = ({k: target[k] for k in ("season", "next_season", "excess", "predicted",
@@ -1095,8 +1122,8 @@ if TARGETS:
 if (plan_checks.CLEARLY_OFF_IN, plan_checks.COUNT_PHRASES) != (CLEARLY_OFF_IN, COUNT_PHRASES):
     raise SystemExit("plan_checks.py's CLEARLY_OFF_IN or COUNT_PHRASES differ from step 17's.")
 n_plans = plan_checks.check(players)
-print(f"  checked {n_plans} plans (all pitchers and each pitcher-hand tab) against the lines and "
-      "numbers beside them: no contradictions")
+print(f"  checked {n_plans} plans, their pitcher-hand notes and the hand tabs' leak numbers against "
+      "the lines and numbers beside them: no contradictions")
 if NOTES:
     n_claims, n_noted = coach_notes.check(players)
     print(f"  checked {n_claims} claims in the coach's notes for {n_noted} hitters: all hold")

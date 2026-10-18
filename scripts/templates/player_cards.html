@@ -122,6 +122,8 @@ aside h2 { font-size: 20px; font-weight: 800; }
 .plan .leaktag { display: inline-flex; align-items: center; gap: 4px; color: var(--muted); font-size: 12px; white-space: nowrap; margin-top: 3px; }
 .plan .leaktag .num { width: 18px; height: 18px; font-size: 11px; border-width: 1.2px; border-color: var(--muted); color: var(--ink2); }
 .plan .keep { color: var(--ink2); font-size: 14px; }
+/* on a pitcher-hand tab: the line's pitches from that hand, under the unchanged line */
+.plan .handnote { display: block; color: var(--muted); font-size: 13px; margin-top: 3px; }
 .state { color: var(--muted); font-size: 13px; margin: 0; }
 .zgrid .rowhead.whiff { border-top: 1px solid var(--axis); padding-top: 6px; }
 .zgrid .whiffrule { grid-column: 1 / -1; border-top: 1px solid var(--axis); height: 0; }
@@ -137,6 +139,9 @@ aside h2 { font-size: 20px; font-weight: 800; }
 .leaks .what { min-width: 0; }
 .leaks .rate { color: var(--ink2); font-size: 13px; font-variant-numeric: tabular-nums; }
 .leaks .runs { font-weight: 800; font-variant-numeric: tabular-nums; text-align: right; }
+/* a leak against one hand only: no number on the pictures or in the plan */
+.leaks .num.only { border-style: dashed; border-color: var(--muted); color: var(--muted); }
+.leaks .onlyhand { color: var(--muted); font-size: 13px; }
 .empty { color: var(--ink2); }
 .tablewrap { overflow-x: auto; }
 .tablebtn { display: none; border: 1px solid var(--axis); background: transparent; color: var(--ink2); border-radius: 999px; padding: 2px 10px; font-size: 13px; cursor: pointer; width: max-content; }
@@ -296,7 +301,7 @@ summary { cursor: pointer; font-weight: 700; }
       </div>
     </div>
     <div class="control card-only">
-      <span class="label" id="lab-hand">Plan, leaks and table</span>
+      <span class="label" id="lab-hand">Leaks and table</span>
       <div class="seg" role="radiogroup" aria-labelledby="lab-hand" id="seg-hand">
         <input type="radio" name="hand" id="hand-all" value="all" checked><label for="hand-all">All pitchers</label>
         <input type="radio" name="hand" id="hand-R" value="R"><label for="hand-R">vs RHP</label>
@@ -918,32 +923,46 @@ summary { cursor: pointer; font-weight: 700; }
       a.append(el("section", { class: "trend" }, el("h2", { text: "Far-off chase rate by season, every hitter" }), trendSvg([], "League far-off chase rate by season")));
       return;
     }
+    // One plan on every tab. A pitcher-hand tab keeps it word for word and adds, under
+    // each pitch line, that line's pitches from the hand; its leaks and table are the hand's.
+    const hand = state.hand, handWords = { R: "right-handers", L: "left-handers" }[hand];
     const plan = el("ul", { class: "plan" });
-    const items = state.hand === "all" ? p.plan_items : ((p.plan_items_by_hand || {})[state.hand] || p.plan_items);
-    items.forEach((it) => {
+    p.plan_items.forEach((it) => {
       if (it.kind === "keep") { plan.append(el("li", {}, el("span"), el("span", { class: "keep", text: it.text }))); return; }
       if (it.kind !== "pitch") { plan.append(el("li", {}, el("span", { class: "dot" }), el("span", { text: it.text }))); return; }
-      plan.append(el("li", {}, el("span", { class: "step", text: String(it.step) }), el("span", { text: it.text }),
-        el("span", { class: "leaktag", title: "This line's leak, numbered on the pictures and in the list below" }, "leak", el("span", { class: "num", text: String(it.n) }))));
+      const body = el("span", {}, it.text);
+      const c = hand !== "all" && it.by_hand ? it.by_hand[hand] : null;
+      if (c) body.append(el("span", { class: "handnote", text: c.pitches
+        ? `Against ${handWords}: you swung at ${c.chases} of ${c.pitches} of these (${pct(c.rate)}); hitters on average swing at ${pct(c.league)}.`
+        : `Against ${handWords}: none of these pitches.` }));
+      plan.append(el("li", {}, el("span", { class: "step", text: String(it.step) }), body,
+        el("span", { class: "leaktag", title: "This line's leak, numbered on the pictures and in the All pitchers leak list" }, "leak", el("span", { class: "num", text: String(it.n) }))));
     });
-    const sec = el("section", {}, el("h2", { text: state.hand === "all" ? "What to work on" : `What to work on vs ${state.hand === "R" ? "right-handers" : "left-handers"}` }), plan);
-    if (state.hand !== "all") sec.append(el("p", { class: "evidence", text: "The plan for this pitcher hand only; pick All pitchers for the full plan." + (p.target_text ? " The target counts all pitchers." : "") }));
+    const sec = el("section", {}, el("h2", { text: "What to work on" }), plan);
+    if (hand !== "all") sec.append(el("p", { class: "evidence", text: `The plan is the same on every tab. Under each line: those pitches from ${handWords} only. The leaks and the table below are against ${handWords} only.` + ((p.target_beat || "").startsWith("under") ? " The target is on the All pitchers view." : "") }));
     if (p.coach_note) sec.append(el("div", { class: "coach" }, el("span", { class: "eyebrow", text: "Coach's note, for the staff" }), p.coach_note));
     a.append(sec);
 
+    // A hand tab's leak carries the card's number for the same pitch (all_n), so a number
+    // means one pitch everywhere on the card; a leak against that hand only gets a dash.
     const list = el("ol", { class: "leaks" });
-    const leaks = p.leaks[state.hand] || [];
-    leaks.forEach((lk, k) => list.append(el("li", {},
-      el("span", { class: "num", text: String(k + 1) }),
-      el("span", { class: "what", text: lk.phrase }),
-      el("span", { class: "rate", text: `${pct(lk.rate)} vs ${pct(lk.league)} avg · ${lk.chases} of ${lk.pitches}` }),
-      el("span", { class: "runs", text: runs(lk.choices) }))));
-    const leakSec = el("section", {}, el("div", { class: "sechead" }, el("h2", { text: state.hand === "all" ? "Biggest leaks" : `Biggest leaks vs ${state.hand === "R" ? "right-handers" : "left-handers"}` })));
+    const leaks = p.leaks[hand] || [];
+    leaks.forEach((lk, k) => {
+      const n = hand === "all" ? k + 1 : lk.all_n;
+      list.append(el("li", {},
+        el("span", { class: "num" + (n ? "" : " only"), text: n ? String(n) : "–" }),
+        el("span", { class: "what" }, lk.phrase, n ? null : el("span", { class: "onlyhand", text: ` · against ${handWords} only` })),
+        el("span", { class: "rate", text: `${pct(lk.rate)} vs ${pct(lk.league)} avg · ${lk.chases} of ${lk.pitches}` }),
+        el("span", { class: "runs", text: runs(lk.choices) })));
+    });
+    const leakSec = el("section", {}, el("div", { class: "sechead" }, el("h2", { text: hand === "all" ? "Biggest leaks" : `Biggest leaks vs ${handWords}` })));
     leakSec.append(leaks.length ? list : el("p", { class: "empty", text: "None worth 0.75 runs per 600 PA." }));
-    leakSec.append(el("p", { class: "evidence", text: (state.hand === "all" ? "Numbered on the pictures, on the row of the hand a leak names. " : "") + "Ranked by what the choices cost, per 600 PA; the plan takes up to two, in the order to work on them, so it can leave a bigger one out." }));
-    if (p.target_text && state.hand === "all") leakSec.append(el("p", { class: "evidence target", text: `Target: ${p.target_text}` }));
+    if (leaks.length) leakSec.append(el("p", { class: "evidence", text: hand === "all"
+      ? "Numbered on the pictures, on the row of the hand a leak names. Ranked by what the choices cost, per 600 PA; the plan takes up to two, in the order to work on them, so it can leave a bigger one out."
+      : `Ranked by what the choices cost against ${handWords}, per 600 PA. A number is the leak's number on the pictures and in the plan; a dash is a leak that shows up against ${handWords} only, so it is not on the pictures or in the plan.` }));
+    if (p.target_text && hand === "all") leakSec.append(el("p", { class: "evidence target", text: `Target: ${p.target_text}` }));
     a.append(leakSec);
-    a.append(el("section", {}, el("h2", { text: "By count" }), countTable(p.tables[state.hand], false),
+    a.append(el("section", {}, el("h2", { text: hand === "all" ? "By count" : `By count vs ${handWords}` }), countTable(p.tables[hand], false),
       el("p", { class: "evidence", text: D.countNote })));
     const seasons = p.trend.length && p.trend.length < 3 ? ` (${p.trend.length} season${p.trend.length > 1 ? "s" : ""})` : "";
     a.append(el("section", { class: "trend" }, el("h2", { text: "Far-off chase rate by season" + seasons }), trendSvg(p.trend, `${p.name} far-off chase rate by season against the league`)));
@@ -956,7 +975,7 @@ summary { cursor: pointer; font-weight: 700; }
     const pitches = state.pitch === "all" ? "all pitches" : PITCH_NAMES[+state.pitch];
     const base = state.base === "all" ? "compared with every hitter" : "compared with hitters of your side against the same hand";
     const hand = { all: "all pitchers", R: "right-handers", L: "left-handers" }[state.hand];
-    line.textContent = `Showing: ${state.metric === "whiff" ? "misses on chases" : "chase choices"} · ${pitches} · ${base} · plan, leaks and table vs ${hand}.`;
+    line.textContent = `Showing: ${state.metric === "whiff" ? "misses on chases" : "chase choices"} · ${pitches} · ${base} · leaks and table vs ${hand}.`;
   }
 
   function numbersTable(p) {

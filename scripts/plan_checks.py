@@ -9,8 +9,17 @@ was not the first thing to do, and 137 where a sentence beside the plan
 undercut it ("you are already about at the league's rate" under a line
 quoting 71% against 43%). Each kind below is one of those patterns,
 tested on the card's own data: the plan items, the leaks, the count
-table, the header numbers and the target. Step 17 runs it on every plan,
-all pitchers and each pitcher-hand tab, and stops listing what failed.
+table, the header numbers and the target. Step 17 runs it on every
+card and stops listing what failed.
+
+A card has one plan. The 2026-10-18 audit found that pitcher-hand tabs
+which rebuilt their own plans from one hand's pitches gave the opposite
+instruction on the same pitch (22 cards), dropped the line the plan
+named for that hand (52) and said "on this card" about a different plan
+(143). The tabs now show the plan unchanged with each pitch line's
+pitches from that hand under it, so the checks below also make sure no
+second plan comes back, the hand notes add up to the line's leak, and a
+leak on a hand tab carries the card's number for the same pitch.
 
 Run on a built page it counts each kind without stopping, which is how
 the before and after counts were taken:
@@ -38,6 +47,8 @@ KINDS = {
     "no target says already": "the no-target sentence says 'already' (it is about next season's forecast)",
     "fastball strength over a fastball line": "the closing line calls fastball decisions a strength "
                                               "under a fastball plan line",
+    "fastball strength beside a fastball leak": "the closing line calls fastball decisions a strength "
+                                                "on a card that lists a fastball leak, on any tab",
     "header 0.0 unexplained": "the header's far-off cost prints 0.0 over a plan of pitch lines "
                               "and nothing says why",
     "good chooser unframed": "a hitter whose choices are better than average gets pitch lines "
@@ -60,6 +71,11 @@ KINDS = {
     # Labels a staff can trust (evaluation items 5 and 7)
     "start line quotes near-identical rates": "the roster's start line quotes two rates under 5 points apart",
     "hand overstated": "a line or leak name gives one pitcher hand for pitches the other hand threw too",
+    # One plan on every tab (the 2026-10-18 audit)
+    "two plans": "the card carries a separate plan for a pitcher-hand tab",
+    "hand note does not add up": "a plan line's pitches from right- and left-handers are not its leak's",
+    "hand leak misnumbered": "a leak on a pitcher-hand tab does not carry the card's number for the same "
+                             "pitch, or carries one the card does not list",
 }
 
 
@@ -98,7 +114,7 @@ def printed_number(it):
     return it.get("step", it["n"])
 
 
-def plan_problems(items, leaks, rows, player, all_pitchers=True):
+def plan_problems(items, leaks, rows, player):
     """(kind, detail) for one plan: the items, the leaks they are
     numbered to, the count table rows by group, and the hitter's summary."""
 
@@ -129,6 +145,9 @@ def plan_problems(items, leaks, rows, player, all_pitchers=True):
     keep = next((it for it in items if it["kind"] == "keep"), None)
     if keep and fastball_line and "fastball decisions are a strength" in keep["text"]:
         out.append(("fastball strength over a fastball line", keep["text"][:60]))
+    elif (keep and "fastball decisions are a strength" in keep["text"]
+          and any(lk["pitch_group"] == "fastball" for view in player["leaks"].values() for lk in view)):
+        out.append(("fastball strength beside a fastball leak", keep["text"][:60]))
     if keep:
         says_one = "the pitch above" in keep["text"]
         if says_one != (len(pitches) == 1):
@@ -148,7 +167,7 @@ def plan_problems(items, leaks, rows, player, all_pitchers=True):
         if not ok:
             out.append(("framing misquoted", f"choices {fmt_runs(c)}: {f[:70]}"))
     zero = shown(player["runs_at_stake"]) == 0
-    if all_pitchers and zero and "nothing net" not in texts:
+    if zero and "nothing net" not in texts:
         out.append(("header 0.0 unexplained", f"{len(pitches)} pitch lines"))
     if "nothing net" in texts and not zero:
         out.append(("framing misquoted", f"far-off cost {player['runs_at_stake']:.1f}, not 0.0"))
@@ -169,7 +188,7 @@ def plan_problems(items, leaks, rows, player, all_pitchers=True):
     # numbers quoted in the pitch lines
     for it in pitches:
         lk = leaks[it["n"] - 1]
-        if all_pitchers and lk["hand"]:
+        if lk["hand"]:
             share = lk["share_rhp"] if lk["hand"] == "R" else 1 - lk["share_rhp"]
             opener = re.split(r", let | are one", it["text"])[0]
             if share < 1 and "mostly" not in opener:
@@ -241,18 +260,41 @@ def label_problems(player):
     return out
 
 
+def hand_problems(player):
+    """The pitcher-hand tabs: the note each pitch line gets for a hand,
+    which splits the line's pitches by the pitcher's hand and so adds up
+    to its leak's, and each hand leak's number, which is the card's number
+    for the same pitch or none when the card does not list it."""
+
+    out = []
+    leaks = player["leaks"]["all"]
+    cells = [(lk["count_group"], lk["pitch_group"], lk["region"]) for lk in leaks]
+    for it in player["plan_items"]:
+        if it["kind"] != "pitch":
+            continue
+        lk, notes = leaks[it["n"] - 1], it.get("by_hand") or {}
+        if (set(notes) != {"R", "L"} or sum(c["pitches"] for c in notes.values()) != lk["pitches"]
+                or sum(c["chases"] for c in notes.values()) != lk["chases"]):
+            out.append(("hand note does not add up", f"vs tabs: line {it.get('step')}"))
+    for h in ("R", "L"):
+        for lk in player["leaks"].get(h) or []:
+            cell = (lk["count_group"], lk["pitch_group"], lk["region"])
+            if lk.get("all_n", "none given") != (cells.index(cell) + 1 if cell in cells else None):
+                out.append(("hand leak misnumbered", f"vs {h}HP: {lk['phrase']}"))
+    return out
+
+
 def problems(player):
-    """Every problem on one card: the all-pitchers plan, the target and
-    the labels, and each pitcher-hand tab's plan. A plan without a pitch
-    line has no plan problems, but its target and labels are checked."""
+    """Every problem on one card: its plan, the target and the labels,
+    and the pitcher-hand tabs' notes and leak numbers. A plan without a
+    pitch line has no plan problems, but its target and labels are
+    checked."""
 
     rows = {r["group"]: r for r in player["tables"]["all"]}
     out = plan_problems(player["plan_items"], player["leaks"]["all"], rows, player)
-    out += target_problems(player) + label_problems(player)
-    for h, items in (player.get("plan_items_by_hand") or {}).items():
-        hrows = {r["group"]: r for r in player["tables"][h]}
-        out += [(kind, f"vs {h}HP: {detail}")
-                for kind, detail in plan_problems(items, player["leaks"][h], hrows, player, False)]
+    out += target_problems(player) + label_problems(player) + hand_problems(player)
+    if player.get("plan_items_by_hand"):
+        out.append(("two plans", "plan_items_by_hand"))
     return out
 
 
@@ -279,7 +321,7 @@ def check(players):
                  for kind, v in by_kind.items()]
         raise SystemExit(f"{len(failed)} contradictions in the plans (scripts/plan_checks.py):\n"
                          + "\n".join(lines))
-    return sum(1 + len(p.get("plan_items_by_hand") or {}) for p in players)
+    return len(players)
 
 
 def load_page(path):
@@ -301,4 +343,4 @@ if __name__ == "__main__":
     for label, kinds in (("first line not the instruction", first), ("card argues with its plan", argue)):
         print(f"  {len(set().union(*(found[k] for k in kinds))):4d}  union: {label}")
     hand = sum(1 for p in players for k, d in problems(p) if d.startswith("vs "))
-    print(f"  {hand:4d}  problems on the pitcher-hand tabs")
+    print(f"  {hand:4d}  problems on the pitcher-hand tabs (hand notes and leak numbers)")

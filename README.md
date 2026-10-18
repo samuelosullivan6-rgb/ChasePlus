@@ -657,8 +657,10 @@ swing-and-miss, is in
 `results/xchase/player_cards/<season>/index.html` (hosted at the link
 above; one page per season, with a switcher on the page, and the season's
 pitches in `pitches.bin` beside it, fetched with the first card, so it
-needs a web server rather than a double-click); the plan there follows
-the pitcher-hand tabs. The same page's Roster view (`#roster`, or
+needs a web server rather than a double-click). A card has one plan: the
+vs RHP and vs LHP tabs show it unchanged, with each pitch line's pitches
+from that hand under it, and switch the leaks and the count table to that
+hand. The same page's Roster view (`#roster`, or
 `#roster/NYY` for one team) is every hitter by team, sorted by runs at
 stake, with the top leak, the count check, the number to beat and the
 plan's first pitch line; a tap on a name opens his card, and a team
@@ -949,12 +951,12 @@ sentence.
 
 The plans are generated, but a sentence written for one case can land
 on a card whose numbers say the opposite. So `scripts/plan_checks.py`
-tests every plan, all pitchers and each pitcher-hand tab, against the
-lines and numbers beside it: the first printed line is a take whenever
+tests every card's plan against the lines and numbers beside it (and
+that the pitcher-hand tabs add notes to it rather than a second plan): the first printed line is a take whenever
 the plan has one, the lines are numbered 1, 2 down the page, a plan of
 video items says the staff takes it, "the biggest pieces" only when they
 are, no "already" in the no-target sentence, no "your fastball decisions
-are a strength" under a fastball line, a good chooser and a 0.0 far-off
+are a strength" under a fastball line or beside a fastball leak, a good chooser and a 0.0 far-off
 header explained, a first line in a count the table shows as a plus
 explained, a target that names its unit and its leaks (and on an
 earlier season's card says it was set afterward and how the next season
