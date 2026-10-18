@@ -17,6 +17,8 @@ body { margin: 0; background: var(--plane); color: var(--ink); font-family: "Ave
 main { max-width: 720px; margin: 0 auto; display: grid; gap: 18px; }
 h1 { margin: 0; font-size: 30px; }
 p { margin: 0; color: var(--ink2); }
+.byline { margin-top: -10px; font-size: 16px; }
+.byline strong { color: var(--ink); }
 a { color: var(--blue); text-decoration: none; }
 a:hover { text-decoration: underline; }
 .links { display: grid; gap: 10px; }
@@ -26,6 +28,7 @@ a:hover { text-decoration: underline; }
 </style>
 <main>
   <h1>Chase Value: xChase+ and the decision cards</h1>
+  <p class="byline">By <strong>Samuel Sullivan</strong> · <a href="https://www.linkedin.com/in/SamuelOttoSullivan">LinkedIn</a></p>
   <p>Chase rate counts how often a hitter swings at pitches outside the zone and treats every one as the same mistake. This project prices every chase in runs with Statcast data, ranks every qualified hitter, and turns the number into a one-pitch plan a coach can hand to a player.</p>
   <div class="links">
     <a class="link" href="results/xchase/player_cards/index.html"><strong>Decision cards and the roster, every qualified hitter</strong><span>A card for each hitter: zone pictures by count and pitcher hand, the biggest leaks, the plan, the count check and the target. Or the roster: every hitter by team on one page, sorted by runs at stake, each name opening his card. Interactive, for every season since 2021; the view, team and season switches are on the page.</span></a>
