@@ -99,11 +99,19 @@ afterward (step 22 freezes it retrospectively), so its card says so and
 shows how the next season came out (step 20's leak_scores file); a card
 whose leaks are all video items prints no number.
 
-The 17 noted hitters also get a printable card: a two-page letter-size
-PDF in noted_players/print/ with the plan, the target, the all-pitchers
-pictures and the leaks on page 1, and on page 2 a guide to the card in
-the player's own words next to the average hitter's two-strike picture.
---print NAME [NAME ...] draws the same for any hitter into
+The 17 noted hitters also get a printable card: the web card on a
+two-page letter-size PDF in noted_players/print/, for the player and the
+staff together. Page 1 has the plan, the target and the coach's note,
+the pictures the leaks are numbered on, the key and the leaks. Its
+picture rows are the web card's that carry a leak, so every number sits
+where the web puts it: a leak named for a pitcher hand on that hand's
+row, a switch hitter's leaks on the side they came from (both sides
+drawn and named), the misses row for a hitter whose problem is contact,
+and the all-pitchers row for the rest. The pictures take the room the
+text leaves, and the build stops if a page would run into its footer.
+Page 2 has a guide to the card in the player's own words, the average
+hitter's two-strike picture, the season chart and what fixing a leak
+paid. --print NAME [NAME ...] draws the same for any hitter into
 player_cards/<season>/print/ (not committed).
 
 Options: --season (default 2026), --static NAME [NAME ...] to also draw
@@ -1253,7 +1261,10 @@ class Card:
         a.axis("off")
         return a
 
-    def zone(self, a, rgb, zone, mask, gap=None, evidence=None, markers=()):
+    def zone(self, a, rgb, zone, mask, gap=None, evidence=None, markers=(), marker_r=0.2):
+        """marker_r: the leak markers' radius in feet (larger on a small picture,
+        so the number still fits inside)."""
+
         step = cs.GRID_STEP / 2
         a.imshow(rgb, origin="lower", interpolation="bilinear",
                  extent=[XS[0] - step, XS[-1] + step, ZS[0] - step, ZS[-1] + step])
@@ -1266,7 +1277,7 @@ class Card:
         # home plate edge on the ground, for scale
         a.plot([-0.708, 0.708], [0, 0], color=self.t["axis"], lw=px(3), solid_capstyle="butt")
         for number, (mx, mz) in markers:
-            a.add_patch(Circle((mx, mz), 0.2, fc=self.t["surface"], ec=self.t["ink"],
+            a.add_patch(Circle((mx, mz), marker_r, fc=self.t["surface"], ec=self.t["ink"],
                                lw=px(1.6), zorder=5))
             a.text(mx, mz - 0.01, str(number), ha="center", va="center", zorder=6,
                    fontsize=px(15), fontweight="bold", color=self.t["ink"])
@@ -1504,17 +1515,17 @@ def row_specs(summary):
 MARKER_GAP = 0.5                # ft between marker centers on one picture
 
 
-def place_marker(spot, taken):
+def place_marker(spot, taken, gap=MARKER_GAP):
     """The marker's spot, nudged until it is clear of the others on the picture."""
 
-    for dx, dz in ((0, 0), (0.5, 0), (-0.5, 0), (0, -0.5), (0, 0.5), (0.5, -0.5), (-0.5, -0.5)):
-        cand = spot + np.array([dx, dz])
-        if all(np.hypot(*(cand - np.array(o))) >= MARKER_GAP for o in taken):
+    for dx, dz in ((0, 0), (1, 0), (-1, 0), (0, -1), (0, 1), (1, -1), (-1, -1)):
+        cand = spot + gap * np.array([dx, dz])
+        if all(np.hypot(*(cand - np.array(o))) >= gap for o in taken):
             return cand
     return spot
 
 
-def leak_markers(summary, specs):
+def leak_markers(summary, specs, gap=MARKER_GAP):
     """Numbered leak markers: on the row of the pitcher hand the leak names,
     or the first row showing that leak's side."""
 
@@ -1528,9 +1539,20 @@ def leak_markers(summary, specs):
         if row is None:
             continue
         key = (row, lk["count_group"])
-        spot = place_marker(np.array([lk["x"], lk["z"]]), [o for _, o in markers.get(key, [])])
+        spot = place_marker(np.array([lk["x"], lk["z"]]), [o for _, o in markers.get(key, [])], gap)
         markers.setdefault(key, []).append((n, tuple(spot)))
     return markers
+
+
+def spec_cell(p, spec, g, t, mask):
+    """One picture of a row from row_specs, for count group g: (rgb, gap, evidence)."""
+
+    _, _, side, hand, metric = spec
+    frame = p[(p["count_group"] == g) & (p["stand"] == side)]
+    if hand != "all":
+        frame = frame[frame["p_throws"] == hand]
+    s = player_surface(frame, metric)
+    return compose(diverging(s["gap"], t, metric), s["evidence"], t, mask), s["gap"], s["evidence"]
 
 
 LEAK_NAME_CHARS = 54             # a leak's name in the card's list fits in this many characters at size 15
@@ -1577,13 +1599,7 @@ def player_card(summary, theme_name, out_path):
     mask = cs.in_zone_mask(XS, ZS, *summary["zone"])
 
     def cells(i, g):
-        _, _, side, hand, metric = specs[i]
-        frame = p[(p["count_group"] == g) & (p["stand"] == side)]
-        if hand != "all":
-            frame = frame[frame["p_throws"] == hand]
-        s = player_surface(frame, metric)
-        return (compose(diverging(s["gap"], t, metric), s["evidence"], t, mask),
-                s["gap"], s["evidence"])
+        return spec_cell(p, specs[i], g, t, mask)
 
     markers = leak_markers(summary, specs)
     whiff_row = next((i for i, sp in enumerate(specs) if sp[4] == "whiff"), None)
@@ -1656,11 +1672,22 @@ def player_card(summary, theme_name, out_path):
 
 
 # --------------------------------------------------
-# THE PRINTABLE CARD: two letter-size pages for a locker
+# THE PRINTABLE CARD: the web card on two letter-size pages
 # --------------------------------------------------
+# Page 1 is the card: the plan, the target, the coach's note for a noted
+# hitter, the pictures the leaks are numbered on, the key and the leaks.
+# Page 2 is the guide in the player's words, the average hitter's
+# two-strike picture, the season chart and what fixing a leak paid.
 
 PRINT_W, PRINT_H = 1275, 1650      # letter, 150 px per inch
 PRINT_MARGIN = 72
+PRINT_END = PRINT_H - 70           # a page's content ends above this; the page footer is under it
+PRINT_LABEL_W = 132                # the row names, left of the pictures
+PRINT_GAP = 14                     # px between pictures
+PRINT_HEAD = 50                    # the count names over the first row
+PRINT_MIN_W = 96                   # a picture narrower than this is a layout to fix, not to print
+PRINT_MARKER_PX = 10.5             # a leak marker's smallest radius, so its number fits inside
+PRINT_KEY_CHARS = 196              # the key under the pictures wraps at this many characters
 
 PLAYER_GUIDE = [
     "Red is where you swing at balls more than other hitters do at the same spot and in the "
@@ -1670,7 +1697,8 @@ PLAYER_GUIDE = [
     "Everyone chases more with two strikes, so the comparison is always with hitters in the "
     "same count. Nobody is judged for a two-strike swing everyone makes.",
     "The numbers on the pictures are your biggest leaks, ranked by what your swing choices "
-    "cost over a full season. Each plan line is tagged with its leak's number.",
+    "cost over a full season, each on the row of pictures its pitches are in ({rows}). Each "
+    "plan line is tagged with its leak's number.",
     "The plan is one pitch per line, numbered 1 and 2 in the order to work on them: a take "
     "before two strikes comes first, because it costs nothing in strikeouts. A take rule is "
     "for the pitch that is clearly a ball; each line says how far off the plate the ones you "
@@ -1685,19 +1713,91 @@ PLAYER_GUIDE = [
     "their leak chasing mostly stopped losing runs; the walks come first, the hits come "
     "later if they come.",
 ]
+GUIDE_ROWS = {"S": "batting left or batting right",
+              None: "a leak against right-handers is on the vs RHP row"}
 
 
-def print_markers(summary, side):
-    """Numbered leak markers for the all-pitchers row on one side of the plate."""
+def print_row_specs(summary):
+    """The printable card's picture rows: the web card's rows that carry a
+    leak, so every number sits on a picture of the pitches it counts, as on
+    the web card (a leak named for a pitcher hand on that hand's row, never
+    on all pitchers). A switch hitter keeps both sides, labeled, a hitter
+    with no leak the all-pitchers row, and a hitter whose problem is
+    contact the misses row."""
 
-    markers = {}
-    for n, lk in enumerate(summary["leaks"]["all"], start=1):
-        if lk["side"] != side:
-            continue
-        spot = place_marker(np.array([lk["x"], lk["z"]]),
-                            [o for _, o in markers.get(lk["count_group"], [])])
-        markers.setdefault(lk["count_group"], []).append((n, tuple(spot)))
-    return markers
+    specs = row_specs(summary)
+    chase = [sp for sp in specs if sp[4] == "chase"]
+    if summary["bats"] != "S":
+        hands = {lk["hand"] or "all" for lk in summary["leaks"]["all"]} or {"all"}
+        chase = [sp for sp in chase if sp[3] in hands]
+    return chase + [sp for sp in specs if sp[4] == "whiff"]
+
+
+def print_key(specs):
+    words = ("Red: you chase more than the average hitter at that spot and count. Blue: you take "
+             "more. Gray: about average. White: too few pitches to say. Outline: 15 points or more over.")
+    if any(sp[4] == "whiff" for sp in specs):
+        words += " Misses row: purple, more misses than the average hitter on the same chases; green, fewer."
+    return words
+
+
+def print_cell_w(n_rows, height):
+    """One picture's width when n_rows rows and the count names share height px."""
+
+    by_height = (height - PRINT_HEAD - (n_rows - 1) * PRINT_GAP) / n_rows / PANEL_ASPECT
+    by_width = (PRINT_W - 2 * PRINT_MARGIN - PRINT_LABEL_W - 3 * PRINT_GAP) / 4
+    return min(by_height, by_width)
+
+
+def print_grid(card, p, summary, specs, markers, top, w, marker_r):
+    """The pictures of page 1: a row per spec, each picture w px wide, under
+    the count names at top. Returns the pictures' bottom edge and right edge."""
+
+    t = card.t
+    mask = cs.in_zone_mask(XS, ZS, *summary["zone"])
+    x0 = PRINT_MARGIN + PRINT_LABEL_W
+    h = w * PANEL_ASPECT
+    names = COUNT_LABELS if w >= 160 else COUNT_SHORT
+    for j, g in enumerate(COUNT_GROUPS):
+        cx = x0 + j * (w + PRINT_GAP) + w / 2
+        card.text(cx, top + 20, names[g], size=16, weight="bold", ha="center")
+        card.text(cx, top + 38, COUNT_DETAIL[g], size=12, color="muted", ha="center")
+    right = x0 + 4 * w + 3 * PRINT_GAP
+    y = top + PRINT_HEAD
+    for i, spec in enumerate(specs):
+        label, sub, _, _, metric = spec
+        if metric == "whiff":
+            card.hline(PRINT_MARGIN, right, y - PRINT_GAP / 2, color="axis", lw=1.2)
+        ly = card.wrapped(PRINT_MARGIN, y + 18, label, 13, size=15, line=19, weight="bold")
+        if sub:
+            card.wrapped(PRINT_MARGIN, ly + 2, sub, 19, size=12, line=15, color="muted")
+        for j, g in enumerate(COUNT_GROUPS):
+            a = card.panel(x0 + j * (w + PRINT_GAP), y, w, h)
+            rgb, gap, ev = spec_cell(p, spec, g, t, mask)
+            card.zone(a, rgb, summary["zone"], mask, gap, ev, markers.get((i, g), []), marker_r)
+        y += h + PRINT_GAP
+    return y - PRINT_GAP, right
+
+
+def print_notes(card, x0, xr, y, summary):
+    """The target and the coach's note under the plan, side by side when the
+    card has both. Returns the y under them."""
+
+    notes = [(label, text) for label, text in (("TARGET", summary["target_text"]),
+                                               ("COACH'S NOTE, FOR THE STAFF", summary["coach_note"]))
+             if text]
+    if not notes:
+        return y
+    y += 8
+    two = len(notes) == 2
+    col = (xr - x0 - 40) / len(notes)
+    ends = []
+    for k, (label, text) in enumerate(notes):
+        x = x0 + k * (col + 40)
+        card.text(x, y, label, size=12, color="muted", weight="bold")
+        ends.append(card.wrapped(x, y + 24, text, 68 if two else 92, size=15 if two else 16,
+                                 line=21 if two else 22, color="ink2"))
+    return max(ends)
 
 
 def print_pages(summary, out_pdf, theme_name="light"):
@@ -1705,7 +1805,8 @@ def print_pages(summary, out_pdf, theme_name="light"):
 
     out_pdf.parent.mkdir(parents=True, exist_ok=True)
     p = df[df["batter"] == summary["id"]]
-    side = (summary["bats"] if summary["bats"] != "S"
+    switch = summary["bats"] == "S"
+    side = (summary["bats"] if not switch
             else max(summary["side_pitches"], key=summary["side_pitches"].get))
     x0, xr = PRINT_MARGIN, PRINT_W - PRINT_MARGIN
     mask = cs.in_zone_mask(XS, ZS, *summary["zone"])
@@ -1713,6 +1814,7 @@ def print_pages(summary, out_pdf, theme_name="light"):
     suffix = "th" if 10 <= rank % 100 <= 20 else {1: "st", 2: "nd", 3: "rd"}.get(rank % 10, "th")
     bats = {"R": "Bats right", "L": "Bats left", "S": "Switch hitter"}[summary["bats"]]
     footer = f"xChase+ 1.1  ·  Statcast {SEASON}  ·  catcher's view, your own strike zone"
+    leak_list = summary["leaks"]["all"]
 
     def header(card, page):
         t = card.t
@@ -1732,8 +1834,15 @@ def print_pages(summary, out_pdf, theme_name="light"):
                   ha="right")
         return t
 
+    def check_end(y, page):
+        # nothing runs into the page footer: the layout fits the pictures
+        # to the room the text leaves, so this is a layout bug, not data
+        if round(y) > PRINT_END:
+            raise SystemExit(f"printable card for {summary['name']}: page {page} runs to "
+                             f"y={y:.0f}, past {PRINT_END}")
+
     with PdfPages(out_pdf) as pdf:
-        # ---- page 1: the plan, the pictures, the leaks
+        # ---- page 1: the plan, the pictures it points at, the leaks
         card = Card(theme_name, PRINT_W, PRINT_H)
         t = header(card, 1)
         y = 252
@@ -1745,43 +1854,42 @@ def print_pages(summary, out_pdf, theme_name="light"):
                 continue
             card.plan_mark(x0 + 11, y - 7, it, 11, 13, xr)
             y = card.wrapped(x0 + 32, y, it["text"], 86, size=18, line=26) + 8
-        if summary["target_text"]:
-            y += 8
-            card.text(x0, y, "TARGET", size=12, color="muted", weight="bold")
-            y = card.wrapped(x0, y + 24, summary["target_text"], 92, size=16, line=22, color="ink2")
-        y += 26
+        y = print_notes(card, x0, xr, y, summary)
+        y += 20
         card.hline(x0, xr, y)
-        y += 42
-        card.text(x0, y, "Where you chase, all pitchers", size=22, weight="bold")
-        card.text(xr, y, "red: more than the average hitter at that spot and count; blue: less",
-                  size=12, color="muted", ha="right")
-        gy = y + 16
-        gap = 16
-        w = (xr - x0 - 3 * gap) / 4
-        h = w * PANEL_ASPECT
-        markers = print_markers(summary, side)
-        for j, g in enumerate(COUNT_GROUPS):
-            left = x0 + j * (w + gap)
-            card.text(left + w / 2, gy + 20, COUNT_LABELS[g], size=16, weight="bold", ha="center")
-            card.text(left + w / 2, gy + 38, COUNT_DETAIL[g], size=12, color="muted", ha="center")
-            frame = p[(p["count_group"] == g) & (p["stand"] == side)]
-            srf = player_surface(frame, "chase")
-            rgb = compose(diverging(srf["gap"], t), srf["evidence"], t, mask)
-            a = card.panel(left, gy + 48, w, h)
-            card.zone(a, rgb, summary["zone"], mask, srf["gap"], srf["evidence"], markers.get(g, []))
-        gb = gy + 48 + h
-        inside, away = ("Inside", "Away") if side == "R" else ("Away", "Inside")
-        card.text(x0 + 4, gb + 20, inside, size=13, color="muted")
-        card.text(x0 + w - 4, gb + 20, away, size=13, color="muted", ha="right")
-        card.text(xr, gb + 20, "catcher's view, to scale", size=13, color="muted", ha="right")
-        y = gb + 64
+        y += 40
+        card.text(x0, y, "Where you chase", size=22, weight="bold")
+        top = y + 14
+        # Under the pictures, from their bottom edge: the side labels and the
+        # key (46 to the key's first line, 16 a line), then 34 to "Biggest
+        # leaks", 34 a leak, 30 to the caption and 6 under it.
+        specs = print_row_specs(summary)
+        key = print_key(specs)
+        key_lines = len(textwrap.wrap(key, PRINT_KEY_CHARS, break_on_hyphens=False))
+        below = 46 + 16 * key_lines + 34 + 34 * max(len(leak_list), 1) + 30 + 6
+        w = print_cell_w(len(specs), PRINT_END - below - top)
+        if w < PRINT_MIN_W:
+            raise SystemExit(f"printable card for {summary['name']}: {len(specs)} rows of pictures "
+                             f"leave {w:.0f} px each, under {PRINT_MIN_W}")
+        marker_r = max(0.2, PRINT_MARKER_PX * (XS[-1] - XS[0]) / w)
+        markers = leak_markers(summary, specs, max(MARKER_GAP, 2.4 * marker_r))
+        gb, right = print_grid(card, p, summary, specs, markers, top, w, marker_r)
+        draw_legend(card, right - 300, top - 40, "gap")
+        if not switch:         # a switch hitter's rows say where inside is
+            inside, away = ("Inside", "Away") if side == "R" else ("Away", "Inside")
+            card.text(x0 + PRINT_LABEL_W + 4, gb + 20, inside, size=13, color="muted")
+            card.text(x0 + PRINT_LABEL_W + w - 4, gb + 20, away, size=13, color="muted", ha="right")
+        card.text(right, gb + 20, "catcher's view, to scale", size=13, color="muted", ha="right")
+        y = card.wrapped(x0, gb + 46, key, PRINT_KEY_CHARS, size=12, line=16, color="ink2")
+        card.hline(x0, xr, y - 4)
+        y += 34
         card.text(x0, y, "Biggest leaks", size=22, weight="bold")
         card.text(xr, y, "numbered on the pictures  ·  runs per 600 PA", size=12, color="muted",
                   ha="right")
-        if not summary["leaks"]["all"]:
+        if not leak_list:
             y += 34
             card.text(x0, y, "None worth 0.75 runs per 600 PA.", size=16, color="ink2")
-        for n, lk in enumerate(summary["leaks"]["all"], start=1):
+        for n, lk in enumerate(leak_list, start=1):
             y += 34
             card.ax.add_patch(Circle((x0 + 12, y - 6), 12, fc=t["surface"], ec=t["ink"], lw=px(1.6)))
             card.text(x0 + 12, y - 5, str(n), size=14, weight="bold", ha="center", va="center")
@@ -1790,42 +1898,36 @@ def print_pages(summary, out_pdf, theme_name="light"):
                       f"{lk['chases']} of {lk['pitches']}", size=14, color="ink2", ha="right")
             card.text(xr, y, fmt_runs(lk["choices"]), size=16, weight="bold", ha="right")
         y += 30
-        card.text(x0, y + 14, "You vs the average hitter on the same pitches; the runs are what "
+        card.text(x0, y, "You vs the average hitter on the same pitches; the runs are what "
                   "the swing choices cost. Ranked by runs; the plan takes up to two, in the order "
                   "to work on them.", size=12, color="muted")
-        y += 56
-        card.hline(x0, xr, y)
-        y += 44
-        card.text(x0, y, trend_title(summary["trend"]), size=22, weight="bold")
-        card.text(x0 + 560, y, "Pitches at least 4 inches off the plate: you against every hitter.",
-                  size=12, color="muted")
-        draw_trend(card, x0 + 48, y + 30, 460, 90, summary["trend"], league_trend)
-        draw_legend(card, x0 + 600, y + 40, "gap", "Chases vs the average hitter, same spot and count")
-        card.text(x0 + 600, y + 96, "Blue: you take more. Red: you chase more. Gray: about average.",
-                  size=13, color="ink2")
-        card.text(x0 + 600, y + 116, "White: too few pitches to say. Outline: 15 points or more.",
-                  size=13, color="ink2")
-        card.wrapped(x0, PRINT_H - 92, EVIDENCE_LINE, 150, size=11, line=14, color="muted")
+        check_end(y + 6, 1)
         dump_page(card, summary, 1)
         card.save_page(pdf)
 
-        # ---- page 2: how to read it, in the player's words
+        # ---- page 2: how to read it, in the player's words, and the seasons
         card = Card(theme_name, PRINT_W, PRINT_H)
         t = header(card, 2)
         y = 252
         card.text(x0, y, "How to read your card", size=24, weight="bold")
         y += 40
+        rows = GUIDE_ROWS["S" if switch else None]
         for n, line in enumerate(PLAYER_GUIDE, start=1):
             card.ax.add_patch(Circle((x0 + 12, y - 6), 12, fc=t["surface"], ec=t["ink"], lw=px(1.6)))
             card.text(x0 + 12, y - 5, str(n), size=13, weight="bold", ha="center", va="center")
-            y = card.wrapped(x0 + 36, y, line, 100, size=16, line=23) + 12
-        y += 16
+            y = card.wrapped(x0 + 36, y, line.format(rows=rows), 100, size=16, line=23) + 12
+        y += 4
         card.hline(x0, xr, y)
-        y += 42
-        card.text(x0, y, "What normal looks like, with two strikes", size=22, weight="bold")
+        y += 40
+        title = "What normal looks like, with two strikes"
+        if switch:
+            title += f", batting {'left' if side == 'L' else 'right'}"
+        card.text(x0, y, title, size=22, weight="bold")
         gy = y + 24
-        w = 340
-        h = w * PANEL_ASPECT
+        # The season chart under the pictures takes 34 to its rule, 44 to its
+        # title and 150 for the chart and its years.
+        h = min(340 * PANEL_ASPECT, PRINT_END - (gy + 40) - (34 + 44 + 150))
+        w = h / PANEL_ASPECT
         lg = df[(df["stand"] == side) & (df["count_group"] == "two")]
         srf = cs.surface(lg["xq"] / 100, lg["zq_avg"] / 100, lg["is_chase"].to_numpy(float),
                          np.zeros(len(lg)), XS, ZS)
@@ -1836,11 +1938,14 @@ def print_pages(summary, out_pdf, theme_name="light"):
                   AVERAGE_ZONE[side], avg_mask)
         card.text(x0 + w / 2, gy + 20, "The average hitter: how often they swing",
                   size=14, weight="bold", ha="center")
+        # the leaks this picture holds on page 1 (all pitchers, this side)
+        you_row = next((i for i, sp in enumerate(specs)
+                        if sp[2] == side and sp[3] == "all" and sp[4] == "chase"), None)
         mine = p[(p["count_group"] == "two") & (p["stand"] == side)]
         srf = player_surface(mine, "chase")
         a = card.panel(x0 + w + 40, gy + 40, w, h)
         card.zone(a, compose(diverging(srf["gap"], t), srf["evidence"], t, mask), summary["zone"],
-                  mask, srf["gap"], srf["evidence"], markers.get("two", []))
+                  mask, srf["gap"], srf["evidence"], markers.get((you_row, "two"), []))
         card.text(x0 + w + 40 + w / 2, gy + 20, "You: more (red) or less (blue) than that",
                   size=14, weight="bold", ha="center")
         lx = x0 + 2 * w + 80
@@ -1849,6 +1954,15 @@ def print_pages(summary, out_pdf, theme_name="light"):
         card.wrapped(lx, gy + 222, "The average hitter chases most with two strikes, below and "
                      "away. Your card only shows where you differ from that.", 34, size=13,
                      line=18, color="ink2")
+        y = gy + 40 + h + 34
+        card.hline(x0, xr, y)
+        y += 44
+        card.text(x0, y, trend_title(summary["trend"]), size=22, weight="bold")
+        card.text(x0 + 600, y, "Pitches at least 4 inches off the plate: you against every hitter.",
+                  size=12, color="muted")
+        draw_trend(card, x0 + 48, y + 30, 460, 90, summary["trend"], league_trend)
+        card.wrapped(x0 + 600, y + 40, EVIDENCE_LINE, 64, size=14, line=20, color="ink2")
+        check_end(y + 150, 2)
         dump_page(card, summary, 2)
         card.save_page(pdf)
 
@@ -2184,8 +2298,10 @@ def write_noted_report():
         f"`results/xchase/player_cards/{SEASON}/index.html` (hosted at",
         f"[samuelosullivan6-rgb.github.io/ChasePlus](https://samuelosullivan6-rgb.github.io/ChasePlus/results/xchase/player_cards/{SEASON}/index.html),",
         "with a switcher to every other season). Each hitter below also has a printable",
-        "two-page card in `print/`: the plan, the target, the pictures and the leaks, then a",
-        "guide to the card in the player's own words. Every chased pitch in these hitters'",
+        "two-page card in `print/`: the plan, the target, the coach's note, the pictures the",
+        "leaks are numbered on (a leak named for a pitcher hand on that hand's row, as on the",
+        "web card) and the leaks, then a guide to the card in the player's own words and the",
+        "season chart. Every chased pitch in these hitters'",
         "leaks, with the date, the pitcher, the count, the pitch and how far off it was, is in",
         f"[`leak_pitches_{SEASON}.csv`](leak_pitches_{SEASON}.csv), for the video room. A leak",
         "named for a pitcher hand (\"mostly vs RHP\") counts the other hand's pitches too, as",

@@ -645,10 +645,13 @@ The cards for the 17 hitters named in the two coaching reports are in
 [`results/xchase/noted_players/`](results/xchase/noted_players/README.md),
 each with a printable two-page letter-size version in
 [`noted_players/print/`](results/xchase/noted_players/print/): the plan,
-the target, the pictures and the leaks on page 1, and on page 2 a guide
-to the card in the player's own words next to the average hitter's
-two-strike picture. Every qualified hitter's card, with switches for
-pitch type, the baseline and swing-and-miss, is in
+the target, the coach's note, the pictures the leaks are numbered on (a
+leak named for a pitcher hand on that hand's row, both sides of a switch
+hitter, the misses row for a contact problem) and the leaks on page 1,
+and on page 2 a guide to the card in the player's own words, the average
+hitter's two-strike picture and the season chart. Every qualified
+hitter's card, with switches for pitch type, the baseline and
+swing-and-miss, is in
 `results/xchase/player_cards/<season>/index.html` (hosted at the link
 above; one page per season, with a switcher on the page, and the season's
 pitches in `pitches.bin` beside it, fetched with the first card, so it

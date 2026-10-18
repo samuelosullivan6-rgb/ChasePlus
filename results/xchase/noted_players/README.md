@@ -9,8 +9,10 @@ Every other qualified hitter has the same card in the interactive page,
 `results/xchase/player_cards/2026/index.html` (hosted at
 [samuelosullivan6-rgb.github.io/ChasePlus](https://samuelosullivan6-rgb.github.io/ChasePlus/results/xchase/player_cards/2026/index.html),
 with a switcher to every other season). Each hitter below also has a printable
-two-page card in `print/`: the plan, the target, the pictures and the leaks, then a
-guide to the card in the player's own words. Every chased pitch in these hitters'
+two-page card in `print/`: the plan, the target, the coach's note, the pictures the
+leaks are numbered on (a leak named for a pitcher hand on that hand's row, as on the
+web card) and the leaks, then a guide to the card in the player's own words and the
+season chart. Every chased pitch in these hitters'
 leaks, with the date, the pitcher, the count, the pitch and how far off it was, is in
 [`leak_pitches_2026.csv`](leak_pitches_2026.csv), for the video room. A leak
 named for a pitcher hand ("mostly vs RHP") counts the other hand's pitches too, as
