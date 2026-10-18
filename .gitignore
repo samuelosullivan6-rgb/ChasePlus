@@ -62,3 +62,10 @@ results/xchase/player_cards/*/print/
 # about 50 MB a review. Kept locally beside the write-up, which names every
 # file it cites and the commit the pictures were taken from.
 results/xchase/evaluation/*/screenshots/
+
+# The college path (scripts/college_build.py): TrackMan files, rosters and
+# everything built from them, one folder per build. Team data, never
+# committed and never published: GitHub Pages serves only what is
+# committed. The round trip's write-up on MLB data is in
+# results/trackman_roundtrip/ instead.
+college/
