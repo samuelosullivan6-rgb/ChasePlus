@@ -33,11 +33,13 @@ their folders are the college build's. A copy that differs from the MLB
 script lists what differs at its top: step 02 keeps the college season
 (SEASONS_TO_KEEP); step 17 has no coach's notes (NOTED_SEASON), reads
 heights back with the adapter's zone share (ABS_TOP_SHARE, 53.5% as in
-MLB), and says TrackMan, not Statcast, in its page footer. Steps 13 and
-15 are copied as they are. The card footer's "Does fixing a leak pay?"
-line is the MLB backtest's finding (step 16 needs back-to-back seasons),
-and the roster's Beat column is empty (step 19 has no college line to
-freeze a target with).
+MLB), says TrackMan, not Statcast, in its page footer, and says the card
+footer's "Does fixing a leak pay?" finding is from MLB hitters (step 16
+needs the same hitters in back-to-back seasons). The copy of its page
+template (templates/player_cards.html) leaves out the roster's Beat
+column and the sentences about the target: step 19 freezes the target,
+and a college build never has one. Steps 13 and 15 are copied as they
+are.
 
 The page needs a web server, not a double-click (it fetches its pitches):
 
@@ -69,6 +71,32 @@ MLB_BACKTEST = PROJECT_DIR / "results" / "xchase" / "coaching" / "leak_backtest_
 
 # The college path's own files, which the copies of the MLB steps never need.
 NOT_COPIED = ("college_*.py", "trackman_*.py", "statcast_to_trackman.py", "__pycache__")
+
+# The card footer (step 17's EVIDENCE_LINE) is the MLB backtest's finding:
+# step 16 needs the same hitters in back-to-back seasons, so a college card
+# says whose finding it is.
+MLB_EVIDENCE = '''\
+    f"{EVIDENCE_QUESTION} Hitters who cut their leak chasing more than expected stopped giving "
+    "counts away: more walks, no more strikeouts, still swinging at strikes. The gain was mostly "
+    "runs not lost; hits come later, if they come.")'''
+COLLEGE_EVIDENCE = '''\
+    f"{EVIDENCE_QUESTION} In MLB, hitters who cut their leak chasing more than expected walked "
+    "more, struck out no more and still swung at strikes; the gain was mostly runs not lost. "
+    "Testing it on these hitters takes a second season.")'''
+
+# The target is what step 19's frozen line expects next season with no
+# change. A college build has one season and no line to freeze, so its
+# page drops the roster's Beat column and every sentence about the target.
+NO_TARGET = [
+    (" Beat is the number to get under in ${D.season + 1}: what the frozen line expects with no "
+     "change at all, with this season's number beside it.", ""),
+    (" Beat: how far above the league's chase rate, in points, the frozen line expects the hitter "
+     "to chase in all of the card's leaks next season with no change, with this season's number "
+     "beside it (step 19); a fix is anything under it, and a card whose leaks are all video items "
+     "has none.", ""),
+    (' ["target", "Beat", true],', ""),
+    (" The target counts all pitchers.", ""),
+]
 
 
 # --------------------------------------------------
@@ -107,9 +135,10 @@ def replace_once(source, old, new, label):
 
 
 def copy_steps(workspace, changes):
-    """scripts/ into college/<name>/scripts/, with `changes` (script ->
-    {"settings": {...}, "replace": [(old, new), ...]}) applied and listed
-    at the top of each changed copy."""
+    """scripts/ into college/<name>/scripts/, with `changes` (file under
+    scripts/ -> {"settings": {...}, "replace": [(old, new), ...]}) applied
+    and listed at the top of each changed copy: a comment in a script, an
+    HTML comment in a page template ("settings" is for scripts only)."""
 
     target = workspace / "scripts"
     if target.exists():
@@ -118,14 +147,24 @@ def copy_steps(workspace, changes):
     for name, change in changes.items():
         path = target / name
         text = path.read_text()
-        text = override_settings(text, change.get("settings", {}), name)
+        if change.get("settings"):
+            if path.suffix != ".py":
+                raise SystemExit(f"{name}: settings are for scripts; change a template with replace.")
+            text = override_settings(text, change["settings"], name)
         for old, new in change.get("replace", []):
             text = replace_once(text, old, new, name)
         listed = [f"{k} = {v!r}" for k, v in change.get("settings", {}).items()]
         listed += [f"text {old!r} -> {new!r}" for old, new in change.get("replace", [])]
-        header = ("# College copy, written by college_build.py from scripts/" + name
-                  + ". Changed from the MLB script:\n"
-                  + "".join(f"#   {line}\n" for line in listed) + "\n")
+        if path.suffix == ".html":
+            if any("--" in line for line in listed):
+                raise SystemExit(f"{name}: a change listed in an HTML comment cannot contain '--'.")
+            header = ("<!-- College copy, written by college_build.py from scripts/" + name
+                      + ". Changed from the MLB file:\n"
+                      + "".join(f"       {line}\n" for line in listed) + "-->\n")
+        else:
+            header = ("# College copy, written by college_build.py from scripts/" + name
+                      + ". Changed from the MLB script:\n"
+                      + "".join(f"#   {line}\n" for line in listed) + "\n")
         path.write_text(header + text)
 
 
@@ -212,8 +251,10 @@ def build(name, trackman, heights, season=None, sign="auto"):
         "17_build_player_cards.py": {
             "settings": {"NOTED_SEASON": None, "ABS_TOP_SHARE": ta.ZONE_TOP_SHARE},
             "replace": [('f"xChase+ 1.1 · Statcast {SEASON} · ',
-                         'f"xChase+ 1.1, college path · TrackMan {SEASON} · ')],
+                         'f"xChase+ 1.1, college path · TrackMan {SEASON} · '),
+                        (MLB_EVIDENCE, COLLEGE_EVIDENCE)],
         },
+        "templates/player_cards.html": {"replace": NO_TARGET},
     }
     copy_steps(workspace, changes)
     run_step(workspace, "02_build_chase_dataset.py", log=log)

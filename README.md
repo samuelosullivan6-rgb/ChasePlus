@@ -1060,10 +1060,10 @@ with no exit speed (those get their hit type's average). The round trip
 was written from Statcast, so it cannot show how one program's operators
 record a foul tip, a bunt or an out on the bases. The adapter takes
 outs from the Outs column, not OutsOnPlay, and reports where the two
-disagree. Two parts of every card still speak for MLB. The footer's "Does
-fixing a leak pay?" quotes the MLB backtest, since step 16 needs back-to-back
-seasons. The roster's Beat column stays empty, since step 19 has no
-college line to freeze a target with.
+disagree. The footer's "Does fixing a leak pay?" is the MLB backtest's
+finding, and a college card says so: step 16 needs the same hitters in
+back-to-back seasons. A college page has no target, so no Beat column on
+the roster: step 19 has no college line to freeze one with.
 
 ## Appendix: Chase+ vs xChase+
 

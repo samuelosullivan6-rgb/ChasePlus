@@ -271,8 +271,8 @@ not against a league he never sees.
   conference one are in the same league baseline, which is the league the
   team's hitters actually faced.
 - **The card's footer.** "Does fixing a leak pay?" quotes the MLB backtest
-  (step 16 needs back-to-back seasons). A college card says the same until
-  there are two college seasons to test it on.
+  (step 16 needs back-to-back seasons), and a college card says the finding
+  is from MLB hitters until there are two college seasons to test it on.
 
 ## Files
 
