@@ -1132,7 +1132,7 @@ summary { cursor: pointer; font-weight: 700; }
         el("span", { class: "leaktag", title: "This line's leak, numbered on the pictures and in the list below" }, "leak", el("span", { class: "num", text: String(it.n) }))));
     });
     const sec = el("section", {}, el("h2", { text: state.hand === "all" ? "What to work on" : `What to work on vs ${state.hand === "R" ? "right-handers" : "left-handers"}` }), plan);
-    if (state.hand !== "all") sec.append(el("p", { class: "evidence", text: "The plan for this pitcher hand only; pick All pitchers for the full plan. The target counts all pitchers." }));
+    if (state.hand !== "all") sec.append(el("p", { class: "evidence", text: "The plan for this pitcher hand only; pick All pitchers for the full plan." + (p.target_text ? " The target counts all pitchers." : "") }));
     if (p.coach_note) sec.append(el("div", { class: "coach" }, el("span", { class: "eyebrow", text: "Coach's note, for the staff" }), p.coach_note));
     a.append(sec);
 
@@ -1216,6 +1216,9 @@ summary { cursor: pointer; font-weight: 700; }
   const STATUS_WORDS = { struggling: "struggling", average: "average", productive: "hitting well" };
   const r1 = (v) => Math.round(v * 10) / 10;
   const fold = (s) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+  // Step 19 freezes the targets; a page whose hitters have none (2021, with no
+  // earlier line, or a college page) has no Beat column and no word of one.
+  const HAS_TARGET = D.players.some((p) => p.target_text);
   const ROSTER = D.players.map((p) => {
     const top = (p.leaks.all || [])[0] || null, t = p.target;
     const beat = p.target_beat !== undefined ? p.target_beat
@@ -1236,7 +1239,7 @@ summary { cursor: pointer; font-weight: 700; }
     ["kind", "Problem", false], ["leak", "Top leak", false], ["leak_runs", "Leak runs", true],
     ["depth", "Inches off", true], ["check", "Count check", false], ["target", "Beat", true],
     ["plan", "Start with", false],
-  ];
+  ].filter(([k]) => HAS_TARGET || k !== "target");
   const PHONE = new Set(["team", "player", "stake", "leak", "plan"]);   // the rest opens on a tap
   let rosterRows = [];                     // the rows as last shown, in order
   const fmtCell = (k, v) => {
@@ -1246,8 +1249,8 @@ summary { cursor: pointer; font-weight: 700; }
     return String(v);
   };
   document.getElementById("roster-title").textContent = `Chase decisions by team, ${D.season}`;
-  document.getElementById("roster-lede").textContent = `Every qualified hitter, sorted by the runs his swing choices on far-off pitches cost per 600 plate appearances. Tap a name for his decision card. Beat is the number to get under in ${D.season + 1}: what the frozen line expects with no change at all, with this season's number beside it. On a phone, tap a hitter for the rest of his row.`;
-  document.getElementById("roster-glossary").textContent = "Runs are per 600 plate appearances. Choices is what the swing decisions cost, with each chase priced at what an average chase costs in the same count and at the same distance off the zone; contact is what his chases produced against that price. Problem: the share of the loss that is choices (step 13). Top leak: the costliest count, pitch group and side of the zone, with the pitcher hand when most of its pitches came from one (“mostly vs RHP”), and how far off the zone the chased pitches were (median inches). Count check: how he hits once the count reaches the leak's counts, shrunk for noise, against the league in the same counts. Beat: how far above the league's chase rate, in points, the frozen line expects the hitter to chase in all of the card's leaks next season with no change, with this season's number beside it (step 19); a fix is anything under it, and a card whose leaks are all video items has none. Start with: the plan's first pitch line, with the two rates when they print 5 or more points apart (otherwise what the swings cost) and the inches off; the rest of the plan is on the card. A traded hitter lists every team, most plate appearances first, and is on each team's roster.";
+  document.getElementById("roster-lede").textContent = `Every qualified hitter, sorted by the runs his swing choices on far-off pitches cost per 600 plate appearances. Tap a name for his decision card.${HAS_TARGET ? ` Beat is the number to get under in ${D.season + 1}: what the frozen line expects with no change at all, with this season's number beside it.` : ""} On a phone, tap a hitter for the rest of his row.`;
+  document.getElementById("roster-glossary").textContent = "Runs are per 600 plate appearances. Choices is what the swing decisions cost, with each chase priced at what an average chase costs in the same count and at the same distance off the zone; contact is what his chases produced against that price. Problem: the share of the loss that is choices (step 13). Top leak: the costliest count, pitch group and side of the zone, with the pitcher hand when most of its pitches came from one (“mostly vs RHP”), and how far off the zone the chased pitches were (median inches). Count check: how he hits once the count reaches the leak's counts, shrunk for noise, against the league in the same counts." + (HAS_TARGET ? " Beat: how far above the league's chase rate, in points, the frozen line expects the hitter to chase in all of the card's leaks next season with no change, with this season's number beside it (step 19); a fix is anything under it, and a card whose leaks are all video items has none." : "") + " Start with: the plan's first pitch line, with the two rates when they print 5 or more points apart (otherwise what the swings cost) and the inches off; the rest of the plan is on the card. A traded hitter lists every team, most plate appearances first, and is on each team's roster.";
 
   function renderRoster() {
     const head = document.querySelector("#roster-table thead tr"); head.replaceChildren();

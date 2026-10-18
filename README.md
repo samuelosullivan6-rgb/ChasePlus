@@ -1062,8 +1062,9 @@ record a foul tip, a bunt or an out on the bases. The adapter takes
 outs from the Outs column, not OutsOnPlay, and reports where the two
 disagree. The footer's "Does fixing a leak pay?" is the MLB backtest's
 finding, and a college card says so: step 16 needs the same hitters in
-back-to-back seasons. A college page has no target, so no Beat column on
-the roster: step 19 has no college line to freeze one with.
+back-to-back seasons. A college page has no target, so, as on the 2021
+page, the roster has no Beat column and no card mentions one: step 19 has
+no college line to freeze one with.
 
 ## Appendix: Chase+ vs xChase+
 

@@ -35,11 +35,11 @@ script lists what differs at its top: step 02 keeps the college season
 heights back with the adapter's zone share (ABS_TOP_SHARE, 53.5% as in
 MLB), says TrackMan, not Statcast, in its page footer, and says the card
 footer's "Does fixing a leak pay?" finding is from MLB hitters (step 16
-needs the same hitters in back-to-back seasons). The copy of its page
-template (templates/player_cards.html) leaves out the roster's Beat
-column and the sentences about the target: step 19 freezes the target,
-and a college build never has one. Steps 13 and 15 are copied as they
-are.
+needs the same hitters in back-to-back seasons). Steps 13 and 15 and
+step 17's page template are copied as they are. Step 19 freezes the
+target and has no college line to freeze one with, so no hitter has one,
+and the template then leaves out the roster's Beat column and every
+sentence about a target, as on MLB's 2021 page.
 
 The page needs a web server, not a double-click (it fetches its pitches):
 
@@ -83,20 +83,6 @@ COLLEGE_EVIDENCE = '''\
     f"{EVIDENCE_QUESTION} In MLB, hitters who cut their leak chasing more than expected walked "
     "more, struck out no more and still swung at strikes; the gain was mostly runs not lost. "
     "Testing it on these hitters takes a second season.")'''
-
-# The target is what step 19's frozen line expects next season with no
-# change. A college build has one season and no line to freeze, so its
-# page drops the roster's Beat column and every sentence about the target.
-NO_TARGET = [
-    (" Beat is the number to get under in ${D.season + 1}: what the frozen line expects with no "
-     "change at all, with this season's number beside it.", ""),
-    (" Beat: how far above the league's chase rate, in points, the frozen line expects the hitter "
-     "to chase in all of the card's leaks next season with no change, with this season's number "
-     "beside it (step 19); a fix is anything under it, and a card whose leaks are all video items "
-     "has none.", ""),
-    (' ["target", "Beat", true],', ""),
-    (" The target counts all pitchers.", ""),
-]
 
 
 # --------------------------------------------------
@@ -254,7 +240,6 @@ def build(name, trackman, heights, season=None, sign="auto"):
                          'f"xChase+ 1.1, college path · TrackMan {SEASON} · '),
                         (MLB_EVIDENCE, COLLEGE_EVIDENCE)],
         },
-        "templates/player_cards.html": {"replace": NO_TARGET},
     }
     copy_steps(workspace, changes)
     run_step(workspace, "02_build_chase_dataset.py", log=log)
