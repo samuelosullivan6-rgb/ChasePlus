@@ -462,3 +462,134 @@ How each listed issue stands now:
   - Issue 2. The hand note makes a wrong label visible: Grissom's vs LHP tab now reads 11 of 24,
     46% vs 39%, under the line that names left-handers. The label rule itself is unchanged.
   - Issues 6, 10 to 21, 23, 24, 26 and 29 to 40, apart from the parts named above.
+
+Items 2 to 4 of the order were built next. The section below says where every issue stands after them.
+
+## Fixed the same day: which pitch leads, the target sentence and the hand label
+
+Items 2, 3 and 4 of the order were built on top of the one-plan fix. Every season was rebuilt with
+step 22. `plan_checks.py` passes on all six, and the coach's notes still pass `coach_notes.py`.
+
+- **The no-target sentence (issues 6, 12, 13).**
+  - Its 2026 points now come from the card's own leak rows: the rows' rates pooled, each rounded as
+    a row prints it. On a one-leak card that is exactly the row's two numbers apart. Rutschman's
+    sentence used to say his leak was 3 points below the league, under a row reading 49% vs 43%. It
+    now says 6 points above.
+  - A forecast more than 2 points below the league now reads "should be at or under it in 2027", not
+    "about at it".
+  - The frozen numbers in `leak_predictions_*.csv` are untouched. The numbered targets and the
+    roster's Beat still print step 19's scale, which step 20 scores.
+- **Which pitch leads (issues 10, 11, 16, 17).**
+  - A take before two strikes goes ahead of a two-strike take only when it rests on 20 or more
+    pitches (`PLAN_LEAD_MIN_PITCHES`). In step 16's backtest, leaks on fewer pitches kept 15% of
+    their excess. A smaller pre-two-strike leak is ordered by runs like the rest.
+  - A take chased 5 or more points above the league goes ahead of one chased at about the league's
+    rate.
+  - A new line under the pitch lines names what the plan leaves for later:
+    - a leak off the plan that costs 1.25 times a plan line or more, on 20+ pitches, with the rule
+      that put the plan's lines ahead of it;
+    - every count costing a run or more that no pitch line sits in. The line says which leak is in
+      that count, or that the cost is spread over many pitches, or that the hitter's contact there
+      pays for it.
+
+    For example:
+    - Álvarez: "Leak 1 (two strikes, mostly vs RHP, changeups / splitters below the zone) costs more
+      than both lines above, but a take before two strikes costs you no strikeouts, so they go
+      first."
+    - Wells: "Leak 1 (two strikes, fastballs above the zone) costs more than both lines above, but
+      the ones you swung at were mostly within a ball of the zone: one to go over on video with your
+      coaches."
+    - Harris: "Your choices also cost about 1 run a season on the first pitch, 4 when you're ahead in
+      the count and 5 at 0-1 or 1-1, spread over many pitches rather than one take."
+  - The closing line now says "The changes to start with are the pitches above" whenever a leak on
+    the list or a costly count is left for later. It says "The only change(s) on this card" only
+    when nothing is.
+  - Harris's coach's note dropped "so nothing else needs to change", which the new line would
+    contradict.
+- **The hand label and the switch-hitter side (issues 2, 21).**
+  - A leak is named for a pitcher hand when that hand threw 80% of its pitches (55% for
+    left-handers), as before. It must now also carry more than half of the leak's extra chases and
+    more than half of their cost. Grissom's line 1 now reads "With two strikes, let breaking balls
+    below the zone go", with no hand: right-handers carried three quarters of that cost. The roster
+    glossary states the rule.
+  - A switch hitter's leak is drawn on the side its extra chases came from, not the side he chased
+    on most, and the card opens there. Perdomo's line 1 now opens on Batting right, where he chased
+    12 of 21 against 45%. Batting left he chased at the league's rate.
+- **New `plan_checks.py` kinds:**
+  - "no target off the card's rows";
+  - "no target 'about at' a forecast below";
+  - "small take leads";
+  - "league rate ahead of a real gap";
+  - "bigger leak left out unnamed";
+  - "costly count unaddressed";
+  - "only changes, with more left";
+  - "hand named without its extra chases";
+  - "switch leak on the quieter side".
+
+  The target-unit check no longer accepts "points below the league's chase rate". Step 17 stops if
+  the rules plan_checks holds (the 20 pitches, the 1.25 ratio and the rest) differ from its own.
+
+Re-counted from the card data in the 2026 page, the same way on both builds
+(`method/remeasure_order_target_hand.py`). The audited build has no per-hand notes and no side
+totals, so the hand-label and switch-side rows are counted on the one-plan build, which still had
+the audited build's labels and sides:
+
+| On the 2026 page | Audited build | Rebuilt |
+|---|---:|---:|
+| No-target sentence says "below the league" under leaks printed above it (issue 6) | 8 | 0 |
+| No-target sentence's points 5+ off the leak rows (issue 12) | 38 | 0 |
+| Numbered target's points 5+ off the leak rows (issue 12; step 19's scale, unchanged) | 32 | 32 |
+| "About at it" for a forecast more than 2 points below the league (issue 13) | 16 | 0 |
+| Numbered target counts a leak off the plan, under "the only changes" (issue 13) | 103 | 0 |
+| First line on fewer than 20 pitches (issue 10) | 39 | 11 |
+| ...a pre-two-strike cell put ahead of leak 1 | 31 | 4 |
+| ...while a leak with twice its pitches is off the plan | 17 | 3 |
+| First line at the league's rate (issue 17) | 14 | 11 |
+| ...with a take well above the league on the list | 3 | 0 |
+| A bigger leak (1.25x a plan line, 20+ pitches) off the plan (issue 16) | 45 | 37 |
+| ...and no line names it | 45 | 0 |
+| A count costing 1+ run with no pitch line and no word (issue 11) | 84 | 0 |
+| "The only change(s)" while a leak or costly count is left (issues 11, 16) | 143 | 0 |
+| Plan lines naming a hand that carries half or less of their extra chases or cost (issue 2) | 12 (8 first lines) | 0 |
+| Switch-hitter leaks drawn on the side with less of their extra chases (issue 21) | 18 (8 first lines) | 0 |
+
+The plan text changed on 154 of the 229 cards with a plan: mostly the closing line. 32 first lines
+changed, and with them 38 roster Start with cells. 106 cards gained the new line. Across 2021-2026
+the plan text changed on 945 cards and 613 gained the new line. 87 hand labels were dropped and 77
+switch-hitter leaks moved side. 350 no-target sentences changed on 2022-2026; 2021 has no targets.
+
+The 11 first lines still under 20 pitches are:
+- five one-leak cards;
+- two coach's-note leads (Luis García, Moniak);
+- three cards whose only takes are under 20 pitches (House, Heliot Ramos, Oneil Cruz);
+- one card of video items only (Vivas).
+
+None of the 11 first lines still at the league's rate has a take well above the league on its list:
+- four are one-leak cards (Mead, Perdomo, Okamoto, McMahon);
+- Chapman's two lines are both at the league's rate;
+- the other six list only video items besides.
+
+Cowser, Olson and Álvarez still leave leak 1 out at twice every plan line. It sits behind two
+pre-two-strike takes of 21 to 33 pitches, and the new line names it. The audit's optional rule (a
+two-strike leak joins the plan at twice every early take) was not built.
+
+How each listed issue stands now:
+
+- **Resolved:** 1, 4, 5, 6, 7, 8, 11, 25 and 27.
+- **Resolved, with what is left by design:**
+  - Issue 10: the 11 first lines above.
+  - Issue 13: the target still counts every leak on the card, as frozen. But the plan no longer calls
+    its pitches the only changes, and it names any bigger leak it leaves out.
+  - Issue 16: every bigger leak left out is now named.
+  - Issue 17: league-rate first lines remain only where the list has no take well above the
+    league.
+- **Changed in kind:** 3, 9, 22 and 28, as in the section above.
+- **Partly done:**
+  - Issue 2: the label rule is fixed. A named leak's rates still pool both hands, and the audit's
+    stricter version (75%, measured against the hitter's own mix of pitchers) was not built.
+  - Issue 12: the no-target half is fixed. The 32 numbered targets 5+ points off their rows are on
+    step 19's scale, so they need a label or a second number, not a new one.
+  - Issue 21: the side is fixed. The switch hitters' caption, the row sublabels ("mostly vs RHP" on
+    rows every pitch of which came from right-handers) and the misses row's missing side are
+    unchanged.
+- **Still open:** 14, 15, 18 to 20, 23, 24, 26 and 29 to 40, apart from the parts named above.

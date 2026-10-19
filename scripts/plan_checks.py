@@ -21,6 +21,15 @@ pitches from that hand under it, so the checks below also make sure no
 second plan comes back, the hand notes add up to the line's leak, and a
 leak on a hand tab carries the card's number for the same pitch.
 
+The same audit found the plan picking the wrong first pitch and leaving
+things out with no word: 39 first lines on fewer than 20 pitches, 14 on
+a pitch chased at the league's rate, 54 cards leaving a bigger leak out
+and 86 a costly count, under "the only changes on this card". It found
+the no-target sentence saying "below the league" under leaks printed
+above it (8 cards), and a hand label that counted who threw the pitches,
+not where the extra chasing was. Those have kinds too, checked on the
+outcome a reader sees rather than by running step 17's rules again.
+
 Run on a built page it counts each kind without stopping, which is how
 the before and after counts were taken:
 
@@ -34,6 +43,15 @@ import sys
 CLEARLY_OFF_IN = 4              # step 17's CLEARLY_OFF_IN: under it a leak is a video item
 COUNT_PHRASES = {"first": "on the first pitch", "ahead": "when you're ahead in the count",
                  "even": "at 0-1 or 1-1", "two": "with two strikes"}
+# Step 17's rules, which step 17 checks are the same here
+RULES = {
+    "RATE_GAP_MIN_PTS": 5,          # under this printed gap a leak is at the league's rate
+    "PLAN_LEAD_MIN_PITCHES": 20,    # a take before two strikes goes first only on this many
+    "NEXT_MIN_RATIO": 1.25,         # a leak left off that costs this many times a plan line is named
+    "COSTLY_COUNT_RUNS": 1.0,       # a count costing this much is named
+    "TARGET_MIN_PTS": 2,            # the no-target forecast band
+    "HAND_CARRY_SHARE": 0.5,        # a named hand carries more than this of the extra chases and cost
+}
 
 KINDS = {
     # The first printed line is the first thing to do (finding 1)
@@ -76,6 +94,27 @@ KINDS = {
     "hand note does not add up": "a plan line's pitches from right- and left-handers are not its leak's",
     "hand leak misnumbered": "a leak on a pitcher-hand tab does not carry the card's number for the same "
                              "pitch, or carries one the card does not list",
+    # The target agrees with the rows above it (the 2026-10-18 audit, issues 6, 12, 13)
+    "no target off the card's rows": "the no-target sentence's points are not what the card's own leak rows "
+                                     "add up to (it said 'below the league' under leaks printed above it)",
+    "no target 'about at' a forecast below": "the no-target sentence says 'about at' the league for a "
+                                             "forecast more than 2 points under it, or 'at or under' for "
+                                             "one that is not",
+    # Which pitch leads, and what the plan leaves out (issues 10, 11, 16, 17)
+    "small take leads": "the first line is a take before two strikes on under 20 pitches, put ahead of a "
+                        "costlier take only by the take-first order",
+    "league rate ahead of a real gap": "a take chased at about the league's rate is ahead of, or keeps off "
+                                       "the plan, a take chased well above it",
+    "bigger leak left out unnamed": "a leak off the plan costs 1.25 times a plan line or more, on 20+ "
+                                    "pitches, and no line names it",
+    "costly count unaddressed": "a count costing 1 run or more has no pitch line and no sentence names it",
+    "only changes, with more left": "the closing line says 'the only change(s)' while a leak or a costly "
+                                    "count is left for later",
+    # The hand and side a leak is drawn and named for (issues 2, 21)
+    "hand named without its extra chases": "a leak is named for a pitcher hand that does not carry most of "
+                                           "its extra chases and cost",
+    "switch leak on the quieter side": "a switch hitter's leak is drawn on the side with less of its extra "
+                                       "chases",
 }
 
 
@@ -208,6 +247,97 @@ def plan_problems(items, leaks, rows, player):
     return out
 
 
+def rate_gaps(lk):
+    """The gap between a leak's two rates as its row prints them: on a
+    built page a rate that sits on a half point can print either way
+    (printed), so both are kept."""
+
+    return {r - lg for r in printed(lk["rate"], 100) for lg in printed(lk["league"], 100)}
+
+
+def leak_video(lk):
+    return lk["depth_in"] < CLEARLY_OFF_IN
+
+
+def at_league_rate(lk):
+    """Surely under step 17's gap for quoting two rates."""
+
+    return max(rate_gaps(lk)) < RULES["RATE_GAP_MIN_PTS"]
+
+
+def real_gap(lk):
+    """Surely at or over it."""
+
+    return min(rate_gaps(lk)) >= RULES["RATE_GAP_MIN_PTS"]
+
+
+def order_problems(items, leaks, rows, player):
+    """Which leaks lead and which the plan leaves for later. Tested on
+    the outcome, not by running step 17's sort again: a small early take
+    ahead of a costlier take it is otherwise level with, a league-rate take
+    ahead of a real gap, a bigger leak left off with no line naming it, a
+    costly count with no line or sentence, and a closing line that calls
+    the plan the only changes while any of this is left. The note's lead
+    is exempt from the order: the staff chose it."""
+
+    out = []
+    pitches = [it for it in items if it["kind"] == "pitch"]
+    if not pitches:
+        return out
+    start = tuple(player["note_start"]) if player.get("note_start") else None
+    cell = lambda lk: (lk["count_group"], lk["pitch_group"], lk["region"])
+    on = [it["n"] for it in pitches]
+    plan = [leaks[n - 1] for n in on]
+    off = [(n, lk) for n, lk in enumerate(leaks, start=1) if n not in on]
+    words = " ".join(it["text"] for it in items if it["kind"] != "pitch")
+
+    first = plan[0]
+    if (not leak_video(first) and first["count_group"] != "two"
+            and first["pitches"] < RULES["PLAN_LEAD_MIN_PITCHES"] and cell(first) != start
+            and any(not leak_video(lk) and (real_gap(lk) or at_league_rate(first))
+                    and lk["choices"] < first["choices"] for lk in leaks if lk is not first)):
+        out.append(("small take leads", f"{first['pitches']} pitches: {first['phrase']}"))
+
+    takes = [lk for lk in plan if not leak_video(lk)]
+    for i, lk in enumerate(takes):
+        later = takes[i + 1:] + [o for _, o in off if not leak_video(o)]
+        if (at_league_rate(lk) and cell(lk) != start
+                and any(real_gap(o) for o in later)):
+            out.append(("league rate ahead of a real gap", f"{max(rate_gaps(lk))} pts: {lk['phrase']}"))
+            break
+
+    for n, lk in off:
+        if (lk["pitches"] >= RULES["PLAN_LEAD_MIN_PITCHES"]
+                and any(-lk["choices"] >= RULES["NEXT_MIN_RATIO"] * -c["choices"] for c in plan)
+                and f"Leak {n} (" not in words):
+            out.append(("bigger leak left out unnamed", f"leak {n}, {lk['choices']:.1f}: {lk['phrase']}"))
+
+    named = {leaks[int(n) - 1]["count_group"] for n in re.findall(r"Leak (\d) \(", words)}
+    lines = {lk["count_group"] for lk in plan}
+    left = []
+    for g, phrase in COUNT_PHRASES.items():
+        if rows[g]["choices"] <= -RULES["COSTLY_COUNT_RUNS"] and g not in lines:
+            left.append(g)
+            if g not in named and phrase not in words.lower() and "across every count" not in words:
+                out.append(("costly count unaddressed", f"{g} {fmt_runs(rows[g]['choices'])}"))
+    keep = next((it for it in items if it["kind"] == "keep"), None)
+    if keep and "The only change" in keep["text"] and (off or left):
+        out.append(("only changes, with more left", f"{len(off)} leaks off, counts {left}"))
+    return out
+
+
+def card_gap(leaks):
+    """The leaks' pooled rate less their pooled league rate, in points,
+    each rounded as a leak row prints it: for one leak, its row's two
+    numbers apart. Taken from the leaks' chases, pitches and league
+    rates, not from step 17's function."""
+
+    n = sum(lk["pitches"] for lk in leaks)
+    rate = sum(lk["chases"] for lk in leaks) / n
+    league = sum(lk["league"] * lk["pitches"] for lk in leaks) / n
+    return {r - lg for r in printed(rate, 100) for lg in printed(league, 100)}
+
+
 def leaks_named(n):
     """Step 17's names for the leaks a target covers."""
 
@@ -231,10 +361,20 @@ def target_problems(player):
         if "Under" in text:
             out.append(("number on a video-only card", text[:60]))
         return out
-    if (not any(w in text for w in ("points above the league's chase rate", "about at the league's chase rate",
-                                    "points below the league's chase rate"))
+    if (not any(w in text for w in ("points above the league's chase rate", "point above the league's chase rate",
+                                    "about at the league's chase rate"))
             or leaks_named(len(player["leaks"]["all"])) not in text.lower()):
         out.append(("target without unit or leaks", text[:60]))
+    if text.startswith(("No target", "No chase target")):
+        x = card_gap(player["leaks"]["all"])
+        says = re.search(r"(?:were|was) (\d+) points? above the league's chase rate", text)
+        quoted = int(says.group(1)) if says else 0 if "about at the league's chase rate" in text else None
+        if "below the league" in text or quoted not in x:
+            out.append(("no target off the card's rows", f"rows add up to {sorted(x)}: {text[:70]}"))
+        low = round(t["predicted"] * 100) < -RULES["TARGET_MIN_PTS"]
+        if low != (" at or under " in text):
+            out.append(("no target 'about at' a forecast below",
+                        f"forecast {t['predicted'] * 100:+.1f}: {text[-60:]}"))
     if t.get("out_of_sample") == "no":
         if "you'd be" in text or "afterward" not in text or ("You were at" not in text
                                                              and "Not scored" not in text
@@ -257,6 +397,15 @@ def label_problems(player):
         share = lk["share_rhp"] if lk["hand"] == "R" else 1 - lk["share_rhp"]
         if lk["hand"] and share < 1 and "mostly" not in lk.get("phrase", "mostly"):
             out.append(("hand overstated", lk["phrase"]))
+        if lk["hand"] and "extra_rhp" in lk:
+            carry = [v if lk["hand"] == "R" else 1 - v for v in (lk["extra_rhp"], lk["cost_rhp"])]
+            if min(carry) <= RULES["HAND_CARRY_SHARE"]:
+                out.append(("hand named without its extra chases",
+                            f"{lk['phrase']}: {carry[0]:.0%} of the extra chases, {carry[1]:.0%} of the cost"))
+        if player["bats"] == "S" and lk.get("side_extra"):
+            other = max(lk["side_extra"].values())
+            if lk["side_extra"].get(lk["side"], 0) < other:
+                out.append(("switch leak on the quieter side", f"batting {lk['side']}: {lk['phrase']}"))
     return out
 
 
@@ -292,6 +441,7 @@ def problems(player):
 
     rows = {r["group"]: r for r in player["tables"]["all"]}
     out = plan_problems(player["plan_items"], player["leaks"]["all"], rows, player)
+    out += order_problems(player["plan_items"], player["leaks"]["all"], rows, player)
     out += target_problems(player) + label_problems(player) + hand_problems(player)
     if player.get("plan_items_by_hand"):
         out.append(("two plans", "plan_items_by_hand"))

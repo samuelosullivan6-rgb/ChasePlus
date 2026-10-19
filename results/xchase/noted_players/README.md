@@ -15,7 +15,8 @@ web card) and the leaks, then a guide to the card in the player's own words and 
 season chart. Every chased pitch in these hitters'
 leaks, with the date, the pitcher, the count, the pitch and how far off it was, is in
 [`leak_pitches_2026.csv`](leak_pitches_2026.csv), for the video room. A leak
-named for a pitcher hand ("mostly vs RHP") counts the other hand's pitches too, as
+named for a pitcher hand ("mostly vs RHP": that hand threw most of its pitches and
+carries most of its extra chases and their cost) counts the other hand's pitches too, as
 its rates do; the `from_leak_hand` column marks which are which, so a reel can be cut
 to the named hand.
 
@@ -27,9 +28,12 @@ pitcher-hand matchup.
 Red is where they swing more, blue where they take more, gray is about average,
 and the background shows through where there are too few pitches to say. The
 plan is written to the player, one pitch per
-line, numbered in the order to work on them (a take before two strikes first, since it
-costs nothing in strikeouts), each tagged with its leak on the list, which is ranked by
-runs; the order can put a smaller leak on the plan ahead of a bigger one. The
+line, numbered in the order to work on them (a pitch chased well above the league's
+rate before one chased at about it, and a take before two strikes first when it rests on
+20 or more pitches, since it costs nothing in strikeouts), each tagged with its leak on
+the list, which is ranked by runs; the order can put a smaller leak on the plan ahead of
+a bigger one, and a line under the plan then names the bigger one and why it comes
+later, as it does a count costing a run or more that no line covers. The
 coach's note underneath is for the staff, and names the leak the plan leads with. A
 card says where a hitter chases, not why:
 the same leak can be pitch recognition, timing or a two-strike approach, and the
@@ -81,7 +85,8 @@ xChase+ 73 (255 of 261). Far-off chases cost 16.9 runs per 600 PA. Choices −23
 
 1. At 0-1 or 1-1, let breaking balls below the zone go. You swung at 74% of them; hitters on average swing at 42%. The ones you swung at were typically 4 inches off the zone. (leak ③)
 2. With two strikes, let breaking balls below the zone go. You swung at 78% of them; hitters on average swing at 49%. The ones you swung at were typically 5 inches off the zone. (leak ①)
-- Keep swinging at strikes. The only changes on this card are the pitches above.
+- Leak 2 (two strikes, mostly vs RHP, breaking balls away) costs more than line 1, but a take before two strikes costs you no strikeouts, so line 1 goes first. Your choices also cost about 3 runs a season on the first pitch and 7 when you're ahead in the count, spread over many pitches rather than one take.
+- Keep swinging at strikes. The changes to start with are the pitches above.
 
 **Count check.** Two strikes: .226 xwOBA once there, league .234; allowing for noise, about average (.231). 0-1 or 1-1: .278 xwOBA once there, league .276; allowing for noise, about average (.280).
 
@@ -104,13 +109,14 @@ xChase+ 78 (251 of 261). Far-off chases cost 16.8 runs per 600 PA. Choices −21
 
 1. With two strikes, let breaking balls below the zone go. You swung at 81% of them; hitters on average swing at 48%. The ones you swung at were typically 8 inches off the zone. (leak ①)
 2. With two strikes, mostly against right-handers, let changeups and splitters below the zone go. You swung at 62% of them; hitters on average swing at 41%. The ones you swung at were typically 6 inches off the zone. (leak ②)
-- Keep swinging at strikes. The only changes on this card are the pitches above.
+- Your choices also cost about 1 run a season on the first pitch, 4 when you're ahead in the count and 5 at 0-1 or 1-1, spread over many pitches rather than one take.
+- Keep swinging at strikes. The changes to start with are the pitches above.
 
 **Count check.** Two strikes: .254 xwOBA once there, league .234; allowing for noise, hitting well (.252).
 
 **Target.** Leaks 1 to 3 together: you chased 25 points above the league's chase rate in 2026. Those spots get better on their own, so with no change you'd be about 14 in 2027. Under 14 is a fix.
 
-**Coach's note, for the staff.** With two strikes, breaking balls below the zone: the plan's first line. The breaking balls, changeups and splitters below the zone that right-handers throw him with two strikes are about half of what his chases cost him; the changeups and splitters among them are the plan's second line. His contact is among the best in this group, so nothing else needs to change.
+**Coach's note, for the staff.** With two strikes, breaking balls below the zone: the plan's first line. The breaking balls, changeups and splitters below the zone that right-handers throw him with two strikes are about half of what his chases cost him; the changeups and splitters among them are the plan's second line. His contact is among the best in this group.
 
 ### Ernie Clement
 
@@ -128,7 +134,7 @@ xChase+ 74 (254 of 261). Far-off chases cost 13.8 runs per 600 PA. Choices −17
 1. On the first pitch, let fastballs above the zone go. You swung at 41% of them; hitters on average swing at 16%. The ones you swung at were typically 5 inches off the zone. (leak ③)
 2. With two strikes, let fastballs above the zone go. You swung at 82% of them; hitters on average swing at 42%. The ones you swung at were typically 7 inches off the zone. (leak ①)
 - Your chase choices cost 17 runs a season, across every count; the two pitches above are two of the pieces, the ones to work on first.
-- Keep swinging at strikes. The only changes on this card are the pitches above.
+- Keep swinging at strikes. The changes to start with are the pitches above.
 
 **Count check.** Two strikes: .213 xwOBA once there, league .234; allowing for noise, struggling (.211). First pitch: .258 xwOBA once there, league .315; allowing for noise, struggling (.275).
 
@@ -151,7 +157,8 @@ xChase+ 87 (222 of 261). Far-off chases cost 12.6 runs per 600 PA. Choices −17
 
 1. With two strikes, let breaking balls below the zone go. You swung at 76% of them; hitters on average swing at 50%. The ones you swung at were typically 6 inches off the zone. (leak ①)
 2. With two strikes, let changeups and splitters below the zone go. You swung at 70% of them; hitters on average swing at 44%. The ones you swung at were typically 8 inches off the zone. (leak ②)
-- Keep swinging at strikes. The only changes on this card are the pitches above.
+- Your choices also cost about 1 run a season on the first pitch, 2 when you're ahead in the count and 4 at 0-1 or 1-1, spread over many pitches rather than one take.
+- Keep swinging at strikes. The changes to start with are the pitches above.
 
 **Count check.** Two strikes: .211 xwOBA once there, league .234; allowing for noise, struggling (.223).
 
@@ -174,7 +181,8 @@ xChase+ 86 (226 of 261). Far-off chases cost 12.2 runs per 600 PA. Choices −16
 
 1. With two strikes, let fastballs above the zone go. You swung at 67% of them; hitters on average swing at 43%. The ones you swung at were typically 5 inches off the zone. (leak ①)
 2. At 0-1 or 1-1, let fastballs above the zone go. You swung at 62% of them; hitters on average swing at 35%. The ones you swung at were typically 5 inches off the zone. (leak ③)
-- Keep swinging at strikes. The only changes on this card are the pitches above.
+- Your choices also cost about 2 runs a season on the first pitch and 2 when you're ahead in the count, spread over many pitches rather than one take.
+- Keep swinging at strikes. The changes to start with are the pitches above.
 
 **Count check.** Two strikes: .212 xwOBA once there, league .234; allowing for noise, struggling (.220). 0-1 or 1-1: .247 xwOBA once there, league .276; allowing for noise, struggling (.257).
 
@@ -197,7 +205,8 @@ xChase+ 79 (246 of 261). Far-off chases cost 11.7 runs per 600 PA. Choices −13
 
 1. With two strikes, let fastballs above the zone go. You swung at 81% of them; hitters on average swing at 51%. The ones you swung at were typically 6 inches off the zone. (leak ①)
 2. With two strikes, let breaking balls below the zone go. You swung at 77% of them; hitters on average swing at 51%. The ones you swung at were typically 5 inches off the zone. (leak ②)
-- Keep swinging at strikes. The only changes on this card are the pitches above.
+- Your choices also cost about 1 run a season when you're ahead in the count, where leak 3 is one for video with your coaches.
+- Keep swinging at strikes. The changes to start with are the pitches above.
 
 **Count check.** Two strikes: .195 xwOBA once there, league .234; allowing for noise, struggling (.211). Ahead in the count: .298 xwOBA once there, league .358; allowing for noise, struggling (.332).
 
@@ -220,7 +229,8 @@ xChase+ 78 (249 of 261). Far-off chases cost 10.0 runs per 600 PA. Choices −14
 
 1. When you're ahead in the count, let breaking balls below the zone go. You swung at 62% of them; hitters on average swing at 28%. The ones you swung at were typically 8 inches off the zone. (leak ③)
 2. With two strikes, let breaking balls below the zone go. You swung at 66% of them; hitters on average swing at 46%. The ones you swung at were typically 6 inches off the zone. (leak ①)
-- Keep swinging at strikes. The only changes on this card are the pitches above.
+- Your choices also cost about 3 runs a season on the first pitch and 3 at 0-1 or 1-1, spread over many pitches rather than one take.
+- Keep swinging at strikes. The changes to start with are the pitches above.
 
 **Count check.** Two strikes: .226 xwOBA once there, league .234; allowing for noise, about average (.231). Ahead in the count: .410 xwOBA once there, league .358; allowing for noise, hitting well (.370).
 
@@ -243,7 +253,8 @@ xChase+ 82 (239 of 261). Far-off chases cost 8.5 runs per 600 PA. Choices −13.
 
 1. With two strikes, let changeups and splitters below the zone go. You swung at 76% of them; hitters on average swing at 46%. The ones you swung at were typically 7 inches off the zone. (leak ①)
 2. At 0-1 or 1-1, let changeups and splitters below the zone go. You swung at 70% of them; hitters on average swing at 35%. The ones you swung at were typically 7 inches off the zone. (leak ③)
-- Keep swinging at strikes. The only changes on this card are the pitches above.
+- Leak 2 (two strikes, breaking balls below the zone) costs more than line 2, but a take before two strikes costs you no strikeouts, so line 2 goes first. Your choices also cost about 1 run a season on the first pitch and 3 when you're ahead in the count, spread over many pitches rather than one take.
+- Keep swinging at strikes. The changes to start with are the pitches above.
 
 **Count check.** Two strikes: .224 xwOBA once there, league .234; allowing for noise, about average (.224). 0-1 or 1-1: .262 xwOBA once there, league .276; allowing for noise, struggling (.258).
 
@@ -267,7 +278,7 @@ xChase+ 86 (225 of 261). Far-off chases cost 8.4 runs per 600 PA. Choices −14.
 1. When you're ahead in the count, let fastballs above the zone go. You swung at 79% of them; hitters on average swing at 21%. The ones you swung at were typically 5 inches off the zone. (leak ①)
 2. When you're ahead, mostly against right-handers, let breaking balls below the zone go. You swung at 43% of them; hitters on average swing at 33%. The ones you swung at were typically 5 inches off the zone. (leak ③)
 - Your chase choices cost 15 runs a season, across every count; the two pitches above are two of the pieces, the ones to work on first.
-- Keep swinging at strikes. The only changes on this card are the pitches above.
+- Keep swinging at strikes. The changes to start with are the pitches above.
 
 **Count check.** Ahead in the count: .369 xwOBA once there, league .358; allowing for noise, hitting well (.377). Two strikes: .285 xwOBA once there, league .234; allowing for noise, hitting well (.269).
 
@@ -294,8 +305,9 @@ xChase+ 55 (261 of 261). Far-off chases cost 13.5 runs per 600 PA. Choices −18
 
 1. When you're ahead against right-handers, let changeups and splitters below the zone go. You swung at 61% of them; hitters on average swing at 30%. The ones you swung at were typically 5 inches off the zone. (leak ③)
 2. With two strikes, mostly against right-handers, let breaking balls below the zone go. You swung at 71% of them; hitters on average swing at 43%. The ones you swung at were typically 8 inches off the zone. (leak ①)
+- Leak 2 (two strikes, fastballs above the zone) costs more than line 1 and comes next, after the line your coaches start you with.
 - Your chase choices cost 19 runs a season, across every count; the two pitches above are two of the pieces, the ones to work on first.
-- Keep swinging at strikes. The only changes on this card are the pitches above.
+- Keep swinging at strikes. The changes to start with are the pitches above.
 
 **Count check.** Two strikes: .217 xwOBA once there, league .234; allowing for noise, about average (.224). Ahead in the count: .371 xwOBA once there, league .358; allowing for noise, struggling (.342).
 
@@ -318,7 +330,8 @@ xChase+ 66 (260 of 261). Far-off chases cost 12.0 runs per 600 PA. Choices −18
 
 1. With two strikes, let breaking balls below the zone go. You swung at 87% of them; hitters on average swing at 50%. The ones you swung at were typically 6 inches off the zone. (leak ①)
 2. With two strikes, let changeups and splitters below the zone go. You swung at 86% of them; hitters on average swing at 53%. The ones you swung at were typically 5 inches off the zone. (leak ②)
-- Keep swinging at strikes. The only changes on this card are the pitches above.
+- Your choices also cost about 3 runs a season on the first pitch, 2 when you're ahead in the count and 4 at 0-1 or 1-1, spread over many pitches rather than one take.
+- Keep swinging at strikes. The changes to start with are the pitches above.
 
 **Count check.** Two strikes: .188 xwOBA once there, league .234; allowing for noise, struggling (.205).
 
@@ -341,7 +354,8 @@ xChase+ 71 (256 of 261). Far-off chases cost 10.5 runs per 600 PA. Choices −13
 
 1. With two strikes, let breaking balls below the zone go. You swung at 69% of them; hitters on average swing at 47%. The ones you swung at were typically 7 inches off the zone. (leak ①)
 2. With two strikes, mostly against right-handers, let breaking balls down and away go. You swung at 43% of them; hitters on average swing at 23%. The ones you swung at were typically 9 inches off the zone. (leak ②)
-- Keep swinging at strikes; your fastball decisions are a strength. The only changes on this card are the pitches above.
+- Your choices also cost about 3 runs a season on the first pitch, 1 when you're ahead in the count and 2 at 0-1 or 1-1, spread over many pitches rather than one take.
+- Keep swinging at strikes; your fastball decisions are a strength. The changes to start with are the pitches above.
 
 **Count check.** Two strikes: .214 xwOBA once there, league .234; allowing for noise, struggling (.221).
 
@@ -364,7 +378,8 @@ xChase+ 67 (259 of 261). Far-off chases cost 10.0 runs per 600 PA. Choices −14
 
 1. With two strikes, mostly against right-handers, let fastballs above the zone go. You swung at 77% of them; hitters on average swing at 51%. The ones you swung at were typically 6 inches off the zone. (leak ①)
 2. With two strikes, mostly against right-handers, let breaking balls below the zone go. You swung at 65% of them; hitters on average swing at 49%. The ones you swung at were typically 5 inches off the zone. (leak ②)
-- Keep swinging at strikes. The only changes on this card are the pitches above.
+- Your choices also cost about 2 runs a season when you're ahead in the count and 4 at 0-1 or 1-1, spread over many pitches rather than one take.
+- Keep swinging at strikes. The changes to start with are the pitches above.
 
 **Count check.** Two strikes: .223 xwOBA once there, league .234; allowing for noise, about average (.227).
 
@@ -387,7 +402,8 @@ xChase+ 76 (252 of 261). Far-off chases cost 8.8 runs per 600 PA. Choices −12.
 
 1. With two strikes, let fastballs above the zone go. You swung at 78% of them; hitters on average swing at 52%. The ones you swung at were typically 5 inches off the zone. (leak ①)
 2. At 0-1 or 1-1, mostly against right-handers, breaking balls below the zone are one to go over on video with your coaches, not a take rule. You swung at 84% of them; hitters on average swing at 41%. Most of the ones you swung at were within a ball of the zone. (leak ③)
-- Keep swinging at strikes. The only changes on this card are the pitches above.
+- Leak 2 (two strikes, mostly vs RHP, breaking balls away) costs more than line 2, but the ones you swung at were mostly within a ball of the zone: one to go over on video with your coaches. Your choices also cost about 3 runs a season on the first pitch and 3 when you're ahead in the count, spread over many pitches rather than one take.
+- Keep swinging at strikes. The changes to start with are the pitches above.
 
 **Count check.** Two strikes: .237 xwOBA once there, league .234; allowing for noise, about average (.240). 0-1 or 1-1: .288 xwOBA once there, league .276; allowing for noise, hitting well (.287).
 
@@ -410,7 +426,8 @@ xChase+ 76 (253 of 261). Far-off chases cost 7.6 runs per 600 PA. Choices −13.
 
 1. With two strikes, let breaking balls below the zone go. You swung at 69% of them; hitters on average swing at 43%. The ones you swung at were typically 6 inches off the zone. (leak ①)
 2. With two strikes, mostly against right-handers, let breaking balls down and away go. You swung at 45% of them; hitters on average swing at 22%. The ones you swung at were typically 12 inches off the zone. (leak ②)
-- Keep swinging at strikes. The only changes on this card are the pitches above.
+- Your choices also cost about 6 runs a season when you're ahead in the count, spread over many pitches rather than one take.
+- Keep swinging at strikes. The changes to start with are the pitches above.
 
 **Count check.** Two strikes: .175 xwOBA once there, league .234; allowing for noise, struggling (.201).
 
@@ -432,12 +449,13 @@ xChase+ 68 (258 of 261). Far-off chases cost 4.6 runs per 600 PA. Choices −6.7
 **What to work on**
 
 1. With two strikes, mostly against right-handers, let breaking balls below the zone go. You swung at 52% of them; hitters on average swing at 41%. The ones you swung at were typically 8 inches off the zone. You miss on 60% of your chases, against 47% for other hitters on the same pitches: contact is your bigger cost, so this one is a take even when you could reach it. (leak ①)
-2. When you're ahead, mostly against right-handers, let breaking balls below the zone go. You swung at 69% of them; hitters on average swing at 33%. The ones you swung at were typically 6 inches off the zone. (leak ③)
-- Keep swinging at strikes. The only changes on this card are the pitches above.
+2. With two strikes, mostly against right-handers, let fastballs above the zone go. You swung at 53% of them; hitters on average swing at 47%. The ones you swung at were typically 4 inches off the zone. (leak ②)
+- Your choices also cost about 3 runs a season when you're ahead in the count, where leak 3 is next after these, and about 2 at 0-1 or 1-1, spread over many pitches rather than one take.
+- Keep swinging at strikes. The changes to start with are the pitches above.
 
 **Count check.** Two strikes: .204 xwOBA once there, league .234; allowing for noise, struggling (.215). Ahead in the count: .360 xwOBA once there, league .358; allowing for noise, about average (.353).
 
-**Target.** No chase target: leaks 1 to 3 together were 7 points above the league's chase rate in 2026, and with no change should be about at it in 2027. The number to move is contact on chases.
+**Target.** No chase target: leaks 1 to 3 together were 11 points above the league's chase rate in 2026, and with no change should be about at it in 2027. The number to move is contact on chases.
 
 **Coach's note, for the staff.** With two strikes, mostly against right-handers, breaking balls below the zone: the plan's first line, a take even when he could reach it, since six chases in ten are misses. A contact problem, so his two-strike take line should be stricter than league norms.
 
@@ -456,10 +474,11 @@ xChase+ 68 (257 of 261). Far-off chases cost 3.1 runs per 600 PA. Choices −3.6
 
 1. When you're ahead, mostly against right-handers, let breaking balls below the zone go. You swung at 57% of them; hitters on average swing at 25%. The ones you swung at were typically 9 inches off the zone. You miss on 68% of your chases, against 45% for other hitters on the same pitches: contact is your bigger cost, so this one is a take even when you could reach it. (leak ②)
 2. With two strikes, mostly against right-handers, let breaking balls below the zone go. You swung at these about as often as other hitters do, but more of yours came at 0-2 and 3-2, and over a season they cost you 1.9 runs. The ones you swung at were typically 4 inches off the zone. (leak ①)
-- Keep swinging at strikes; your fastball decisions are a strength. The only changes on this card are the pitches above.
+- Your choices also cost about 2 runs a season on the first pitch and 1 at 0-1 or 1-1, spread over many pitches rather than one take.
+- Keep swinging at strikes; your fastball decisions are a strength. The changes to start with are the pitches above.
 
 **Count check.** Two strikes: .191 xwOBA once there, league .234; allowing for noise, struggling (.205). Ahead in the count: .304 xwOBA once there, league .358; allowing for noise, struggling (.340).
 
-**Target.** No chase target: leaks 1 and 2 together were 4 points above the league's chase rate in 2026, and with no change should be about at it in 2027. The number to move is contact on chases.
+**Target.** No chase target: leaks 1 and 2 together were 10 points above the league's chase rate in 2026, and with no change should be about at it in 2027. The number to move is contact on chases.
 
 **Coach's note, for the staff.** When he is ahead, mostly against right-handers, breaking balls below the zone: the plan's first take. A contact problem: two chases in three are misses, so a chase is close to a sure strike. With two strikes, the same pitch, mostly from right-handers, is the plan's second line.

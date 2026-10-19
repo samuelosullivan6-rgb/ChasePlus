@@ -250,9 +250,10 @@ How to read it, top to bottom:
    too few pitches to say anything. The outlines mark spots 15 points or
    more above average.
 3. **The numbers on the zones are the leaks**, ranked by runs, each with
-   the pitcher hand most of its pitches came from ("mostly vs RHP": its
-   rates count every pitch, so it says "mostly" unless that hand threw
-   them all) and the pitch count behind the rate. The
+   the pitcher hand when that hand threw most of its pitches and carries
+   most of its extra chases and their cost ("mostly vs RHP": its rates
+   count every pitch, so it says "mostly" unless that hand threw them
+   all) and the pitch count behind the rate. The
    worst is two-strike breaking balls below the zone: Pérez swings at 78%,
    where an average hitter on the same pitches swings at 49%.
 4. **The plan is written to the player**, in the words a hitter would use
@@ -263,16 +264,24 @@ How to read it, top to bottom:
    as "take the borderline pitch". The lines are numbered 1 and 2 in the
    order to work on them, not the order of their runs, and each carries a
    small tag with its leak's number from the list and the pictures: a
-   take before two strikes comes first, because it costs nothing in
-   strikeouts and the league rarely swings there, and two-strike takes
-   follow. So Pérez's line 1 is his third leak and his biggest, the
-   two-strike breaking ball below the zone, is line 2. The order also
-   chooses: it can put a smaller leak on the plan ahead of a bigger
-   two-strike one, and the card says so under the leak list. A leak whose
-   chased pitches were mostly within a ball of the zone is written as a
-   video item, not a take ("fastballs off the plate inside are one to go
-   over on video with your coaches, not a take rule"), and a plan of video
-   items only says the staff takes it from there. The two percentages are
+   pitch he chases well above the league's rate comes before one he
+   chases at about it; among those, a take before two strikes comes
+   first, because it costs nothing in strikeouts and the league rarely
+   swings there, when it rests on 20 or more pitches (leaks on fewer
+   mostly do not repeat, step 16); the rest follow by runs. So Pérez's
+   line 1 is his third leak and his biggest, the two-strike breaking ball
+   below the zone, is line 2. The order also chooses: it can put a
+   smaller leak on the plan ahead of a bigger one, and a line under the
+   plan then names the bigger one and why it waits ("Leak 2 (two strikes,
+   mostly vs RHP, breaking balls away) costs more than line 1, but a take
+   before two strikes costs you no strikeouts, so line 1 goes first"), as
+   it names any count costing a run or more that no line sits in. A plan
+   that leaves anything for later calls its pitches the changes to start
+   with, never the only ones. A leak whose chased pitches were mostly
+   within a ball of the zone is written as a video item, not a take
+   ("fastballs off the plate inside are one to go over on video with your
+   coaches, not a take rule"), and a plan of video items only says the
+   staff takes it from there. The two percentages are
    quoted only when they print at least 5 points apart; a costly spot can
    sit a point above the league rate when the extra swings come in its
    costlier counts, and there the line says which counts and what they
@@ -335,9 +344,14 @@ How to read it, top to bottom:
    seasons through that one, so the card says so and shows how the next
    season came out ("You were at 13: not under it"). A hitter whose
    forecast for next season is about at the league's rate gets no target
-   rather than a negative one, and the sentence says it is the forecast:
-   the plan beside it can still quote a rate well above the league's. A
-   card whose leaks are all video items gets no number at all.
+   rather than a negative one, and the sentence says it is the forecast
+   ("about at it", or "at or under it" for a forecast more than 2 points
+   below): the plan beside it can still quote a rate well above the
+   league's. With no number to beat, its points for this season are the
+   card's own, the leak rows' rates pooled, so they always agree with the
+   rows above it (on the backtest's coarser baseline a two-strike breaking
+   ball the rows show above the league can come out below it). A card
+   whose leaks are all video items gets no number at all.
 
 **Does taking more pay?** Before putting "take that pitch" on a card, step
 14 checked what happened to real hitters who did it. Across 941 pairs of
@@ -629,8 +643,10 @@ cards go from a file to a cage.
 - **Start before two strikes.** The plan's lines are in the order to work
   on them: a take in an early count costs nothing in strikeouts and the
   league rarely swings there, so it comes first even when a two-strike
-  leak costs more runs. The leak list stays ranked by runs; the plan's
-  lines are numbered 1 and 2 and tagged with their leaks' numbers.
+  leak costs more runs, as long as it rests on 20 or more pitches; the
+  plan then names the bigger leak and says it comes next. The leak list
+  stays ranked by runs; the plan's lines are numbered 1 and 2 and tagged
+  with their leaks' numbers.
 - **Check at midseason on the frozen cells.** The half-season pairs
   carry the same payoff as the season pairs, so the spring's frozen cells
   scored on the first half of the season (`step 20 --period h1`, split at
@@ -963,7 +979,17 @@ earlier season's card says it was set afterward and how the next season
 came out), no number on a card of video items only, no near-identical
 rates on the roster's start line, "mostly" wherever a leak's hand did not
 throw every pitch, and every rate, inch and run a sentence quotes equal
-to the one beside it. Step 17 stops and lists the cards when any fails. Run on
+to the one beside it. Since the 2026-10-18 audit it also checks the
+order and what the plan leaves out: no take before two strikes on under
+20 pitches put first only by the take-first order, no take at the
+league's rate ahead of one well above it, no bigger leak (1.25 times a
+plan line, 20+ pitches) and no count costing a run or more left without
+a word, and "the only changes" only when nothing is; that a no-target
+sentence's points are the leak rows' own and its "about at" or "at or
+under" matches the forecast; that a hand is named only where it carries
+most of the extra chases and cost; and that a switch hitter's leak is
+drawn on the side with most of its extra chases. Step 17 stops and lists
+the cards when any fails. Run on
 a built page (`python scripts/plan_checks.py
 results/xchase/player_cards/2026/index.html`) it counts each kind
 instead.

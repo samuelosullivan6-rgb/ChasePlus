@@ -16,12 +16,16 @@ and what is it costing me?" for one hitter-season:
   - the far-off chase rate by season against the league's;
   - a short plan in plain language, written to the player: one pitch per
     line from the leaks, numbered 1 and 2 in the order to work on them
-    and tagged with the leak's number (a take before two strikes first,
-    since it costs nothing in strikeouts; two-strike takes after; a pitch
-    the hitter chases at the league's rate explains why it is there, and
-    a first line in a count where his choices are a plus says why; a
-    borderline pitch is a video item, not a take), then a line that says
-    to keep swinging at strikes. The first printed line is the first
+    and tagged with the leak's number (a pitch chased well above the
+    league's rate before one chased at about it; a take before two
+    strikes first when it rests on 20 or more pitches, since it costs
+    nothing in strikeouts; the rest by runs; a pitch the hitter chases at
+    the league's rate explains why it is there, and a first line in a
+    count where his choices are a plus says why; a borderline pitch is a
+    video item, not a take), a line naming a bigger leak or a costly
+    count the plan leaves for later and why, then a line that says to
+    keep swinging at strikes, and calls the plan's pitches the only
+    changes only when nothing is left. The first printed line is the first
     thing to do: when no single pitch explains the loss, or the hitter's
     choices are average or better, a line after the pitch lines says so,
     and a hitter whose problem is contact reads the reason in his first
@@ -420,6 +424,7 @@ LEAK_REGION = {"up": "above the zone", "down": "below the zone", "in": "inside",
 HAND_WORDS = {"R": " against right-handers", "L": " against left-handers", None: ""}
 HAND_SHORT = {"R": " vs RHP", "L": " vs LHP", None: ""}
 HAND_RHP_SHARE, HAND_LHP_SHARE = 0.8, 0.45   # a leak is one hand's when that hand threw this share
+HAND_CARRY_SHARE = 0.5          # ...and carries more than this share of its extra chases and cost
 
 
 def hand_view(frame, hand):
@@ -459,15 +464,31 @@ def count_table(p, scale, batter, hand):
 
 
 def leaks(p, scale, batter):
+    """The card's leaks from these pitches (all pitchers, or one hand's
+    for a tab's list). A leak is named for a pitcher hand when that hand
+    threw most of its pitches and also carries most of its extra chases
+    and of what they cost: Grissom's two-strike breaking balls, 2026, came
+    56% from left-handers, but right-handers carried three quarters of the
+    cost, so naming left-handers sent him to the wrong matchup. A switch
+    hitter's leak is drawn on the side where its extra chases came from,
+    not the side he chased on most."""
+
     out = []
     cells = lr.leak_cells(p, scale, "e_match").head(lr.LEAK_TOP)
     for lk in cells.itertuples():
         s = p[(p["count_group"] == lk.count_group) & (p["pitch_group"] == lk.pitch_group)
               & (p["region"] == lk.region)]
+        s = s.assign(_x=s["is_chase"] - s["e_match"])
         rhp = (s["p_throws"] == "R").mean()
-        hand = "R" if rhp >= HAND_RHP_SHARE else ("L" if rhp <= HAND_LHP_SHARE else None)
+        extra_rhp = float(s.loc[s["p_throws"] == "R", "_x"].sum() / s["_x"].sum())
+        cost_rhp = float(s.loc[s["p_throws"] == "R", "choices"].sum() / s["choices"].sum())
+        hand = ("R" if rhp >= HAND_RHP_SHARE and min(extra_rhp, cost_rhp) > HAND_CARRY_SHARE else
+                "L" if rhp <= HAND_LHP_SHARE and max(extra_rhp, cost_rhp) < 1 - HAND_CARRY_SHARE else
+                None)
         chased = s[s["is_chase"] == 1]
-        side = chased["stand"].mode().iloc[0]
+        side_extra = {k: float(v) for k, v in s.groupby("stand")["_x"].sum().items()}
+        side = (max(side_extra, key=side_extra.get) if batter in switch
+                else chased["stand"].mode().iloc[0])
         on_side = chased[chased["stand"] == side]
         # Is the hitter struggling once the count gets there? All pitchers,
         # whatever the hand of the leak list.
@@ -484,7 +505,10 @@ def leaks(p, scale, batter):
             "rate": lk.rate, "league": lk.league,
             "extra_chases": float(lk.extra_chases), "choices": lk.choices, "contact": lk.contact,
             "share_rhp": float(rhp), "hand": hand, "excess_counts": excess_counts,
-            "side": side, "x": float(on_side["xd"].median()), "z": float(on_side["zd"].median()),
+            # the right-handers' share of the extra chases and of the cost, for the hand label
+            "extra_rhp": extra_rhp, "cost_rhp": cost_rhp,
+            "side": side, "side_extra": side_extra,
+            "x": float(on_side["xd"].median()), "z": float(on_side["zd"].median()),
             # how far off the zone the chased pitches were, so the plan can say it
             "depth_in": float(chased["distance_outside_zone"].median() * 12),
             "count_xwoba": cc.xwoba, "count_xwoba_league": cc.league_xwoba,
@@ -501,8 +525,9 @@ def hand_share(lk):
 
 def hand_phrase(lk):
     """The pitcher hand in a plan line. A leak is named for a hand when 80%
-    or more of its pitches came from it (55% for left-handers), and its rates
-    count every pitch, so it says "mostly" unless that hand threw them all."""
+    or more of its pitches came from it (55% for left-handers) and that hand
+    carries most of its extra chases and cost (leaks), and its rates count
+    every pitch, so it says "mostly" unless that hand threw them all."""
 
     if not lk["hand"]:
         return ""
@@ -536,19 +561,28 @@ CLEARLY_OFF_IN = 4              # a take rule needs the chased pitches typically
 
 
 # The plan: the pitch lines come from the leaks, in the order to work on
-# them, not the order of their runs: a take before two strikes first (it
-# costs nothing in strikeouts and the league rate there is low), two-strike
-# takes after, and a borderline pitch (a video item, not a take) never
-# ahead of a take. For a noted hitter the coach's note names the leak to
-# lead with. A pitch line quotes the hitter's chase rate against the
-# league's only when the two print well apart; otherwise it says which
-# counts the extra swings came in and what they cost. After the pitch
-# lines: a framing line when the loss is spread thin or the hitter's
-# choices are average or better, and a closing line that says to keep
-# swinging at strikes. A hitter whose problem is contact reads why in his
-# first take line, or as the plan's one line when it has no take.
-# "Nothing stands out" is said only when the count table agrees.
+# them, not the order of their runs: a take the hitter chases well above
+# the league's rate ahead of one he chases at about the league's rate, a
+# take before two strikes first (it costs nothing in strikeouts and the
+# league rate there is low) when it rests on enough pitches to repeat,
+# everything else by its runs, and a borderline pitch (a video item, not
+# a take) never ahead of a take. For a noted hitter the coach's note names
+# the leak to lead with. A pitch line quotes the hitter's chase rate
+# against the league's only when the two print well apart; otherwise it
+# says which counts the extra swings came in and what they cost. After
+# the pitch lines: a line naming a bigger leak the order left for later,
+# or a costly count no line or sentence covers; a framing line when the
+# loss is spread thin or the hitter's choices are average or better; and
+# a closing line that says to keep swinging at strikes. A hitter whose
+# problem is contact reads why in his first take line, or as the plan's
+# one line when it has no take. "Nothing stands out" is said only when
+# the count table agrees.
 PLAN_LINES = 2                  # pitch lines in a plan
+PLAN_LEAD_MIN_PITCHES = 20      # a take before two strikes goes first only on this many
+                                # pitches: in step 16's backtest, leaks on fewer kept 15%
+                                # of their excess the next period, on 20 to 25 about half
+NEXT_MIN_RATIO = 1.25           # a leak left off the plan is named when it costs this many
+                                # times a plan line, on PLAN_LEAD_MIN_PITCHES or more
 RATE_GAP_MIN_PTS = 5            # a pitch line quotes the two chase rates only
                                 # when they print this many points apart
 WHIFF_GAP_MIN_PTS = 5           # the contact line quotes the miss rate only when it
@@ -632,15 +666,34 @@ def pitch_line(lk):
             f"typically {lk['depth_in']:.0f} inches off the zone.")
 
 
+def at_league_rate(lk):
+    return rate_gap(lk) < RATE_GAP_MIN_PTS
+
+
+def early_take(lk):
+    """A take before two strikes on enough pitches to lead the plan."""
+
+    return lk["count_group"] != "two" and lk["pitches"] >= PLAN_LEAD_MIN_PITCHES
+
+
+def plan_order(lk):
+    """The sort key of the order to work on the leaks: takes before video
+    items, a real gap before the league's rate, a well-sampled take before
+    two strikes, then the runs."""
+
+    return (is_video(lk), at_league_rate(lk), not early_take(lk), lk["choices"])
+
+
 def plan_pitch_items(leak_list, start=None):
     """Which leaks make the plan, in the order to work on them. The order
     also chooses: a take before two strikes can put a smaller leak on the
-    plan ahead of a bigger two-strike one."""
+    plan ahead of a bigger two-strike one, and a real gap a smaller leak
+    ahead of a bigger one at the league's rate. The note's lead stays first
+    among the takes."""
 
     items = list(enumerate(leak_list, start=1))
     lead = [it for it in items if start and leak_cell(it[1]) == tuple(start)]
-    rest = [it for it in items if it not in lead]
-    rest.sort(key=lambda it: (it[1]["count_group"] == "two", it[1]["choices"]))
+    rest = sorted((it for it in items if it not in lead), key=lambda it: plan_order(it[1]))
     ordered = sorted(lead + rest, key=lambda it: is_video(it[1]))
     return ordered[:PLAN_LINES]
 
@@ -786,16 +839,118 @@ def framing_line(summary, chosen):
     return f"{line}: {which} to {verb}, not a new approach."
 
 
-def keep_line(summary, chosen):
+def left_off(leak_list, chosen):
+    """The leaks on the list that the plan leaves off, with their numbers."""
+
+    on = {n for n, _ in chosen}
+    return [(n, lk) for n, lk in enumerate(leak_list, start=1) if n not in on]
+
+
+def bigger_left_off(leak_list, chosen):
+    """A leak the order left off the plan that costs NEXT_MIN_RATIO times
+    a plan line or more, on enough pitches to repeat (the costliest when
+    there are two), or None."""
+
+    return next(((n, lk) for n, lk in left_off(leak_list, chosen)
+                 if lk["pitches"] >= PLAN_LEAD_MIN_PITCHES
+                 and any(-lk["choices"] >= NEXT_MIN_RATIO * -c["choices"] for _, c in chosen)), None)
+
+
+def uncovered_counts(chosen, costly):
+    """The costly counts no pitch line sits in."""
+
+    return [g for g in costly if g not in {lk["count_group"] for _, lk in chosen}]
+
+
+def lines_ref(steps, chosen):
+    return "both lines above" if len(steps) == len(chosen) > 1 else f"line {steps[0]}"
+
+
+def next_line(leak_list, chosen, rows, costly, start=None):
+    """What the plan leaves for later, in one line, so a bigger leak on the
+    list or a costly row of the count table is never left with no word: a
+    leak bigger than a plan line (bigger_left_off), named by its number and
+    the list's name for it, with the rule that put the plan's lines ahead
+    of it; then each costly count with no pitch line, by what is in it (a
+    leak left off, or many pitches with no one take), or that the hitter's
+    contact there pays for the choices. The caller passes no costly counts
+    when the spread line already names every count with a loss. None when
+    nothing is left."""
+
+    steps = {n: step for step, (n, _) in enumerate(chosen, start=1)}
+    parts = []
+    covered = {lk["count_group"] for _, lk in chosen}
+    big = bigger_left_off(leak_list, chosen)
+    if big:
+        n, lk = big
+        covered.add(lk["count_group"])
+        name = leak_phrase(lk)
+        ref = f"Leak {n} ({name[0].lower()}{name[1:]})"
+        than = lines_ref([steps[m] for m, c in chosen if c["choices"] > lk["choices"]], chosen)
+        # the plan line it out-costs most, and the rule that put that one
+        # ahead of it; only when no rule does is it the note's lead
+        small = max((c for _, c in chosen), key=lambda c: c["choices"])
+        if is_video(lk):
+            parts.append(f"{ref} costs more than {than}, but the ones you swung at were mostly within "
+                         "a ball of the zone: one to go over on video with your coaches.")
+        elif at_league_rate(lk) and not at_league_rate(small):
+            ahead = [steps[j] for j, c in chosen if not at_league_rate(c)]
+            who = "the lines above are" if len(ahead) > 1 else f"line {ahead[0]} is"
+            parts.append(f"{ref} costs more than {than}, but you swing at those about as often as other "
+                         f"hitters do, and {who} where you chase more than they do.")
+        elif early_take(small) and not early_take(lk):
+            ahead = [steps[j] for j, c in chosen if early_take(c)]
+            who = "they go" if len(ahead) > 1 else f"line {ahead[0]} goes"
+            parts.append(f"{ref} costs more than {than}, but a take before two strikes costs you no "
+                         f"strikeouts, so {who} first.")
+        else:
+            parts.append(f"{ref} costs more than {than} and comes next"
+                         + (", after the line your coaches start you with." if start else "."))
+    out = [(n, lk) for n, lk in left_off(leak_list, chosen) if not big or n != big[0]]
+    left = [g for g in costly if g not in covered]
+    paid = [g for g in left if rows[g]["contact"] > 0 and rows[g]["contact"] >= -rows[g]["choices"]]
+    # one sentence for the counts that cost: those holding a leak left off
+    # say what it is, the rest are spread over many pitches
+    held, spread = [], []
+    for g in (g for g in left if g not in paid):
+        inside = next(((n, lk) for n, lk in out if lk["count_group"] == g), None)
+        (held if inside else spread).append((g, inside))
+    pieces = []
+    for g, inside in held + spread:
+        cost = -rows[g]["choices"]
+        amount = f"{runs_phrase(cost)} a season" if not pieces else f"{round(cost):.0f}"
+        pieces.append(f"{amount} {COUNT_PHRASES[g]}")
+        if inside:
+            pieces[-1] += (f", where leak {inside[0]} is "
+                           + ("one for video with your coaches" if is_video(inside[1]) else "next after these"))
+    if pieces:
+        held_part = pieces[:len(held)]
+        spread_part = [join_words(pieces[len(held):]) + ", spread over many pitches rather than one take"] \
+            if spread else []
+        parts.append("Your choices also cost about " + ", and about ".join(held_part + spread_part) + ".")
+    if paid:
+        where = join_words([COUNT_PHRASES[g] for g in paid])
+        cost = runs_phrase(sum(-rows[g]["choices"] for g in paid))
+        parts.append(f"{where[0].upper()}{where[1:]} your choices cost about {cost} a season, but what "
+                     "you hit on those chases pays for them.")
+    return " ".join(parts) or None
+
+
+def keep_line(summary, chosen, left_out=False):
     """Every other line is a take; this one says what to keep doing. The
     fastball clause is left out when any leak on the card is a fastball,
     on the plan or not and on any pitcher-hand tab's list, and a plan of
-    video items only says the staff takes it from here."""
+    video items only says the staff takes it from here. A plan that leaves
+    a leak on the list or a costly count for later says its pitches are the
+    changes to start with, never the only ones."""
 
     one = len(chosen) == 1
     if all(is_video(lk) for _, lk in chosen):
         only = ("Nothing on this card is a take rule for you yet: the staff takes "
                 + ("the pitch above" if one else "the pitches above") + " to video with you first.")
+    elif left_out:
+        only = ("The change to start with is the pitch above." if one
+                else "The changes to start with are the pitches above.")
     else:
         only = ("The only change on this card is the pitch above." if one
                 else "The only changes on this card are the pitches above.")
@@ -807,18 +962,19 @@ def keep_line(summary, chosen):
 
 def plan_items(leak_list, summary, table, start=None):
     """The card's one plan, from the all-pitchers leaks and table, as a
-    list of items: kind (pitch / frame / contact / keep / fallback), and
-    for a pitch line its step in the order to work on them (printed as 1,
-    2), the leak's number on the list and the pictures (n, printed as a
+    list of items: kind (pitch / next / frame / contact / keep / fallback),
+    and for a pitch line its step in the order to work on them (printed as
+    1, 2), the leak's number on the list and the pictures (n, printed as a
     small tag), its cell, whether it is a video item, and the text. The
     pitcher-hand tabs show this same plan, with each pitch line's pitches
     from that hand under it (hand_counts), so the card never gives two
     plans.
 
     The first printed line is the first thing to do: the pitch lines come
-    first, the framing line after them, and a contact hitter's reason is
-    folded into his first take line. Only a plan with no take line opens
-    on something else (the contact line, or a video item)."""
+    first, then what they leave for later (next_line), the framing line
+    after them, and a contact hitter's reason is folded into his first
+    take line. Only a plan with no take line opens on something else (the
+    contact line, or a video item)."""
 
     rows = {r["group"]: r for r in table}
     loss = -rows["total"]["choices"]
@@ -836,13 +992,17 @@ def plan_items(leak_list, summary, table, start=None):
         if why:
             items[0]["text"] += " " + why
     named = sum(-lk["choices"] for _, lk in chosen)
-    if loss >= SPREAD_MIN_RUNS and named < SPREAD_SHARE * loss:
+    spread = loss >= SPREAD_MIN_RUNS and named < SPREAD_SHARE * loss
+    if spread:
         biggest = sorted(n for n, _ in chosen) == list(range(1, len(chosen) + 1))
         frame = spread_line(rows, loss, rows["total"]["contact"], costly, len(chosen), biggest)
         if chosen and far_off_zero(summary):
             frame += f" {FAR_OFF_ZERO[0].upper()}{FAR_OFF_ZERO[1:]}."
     else:
         frame = framing_line(summary, chosen)
+    later = next_line(leak_list, chosen, rows, [] if spread else costly, start) if chosen else None
+    if later:
+        items.append({"kind": "next", "n": None, "cell": None, "text": later})
     if frame:
         items.append({"kind": "frame", "n": None, "cell": None, "text": frame})
     if contact_led and not takes:
@@ -850,7 +1010,9 @@ def plan_items(leak_list, summary, table, start=None):
     if not items:
         items.append({"kind": "fallback", "n": None, "cell": None, "text": fallback_line(rows, costly)})
     if chosen:
-        items.append({"kind": "keep", "n": None, "cell": None, "text": keep_line(summary, chosen)})
+        left_out = bool(left_off(leak_list, chosen) or uncovered_counts(chosen, costly))
+        items.append({"kind": "keep", "n": None, "cell": None,
+                      "text": keep_line(summary, chosen, left_out)})
     return items
 
 
@@ -985,6 +1147,24 @@ def leaks_named(n):
     return "Leak 1" if n == 1 else ("Leaks 1 and 2 together" if n == 2 else f"Leaks 1 to {n} together")
 
 
+def points(n):
+    return f"{n} point" + ("" if abs(n) == 1 else "s")
+
+
+def card_gap(leak_list):
+    """How far above the league the hitter chased in these leaks, pooled,
+    in points on the card's own rates (the "avg" in the leak rows): the
+    pooled rate less the pooled league rate, each rounded as a row prints
+    it, so one leak's points are its row's two numbers apart. Every leak
+    has more chases than the league expects, so it is never below the
+    league."""
+
+    n = sum(lk["pitches"] for lk in leak_list)
+    rate = sum(lk["chases"] for lk in leak_list) / n
+    league = sum(lk["league"] * lk["pitches"] for lk in leak_list) / n
+    return int(f"{rate * 100:.0f}") - int(f"{league * 100:.0f}")
+
+
 def target_text(summary):
     """The target as one sentence, the same on every surface: the card's
     leaks it covers (all of them, not only the plan's), how far above the
@@ -994,7 +1174,15 @@ def target_text(summary):
     how the next season came out; a forecast at about the league's rate
     says there is no number to beat, about the forecast, never this season;
     a card whose every leak is a video item prints no number. None when the
-    hitter has no frozen target."""
+    hitter has no frozen target.
+
+    A number to beat is on step 19's scale, the one step 20 scores. The
+    no-target sentence has none to beat, so its 2026 points are the card's
+    own (card_gap), the ones a reader can check against the leak rows: on
+    step 19's coarser league baseline a two-strike breaking ball the rows
+    print above the league can come out below it (Rutschman, 2026: 49% vs
+    43% in the row, 3 points below on that scale). Its forecast says "at
+    or under it" when it is more than TARGET_MIN_PTS below the league."""
 
     t = summary["target"]
     if not t:
@@ -1010,13 +1198,13 @@ def target_text(summary):
     if pred <= TARGET_MIN_PTS:
         head = "No chase target" if summary["archetype"] == "execution-led" else "No target"
         verb = "was" if len(leaks_all) == 1 else "were"
-        x = round(t["excess"] * 100)
-        where = (f"{x} points above the league's chase rate" if x > 0 else
-                 "about at the league's chase rate" if x == 0 else
-                 f"{-x} points below the league's chase rate")
+        x = card_gap(leaks_all)
+        where = (f"{points(x)} above the league's chase rate" if x > 0 else
+                 "about at the league's chase rate")
+        at = "at or under" if pred < -TARGET_MIN_PTS else "about at"
         line = f"{head}: {which.lower()} {verb} {where} in {season}, and "
-        line += (f"a line fit afterward on seasons through {season} put {nxt} about at the "
-                 "league's rate." if retro else f"with no change should be about at it in {nxt}.")
+        line += (f"a line fit afterward on seasons through {season} put {nxt} {at} the "
+                 "league's rate." if retro else f"with no change should be {at} it in {nxt}.")
         if retro and t["actual"] is not None:
             line += f" You were at {t['actual'] * 100:.0f}."
         if summary["archetype"] == "execution-led":
@@ -1121,6 +1309,8 @@ if TARGETS:
              if stale else ""))
 if (plan_checks.CLEARLY_OFF_IN, plan_checks.COUNT_PHRASES) != (CLEARLY_OFF_IN, COUNT_PHRASES):
     raise SystemExit("plan_checks.py's CLEARLY_OFF_IN or COUNT_PHRASES differ from step 17's.")
+if plan_checks.RULES != {k: globals()[k] for k in plan_checks.RULES}:
+    raise SystemExit("plan_checks.py's RULES differ from step 17's constants of the same names.")
 n_plans = plan_checks.check(players)
 print(f"  checked {n_plans} plans, their pitcher-hand notes and the hand tabs' leak numbers against "
       "the lines and numbers beside them: no contradictions")
@@ -1727,7 +1917,9 @@ PLAYER_GUIDE = [
     "cost over a full season, each on the row of pictures its pitches are in ({rows}). Each "
     "plan line is tagged with its leak's number.",
     "The plan is one pitch per line, numbered 1 and 2 in the order to work on them: a take "
-    "before two strikes comes first, because it costs nothing in strikeouts. A take rule is "
+    "before two strikes comes first, because it costs nothing in strikeouts, when you have "
+    "seen enough of those pitches to trust the number. A line under them names a bigger leak "
+    "or a costly count that comes later. A take rule is "
     "for the pitch that is clearly a ball; each line says how far off the plate the ones you "
     "swung at were, and a pitch that was mostly borderline is one to go over on video with "
     "your coaches, not a take. Keep swinging at strikes.",
@@ -2019,7 +2211,7 @@ GUIDE = [
     "chases 15 points or more above average.",
     "Numbers on the pictures match the leaks list, ranked by what the swing choices cost per "
     "600 plate appearances. The plan's lines are numbered in the order to work on them, a take "
-    "before two strikes first, each tagged with its leak's number.",
+    "before two strikes first on 20+ pitches, each tagged with its leak's number.",
     "Choices is what the swing decisions cost. Contact is what the chases produced compared "
     "with an average hitter's chases. A contact problem needs a different fix.",
     "In the table, far-off means at least 4 inches off the plate, a pitch almost never called "
@@ -2331,7 +2523,8 @@ def write_noted_report():
         "season chart. Every chased pitch in these hitters'",
         "leaks, with the date, the pitcher, the count, the pitch and how far off it was, is in",
         f"[`leak_pitches_{SEASON}.csv`](leak_pitches_{SEASON}.csv), for the video room. A leak",
-        "named for a pitcher hand (\"mostly vs RHP\") counts the other hand's pitches too, as",
+        "named for a pitcher hand (\"mostly vs RHP\": that hand threw most of its pitches and",
+        "carries most of its extra chases and their cost) counts the other hand's pitches too, as",
         "its rates do; the `from_leak_hand` column marks which are which, so a reel can be cut",
         "to the named hand.",
         "",
@@ -2343,9 +2536,12 @@ def write_noted_report():
         "Red is where they swing more, blue where they take more, gray is about average,",
         "and the background shows through where there are too few pitches to say. The",
         "plan is written to the player, one pitch per",
-        "line, numbered in the order to work on them (a take before two strikes first, since it",
-        "costs nothing in strikeouts), each tagged with its leak on the list, which is ranked by",
-        "runs; the order can put a smaller leak on the plan ahead of a bigger one. The",
+        "line, numbered in the order to work on them (a pitch chased well above the league's",
+        "rate before one chased at about it, and a take before two strikes first when it rests on",
+        "20 or more pitches, since it costs nothing in strikeouts), each tagged with its leak on",
+        "the list, which is ranked by runs; the order can put a smaller leak on the plan ahead of",
+        "a bigger one, and a line under the plan then names the bigger one and why it comes",
+        "later, as it does a count costing a run or more that no line covers. The",
         "coach's note underneath is for the staff, and names the leak the plan leads with. A",
         "card says where a hitter chases, not why:",
         "the same leak can be pitch recognition, timing or a two-strike approach, and the",
