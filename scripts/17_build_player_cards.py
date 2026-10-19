@@ -48,9 +48,14 @@ noted hitters are in coach_notes.py, each next to the facts it states;
 every fact is checked against the data before a card is drawn, and the
 run stops if one no longer holds.
 
-Hitters whose problem is contact rather than choices (the execution-led
-group from step 13) also get a whiff picture: how often they miss when
-they do chase, against the league on the same pitches.
+Hitters whose problem is contact rather than choices also get a whiff
+picture: how often they miss when they do chase, against the league on
+the same pitches. That is decided on the card's own numbers (contact_led:
+chases that lost CONTACT_LED_RUNS or more on what they produced, more than
+the choices lost and more than the far-off tile), not on step 13's
+archetype, which exists only for a net loss and so split hitters at a net
+of zero (+8.8 / -9.1 heard about contact, +9.0 / -8.7 never did). The
+roster's Problem column still shows step 13's archetype.
 
 TEAM
   Statcast's pitch file has no batter team, only the home and away
@@ -139,6 +144,7 @@ every season, so the pages agree.
 import argparse
 import base64
 import json
+import math
 import re
 import shutil
 import subprocess
@@ -451,6 +457,7 @@ def count_table(p, scale, batter, hand):
             "chase_league": s["e_match"].mean() if len(s) else None,
             "far": far["is_chase"].mean() if len(far) else None,
             "far_league": far["e_match"].mean() if len(far) else None,
+            "chases": int(len(ch)),     # so the page can say a miss rate rests on a few chases
             "whiff": ch["whiff"].mean() if len(ch) else None,
             "whiff_league": ch["w_match"].mean() if len(ch) else None,
             "choices": s["choices"].sum() * scale,
@@ -588,6 +595,7 @@ RATE_GAP_MIN_PTS = 5            # a pitch line quotes the two chase rates only
 WHIFF_GAP_MIN_PTS = 5           # the contact line quotes the miss rate only when it
                                 # is this far above the league's
 COSTLY_COUNT_RUNS = 1.0         # a count group costing this much is named
+CONTACT_LED_RUNS = 3.0          # contact is the card's subject from this loss up
 SPREAD_MIN_RUNS = 3.0           # a choices loss this big...
 SPREAD_SHARE = 0.25             # ...that the plan's pitches cover less than a
                                 # quarter of gets the framing line first
@@ -601,7 +609,7 @@ def join_words(items):
 
 
 def fmt_runs(v):
-    v = round(v, 1)
+    v = page_runs(v)
     if v == 0:
         return "0.0"
     return ("+" if v > 0 else "−") + f"{abs(v):.1f}"
@@ -616,9 +624,33 @@ def stored(v):
     return round(float(v), 4)
 
 
+# Every number a sentence quotes is rounded the way the page rounds the
+# same number in its rows and tables: JavaScript's Math.round (half up) on
+# the stored value. Python's round goes half to even, so a leak at exactly
+# 30 of 48 chases once printed 62% in the plan and 63% in the leak row.
+def page_whole(v, scale=1):
+    return math.floor(stored(v) * scale + 0.5)
+
+
+def page_pct(v):
+    return page_whole(v, 100)
+
+
+def page_runs(v):
+    """A run value as the page's runs() prints it, to one decimal."""
+
+    return page_whole(v, 10) / 10
+
+
+def whole_runs(runs):
+    """A run amount as a whole number, from its one-decimal print."""
+
+    return math.floor(abs(page_runs(runs)) + 0.5)
+
+
 def runs_phrase(runs):
-    n = round(runs)
-    return f"{n:.0f} run" + ("" if n == 1 else "s")
+    n = whole_runs(runs)
+    return f"{n} run" + ("" if n == 1 else "s")
 
 
 def chases_more(row):
@@ -629,7 +661,7 @@ def rate_gap(lk):
     """The gap as it prints, so the line never shows the same rounded rate
     for the hitter and the league."""
 
-    return int(f"{lk['rate'] * 100:.0f}") - int(f"{lk['league'] * 100:.0f}")
+    return page_pct(lk["rate"]) - page_pct(lk["league"])
 
 
 def rate_clause(lk):
@@ -639,31 +671,46 @@ def rate_clause(lk):
     pitches; there the line says which counts they came in and what they
     cost, instead of two near-identical percentages."""
 
-    mine, theirs = f"{lk['rate'] * 100:.0f}", f"{lk['league'] * 100:.0f}"
     if rate_gap(lk) >= RATE_GAP_MIN_PTS:
-        return f"You swung at {mine}% of them; hitters on average swing at {theirs}%."
+        return (f"You swung at {page_pct(lk['rate'])}% of them; hitters on average swing at "
+                f"{page_pct(lk['league'])}%.")
     where = (f" at {join_words(lk['excess_counts'])}" if lk["excess_counts"]
              else " on the costlier pitches")
     return (f"You swung at these about as often as other hitters do, but more of yours "
-            f"came{where}, and over a season they cost you {-lk['choices']:.1f} runs.")
+            f"came{where}, and over a season they cost you {abs(page_runs(lk['choices'])):.1f} runs.")
 
 
 def is_video(lk):
     return lk["depth_in"] < CLEARLY_OFF_IN
 
 
+VIDEO_DEPTH = f"typically under {CLEARLY_OFF_IN} inches off the zone"
+
+
+def small_sample(lk):
+    """A leak on fewer pitches than step 16's backtest trusts to repeat."""
+
+    return lk["pitches"] < PLAN_LEAD_MIN_PITCHES
+
+
 def pitch_line(lk):
-    """One pitch, written to the player."""
+    """One pitch, written to the player. A video item says why in the
+    card's own unit, the 4 inches that make a take rule; a take on fewer
+    than PLAN_LEAD_MIN_PITCHES pitches says it is a small sample."""
 
     hand = hand_phrase(lk)
     opener = (GROUP_WORDS_SHORT if hand else GROUP_WORDS)[lk["count_group"]]
     what = f"{PITCH_WORDS[lk['pitch_group']]} {REGION_WORDS[lk['region']]}"
     if is_video(lk):
         return (f"{opener}{hand}, {what} are one to go over on video with your coaches, not a "
-                f"take rule. {rate_clause(lk)} Most of the ones you swung at were within a ball "
-                "of the zone.")
-    return (f"{opener}{hand}, let {what} go. {rate_clause(lk)} The ones you swung at were "
-            f"typically {lk['depth_in']:.0f} inches off the zone.")
+                f"take rule. {rate_clause(lk)} The ones you swung at were {VIDEO_DEPTH}, too "
+                "close for a take rule.")
+    line = (f"{opener}{hand}, let {what} go. {rate_clause(lk)} The ones you swung at were "
+            f"typically {page_whole(lk['depth_in'])} inches off the zone.")
+    if small_sample(lk):
+        line += (f" Only {lk['pitches']} of these pitches so far, a small sample: go over them on "
+                 "video with your coaches before you make it a rule.")
+    return line
 
 
 def at_league_rate(lk):
@@ -698,21 +745,31 @@ def plan_pitch_items(leak_list, start=None):
     return ordered[:PLAN_LINES]
 
 
-def productive_line(rows, costly, contact):
+def pays_back(rows, costly):
+    """In every costly count, the hitter's chases produced at least what
+    his choices there cost."""
+
+    return bool(costly) and all(stored(rows[g]["contact"]) >= -stored(rows[g]["choices"])
+                                for g in costly)
+
+
+def productive_line(rows, costly):
     """The costly counts are counts where the hitter's chases have produced
-    more than his choices cost (the leak rule never names such a pitch)."""
+    more than his choices cost (the leak rule never names such a pitch).
+    It quotes what the chases in those counts produced, not the season's."""
 
     cost = sum(-rows[g]["choices"] for g in costly)
+    paid = sum(rows[g]["contact"] for g in costly)
     where = join_words([COUNT_PHRASES[g] for g in costly])
     if all(chases_more(rows[g]) for g in costly):
         what = f"You chase more than most hitters {where}"
         if len(costly) == 1:
             r = rows[costly[0]]
-            what += f" ({r['chase'] * 100:.0f}% against {r['chase_league'] * 100:.0f}%)"
+            what += f" ({page_pct(r['chase'])}% against {page_pct(r['chase_league'])}%)"
     else:
         what = f"Your chase choices cost {runs_phrase(cost)} a season {where}"
-    return (f"Nothing to change. {what}, but those swings have paid: {contact:.0f} runs more "
-            "than an average hitter's chases, more than the extra swings cost.")
+    return (f"Nothing to change. {what}, but those swings have paid: {runs_phrase(paid)} more "
+            "than an average hitter's chases there, more than the extra swings cost.")
 
 
 def spread_line(rows, loss, contact, costly, n_pitches, biggest=False):
@@ -723,22 +780,25 @@ def spread_line(rows, loss, contact, costly, n_pitches, biggest=False):
     not repeat them. A hitter whose chases produce more than his choices
     cost, with no pitch worth a take rule, is told so instead."""
 
-    if (n_pitches == 0 and contact > 0 and contact >= loss and costly
-            and contact >= sum(-rows[g]["choices"] for g in costly)):
-        return productive_line(rows, costly, contact)
-    neg = [g for g in COUNT_GROUPS if rows[g]["choices"] < 0]
+    if n_pitches == 0 and contact > 0 and contact >= loss and pays_back(rows, costly):
+        return productive_line(rows, costly)
+    # the counts that cost a run or more, as the table prints them; a count
+    # at a fraction of a run is not where the loss is
+    neg = [g for g in COUNT_GROUPS if page_runs(rows[g]["choices"]) <= -COSTLY_COUNT_RUNS]
     if len(neg) == 4:
         where = "across every count"
-    elif len(neg) == 1:
-        where = f"nearly all of it {COUNT_PHRASES[neg[0]]}"
+    elif not neg:
+        where = "spread thin across the counts"
     else:
-        where = join_words([COUNT_PHRASES[g] for g in neg]) + " rather than in one spot"
+        where = "the most " + join_words([COUNT_PHRASES[g] for g in neg])
     cost = f"Your chase choices cost {runs_phrase(loss)} a season, {where}"
     if n_pitches > 1:
-        return (f"{cost}; the two pitches above are the biggest pieces of it." if biggest else
+        return (f"{cost}; the two pitches above are its biggest single pieces, and the rest is spread "
+                "thin." if biggest else
                 f"{cost}; the two pitches above are two of the pieces, the ones to work on first.")
     if n_pitches == 1:
-        return (f"{cost}; the pitch above is the biggest piece of it." if biggest else
+        return (f"{cost}; the pitch above is its biggest single piece, and the rest is spread thin."
+                if biggest else
                 f"{cost}; the pitch above is one of the pieces, the one to work on first.")
     worst = min(COUNT_GROUPS, key=lambda g: rows[g]["choices"])
     line = f"No single pitch here is a clear take. {cost}; the count table shows where."
@@ -751,30 +811,42 @@ def fallback_line(rows, costly):
     """What the plan says when no leak makes it."""
 
     choices, contact = rows["total"]["choices"], rows["total"]["contact"]
+    c = page_runs(choices)
     if not costly:
-        return ("Nothing stands out. Your chase choices are about league average"
-                + (" or better" if choices >= 0 else "") + " in every count.")
+        if c >= 1:
+            return (f"Nothing stands out: your chase choices are better than average ({fmt_runs(c)} "
+                    "runs a season), and no count costs you a full run.")
+        return ("Nothing stands out. No count costs you a full run, and your chase choices are "
+                + ("about league average or better." if c >= 0 else
+                   f"about league average overall ({fmt_runs(c)} runs a season)."))
     cost = sum(-rows[g]["choices"] for g in costly)
-    if contact > 0 and contact >= cost and contact >= -choices:
-        return productive_line(rows, costly, contact)
-    level = "better than average" if choices >= 1 else "about average"
+    if contact > 0 and pays_back(rows, costly):
+        return productive_line(rows, costly)
     where = join_words([COUNT_PHRASES[g] for g in costly])
+    if c <= -COSTLY_COUNT_RUNS:
+        return (f"No single pitch stands out. Your chase choices cost you {runs_phrase(-c)} a season, "
+                f"spread across many pitches; the most, about {runs_phrase(cost)}, {where}.")
+    level = "better than average" if c >= 1 else "about average"
     return (f"No single pitch stands out. Your chase choices are {level} overall "
-            f"({choices:+.1f} runs a season); you give back about {runs_phrase(cost)} "
+            f"({fmt_runs(c)} runs a season); you give back about {runs_phrase(cost)} "
             f"a season {where}.")
 
 
 def contact_why(summary):
-    """Why contact is the issue: the miss rate only when that is the
-    evidence; otherwise what the chases produced, which is what put the
-    hitter in the execution-led group."""
+    """Why contact is the issue, decided on the miss rates as they print:
+    the miss rate when he misses more; otherwise what the chases produced,
+    saying whether he misses about as often as other hitters or less."""
 
-    if (summary["whiff"] - summary["whiff_league"]) * 100 >= WHIFF_GAP_MIN_PTS:
-        return (f"you miss on {summary['whiff'] * 100:.0f}% of your chases, against "
-                f"{summary['whiff_league'] * 100:.0f}% for other hitters on the same pitches")
-    return ("you miss about as often as other hitters do, but what you hit on a chase goes "
-            f"nowhere (over a season your chases cost you {runs_phrase(-summary['contact'])} more "
-            "than an average hitter's would)")
+    mine, theirs = page_pct(summary["whiff"]), page_pct(summary["whiff_league"])
+    cost = (f"over a season your chases cost you {runs_phrase(-summary['contact'])} more than an "
+            "average hitter's would")
+    if mine - theirs >= WHIFF_GAP_MIN_PTS:
+        return (f"you miss on {mine}% of your chases, against {theirs}% for other hitters on the "
+                "same pitches")
+    if theirs - mine >= WHIFF_GAP_MIN_PTS:
+        return (f"you miss less often than other hitters ({mine}% of your chases against {theirs}%), "
+                f"but what you hit on a chase does little ({cost})")
+    return f"you miss about as often as other hitters do, but what you hit on a chase goes nowhere ({cost})"
 
 
 def contact_line(summary):
@@ -795,17 +867,23 @@ def contact_clause(summary):
             "when you could reach it.")
 
 
+PLUS_COUNT_MIN_RUNS = 1.0       # a count at or over this is "a plus overall"; under it,
+                                # "about even", the line framing_line draws for a hitter
+
+
 def strength_clause(rows, lk):
     """A pitch line in a count where the count table shows the hitter's
     choices as a plus says why it is there, so the table does not argue
-    with it. None when the count is not a plus as printed."""
+    with it: "a plus overall" from a run up, "about even" under that. The
+    line has already named its count, so the clause says "in this count".
+    None when the count is not a plus as printed."""
 
-    v = stored(rows[lk["count_group"]]["choices"])
-    if round(v, 1) <= 0:
+    v = page_runs(rows[lk["count_group"]]["choices"])
+    if v <= 0:
         return None
-    where = COUNT_PHRASES[lk["count_group"]]
-    return (f"{where[0].upper()}{where[1:]}, your choices are a plus overall ({fmt_runs(v)} runs "
-            "in the count table); this pitch is where they give some back.")
+    level = "are a plus overall" if v >= PLUS_COUNT_MIN_RUNS else "come out about even"
+    return (f"In this count your choices {level} ({fmt_runs(v)} runs in the count table); this "
+            "pitch is where they give some back.")
 
 
 def far_off_zero(summary):
@@ -814,7 +892,7 @@ def far_off_zero(summary):
     return round(stored(summary["runs_at_stake"]), 1) == 0
 
 
-FAR_OFF_ZERO = "on far-off pitches they cost you nothing net (the 0.0 at the top)"
+FAR_OFF_ZERO = "on far-off pitches as a whole they cost you nothing net (the 0.0 at the top)"
 
 
 def framing_line(summary, chosen):
@@ -834,7 +912,8 @@ def framing_line(summary, chosen):
     line = f"Overall your chase choices are {level} ({fmt_runs(c)} runs a season)"
     if far_off_zero(summary):
         line += f", and {FAR_OFF_ZERO}"
-    verb = "look at" if all(is_video(lk) for _, lk in chosen) else "tighten"
+    videos = sum(is_video(lk) for _, lk in chosen)
+    verb = "look at" if videos == len(chosen) else ("work on" if videos else "tighten")
     which = "the pitch above is one spot" if len(chosen) == 1 else "the pitches above are spots"
     return f"{line}: {which} to {verb}, not a new approach."
 
@@ -891,8 +970,8 @@ def next_line(leak_list, chosen, rows, costly, start=None):
         # ahead of it; only when no rule does is it the note's lead
         small = max((c for _, c in chosen), key=lambda c: c["choices"])
         if is_video(lk):
-            parts.append(f"{ref} costs more than {than}, but the ones you swung at were mostly within "
-                         "a ball of the zone: one to go over on video with your coaches.")
+            parts.append(f"{ref} costs more than {than}, but the ones you swung at were {VIDEO_DEPTH}: "
+                         "one to go over on video with your coaches.")
         elif at_league_rate(lk) and not at_league_rate(small):
             ahead = [steps[j] for j, c in chosen if not at_league_rate(c)]
             who = "the lines above are" if len(ahead) > 1 else f"line {ahead[0]} is"
@@ -918,7 +997,7 @@ def next_line(leak_list, chosen, rows, costly, start=None):
     pieces = []
     for g, inside in held + spread:
         cost = -rows[g]["choices"]
-        amount = f"{runs_phrase(cost)} a season" if not pieces else f"{round(cost):.0f}"
+        amount = f"{runs_phrase(cost)} a season" if not pieces else f"{whole_runs(cost)}"
         pieces.append(f"{amount} {COUNT_PHRASES[g]}")
         if inside:
             pieces[-1] += (f", where leak {inside[0]} is "
@@ -945,9 +1024,16 @@ def keep_line(summary, chosen, left_out=False):
     changes to start with, never the only ones."""
 
     one = len(chosen) == 1
-    if all(is_video(lk) for _, lk in chosen):
-        only = ("Nothing on this card is a take rule for you yet: the staff takes "
-                + ("the pitch above" if one else "the pitches above") + " to video with you first.")
+    videos = [is_video(lk) for _, lk in chosen]
+    if all(videos):
+        only = ("The pitch above is not a take rule yet: the staff takes it to video with you first."
+                if one else
+                "The pitches above are not take rules yet: the staff takes them to video with you first.")
+    elif any(videos):
+        # video items come last, so with one of each the take is the first line
+        only = (("The change to start with is the first pitch above" if left_out
+                 else "The only take on this card is the first pitch above")
+                + "; the staff takes the second to video with you first.")
     elif left_out:
         only = ("The change to start with is the pitch above." if one
                 else "The changes to start with are the pitches above.")
@@ -984,13 +1070,16 @@ def plan_items(leak_list, summary, table, start=None):
               "text": pitch_line(lk)}
              for step, (n, lk) in enumerate(chosen, start=1)]
     takes = [it for it in items if not it["video"]]
-    contact_led = summary["archetype"] == "execution-led"
+    contact_led = summary["contact_led"]
     if contact_led and takes:
         takes[0]["text"] += " " + contact_clause(summary)
-    if items:
-        why = strength_clause(rows, chosen[0][1])
+    # each line in a count the table shows as a plus says why, once a count
+    explained = set()
+    for it, (_, lk) in zip(items, chosen):
+        why = None if lk["count_group"] in explained else strength_clause(rows, lk)
         if why:
-            items[0]["text"] += " " + why
+            it["text"] += " " + why
+            explained.add(lk["count_group"])
     named = sum(-lk["choices"] for _, lk in chosen)
     spread = loss >= SPREAD_MIN_RUNS and named < SPREAD_SHARE * loss
     if spread:
@@ -1044,11 +1133,14 @@ def start_with(items, leak_list):
         return ""
     lk = leak_list[first["n"] - 1]
     clause = first["text"].split(". ")[0].rstrip(".")
-    depth = (f"{lk['depth_in']:.0f} in off" if lk["depth_in"] >= CLEARLY_OFF_IN
-             else "within a ball of the zone")
+    depth = (f"{page_whole(lk['depth_in'])} in off" if not is_video(lk)
+             else f"under {CLEARLY_OFF_IN} in off")
+    if small_sample(lk) and not is_video(lk):
+        depth += f", only {lk['pitches']} pitches"
     if rate_gap(lk) >= RATE_GAP_MIN_PTS:
-        return f"{clause} ({lk['rate'] * 100:.0f}% vs {lk['league'] * 100:.0f}%, {depth})"
-    return f"{clause} (about as often as other hitters, but costing {-lk['choices']:.1f} runs; {depth})"
+        return f"{clause} ({page_pct(lk['rate'])}% vs {page_pct(lk['league'])}%, {depth})"
+    return (f"{clause} (about as often as other hitters, but costing "
+            f"{abs(page_runs(lk['choices'])):.1f} runs; {depth})")
 
 
 # What step 16 found when hitters fixed their card's leaks, as a range
@@ -1139,6 +1231,7 @@ if TARGETS and SCORE_FILE.exists():
             TARGETS[int(r.batter)]["actual"] = float(getattr(r, f"actual_excess_{SEASON + 1}"))
 
 TARGET_MIN_PTS = 2              # no target when the no-change forecast rounds to this or less
+TARGET_SCALE_NOTE_PTS = 3       # a number to beat this far from the leak rows' own gap says so
 
 
 def leaks_named(n):
@@ -1151,6 +1244,12 @@ def points(n):
     return f"{n} point" + ("" if abs(n) == 1 else "s")
 
 
+def minus(text):
+    """A number as the page prints a negative one, with a minus sign."""
+
+    return text.replace("-", "−")
+
+
 def card_gap(leak_list):
     """How far above the league the hitter chased in these leaks, pooled,
     in points on the card's own rates (the "avg" in the leak rows): the
@@ -1161,8 +1260,8 @@ def card_gap(leak_list):
 
     n = sum(lk["pitches"] for lk in leak_list)
     rate = sum(lk["chases"] for lk in leak_list) / n
-    league = sum(lk["league"] * lk["pitches"] for lk in leak_list) / n
-    return int(f"{rate * 100:.0f}") - int(f"{league * 100:.0f}")
+    league = sum(stored(lk["league"]) * lk["pitches"] for lk in leak_list) / n   # as the page stores it
+    return page_pct(rate) - page_pct(league)
 
 
 def target_text(summary):
@@ -1189,40 +1288,53 @@ def target_text(summary):
         return None
     leaks_all = summary["leaks"]["all"]
     if all(is_video(lk) for lk in leaks_all):
-        return ("No number to beat: every leak on this card was mostly within a ball of the zone, "
-                "one for video, not a take rule.")
+        return (f"No number to beat: the one leak on this card was {VIDEO_DEPTH}, one for video, "
+                "not a take rule." if len(leaks_all) == 1 else
+                f"No number to beat: every leak on this card was {VIDEO_DEPTH}: video items, not "
+                "take rules.")
     which = leaks_named(len(leaks_all))
     season, nxt = t["season"], t["next_season"]
     pred = round(t["predicted"] * 100)
     retro = t["out_of_sample"] == "no"
     if pred <= TARGET_MIN_PTS:
-        head = "No chase target" if summary["archetype"] == "execution-led" else "No target"
+        head = "No chase target" if summary["contact_led"] else "No target"
         verb = "was" if len(leaks_all) == 1 else "were"
-        x = card_gap(leaks_all)
+        x, xf = card_gap(leaks_all), round(t["excess"] * 100)
         where = (f"{points(x)} above the league's chase rate" if x > 0 else
                  "about at the league's chase rate")
+        # the forecast is on step 19's league rate; when the rows add up to something
+        # else, say what the forecast starts from
+        scale = ("" if abs(x - xf) < TARGET_SCALE_NOTE_PTS else
+                 f" ({xf} on the simpler league rate the target uses)" if xf > 0 else
+                 " (at or under it on the simpler league rate the target uses)")
         at = "at or under" if pred < -TARGET_MIN_PTS else "about at"
-        line = f"{head}: {which.lower()} {verb} {where} in {season}, and "
+        line = f"{head}: {which.lower()} {verb} {where} in {season}{scale}, and "
         line += (f"a line fit afterward on seasons through {season} put {nxt} {at} the "
                  "league's rate." if retro else f"with no change should be {at} it in {nxt}.")
         if retro and t["actual"] is not None:
-            line += f" You were at {t['actual'] * 100:.0f}."
-        if summary["archetype"] == "execution-led":
+            line += f" You were at {minus(f'{t['actual'] * 100:.0f}')}."
+        if summary["contact_led"]:
             line += " The number to move is contact on chases."
         return line
-    now = f"{which}: you chased {t['excess'] * 100:.0f} points above the league's chase rate in {season}."
+    # The number to beat is on step 19's scale, which the leak rows do not
+    # use; when the rows add up to something else, the sentence says so.
+    x, rows_x = round(t["excess"] * 100), card_gap(leaks_all)
+    scale = ("" if abs(rows_x - x) < TARGET_SCALE_NOTE_PTS else
+             f" ({rows_x} on the rows above; the target uses a simpler league rate, the one it is "
+             "scored on)")
+    now = f"{which}: you chased {points(x)} above the league's chase rate in {season}{scale}."
     if not retro:
         return (f"{now} Those spots get better on their own, so with no change you'd be about "
-                f"{pred} in {nxt}. Under {pred} is a fix.")
+                f"{points(pred)} above it in {nxt}. Under {pred} is a fix.")
     line = (f"{now} Set afterward from seasons through {season}, the line put {nxt} at about "
-            f"{pred} with no change.")
+            f"{points(pred)} above it with no change.")
     a = t["actual"]
     if a is None:
         return line + f" Not scored in {nxt}: too few of these pitches, or not qualified."
     under = a < t["predicted"]
     if round(a * 100) != pred:
-        return line + f" You were at {a * 100:.0f}: " + ("under it, a fix." if under else "not under it.")
-    return (line + f" You were at {a * 100:.1f} against its {t['predicted'] * 100:.1f}: "
+        return line + f" You were at {minus(f'{a * 100:.0f}')}: " + ("under it, a fix." if under else "not under it.")
+    return (line + f" You were at {minus(f'{a * 100:.1f}')} against its {minus(f'{t['predicted'] * 100:.1f}')}: "
             + ("just under, a fix." if under else "not under it."))
 
 
@@ -1263,6 +1375,9 @@ for _, row in board.sort_values("xchase_plus", ascending=False).iterrows():
         "note_start": NOTES.get(row["player"], NO_NOTE)[2],
         "fastball_choices": float(p.loc[p["pitch_group"] == "fastball", "choices"].sum() * scale),
     }
+    c, ch = stored(summary["contact"]), stored(summary["choices"])
+    summary["contact_led"] = bool(c <= -CONTACT_LED_RUNS and -c > max(-ch, 0)
+                                  and -c >= stored(summary["runs_at_stake"]))
     summary["tables"] = {h: count_table(hand_view(p, h), scale, bid, h) for h in HANDS}
     summary["leaks"] = {h: leaks(hand_view(p, h), scale, bid) for h in HANDS}
     all_cells = [leak_cell(lk) for lk in summary["leaks"]["all"]]
@@ -1392,7 +1507,7 @@ def compose(color, evidence, theme, mask):
 
 
 def pct(v):
-    return "–" if v is None or not np.isfinite(v) else f"{v * 100:.0f}%"
+    return "–" if v is None or not np.isfinite(v) else f"{page_pct(v)}%"
 
 
 def outline_paths(gap, evidence, mask):
@@ -1721,7 +1836,7 @@ def row_specs(summary):
         rows = [("All pitchers", None, side, "all", "chase"),
                 ("vs RHP", "right-handed pitchers", side, "R", "chase"),
                 ("vs LHP", "left-handed pitchers", side, "L", "chase")]
-    if summary["archetype"] == "execution-led":
+    if summary["contact_led"]:
         side = summary["bats"] if summary["bats"] != "S" else max(
             summary["side_pitches"], key=summary["side_pitches"].get)
         rows.append(("Misses on chases", "swing-and-miss per chase, vs the average hitter: "
@@ -1729,7 +1844,8 @@ def row_specs(summary):
     return rows
 
 
-MARKER_GAP = 0.5                # ft between marker centers on one picture
+MARKER_GAP = 0.7                # ft between marker centers on one picture (a marker is about 0.6 ft across)
+SNAP_FT, MARK_MIN_GAP = 1.0, 0.05    # a number on a spot under +5 pts moves to the nearest +5 spot within a foot
 
 
 def place_marker(spot, taken, gap=MARKER_GAP):
@@ -1742,11 +1858,47 @@ def place_marker(spot, taken, gap=MARKER_GAP):
     return spot
 
 
-def leak_markers(summary, specs, gap=MARKER_GAP):
+def batter_region(x, z, side, zone):
+    """The region off the zone a spot is in, batter-relative, as the page's
+    Zone numbers name it (inside is the side the batter stands on)."""
+
+    xb = -x if side == "L" else x
+    vert = "up" if z > zone[1] else ("down" if z < zone[0] else "")
+    horiz = "in" if xb < -cs.HALF_PLATE_PLUS_BALL else ("away" if xb > cs.HALF_PLATE_PLUS_BALL else "")
+    return "-".join(w for w in (vert, horiz) if w)
+
+
+def marker_spot(lk, surf, side, zone, mask):
+    """Where a leak's number goes on its picture: the median of its chased
+    pitches, unless the picture, which counts every pitch type, reads under
+    +5 points there; then the nearest spot at +5 or more within SNAP_FT, in
+    the same region off the zone, with enough pitches to color (on 2026 the
+    median move is under 3 inches). The page's placeMarkers does the same,
+    so the web card and the printed one put it in one place."""
+
+    ix = lambda arr, v: int(np.clip(np.rint((v - arr[0]) / cs.GRID_STEP), 0, len(arr) - 1))
+    x, z = lk["x"], lk["z"]
+    if surf["gap"][ix(ZS, z), ix(XS, x)] >= MARK_MIN_GAP:
+        return np.array([x, z])
+    best = None
+    for b in range(ix(ZS, z - SNAP_FT), ix(ZS, z + SNAP_FT) + 1):
+        for a in range(ix(XS, x - SNAP_FT), ix(XS, x + SNAP_FT) + 1):
+            d = np.hypot(XS[a] - x, ZS[b] - z)
+            if (d > SNAP_FT or mask[b, a] or surf["evidence"][b, a] < 0.5 or surf["gap"][b, a] < MARK_MIN_GAP
+                    or batter_region(XS[a], ZS[b], side, zone) != lk["region"]):
+                continue
+            if best is None or d < best[0]:
+                best = (d, XS[a], ZS[b])
+    return np.array([best[1], best[2]]) if best else np.array([x, z])
+
+
+def leak_markers(summary, specs, p, gap=MARKER_GAP):
     """Numbered leak markers: on the row of the pitcher hand the leak names,
-    or the first row showing that leak's side."""
+    or the first row showing that leak's side, at marker_spot on that row's
+    picture for the leak's count."""
 
     markers = {}
+    mask = cs.in_zone_mask(XS, ZS, *summary["zone"])
     for n, lk in enumerate(summary["leaks"]["all"], start=1):
         hand = lk["hand"] or "all"
         row = next((i for i, sp in enumerate(specs)
@@ -1756,7 +1908,12 @@ def leak_markers(summary, specs, gap=MARKER_GAP):
         if row is None:
             continue
         key = (row, lk["count_group"])
-        spot = place_marker(np.array([lk["x"], lk["z"]]), [o for _, o in markers.get(key, [])], gap)
+        _, _, side, hand, _ = specs[row]
+        frame = p[(p["count_group"] == lk["count_group"]) & (p["stand"] == side)]
+        if hand != "all":
+            frame = frame[frame["p_throws"] == hand]
+        spot = marker_spot(lk, player_surface(frame), side, summary["zone"], mask)
+        spot = place_marker(spot, [o for _, o in markers.get(key, [])], gap)
         markers.setdefault(key, []).append((n, tuple(spot)))
     return markers
 
@@ -1818,7 +1975,7 @@ def player_card(summary, theme_name, out_path):
     def cells(i, g):
         return spec_cell(p, specs[i], g, t, mask)
 
-    markers = leak_markers(summary, specs)
+    markers = leak_markers(summary, specs, p)
     whiff_row = next((i for i, sp in enumerate(specs) if sp[4] == "whiff"), None)
     bottom = draw_grid(card, rows, cells, summary["zone"], markers,
                        None if summary["bats"] == "S" else summary["bats"], whiff_row)
@@ -1918,7 +2075,8 @@ PLAYER_GUIDE = [
     "plan line is tagged with its leak's number.",
     "The plan is one pitch per line, numbered 1 and 2 in the order to work on them: a take "
     "before two strikes comes first, because it costs nothing in strikeouts, when you have "
-    "seen enough of those pitches to trust the number. A line under them names a bigger leak "
+    "seen enough of those pitches to trust the number, unless your coaches picked where to "
+    "start. A line under them names a bigger leak "
     "or a costly count that comes later. A take rule is "
     "for the pitch that is clearly a ball; each line says how far off the plate the ones you "
     "swung at were, and a pitch that was mostly borderline is one to go over on video with "
@@ -2091,7 +2249,7 @@ def print_pages(summary, out_pdf, theme_name="light"):
             raise SystemExit(f"printable card for {summary['name']}: {len(specs)} rows of pictures "
                              f"leave {w:.0f} px each, under {PRINT_MIN_W}")
         marker_r = max(0.2, PRINT_MARKER_PX * (XS[-1] - XS[0]) / w)
-        markers = leak_markers(summary, specs, max(MARKER_GAP, 2.4 * marker_r))
+        markers = leak_markers(summary, specs, p, max(MARKER_GAP, 2.4 * marker_r))
         gb, right = print_grid(card, p, summary, specs, markers, top, w, marker_r)
         draw_legend(card, right - 300, top - 40, "gap")
         if not switch:         # a switch hitter's rows say where inside is
@@ -2211,7 +2369,8 @@ GUIDE = [
     "chases 15 points or more above average.",
     "Numbers on the pictures match the leaks list, ranked by what the swing choices cost per "
     "600 plate appearances. The plan's lines are numbered in the order to work on them, a take "
-    "before two strikes first on 20+ pitches, each tagged with its leak's number.",
+    "before two strikes first on 20+ pitches (a noted hitter's plan starts where his coach's "
+    "note says), each tagged with its leak's number.",
     "Choices is what the swing decisions cost. Contact is what the chases produced compared "
     "with an average hitter's chases. A contact problem needs a different fix.",
     "In the table, far-off means at least 4 inches off the plate, a pitch almost never called "
@@ -2374,9 +2533,11 @@ def build_page():
         "leagueTrend": [[int(y), float(r)] for y, r in league_trend.items()],
         "players": page_players, "references": references,
         "defaultSlug": slug(default), "guide": GUIDE, "evidence": EVIDENCE_LINE,
-        "countNote": GLOSSARY + " With a pitcher-hand tab, both sides face that hand.",
+        "countNote": (GLOSSARY + " Every plate appearance starts at 0-0, so the First pitch "
+                      "xwOBA is the whole season's. With a pitcher-hand tab, both sides face that hand."),
         "footer": (f"xChase+ 1.1 · Statcast {SEASON} · {len(players)} qualified hitters. "
-                   "Every picture compares a hitter with the average hitter on pitches at the "
+                   "xChase+ is what a hitter's chase decisions saved or cost in runs, counting what "
+                   "his chases produced: 100 is league average, higher is better. Every picture compares a hitter with the average hitter on pitches at the "
                    "same spot and count; “Same side and hand” also matches batter side and "
                    "pitcher hand. Runs are per 600 plate appearances. Built by step 17 of the "
                    "Chase Leaderboard project."),

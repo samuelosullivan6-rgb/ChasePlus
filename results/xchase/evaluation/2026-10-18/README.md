@@ -593,3 +593,148 @@ How each listed issue stands now:
     rows every pitch of which came from right-handers) and the misses row's missing side are
     unchanged.
 - **Still open:** 14, 15, 18 to 20, 23, 24, 26 and 29 to 40, apart from the parts named above.
+
+## Fixed on 2026-10-19: everything else still open
+
+This round worked through every issue the section above left open. Every season was rebuilt with
+step 22. On all six built pages `plan_checks.py` finds 0 in every kind, including the ten kinds added
+for this round. All 112 coach's-note claims hold, and all 17 printable cards are drawn.
+
+**Plan and target sentences (step 17)**
+
+- **Rounding.** Every number a sentence quotes is rounded the way the page rounds it: JavaScript's
+  Math.round on the stored value. A plan line and its leak row can no longer print one point apart
+  (39).
+- **Small samples.** A take on fewer than 20 pitches says so: "Only 18 of these pitches so far, a
+  small sample: go over them on video with your coaches before you make it a rule." The roster's
+  Start with says it too (10).
+- **Video items.** They give the card's own reason, "typically under 4 inches off the zone, too close
+  for a take rule", in place of "within a ball". This holds on the line, the roster, the video-only
+  target and Peña's note (38). A plan with one take and one video item now closes "The only take on
+  this card is the first pitch above; the staff takes the second to video with you first." A
+  video-only plan says its pitches are "not take rules yet" and no longer says "Nothing on this card
+  is a take rule" (24).
+- **The plus-count reason.** Every line in a count the table shows as a plus says why, once per
+  count (37). It reads "In this count your choices are a plus overall", or "come out about even"
+  under a run, so it no longer repeats the line's count phrase (35).
+- **Contact.** Contact is a card's subject when the chases lost 3 runs or more on what they produced,
+  more than the choices lost and more than the far-off tile. It used to come from step 13's
+  archetype, which exists only for a net loss (18).
+  - The change adds 30 hitters (Reynolds, Torkelson, Stephenson and others) and drops 5 whose
+    contact loss was under 3 runs: 68 contact cards, from 43.
+  - The misses row, the contact sentences and "The number to move is contact on chases" follow it.
+    The roster's Problem column still shows step 13's archetype, and its glossary now says what that
+    is.
+- **Contact wording.** The contact sentence picks among "you miss on X%", "you miss less often" and
+  "about as often" by the printed rates (24).
+- **Fallbacks.**
+  - "Nothing to change" quotes what its own counts' chases paid, not the season's (28).
+  - A loss of a run or more is no longer "about average" (27).
+  - Good choosers with no costly count read "Nothing stands out: your chase choices are better than
+    average (+27.1 runs a season), and no count costs you a full run" (35).
+- **Spread lines.** They name the counts that cost a run or more, not every count below zero. "The
+  biggest piece" became "its biggest single piece, and the rest is spread thin" (23).
+- **Targets.**
+  - A target whose number is 3+ points from what its leak rows add up to says so: "(27 on the rows
+    above; the target uses a simpler league rate, the one it is scored on)". A no-target sentence
+    says the same (12).
+  - Forecasts carry their unit ("about 12 points above it").
+  - "1 points" is fixed, and the page no longer prints "Target: No target:" (33).
+  - Negative numbers print with a minus sign, not a hyphen (27, 33).
+- **Guides.** The card and print guides say a noted hitter's plan starts where the coach's note says
+  (26).
+
+**The coach's notes (26).** Ten notes were reworded so every number has its season, unit and scope,
+with four new claims checked:
+- Rafaela's 2026 rate.
+- Caballero's 81% leak rate.
+- Albies's vs LHP figures, now taken from the card's own table: 35% vs 18%.
+- The 14- and 18-pitch samples under García's and Moniak's first lines.
+
+García's and Peraza's three-ball rule is now "the staff's rule to add, not the card's". Martínez's
+note is unchanged: the audit found its claim true and only loosely worded.
+
+**The page (template)**
+
+- **Pictures (14, 34, 15).**
+  - A leak's number moves to the nearest spot at +5 points or more within a foot, in the leak's own
+    region off the zone, when its median spot reads pale or blue. The web card and the printed card
+    use the same rule. The median move is under 3 inches.
+  - Numbers keep 0.7 ft apart (a number is about 0.6 ft across) and never shrink below a readable
+    size on a phone.
+  - Numbers also show when Pitches is set to the leak's own type, and the leak caption says so.
+  - The flat hover prints the same "you" as the 3D view, so its bold gap is the difference it shows.
+  - Zone numbers says it counts every pitch type, and prints "none" for an empty cell.
+- **Layout (29, 30).**
+  - The By count table stacks the league's number under the hitter's. A phone shows Chases, Choices
+    and Contact, with a button for the rest.
+  - The card is one column up to 1200 px, in the order plan and leaks, pictures, then tables.
+  - On a phone the plan comes right after the name line. The picture switches fold behind "Picture
+    options", and the "Showing" line is hidden.
+- **Header (20).** The far-off tile says "runs lost per 600 PA ... 0.0 is no net loss". The roster
+  column is now "Far-off cost", and the glossary gives the sign rule for every run column.
+- **Roster (19, 31, 32).**
+  - The hitter's name is the first column and stays in view when the table scrolls sideways.
+  - Start with and Beat come right after xChase+. Beat sorts by the number to beat.
+  - Start with names its leak when that is not leak 1 ("Leak 3: ..."). Top leak says "(not in the
+    plan yet)" when the plan leaves leak 1 for later. Inches off prints "under 4" for a video item.
+  - The glossary defines xChase+, Far-off cost, noted, "no target", "none: video only" and a blank
+    Beat.
+  - The Problem filter offers only the kinds the season has.
+  - `#roster` no longer jumps past the controls, and coming back from a card keeps your place.
+  - A mistyped or differently cased link finds its hitter, and an unknown one no longer claims the
+    hitter "did not qualify".
+- **Labels (31, 21).**
+  - The footer defines xChase+.
+  - Every card links to "How to read a card", the reference card's guide.
+  - A switch hitter's leak caption says the leak counts both sides and is drawn on the side most of
+    its extra chases came from.
+- **Tables and chart (40).**
+  - The count note says the First pitch xwOBA is the whole season's, since every plate appearance
+    starts at 0-0.
+  - A miss rate from fewer than 5 chases prints as "k of n chases".
+  - The trend line joins only seasons in a row.
+  - The chart's gray line is labeled "league".
+
+**Re-measured on the 2026 page** (`method/remeasure_round2.py` on the audit's extraction and the
+rebuilt one; `method/layout.mjs` for the layout):
+
+| Issue | Audited build | Now |
+|---|---:|---:|
+| Take lines on under 20 pitches with no word of it (10) | 43 | 0 |
+| Numbered targets 5+ points off their rows, unlabeled (12) | 82 | 0 |
+| Leak numbers on a spot at or under average, of 547 (14) | 73 | 19 |
+| ...visibly blue, −5 pts or less | 22 | 10 |
+| ...the plan's first line | 28 | 6 |
+| Contact the bigger cost (3+ runs) with no contact word (18) | 30 | 0 |
+| A contact sentence on a contact loss under 3 runs (18) | 5 | 0 |
+| "Miss about as often" beside rates 5+ points apart (24) | 4 | 0 |
+| Roster Start with on another leak than Top leak, unmarked (19) | 88 | 0 |
+| Roster Inches off "4" for a video item (19) | 7 | 0 |
+| "about average overall (-N" fallbacks (27) | 12 | 0 |
+| "1 points" / "Target: No" / forecast with no unit (33) | 6 / 89 / 140 | 0 / 0 / 0 |
+| The plus clause repeating the line's count (35) | 81 | 0 |
+| Leak caption under an empty list, views (35) | 265 | 0 |
+| A second line in a different plus count with no why (37) | 41 | 0 |
+| Cards saying "within a ball" (38) | 37 | 0 |
+| Plan rates one point off their leak row (39) | 9 | 0 |
+| By count tables wider than their box, at 390 / 768 / 1101 / 1280 / 1440 / 1920 px (29) | 261 at 390, most at 1101-1470 | 0 at every width |
+| Plan heading on the first phone screen, 390 x 844 (30) | 0 of 261 | 261 of 261 (median y 605) |
+| Roster Start with and Beat in view, 1101 to 1920 px (32) | no | yes |
+
+**What is left, and why**
+
+- **Leak numbers on a pale spot (14).** 19 numbers (10 visibly blue) have no spot at +5 points within
+  a foot in their region of the all-pitch picture: the leak's pitch type is red, but the other types
+  in that region are not. The caption now says a picture counts every pitch type, and Pitches set to
+  the leak's own type shows it red (524 of 547 spots).
+- **Plan wording (35).** The two openers for "ahead" ("When you're ahead" with a hand, "When you're
+  ahead in the count" without) and the leak list's shorter names ("changeups / splitters", "away")
+  are unchanged. The coach's notes are checked against the plan's own words, so changing those words
+  means rewording and rechecking all 17 notes for no change in meaning.
+- **Good choosers (36).** By design a good chooser's plan still carries the framing line and the
+  plus-count reason beside its one or two takes. The fallback now says plainly when his choices are
+  better than average.
+- **Roster at 768 px.** On a tablet the Beat column sits about 100 px past the box's edge and scrolls
+  into view, with the hitter's name kept in place.
+- **Labels (21).** The row sublabels "mostly vs RHP" on a switch hitter's rows are unchanged.

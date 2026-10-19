@@ -49,23 +49,23 @@ KEYS = ["game_pk", "at_bat_number", "pitch_number", "batter", "game_year"]
 NOTED = {
     # Easiest to improve (step 13): decision-only, persistent pattern
     "Salvador Pérez": ("easiest", "At 0-1 or 1-1, breaking balls below the zone: the plan's first line, where the take costs nothing in strikeouts. Volume, not contact: these chases turn out better than the league's, which softens every leak but erases none.", ("even", "breaking", "down")),
-    "Michael Harris": ("easiest", "With two strikes, breaking balls below the zone: the plan's first line. The breaking balls, changeups and splitters below the zone that right-handers throw him with two strikes are about half of what his chases cost him; the changeups and splitters among them are the plan's second line. His contact is among the best in this group.", ("two", "breaking", "down")),
+    "Michael Harris": ("easiest", "With two strikes, breaking balls below the zone: the plan's first line. The breaking balls, changeups and splitters below the zone that right-handers throw him with two strikes are about half of what his chases cost him, net of contact; the changeups and splitters among them are the plan's second line. His contact is among the best two of the nine hitters noted as easiest to improve.", ("two", "breaking", "down")),
     "Ernie Clement": ("easiest", "On the first pitch, fastballs above the zone: the plan's first line. Before two strikes he puts 44% of his chased fastballs above the zone in play (league 18%), so it never looks like a mistake, but it is weak contact (.173 xwOBA vs .283) that gives away a hitter's count.", ("first", "fastball", "up")),
     "Angel Martínez": ("easiest", "With two strikes, breaking balls below the zone, then changeups and splitters below the zone: the plan's two lines. More of what they cost him comes from right-handers than from left-handers, and the contact is there on the swings that stay.", ("two", "breaking", "down")),
-    "Ceddanne Rafaela": ("easiest", "With two strikes, fastballs above the zone: the plan's first line. His early-count chasing came down in 2025 (35% to 28% of far-off pitches) but is still well above the league's 17% and costs about 4 runs; it is next.", ("two", "fastball", "up")),
-    "José Caballero": ("easiest", "With two strikes, fastballs above the zone: the plan's first line, then breaking balls below the zone. He has chased more of the far-off fastballs above the zone every year (55%, 65%, 77% since 2024), even in 2025, when his xChase+ was 109.", ("two", "fastball", "up")),
-    "Ozzie Albies": ("easiest", "With two strikes, changeups and splitters below the zone: the plan's first line and his biggest leak. He chases them in every count and from both hands, and at 0-1 or 1-1 they are the plan's second line. Against left-handers he chases far-off pitches of every kind more (35% vs 19%).", ("two", "offspeed", "down")),
-    "Luis García": ("easiest", "When he is ahead in the count, fastballs above the zone: the plan's first line. Three-ball counts sit inside it, and with three balls his choices cost about 5 runs, so swing only at strikes there; the card cannot show those counts on their own yet. With two strikes he chases nine fastballs above the zone in ten, but his contact there pays for it, so don't coach that one.", ("ahead", "fastball", "up")),
-    "Hunter Goodman": ("easiest", "When he is ahead in the count, breaking balls below the zone: the plan's first line, and the free part, since the take costs nothing in strikeouts. Across every count before two strikes, not only ahead, he chases them 48% of the time against 30% on the same pitches, about 5 runs. Fastballs above the zone before two strikes look worse than they are: his contact nearly pays for them. The two-strike breaking ball, the plan's second line, may be contact as much as choice.", ("ahead", "breaking", "down")),
+    "Ceddanne Rafaela": ("easiest", "With two strikes, fastballs above the zone: the plan's first line. His early-count chasing came down in 2025 (35% to 28% of far-off pitches) and held at 27% in 2026, still well above the league's 17%; it costs about 4 runs per 600 PA, and it is next.", ("two", "fastball", "up")),
+    "José Caballero": ("easiest", "With two strikes, fastballs above the zone: the plan's first line, then breaking balls below the zone. He has chased more of the far-off (4+ inch) fastballs above the zone with two strikes every year (55%, 65%, 77% since 2024; 81% in 2026 counting the near ones, as the leak list does), even in 2025, when his xChase+ was 109.", ("two", "fastball", "up")),
+    "Ozzie Albies": ("easiest", "With two strikes, changeups and splitters below the zone: the plan's first line and his biggest leak. He chases them in every count and from both hands, and at 0-1 or 1-1 they are the plan's second line. Against left-handers he chases far-off pitches more (35% vs 18%, the vs LHP table's All counts).", ("two", "offspeed", "down")),
+    "Luis García": ("easiest", "When he is ahead in the count, fastballs above the zone: the plan's first line, on 14 pitches so far. Three-ball counts sit inside it and in the 3-2 part of 'Two strikes', and with three balls his choices cost about 5 runs per 600 PA; the card cannot show those counts on their own yet, so swinging only at strikes there is the staff's rule to add, not the card's. With two strikes he chases nine fastballs above the zone in ten, but his contact there pays for it, so don't coach that one.", ("ahead", "fastball", "up")),
+    "Hunter Goodman": ("easiest", "When he is ahead in the count, breaking balls below the zone: the plan's first line, and the free part, since the take costs nothing in strikeouts. Across every count before two strikes, not only ahead, he chases them 48% of the time against 30% on the same pitches, about 5 runs per 600 PA net of contact. Fastballs above the zone before two strikes look worse than they are: his contact nearly pays for them. The two-strike breaking ball, the plan's second line, may be contact as much as choice.", ("ahead", "breaking", "down")),
     # Biggest losses (step 12): the bottom 10 not already listed
-    "Mickey Moniak": ("biggest", "When he is ahead against right-handers, changeups and splitters below the zone: the plan's first line, a take that costs nothing in strikeouts. The second line, breaking balls below the zone with two strikes, mostly against right-handers, is the bigger leak; fix the early one first.", ("ahead", "offspeed", "down")),
-    "Ezequiel Tovar": ("biggest", "With two strikes, breaking balls below the zone: the plan's first line, and a take in every count, so the earlier counts come next. With two strikes, changeups and splitters below the zone are the plan's second line. The fastball decisions are fine.", ("two", "breaking", "down")),
+    "Mickey Moniak": ("biggest", "When he is ahead against right-handers, changeups and splitters below the zone: the plan's first line, a take that costs nothing in strikeouts, on 18 pitches so far. The second line, breaking balls below the zone with two strikes, mostly against right-handers, is the bigger leak; fix the early one first.", ("ahead", "offspeed", "down")),
+    "Ezequiel Tovar": ("biggest", "With two strikes, breaking balls below the zone: the plan's first line, and he chases them above the league in every count, so after the plan's two lines the earlier counts are next. With two strikes, changeups and splitters below the zone are the plan's second line. The fastball decisions are fine.", ("two", "breaking", "down")),
     "Andrés Giménez": ("biggest", "With two strikes, mostly against right-handers, fastballs above the zone, then breaking balls below the zone: the plan's two lines, the cheap rules while the staff looks into the rest. Not new: xChase+ 69 and 74 in 2022-23, then 95 and 105, and back to 67, so find out what made 2024-25 work before any mechanical change. His biggest net loss by count is at 0-1 and 1-1, where none of his three biggest leaks sits, which is why the plan starts with two strikes.", ("two", "fastball", "up")),
     "Jarren Duran": ("biggest", "With two strikes, mostly against right-handers, breaking balls below the zone: the plan's first line, a take even when he could reach it, since six chases in ten are misses. A contact problem, so his two-strike take line should be stricter than league norms.", ("two", "breaking", "down")),
     "Colson Montgomery": ("biggest", "When he is ahead, mostly against right-handers, breaking balls below the zone: the plan's first take. A contact problem: two chases in three are misses, so a chase is close to a sure strike. With two strikes, the same pitch, mostly from right-handers, is the plan's second line.", ("ahead", "breaking", "down")),
-    "Zach Neto": ("biggest", "With two strikes, breaking balls below the zone: the plan's first line, from either hand. The sliders among them from right-handers are the steady part: he chased those well above league in 2024 and 2025 too, and in 2026 pitchers threw him far more (290, up from 184). The fastball decisions are a strength.", ("two", "breaking", "down")),
-    "Oswald Peraza": ("biggest", "With two strikes, breaking balls below the zone: the plan's first line and his biggest leak. The second line is breaking balls down and away, mostly from right-handers. Three-ball counts are a separate piece the card cannot show on its own yet (62% chase against about 40%, about 5 runs in 45 pitches; they sit inside 'Ahead in the count' and the 3-2 part of 'Two strikes'): swing only at strikes there. Fewest plate appearances of the 17, so flag the sample on anything beyond these.", ("two", "breaking", "down")),
-    "Jeremy Peña": ("biggest", "With two strikes, fastballs above the zone: the plan's first line and the one clear take on his card. His contact pays for most of his chases on fastballs above the zone, so keep him swinging at strikes at the top of it. The two-strike slider away and the breaking ball below the zone at 0-1 or 1-1, both mostly from right-handers, were mostly within a ball of the zone: video items, not take rules.", ("two", "fastball", "up")),
+    "Zach Neto": ("biggest", "With two strikes, breaking balls below the zone: the plan's first line, from either hand. The sliders among them from right-handers are the steady part: he chased those well above league in 2024 and 2025 too, and in 2026 pitchers threw him far more (290 in any count, up from 184 in 2024). The fastball decisions are a strength.", ("two", "breaking", "down")),
+    "Oswald Peraza": ("biggest", "With two strikes, breaking balls below the zone: the plan's first line and his biggest leak. The second line is breaking balls down and away, mostly from right-handers. Three-ball counts are a separate piece the card cannot show on its own yet (62% chase against about 40%, about 5 runs per 600 PA net of contact, from 45 pitches; they sit inside 'Ahead in the count' and the 3-2 part of 'Two strikes'): swinging only at strikes there is the staff's rule to add, not the card's. Fewest plate appearances of the 17, so flag the sample on anything beyond these.", ("two", "breaking", "down")),
+    "Jeremy Peña": ("biggest", "With two strikes, fastballs above the zone: the plan's first line and the one clear take on his card. His contact pays for most of his chases on fastballs above the zone, so keep him swinging at strikes at the top of it. The two-strike breaking ball away (mostly sliders) and the breaking ball below the zone at 0-1 or 1-1, both mostly from right-handers, were typically under 4 inches off the zone: video items, not take rules.", ("two", "fastball", "up")),
 }
 
 
@@ -140,6 +140,18 @@ def xwoba(v, quoted):
     return abs(v - quoted) <= 0.0015, f"{v:.4f}"
 
 
+def page_pct(v):
+    """A rate as the card prints it: JavaScript's Math.round on the stored
+    four-decimal value (step 17's page_pct)."""
+
+    return int(np.floor(round(float(v), 4) * 100 + 0.5))
+
+
+def leak(player, cell):
+    return next((lk for lk in player["leaks"]["all"]
+                 if (lk["count_group"], lk["pitch_group"], lk["region"]) == tuple(cell)), None)
+
+
 def holds(ok, shown):
     return bool(ok), shown
 
@@ -205,6 +217,11 @@ def claims(d):
     def second_line(name, text, cell):
         add(name, text, holds(line_cell(name, 1) == cell, str(line_cell(name, 1))))
 
+    def first_pitches(name, n):
+        pitches = plan_pitches(p[name])
+        lk = p[name]["leaks"]["all"][pitches[0]["n"] - 1] if pitches else None
+        return holds(lk is not None and lk["pitches"] == n, lk and f"{lk['pitches']} pitches")
+
     def biggest_leak(name, text):
         top = p[name]["leaks"]["all"][0]
         add(name, text, holds(line_cell(name, 0) == (top["count_group"], top["pitch_group"], top["region"]),
@@ -263,7 +280,7 @@ def claims(d):
                                                        f"{p['Angel Martínez']['contact']:+.1f}"))
 
     # Ceddanne Rafaela
-    for year, q in ((2024, 35), (2025, 28)):
+    for year, q in ((2024, 35), (2025, 28), (2026, 27)):
         m = d.me("Ceddanne Rafaela", year)
         add("Ceddanne Rafaela", f"early-count chasing {q}% of far-off pitches in {year}",
             pct(m.loc[m["far"] & (m["strikes"] < 2), "is_chase"].mean(), q))
@@ -279,6 +296,9 @@ def claims(d):
         f = m[(m["strikes"] == 2) & (m["pitch_group"] == "fastball") & (m["region"] == "up") & m["far"]]
         add("José Caballero", f"chased {q}% of the far-off fastballs above the zone with two strikes in {year}",
             pct(f["is_chase"].mean(), q))
+    lk = leak(p["José Caballero"], ("two", "fastball", "up"))
+    add("José Caballero", "81% in 2026 counting the near ones, as the leak list does",
+        holds(lk is not None and page_pct(lk["rate"]) == 81, lk and f"{page_pct(lk['rate'])}%"))
     second_line("José Caballero", "then breaking balls below the zone", ("two", "breaking", "down"))
     add("José Caballero", "in 2025, when his xChase+ was 109", about(d.xchase("José Caballero", 2025), 109, 0.5))
 
@@ -291,14 +311,18 @@ def claims(d):
     f = m[(m["pitch_group"] == "offspeed") & m["down"]]
     gap = {h: g["is_chase"].mean() - g["e"].mean() for h, g in f.groupby("p_throws")}
     add("Ozzie Albies", "from both hands", holds(min(gap.values()) > 0.15, " ".join(f"{h} {v:+.2f}" for h, v in gap.items())))
-    f = m[m["far"] & (m["p_throws"] == "L")]
-    add("Ozzie Albies", "against left-handers he chases far-off pitches 35%", pct(f["is_chase"].mean(), 35))
-    add("Ozzie Albies", "vs 19%", pct(f["e"].mean(), 19))
+    # quoted from the card's own vs LHP table, so the note and the table agree
+    t = {r["group"]: r for r in p["Ozzie Albies"]["tables"]["L"]}["total"]
+    add("Ozzie Albies", "against left-handers he chases far-off pitches 35%",
+        holds(page_pct(t["far"]) == 35, f"{page_pct(t['far'])}%"))
+    add("Ozzie Albies", "vs 18%, the vs LHP table's All counts",
+        holds(page_pct(t["far_league"]) == 18, f"{page_pct(t['far_league'])}%"))
 
     # Luis García
     m = d.me("Luis García")
     add("Luis García", "with three balls his choices cost about 5 runs",
         about(d.choices(m[m["balls"] == 3], "Luis García"), -5))
+    add("Luis García", "the plan's first line, on 14 pitches so far", first_pitches("Luis García", 14))
     add("Luis García", "three-ball counts sit inside it (ahead in the count)",
         holds(line_cell("Luis García", 0)[0] == "ahead", str(line_cell("Luis García", 0))))
     f = m[(m["strikes"] == 2) & (m["pitch_group"] == "fastball") & (m["region"] == "up")]
@@ -323,6 +347,8 @@ def claims(d):
         holds(f["contact"].sum() < 0, f"contact {f['contact'].sum() * 600 / d.pa('Hunter Goodman'):+.1f}"))
 
     # Mickey Moniak
+    add("Mickey Moniak", "a take that costs nothing in strikeouts, on 18 pitches so far",
+        first_pitches("Mickey Moniak", 18))
     second_line("Mickey Moniak", "the second line, breaking balls below the zone with two strikes against "
                 "right-handers", ("two", "breaking", "down"))
     pitches = plan_pitches(p["Mickey Moniak"])

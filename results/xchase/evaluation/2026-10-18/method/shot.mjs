@@ -3,8 +3,8 @@
 import { spawn } from "node:child_process";
 import { writeFileSync, readFileSync, mkdirSync } from "node:fs";
 const jobs = JSON.parse(readFileSync(process.argv[2], "utf8"));
-const port = 9334;
-const prof = new URL("./chrome-prof-shots", import.meta.url).pathname;
+const port = 9339;
+const prof = new URL("./chrome-prof-shots2", import.meta.url).pathname;
 mkdirSync(prof, { recursive: true });
 const chrome = spawn("/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
   ["--headless=new", `--remote-debugging-port=${port}`, `--user-data-dir=${prof}`, "--hide-scrollbars", "--no-first-run", "about:blank"], { stdio: "ignore" });
@@ -16,7 +16,7 @@ await new Promise((r) => ws.addEventListener("open", r));
 let id = 0; const pending = new Map();
 ws.addEventListener("message", (ev) => { const m = JSON.parse(ev.data); if (m.id && pending.has(m.id)) { pending.get(m.id)(m); pending.delete(m.id); } });
 const send = (method, params = {}) => new Promise((r) => { const i = ++id; pending.set(i, r); ws.send(JSON.stringify({ id: i, method, params })); });
-await send("Page.enable");
+await send("Page.enable"); await send("Network.enable"); await send("Network.setCacheDisabled", { cacheDisabled: true });
 for (const j of jobs) {
   const w = j.width || 1440, h = j.height || 1000;
   await send("Page.navigate", { url: "about:blank" }); await sleep(200);

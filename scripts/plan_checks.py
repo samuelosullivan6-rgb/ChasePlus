@@ -30,6 +30,15 @@ above it (8 cards), and a hand label that counted who threw the pitches,
 not where the extra chasing was. Those have kinds too, checked on the
 outcome a reader sees rather than by running step 17's rules again.
 
+The second round of fixes from that audit added kinds for what was left:
+a sentence and the row beside it rounding the same number apart, a take
+on a small sample with no word of it, video wording off the card's 4-inch
+rule, the plus-count reason missing on a second line, a contact sentence
+that misstates the miss rates or speaks for a hitter whose loss is not
+contact, a "Nothing to change" line quoting the season's contact instead
+of its counts', a loss called "about average", an ASCII minus, and a
+number to beat on a different scale from the rows with no word of it.
+
 Run on a built page it counts each kind without stopping, which is how
 the before and after counts were taken:
 
@@ -37,6 +46,7 @@ the before and after counts were taken:
 """
 
 import json
+import math
 import re
 import sys
 
@@ -51,6 +61,10 @@ RULES = {
     "COSTLY_COUNT_RUNS": 1.0,       # a count costing this much is named
     "TARGET_MIN_PTS": 2,            # the no-target forecast band
     "HAND_CARRY_SHARE": 0.5,        # a named hand carries more than this of the extra chases and cost
+    "PLUS_COUNT_MIN_RUNS": 1.0,     # a count at or over this is "a plus overall", under it "about even"
+    "CONTACT_LED_RUNS": 3.0,        # contact is the card's subject from this loss up
+    "WHIFF_GAP_MIN_PTS": 5,         # the miss rates print this far apart to be "more" or "less"
+    "TARGET_SCALE_NOTE_PTS": 3,     # a number to beat this far from the rows' gap says so
 }
 
 KINDS = {
@@ -71,13 +85,14 @@ KINDS = {
                               "and nothing says why",
     "good chooser unframed": "a hitter whose choices are better than average gets pitch lines "
                              "and nothing says so",
-    "first line in a plus count, no why": "the first pitch line is in a count the table shows as a "
-                                          "plus and does not say why",
+    "plus count, no why": "a pitch line in a count the table shows as a plus, with no line above it in "
+                          "that count, does not say why",
     # Sentences that quote a number must quote the one beside them
     "rates misquoted": "a pitch line's two rates are not its leak's",
     "inches misquoted": "a take line's inches off the zone are not its leak's",
     "framing misquoted": "a framing line's runs or level are not the hitter's",
-    "plus count misquoted": "a plus-count sentence's runs are not the count table's",
+    "plus count misquoted": "a plus-count sentence's runs are not the count table's, or it calls a count "
+                            "under a run 'a plus overall' (or one over it 'about even')",
     "keep line miscounts": "the closing line's 'pitch above' / 'pitches above' is not the plan's",
     # The target can be read and tracked (evaluation item 4)
     "target without unit or leaks": "the target sentence does not say it is points above the league's "
@@ -115,11 +130,24 @@ KINDS = {
                                            "its extra chases and cost",
     "switch leak on the quieter side": "a switch hitter's leak is drawn on the side with less of its extra "
                                        "chases",
+    # The rest of the audit (issues 10, 12, 18, 24, 27, 28, 33, 38, 39)
+    "small sample unflagged": "a take line rests on fewer than 20 pitches and does not say so",
+    "video item off the 4-inch rule": "a video line does not give the card's own reason, under 4 inches off",
+    "contact miss rate misstated": "a contact sentence's miss rates are not the hitter's, or 'more', 'less' or "
+                                   "'about as often' does not fit them as printed",
+    "contact sentence off the contact flag": "a contact sentence on a card whose contact loss is not its "
+                                             "subject, or none on one whose is",
+    "nothing to change misquoted": "a 'Nothing to change' line quotes runs its counts' chases did not produce, "
+                                   "or a count whose chases did not pay",
+    "loss called average": "a fallback calls a choices loss of a run or more 'about average'",
+    "ascii minus": "a sentence prints a negative number with a hyphen, where the page's tables use a minus sign",
+    "target scale or unit unsaid": "a number to beat several points from what the leak rows add up to does "
+                                   "not say it is on another league rate, or its forecast has no unit",
 }
 
 
 def fmt_runs(v):
-    v = round(stored(v), 1)
+    v = shown(v)
     return "0.0" if v == 0 else ("+" if v > 0 else "−") + f"{abs(v):.1f}"
 
 
@@ -130,16 +158,29 @@ def stored(v):
     return round(float(v), 4)
 
 
+def page_whole(v, scale=1):
+    """How the page prints v * scale as a whole number: JavaScript's
+    Math.round (half up) on the stored value."""
+
+    return math.floor(stored(v) * scale + 0.5)
+
+
 def shown(v):
-    return round(stored(v), 1)
+    """A run value to one decimal, as the page's runs() prints it."""
+
+    return page_whole(v, 10) / 10
+
+
+def whole_runs(v):
+    return math.floor(abs(shown(v)) + 0.5)
 
 
 def printed(v, scale=1):
-    """How v prints as a whole number. A built page stores values to four
-    decimals, which can move a rate that sits on a half point by one, so
-    both neighbors of the stored value count."""
+    """How v prints as a whole number, as a one-element set: step 17 rounds
+    every quoted number the way the page does, so a sentence and its row
+    agree exactly."""
 
-    return {int(f"{(v + d) * scale:.0f}") for d in (-5e-5, 0, 5e-5)}
+    return {page_whole(v, scale)}
 
 
 def is_video(it):
@@ -178,7 +219,7 @@ def plan_problems(items, leaks, rows, player):
     leak_n = sorted(it["n"] for it in pitches)
     biggest = leak_n == list(range(1, len(pitches) + 1))
     for it in items:
-        if it["kind"] == "frame" and "biggest piece" in it["text"] and not biggest:
+        if it["kind"] == "frame" and "biggest single piece" in it["text"] and not biggest:
             out.append(("biggest, but not", f"leaks {leak_n}"))
     fastball_line = any(tuple(it["cell"])[1] == "fastball" for it in pitches)
     keep = next((it for it in items if it["kind"] == "keep"), None)
@@ -188,7 +229,7 @@ def plan_problems(items, leaks, rows, player):
           and any(lk["pitch_group"] == "fastball" for view in player["leaks"].values() for lk in view)):
         out.append(("fastball strength beside a fastball leak", keep["text"][:60]))
     if keep:
-        says_one = "the pitch above" in keep["text"]
+        says_one = "the pitch above" in keep["text"].lower()
         if says_one != (len(pitches) == 1):
             out.append(("keep line miscounts", f"{len(pitches)} pitch lines"))
 
@@ -199,7 +240,7 @@ def plan_problems(items, leaks, rows, player):
         out.append(("good chooser unframed", f"choices {fmt_runs(c)}"))
     for f in frames:
         if c <= -1:
-            ok = f"cost you {round(-c):.0f} run" in f
+            ok = f"cost you {whole_runs(-c)} run" in f
         else:
             level = "better than average" if c >= 1 else "about average"
             ok = f"are {level} ({fmt_runs(c)} runs a season)" in f
@@ -211,18 +252,20 @@ def plan_problems(items, leaks, rows, player):
     if "nothing net" in texts and not zero:
         out.append(("framing misquoted", f"far-off cost {player['runs_at_stake']:.1f}, not 0.0"))
 
-    # the first line in a count the table calls a plus
-    g = tuple(pitches[0]["cell"])[0]
-    v = rows[g]["choices"]
-    why = f"{COUNT_PHRASES[g]}, your choices are a plus overall"
-    if shown(v) > 0 and why.lower() not in pitches[0]["text"].lower():
-        out.append(("first line in a plus count, no why", f"{g} {fmt_runs(v)}"))
+    # every line in a count the table calls a plus says why, once a count
+    explained = set()
     for it in pitches:
-        m = re.search(r"\. ([^.]+?), your choices are a plus overall \(([^ ]+) runs", it["text"])
+        g = tuple(it["cell"])[0]
+        v = shown(rows[g]["choices"])
+        m = re.search(r"In this count your choices (are a plus overall|come out about even) \(([^ ]+) runs",
+                      it["text"])
+        if v > 0 and g not in explained and not m:
+            out.append(("plus count, no why", f"{g} {fmt_runs(v)}"))
         if m:
-            gg = tuple(it["cell"])[0]
-            if m.group(1).lower() != COUNT_PHRASES[gg] or m.group(2) != fmt_runs(rows[gg]["choices"]):
-                out.append(("plus count misquoted", f"{m.group(2)} vs {fmt_runs(rows[gg]['choices'])}"))
+            want = "are a plus overall" if v >= RULES["PLUS_COUNT_MIN_RUNS"] else "come out about even"
+            if m.group(1) != want or m.group(2) != fmt_runs(v) or g in explained:
+                out.append(("plus count misquoted", f"{m.group(1)} {m.group(2)} vs {fmt_runs(v)}"))
+            explained.add(g)
 
     # numbers quoted in the pitch lines
     for it in pitches:
@@ -244,6 +287,50 @@ def plan_problems(items, leaks, rows, player):
             out.append(("inches misquoted", m.group(0)))
         if is_video(it) != (lk["depth_in"] < CLEARLY_OFF_IN):
             out.append(("inches misquoted", "take or video item against its depth"))
+        if is_video(it) and f"typically under {CLEARLY_OFF_IN} inches off the zone" not in it["text"]:
+            out.append(("video item off the 4-inch rule", it["text"][:60]))
+        if (not is_video(it) and lk["pitches"] < RULES["PLAN_LEAD_MIN_PITCHES"]
+                and f"Only {lk['pitches']} of these pitches so far" not in it["text"]):
+            out.append(("small sample unflagged", f"{lk['pitches']} pitches: {lk['phrase']}"))
+    return out
+
+
+def sentence_problems(items, rows, player):
+    """Sentences on any plan, with pitch lines or not: the contact sentence,
+    the 'Nothing to change' line, the fallback's level, and how a negative
+    number prints."""
+
+    out = []
+    texts = " ".join(it["text"] for it in items)
+    # the contact sentence fits the miss rates as they print, and only a contact card has one
+    mine, theirs = page_whole(player["whiff"], 100), page_whole(player["whiff_league"], 100)
+    more = re.search(r"you miss on (\d+)% of your chases, against (\d+)%", texts)
+    less = re.search(r"you miss less often than other hitters \((\d+)% of your chases against (\d+)%\)", texts)
+    same = "you miss about as often as other hitters" in texts
+    gap, wide = mine - theirs, RULES["WHIFF_GAP_MIN_PTS"]
+    if ((more and (gap < wide or (int(more.group(1)), int(more.group(2))) != (mine, theirs)))
+            or (less and (-gap < wide or (int(less.group(1)), int(less.group(2))) != (mine, theirs)))
+            or (same and abs(gap) >= wide)):
+        out.append(("contact miss rate misstated", f"{mine}% vs {theirs}%"))
+    says_contact = "contact is your bigger cost" in texts or "issue is contact" in texts
+    if says_contact != bool(player.get("contact_led")):
+        out.append(("contact sentence off the contact flag", f"contact {fmt_runs(player['contact'])}, "
+                                                            f"choices {fmt_runs(player['choices'])}"))
+    for it in items:
+        text = it["text"]
+        if text.startswith("Nothing to change."):
+            named = [g for g, phrase in COUNT_PHRASES.items() if phrase in text]
+            m = re.search(r"those swings have paid: (\d+) runs? more", text)
+            paid = sum(rows[g]["contact"] for g in named)
+            if (not m or int(m.group(1)) != whole_runs(paid)
+                    or any(stored(rows[g]["contact"]) < -stored(rows[g]["choices"]) for g in named)):
+                out.append(("nothing to change misquoted", text[:70]))
+        m = re.search(r"about average overall \(([^ ]+) runs", text)
+        if m and shown(rows["total"]["choices"]) <= -RULES["COSTLY_COUNT_RUNS"]:
+            out.append(("loss called average", m.group(0)))
+    for text in [it["text"] for it in items] + [player.get("target_text") or "", player.get("coach_note") or ""]:
+        if re.search(r"[(\s]-\d", text):
+            out.append(("ascii minus", re.search(r"[(\s]-\d[^ ]*", text).group(0)))
     return out
 
 
@@ -334,7 +421,7 @@ def card_gap(leaks):
 
     n = sum(lk["pitches"] for lk in leaks)
     rate = sum(lk["chases"] for lk in leaks) / n
-    league = sum(lk["league"] * lk["pitches"] for lk in leaks) / n
+    league = sum(stored(lk["league"]) * lk["pitches"] for lk in leaks) / n
     return {r - lg for r in printed(rate, 100) for lg in printed(league, 100)}
 
 
@@ -375,13 +462,24 @@ def target_problems(player):
         if low != (" at or under " in text):
             out.append(("no target 'about at' a forecast below",
                         f"forecast {t['predicted'] * 100:+.1f}: {text[-60:]}"))
+    if text.startswith(("No target", "No chase target")):
+        xf = round(t["excess"] * 100)
+        if (min(abs(r - xf) for r in card_gap(player["leaks"]["all"])) >= RULES["TARGET_SCALE_NOTE_PTS"]
+                and "simpler league rate" not in text):
+            out.append(("target scale or unit unsaid", text[:70]))
+    if not text.startswith(("No target", "No chase target", "No number")):
+        x = round(t["excess"] * 100)
+        far = min(abs(r - x) for r in card_gap(player["leaks"]["all"])) >= RULES["TARGET_SCALE_NOTE_PTS"]
+        if (far and "on the rows above" not in text) or not re.search(r"about \d+ points? above it", text):
+            out.append(("target scale or unit unsaid", text[:70]))
     if t.get("out_of_sample") == "no":
         if "you'd be" in text or "afterward" not in text or ("You were at" not in text
                                                              and "Not scored" not in text
                                                              and t.get("actual", 0) is not None):
             out.append(("retrospective target as a forecast", text[:60]))
         a = t.get("actual")
-        if a is not None and f"You were at {a * 100:.0f}" not in text and f"You were at {a * 100:.1f}" not in text:
+        said = [f"You were at {a * 100:{w}}".replace("-", "−") for w in (".0f", ".1f")] if a is not None else []
+        if a is not None and not any(s in text for s in said):
             out.append(("target result misquoted", f"actual {a * 100:.1f}: {text[-50:]}"))
     return out
 
@@ -442,6 +540,7 @@ def problems(player):
     rows = {r["group"]: r for r in player["tables"]["all"]}
     out = plan_problems(player["plan_items"], player["leaks"]["all"], rows, player)
     out += order_problems(player["plan_items"], player["leaks"]["all"], rows, player)
+    out += sentence_problems(player["plan_items"], rows, player)
     out += target_problems(player) + label_problems(player) + hand_problems(player)
     if player.get("plan_items_by_hand"):
         out.append(("two plans", "plan_items_by_hand"))
@@ -489,7 +588,7 @@ if __name__ == "__main__":
         print(f"  {len(names):4d}  {kind}" + (f"   e.g. {', '.join(names[:3])}" if names else ""))
     first = {"contact first", "frame first", "numbers backwards", "video only, nobody named"}
     argue = {"no target says already", "fastball strength over a fastball line",
-             "header 0.0 unexplained", "first line in a plus count, no why"}
+             "header 0.0 unexplained", "plus count, no why"}
     for label, kinds in (("first line not the instruction", first), ("card argues with its plan", argue)):
         print(f"  {len(set().union(*(found[k] for k in kinds))):4d}  union: {label}")
     hand = sum(1 for p in players for k, d in problems(p) if d.startswith("vs "))

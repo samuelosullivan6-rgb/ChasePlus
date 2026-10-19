@@ -43,7 +43,7 @@
     let rows = p.bats === "S"
       ? [["Batting left", "L", "all", "chase"], ["Batting right", "R", "all", "chase"]]
       : [["All pitchers", p.bats, "all", "chase"], ["vs RHP", p.bats, "R", "chase"], ["vs LHP", p.bats, "L", "chase"]];
-    if (p.archetype === "execution-led") rows.push(["Misses on chases", p.bats, "all", "whiff"]);
+    if (p.contact_led !== undefined ? p.contact_led : p.archetype === "execution-led") rows.push(["Misses on chases", p.bats, "all", "whiff"]);
     return rows;
   }
 
@@ -71,11 +71,13 @@
       rec.orient = T("orient"); rec.legend = T("legend");
       rec.numbers_note = T("numbers-note");
       rec.numbers = [...document.querySelectorAll("#numbers-table tr")].map((tr) => [...tr.children].map((c) => c.textContent).join(" | "));
+      const tw = document.querySelector(".tablewrap");
+      rec.table_overflow = tw ? tw.scrollWidth - tw.clientWidth : null;
       rec.aside = {};
       for (const h of ["all", "R", "L"]) {
         const r = document.getElementById("hand-" + h); r.checked = true; r.dispatchEvent(new Event("change", { bubbles: true }));
         await sleep(5);
-        rec.aside[h] = IT("aside");
+        rec.aside[h] = IT("aside") + (document.getElementById("more") ? "\n" + IT("more") : "");
         if (h !== "all") rec["state_" + h] = T("state");
       }
       const r0 = document.getElementById("hand-all"); r0.checked = true; r0.dispatchEvent(new Event("change", { bubbles: true }));
@@ -89,13 +91,30 @@
           if (row < 0) { row = rows.findIndex((r) => r[1] === lk.side && r[3] === "chase"); fallback = row >= 0; }
           if (row < 0) return { n: k + 1, drawn: false };
           const key = row + "|" + lk.count_group, taken = placed[key] || [];
+          const s = surf(p, GKEYS.indexOf(lk.count_group), rows[row][2], rows[row][1]);
           let x = lk.x, z = lk.z;
-          for (const [dx, dz] of [[0, 0], [0.5, 0], [-0.5, 0], [0, -0.5], [0, 0.5], [0.5, -0.5], [-0.5, -0.5]]) {
-            const cx = lk.x + dx, cz = lk.z + dz;
-            if (taken.every(([, ox, oz]) => Math.hypot(cx - ox, cz - oz) >= 0.5)) { x = cx; z = cz; break; }
+          const NEW = p.contact_led !== undefined;      // the rebuilt page snaps and spaces 0.7 ft
+          const SEP = NEW ? 0.7 : 0.5;
+          if (NEW) {
+            const gi = (arr, v) => Math.max(0, Math.min(arr.length - 1, Math.round((v - arr[0]) / D.gridStep)));
+            const reg = (xx, zz) => { const xb = rows[row][1] === "L" ? -xx : xx; return ((zz > p.zone[1] ? "up" : zz < p.zone[0] ? "down" : "") + "-" + (xb < -0.83 ? "in" : xb > 0.83 ? "away" : "")).replace(/^-|-$/g, ""); };
+            const mask = M.zoneMask(XS, ZS, p.zone[0], p.zone[1]);
+            if (s.gap[gi(ZS, z) * NX + gi(XS, x)] < 0.05) {
+              let best = null;
+              for (let b = gi(ZS, lk.z - 1.0); b <= gi(ZS, lk.z + 1.0); b++) for (let a = gi(XS, lk.x - 1.0); a <= gi(XS, lk.x + 1.0); a++) {
+                const j = b * NX + a, dd = Math.hypot(XS[a] - lk.x, ZS[b] - lk.z);
+                if (dd > 1.0 || mask[j] || s.evidence[j] < 0.5 || s.gap[j] < 0.05 || reg(XS[a], ZS[b]) !== lk.region) continue;
+                if (!best || dd < best.d) best = { d: dd, x: XS[a], z: ZS[b] };
+              }
+              if (best) { x = best.x; z = best.z; }
+            }
+          }
+          const bx = x, bz = z;
+          for (const [dx, dz] of [[0, 0], [SEP, 0], [-SEP, 0], [0, -SEP], [0, SEP], [SEP, -SEP], [-SEP, -SEP]]) {
+            const cx = bx + dx, cz = bz + dz;
+            if (taken.every(([, ox, oz]) => Math.hypot(cx - ox, cz - oz) >= SEP)) { x = cx; z = cz; break; }
           }
           (placed[key] = placed[key] || []).push([k + 1, x, z]);
-          const s = surf(p, GKEYS.indexOf(lk.count_group), rows[row][2], rows[row][1]);
           const at = (xx, zz) => { const j = near(ZS, zz) * NX + near(XS, xx); return { gap: Math.round(s.gap[j] * 100), evidence: +s.evidence[j].toFixed(2), you: Math.round(s.playerRate[j] * 100), avg: Math.round(s.leagueRate[j] * 100) }; };
           const inZone = Math.abs(x) < 0.83 && z > p.zone[0] && z < p.zone[1];
           return { n: k + 1, drawn: true, row: rows[row][0], row_fallback: fallback, group: lk.count_group, moved: Math.hypot(x - lk.x, z - lk.z) > 1e-9,

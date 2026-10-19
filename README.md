@@ -277,8 +277,9 @@ How to read it, top to bottom:
    before two strikes costs you no strikeouts, so line 1 goes first"), as
    it names any count costing a run or more that no line sits in. A plan
    that leaves anything for later calls its pitches the changes to start
-   with, never the only ones. A leak whose chased pitches were mostly
-   within a ball of the zone is written as a video item, not a take
+   with, never the only ones. A take on fewer than 20 pitches says it is
+   a small sample to go over on video first. A leak whose chased pitches
+   were typically under 4 inches off the zone is written as a video item, not a take
    ("fastballs off the plate inside are one to go over on video with your
    coaches, not a take rule"), and a plan of video items only says the
    staff takes it from there. The two percentages are
@@ -297,17 +298,21 @@ How to read it, top to bottom:
    two pitches above are two of the pieces, the ones to work on first. A
    hitter whose choices are average or better overall is told so (J. P.
    Crawford: "Overall your chase choices are better than average (+17.3
-   runs a season), and on far-off pitches they cost you nothing net (the
-   0.0 at the top): the pitches above are spots to tighten, not a new
-   approach"), and a first line in a count where the count table shows
-   his choices as a plus says why it is there ("With two strikes, your
-   choices are a plus overall (+8.4 runs in the count table); this pitch
-   is where they give some back"). A hitter whose problem is contact
+   runs a season), and on far-off pitches as a whole they cost you nothing
+   net (the 0.0 at the top): the pitches above are spots to tighten, not a
+   new approach"), and a line in a count where the count table shows his
+   choices as a plus says why it is there ("In this count your choices are
+   a plus overall (+8.4 runs in the count table); this pitch is where they
+   give some back", or "come out about even" under a run). Contact is the
+   subject of a card when the chases lost 3 runs or more on what they
+   produced, more than the choices lost and more than the far-off tile:
+   the card's own numbers, not step 13's archetype, which exists only for
+   a net loss (the roster's Problem column still shows it). A hitter whose problem is contact
    reads the reason in his first take line ("You miss on 68% of your
    chases, against 45% for other hitters on the same pitches: contact is
    your bigger cost, so this one is a take even when you could reach
-   it"), with the miss rate quoted only when it is above the league's and
-   what his chases produced otherwise; with no take line it is the plan's
+   it"), with the miss rates quoted when they print 5 points or more apart,
+   either way, and what his chases produced otherwise; with no take line it is the plan's
    one line. Every plan ends with "Keep swinging at strikes." Every
    sentence is written from the count table beside it, so a plan is empty
    only when that table agrees that no count costs a run, and a hitter
@@ -638,7 +643,7 @@ cards go from a file to a cage.
   how far off the zone the chased pitches were. A take rule is for the pitch
   that is clearly a ball, never the borderline one, and a two-strike take
   of a borderline pitch is a called third strike; a leak whose chased
-  pitches were mostly within a ball of the zone is written as a video
+  pitches were typically under 4 inches off the zone is written as a video
   item instead.
 - **Start before two strikes.** The plan's lines are in the order to work
   on them: a take in an early count costs nothing in strikeouts and the
@@ -988,8 +993,14 @@ a word, and "the only changes" only when nothing is; that a no-target
 sentence's points are the leak rows' own and its "about at" or "at or
 under" matches the forecast; that a hand is named only where it carries
 most of the extra chases and cost; and that a switch hitter's leak is
-drawn on the side with most of its extra chases. Step 17 stops and lists
-the cards when any fails. Run on
+drawn on the side with most of its extra chases. The second round of
+fixes added checks that every quoted number rounds as the page rounds it,
+a small-sample take says so, a video line gives the 4-inch reason, every
+line in a plus count says why, a contact sentence fits the printed miss
+rates and appears only on a contact card, a "Nothing to change" line
+quotes its own counts' contact, no loss is called "about average", no
+negative number prints with a hyphen, and a target on a different league
+rate from the rows says so. Step 17 stops and lists the cards when any fails. Run on
 a built page (`python scripts/plan_checks.py
 results/xchase/player_cards/2026/index.html`) it counts each kind
 instead.

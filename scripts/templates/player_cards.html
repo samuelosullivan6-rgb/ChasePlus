@@ -87,7 +87,7 @@ button, input, select { font: inherit; color: inherit; }
 .head .sub { color: var(--ink2); font-size: 16px; }
 .tiles { display: flex; gap: 32px; flex-wrap: wrap; }
 .tile .big { font-size: 46px; font-weight: 800; line-height: 1; margin-top: 6px; }
-.tile .note { color: var(--ink2); font-size: 13px; }
+.tile .note { color: var(--ink2); font-size: 13px; max-width: 34ch; }
 .bars { display: grid; grid-template-columns: auto 190px auto; gap: 6px 12px; align-items: center; margin-top: 8px; font-size: 15px; }
 .bars .track { position: relative; height: 16px; }
 .bars .track::after { content: ""; position: absolute; left: 50%; top: -4px; bottom: -4px; width: 1px; background: var(--axis); }
@@ -95,10 +95,13 @@ button, input, select { font: inherit; color: inherit; }
 .bars .val { font-weight: 800; text-align: right; font-variant-numeric: tabular-nums; }
 .bars .lab { color: var(--ink2); }
 
-.body { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: 32px; }
+/* two columns: the pictures on the left; the plan and leaks, then the tables and chart, on the right.
+   On one column the plan and leaks come first, then the pictures, then the rest (grid areas below). */
+.body { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); grid-template-areas: "zones aside" "zones more";
+        grid-template-rows: auto 1fr; gap: 32px; }
 /* a minmax(0, 1fr) column, not the implicit auto one: an auto column grows to a wide table's
    min-content width, so the table would spill past the card instead of scrolling in its .tablewrap */
-.zones { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; min-width: 0; align-content: start; }
+.zones { grid-area: zones; display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; min-width: 0; align-content: start; }
 .zgrid { display: grid; grid-template-columns: 92px repeat(4, minmax(0, 1fr)); gap: 8px; align-items: center; }
 .zgrid .colhead { text-align: center; font-weight: 800; font-size: 15px; line-height: 1.2; }
 .zgrid .colhead span { display: block; font-weight: 400; font-size: 12px; color: var(--muted); }
@@ -111,9 +114,11 @@ button, input, select { font: inherit; color: inherit; }
 .legend .ramp { height: 12px; border-radius: 2px; }
 .legend .ticks { display: flex; justify-content: space-between; color: var(--muted); font-size: 12px; }
 
-aside { display: grid; gap: 22px; align-content: start; min-width: 0; }
-aside section { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; min-width: 0; }   /* the column as in .zones */
-aside h2 { font-size: 20px; font-weight: 800; }
+aside { grid-area: aside; }
+.col-rest { grid-area: more; }   /* the tables and chart under the plan (not the roster's td.more) */
+aside, .col-rest { display: grid; gap: 22px; align-content: start; min-width: 0; }
+aside section, .col-rest section { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; min-width: 0; }   /* the column as in .zones */
+aside h2, .col-rest h2 { font-size: 20px; font-weight: 800; }
 .plan { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; font-size: 16px; max-width: 68ch; }
 .plan li { display: grid; grid-template-columns: 26px minmax(0, 1fr) auto; gap: 8px; align-items: start; }
 .plan .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--ink); margin: 8px 0 0 8px; }
@@ -152,7 +157,10 @@ th, td { padding: 4px 8px; text-align: right; white-space: nowrap; }
 th:first-child, td:first-child { text-align: left; padding-left: 0; }
 thead th { color: var(--muted); font-size: 12px; font-weight: 700; border-bottom: 1px solid var(--hair); vertical-align: bottom; }
 thead th small { display: block; font-weight: 400; }
-td .avg { color: var(--muted); margin-left: 6px; }
+/* the league's number under the hitter's, so the eight columns fit the right-hand column */
+td .avg { display: block; color: var(--muted); font-size: 12px; line-height: 1.2; }
+td .few { color: var(--muted); font-size: 12px; }
+@media (min-width: 1201px) { .col-rest th, .col-rest td { padding: 4px 5px; } }
 tr.total td { font-weight: 800; border-top: 1px solid var(--hair); }
 .trend svg { width: 100%; height: auto; max-width: 520px; display: block; }
 .evidence { color: var(--muted); font-size: 13px; max-width: 80ch; }
@@ -190,7 +198,8 @@ summary { cursor: pointer; font-weight: 700; }
 .roster .scroll { overflow: auto; max-height: max(420px, calc(100vh - 340px)); }
 .roster table { border-collapse: collapse; width: 100%; min-width: 1560px; color: var(--ink); font-size: 14px; }
 .roster th, .roster td { padding: 7px 10px; text-align: left; border-bottom: 1px solid var(--hair); vertical-align: top; white-space: nowrap; }
-.roster th:first-child, .roster td:first-child { padding-left: 24px; }
+.roster th:first-child, .roster td:first-child { padding-left: 24px; position: sticky; left: 0; background: var(--surface); z-index: 1; }
+.roster th:first-child { z-index: 2; }
 .roster th { font-size: 11px; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: .05em; cursor: pointer;
              position: sticky; top: 0; background: var(--surface); user-select: none; vertical-align: bottom;
              border-bottom: 0; box-shadow: inset 0 -1px 0 var(--hair); }   /* a collapsed border stays behind when the head sticks; a shadow goes with it */
@@ -213,7 +222,7 @@ summary { cursor: pointer; font-weight: 700; }
   .roster thead { display: none; }
   .roster tbody tr { display: block; padding: 10px 16px; border-bottom: 1px solid var(--hair); cursor: pointer; }
   .roster tbody td { display: flex; justify-content: space-between; gap: 12px; border: 0; padding: 2px 0; white-space: normal; text-align: left; }
-  .roster tbody td:first-child { padding-left: 0; font-weight: 700; }
+  .roster tbody td:first-child { padding-left: 0; font-weight: 700; position: static; }
   .roster tbody td::before { content: attr(data-label); color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .05em; flex: 0 0 auto; padding-top: 3px; }
   .roster tbody td.right { text-align: right; }
   .roster tbody td.plan { display: block; min-width: 0; max-width: none; padding-top: 6px; }
@@ -223,8 +232,25 @@ summary { cursor: pointer; font-weight: 700; }
   .roster tbody tr.open td.more { display: flex; }
 }
 
-/* one column: the plan, leaks and table come before the pictures, so a phone opens on the plan */
-@media (max-width: 1100px) { .body { grid-template-columns: minmax(0, 1fr); } aside { order: -1; } }
+/* one column: the plan and leaks first, so a phone opens on the plan, then the pictures they are numbered on */
+@media (max-width: 1200px) { .body { grid-template-columns: minmax(0, 1fr); grid-template-areas: "aside" "zones" "more"; grid-template-rows: auto; } }
+/* phones: the picture switches fold behind one button, so the first screen reaches the card */
+.optbtn { display: none; }
+.optbtn button { border: 1px solid var(--axis); background: var(--surface); border-radius: 6px; padding: 7px 12px; font-size: 14px; color: var(--ink2); cursor: pointer; }
+@media (max-width: 640px) {
+  .optbtn { display: grid; }
+  .picopt { display: none; }
+  body.showopts[data-view="card"] .picopt { display: grid; }
+  /* the first screen reaches the plan: the name, then the plan and leaks, then the cost tiles and
+     the pictures; the switches show their own state, so the "Showing" line goes */
+  body[data-view="card"] #state { display: none; }
+  .head, .body { display: contents; }
+  .head > :first-child { order: 0; padding-bottom: 14px; border-bottom: 1px solid var(--hair); }
+  aside { order: 1; grid-area: auto; }
+  .tiles { order: 2; }
+  .zones { order: 3; grid-area: auto; }
+  .col-rest { order: 4; grid-area: auto; }
+}
 @media (max-width: 640px) {
   .card { padding: 16px; }
   th.nar, td.nar { display: none; }
@@ -279,21 +305,22 @@ summary { cursor: pointer; font-weight: 700; }
       <label for="kind">Problem</label>
       <div class="picker"><select id="kind" aria-label="Filter by the kind of problem"><option value="">Any</option><option>choices</option><option>mostly choices</option><option>mixed</option><option>mostly contact</option><option>contact</option></select></div>
     </div>
-    <div class="control card-only">
+    <div class="control card-only optbtn"><span class="label">Pictures</span><button type="button" id="optbtn" aria-expanded="false">Picture options</button></div>
+    <div class="control card-only picopt">
       <span class="label" id="lab-base">Compare with</span>
       <div class="seg" role="radiogroup" aria-labelledby="lab-base" id="seg-base">
         <input type="radio" name="base" id="base-match" value="match" checked><label for="base-match">Same side and hand</label>
         <input type="radio" name="base" id="base-all" value="all"><label for="base-all">All hitters</label>
       </div>
     </div>
-    <div class="control card-only">
+    <div class="control card-only picopt">
       <span class="label" id="lab-metric">Show</span>
       <div class="seg" role="radiogroup" aria-labelledby="lab-metric" id="seg-metric">
         <input type="radio" name="metric" id="metric-chase" value="chase" checked><label for="metric-chase">Chase choices</label>
         <input type="radio" name="metric" id="metric-whiff" value="whiff"><label for="metric-whiff">Misses on chases</label>
       </div>
     </div>
-    <div class="control card-only">
+    <div class="control card-only picopt">
       <span class="label" id="lab-pitch">Pitches</span>
       <div class="seg" role="radiogroup" aria-labelledby="lab-pitch" id="seg-pitch">
         <input type="radio" name="pitch" id="pitch-all" value="all" checked><label for="pitch-all">All</label>
@@ -313,7 +340,7 @@ summary { cursor: pointer; font-weight: 700; }
   </div>
   <p class="state" id="state"></p>
   <p class="notice" id="notice" hidden></p>
-  <p class="back" id="back" hidden><a id="back-link" href="#roster">&larr; Back to the roster</a></p>
+  <p class="back" id="back" hidden><a id="back-link" href="#roster">&larr; Back to the roster</a> · <a id="guide-link" href="#">How to read a card</a></p>
 
   <article class="card" id="card" aria-live="polite" hidden>
     <div class="head">
@@ -344,10 +371,11 @@ summary { cursor: pointer; font-weight: 700; }
         </details>
       </div>
       <aside id="aside"></aside>
+      <div class="col-rest" id="more"></div>
     </div>
   </article>
 
-  <section class="roster" id="roster" aria-label="The roster" hidden>
+  <section class="roster" id="roster-view" aria-label="The roster" hidden>
     <div class="rhead">
       <h1 id="roster-title"></h1>
       <p class="lede" id="roster-lede"></p>
@@ -390,6 +418,9 @@ summary { cursor: pointer; font-weight: 700; }
   }
   const everyone = D.players.concat(D.references);
   const bySlug = new Map(everyone.map((p) => [p.slug, p]));
+  // a link typed by hand, or with other capitals or accents, still finds its hitter
+  const slugKey = (s) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]/g, "");
+  const byKey = new Map(everyone.map((p) => [slugKey(p.slug), p.slug]));
   const TEAMS = Array.from(new Set(D.players.flatMap((p) => p.teams))).sort();
   // Two views of one page: the roster (every hitter, by team) and a card.
   // The URL hash says which: #roster, #roster/NYY, or #<hitter>.
@@ -564,7 +595,7 @@ summary { cursor: pointer; font-weight: 700; }
     }
     if (extras && extras.markers) {
       // markers shrink with the panel so they never swamp a small picture (phones)
-      const scale = Math.min(1, rect.width / 150);
+      const scale = Math.max(0.8, Math.min(1, rect.width / 150));   // never so small a phone cannot read it
       for (const [n, x, z] of extras.markers) {
         const r = 11 * dpr * scale;
         ctx.beginPath(); ctx.arc(sx(x), sz(z), r, 0, Math.PI * 2);
@@ -601,6 +632,45 @@ summary { cursor: pointer; font-weight: 700; }
   const LEAK_REGION = { up: "above the zone", down: "below the zone", in: "inside", away: "away", "up-in": "up and in",
                         "up-away": "up and away", "down-in": "down and in", "down-away": "down and away" };
   let lastRender = null;
+  const PITCH_KEYS = ["fastball", "breaking", "offspeed"];   // the Pitches switch's order
+  const FEW_CHASES = 5;                    // under this many chases the table prints "k of n", not a rate
+
+  // Where a leak's number goes in its picture. It starts at the median of the leak's chased
+  // pitches, but the picture counts every pitch type (or the type picked), so that spot can
+  // read pale or blue; then the number moves to the nearest spot at +5 pts or more within a
+  // foot, in the same region off the zone, with enough pitches to color (half the moves are
+  // under 3 inches). It never overlaps another number.
+  const MARK_SEP = 0.7, SNAP_FT = 1.0, MARK_MIN_GAP = 0.05;
+  const gridIndex = (arr, v) => Math.max(0, Math.min(arr.length - 1, Math.round((v - arr[0]) / STEP)));
+  function regionOf(x, z, side) {            // batter-relative, as the Zone numbers table
+    const xb = side === "L" ? -x : x;
+    return ((z > ZONE[1] ? "up" : z < ZONE[0] ? "down" : "") + "-" + (xb < -0.83 ? "in" : xb > 0.83 ? "away" : "")).replace(/^-|-$/g, "");
+  }
+  function placeMarkers(list, s, side) {
+    if (!list) return null;
+    const out = [];
+    for (const { n, lk } of list) {
+      let x = lk.x, z = lk.z;
+      if (s.gap[gridIndex(ZS, z) * NX + gridIndex(XS, x)] < MARK_MIN_GAP) {
+        let best = null;
+        for (let b = gridIndex(ZS, lk.z - SNAP_FT); b <= gridIndex(ZS, lk.z + SNAP_FT); b++) {
+          for (let a = gridIndex(XS, lk.x - SNAP_FT); a <= gridIndex(XS, lk.x + SNAP_FT); a++) {
+            const j = b * NX + a;
+            const d = Math.hypot(XS[a] - lk.x, ZS[b] - lk.z);
+            if (d > SNAP_FT || MASK[j] || s.evidence[j] < 0.5 || s.gap[j] < MARK_MIN_GAP
+                || regionOf(XS[a], ZS[b], side) !== lk.region) continue;
+            if (!best || d < best.d) best = { d, x: XS[a], z: ZS[b] };
+          }
+        }
+        if (best) { x = best.x; z = best.z; }
+      }
+      for (const [dx, dz] of [[0, 0], [MARK_SEP, 0], [-MARK_SEP, 0], [0, -MARK_SEP], [0, MARK_SEP], [MARK_SEP, -MARK_SEP], [-MARK_SEP, -MARK_SEP]]) {
+        if (out.every(([, ox, oz]) => Math.hypot(x + dx - ox, z + dz - oz) >= MARK_SEP)) { x += dx; z += dz; break; }
+      }
+      out.push([n, x, z]);
+    }
+    return out;
+  }
 
   function setSegEnabled(id, on) {
     const seg = document.getElementById(id);
@@ -625,7 +695,7 @@ summary { cursor: pointer; font-weight: 700; }
       `Swings at ${pct(p.chase)} of pitches outside the zone. Hitters on average swing at ${pct(p.chase_league)} of the same pitches.`;
     const stake = el("div", { class: "tile" }, el("div", { class: "eyebrow", text: "Cost of far-off chases" }),
       el("div", { class: "big", text: p.runs_at_stake.toFixed(1) }),
-      el("div", { class: "note", text: "runs per 600 PA from your choices on pitches at least 4 inches off the plate" }));
+      el("div", { class: "note", text: "runs lost per 600 PA to your choices on pitches at least 4 inches off the plate; 0.0 is no net loss" }));
     const bars = el("div", { class: "bars" });
     for (const [lab, v] of [["Choices", p.choices], ["Contact", p.contact]]) {
       const w = Math.min(25, Math.abs(v)) / 25 * 50;
@@ -653,7 +723,7 @@ summary { cursor: pointer; font-weight: 700; }
               ["vs RHP", "right-handed pitchers", p.bats, "R", state.metric],
               ["vs LHP", "left-handed pitchers", p.bats, "L", state.metric]];
     }
-    if (p.archetype === "execution-led" && state.metric === "chase") {
+    if (p.contact_led && state.metric === "chase") {
       const side = p.bats !== "S" ? p.bats : (p.side_pitches.L >= p.side_pitches.R ? "L" : "R");
       rows.push(["Misses on chases", "swing-and-miss per chase, vs the average hitter: purple more, green fewer", side, "all", "whiff"]);
     }
@@ -667,20 +737,17 @@ summary { cursor: pointer; font-weight: 700; }
     // non-breaking hyphens, so a narrow column breaks "0-1 or 1-1" at a space, never inside a count
     GROUPS.forEach((g) => grid.append(el("div", { class: "colhead" }, g.label.replace(/-/g, "\u2011"), el("span", { text: g.detail }))));
     const rows = rowsFor(p);
-    const placed = {};                       // "row|group" -> [[n, x, z]]
-    if (!p.reference && state.metric === "chase" && state.pitch === "all") {
+    // Each leak's number goes on the row of the hand it names (else its side's row), in its
+    // count's picture: with every pitch type showing, or the leak's own type picked under
+    // Pitches. Where it lands is decided once that picture is drawn (placeMarkers).
+    const placed = {};                       // "row|group" -> [{n, lk}]
+    if (!p.reference && state.metric === "chase") {
       (p.leaks.all || []).forEach((lk, k) => {
+        if (state.pitch !== "all" && PITCH_KEYS[+state.pitch] !== lk.pitch_group) return;
         let row = rows.findIndex((r) => r[2] === lk.side && r[3] === (lk.hand || "all") && r[4] === "chase");
         if (row < 0) row = rows.findIndex((r) => r[2] === lk.side && r[4] === "chase");
         if (row < 0) return;
-        const key = row + "|" + lk.count_group;
-        const taken = placed[key] || [];
-        let x = lk.x, z = lk.z;
-        for (const [dx, dz] of [[0, 0], [0.5, 0], [-0.5, 0], [0, -0.5], [0, 0.5], [0.5, -0.5], [-0.5, -0.5]]) {
-          const cx = lk.x + dx, cz = lk.z + dz;
-          if (taken.every(([, ox, oz]) => Math.hypot(cx - ox, cz - oz) >= 0.5)) { x = cx; z = cz; break; }
-        }
-        (placed[key] = placed[key] || []).push([k + 1, x, z]);
+        (placed[row + "|" + lk.count_group] = placed[row + "|" + lk.count_group] || []).push({ n: k + 1, lk });
       });
     }
     rows.forEach(([label, sub, side, hand, metric], ri) => {
@@ -709,7 +776,7 @@ summary { cursor: pointer; font-weight: 700; }
         const s = panelSurface(p, gi, hand, metric, side);
         panels[key] = { kind: metric, s, label: `${label}, ${g.label}` };
         const lines = M.outlines(s.gap, s.evidence, MASK, XS, ZS);
-        const marks = placed[ri + "|" + g.key] || null;
+        const marks = placeMarkers(placed[ri + "|" + g.key], s, side);
         const what = metric === "whiff" ? "misses on chases" : "chases";
         canvas.setAttribute("aria-label", `${label}, ${g.label}: ${what} compared with the average hitter. ${s.n} pitches.`);
         const scale = metric === "whiff" ? T.divW : T.div;
@@ -722,11 +789,12 @@ summary { cursor: pointer; font-weight: 700; }
         attachTip(canvas, (j) => {
           if (MASK[j]) return [el("span", { text: "Strike zone" })];
           if (s.evidence[j] < 0.25) return [el("span", { text: "Too few pitches here to say" })];
-          const gap = Math.round(s.gap[j] * 100);
+          const you = Math.min(1, Math.max(0, s.leagueRate[j] + s.gap[j]));
+          const gap = Math.round(you * 100) - Math.round(s.leagueRate[j] * 100);
           return [
             el("strong", { text: `${gap > 0 ? "+" : gap < 0 ? "−" : ""}${Math.abs(gap)} pts` }),
-            el("div", { text: `${metric === "whiff" ? "Misses" : "Swings"}: you ${pct(s.playerRate[j])}, average ${pct(s.leagueRate[j])}` }),
-            el("div", { class: "k", text: `about ${Math.max(1, Math.round(s.weight[j]))} nearby ${metric === "whiff" ? "chases" : "pitches"}, weighted` }),
+            el("div", { text: `${metric === "whiff" ? "Misses" : "Swings"}: you ${pct(you)}, average ${pct(s.leagueRate[j])}` }),
+            el("div", { class: "k", text: `about ${Math.max(1, Math.round(s.weight[j]))} nearby ${metric === "whiff" ? "chases" : "pitches"}, weighted; pulled toward average where there are few` }),
           ];
         });
       });
@@ -771,7 +839,7 @@ summary { cursor: pointer; font-weight: 700; }
 
   // The selected zone picture as a terrain: the floor is the plate area from
   // the catcher's view, height is the rate, and the gray mesh is the average
-  // hitter on the same pitches. Same numbers as the flat picture.
+  // hitter on the same pitches. Same numbers as the flat picture's hover (you = average + gap).
   function drawTerrain(p) {
     const box = document.getElementById("terrain"), note = document.getElementById("terrain-note");
     const panel = panels[state.sel];
@@ -860,26 +928,29 @@ summary { cursor: pointer; font-weight: 700; }
   function countTable(rows, leagueOnly) {
     const t = el("table");
     const head = el("tr", {}, el("th", { text: "" }), el("th", { text: "Pitches" }));
+    head.lastChild.className = "nar";
     for (const [n, s] of [["Chases", leagueOnly ? "rate" : "you / avg"], ["Far-off", leagueOnly ? "rate" : "you / avg"], ["Misses", leagueOnly ? "per chase" : "you / avg"]])
       head.append(el("th", { class: n === "Chases" ? "" : "nar" }, n, el("small", { text: s })));
-    if (!leagueOnly) head.append(el("th", {}, "xwOBA", el("small", { text: "you / avg" })), el("th", {}, "Choices", el("small", { text: "runs" })), el("th", {}, "Contact", el("small", { text: "runs" })));
+    if (!leagueOnly) head.append(el("th", { class: "nar" }, "xwOBA", el("small", { text: "you / avg" })), el("th", {}, "Choices", el("small", { text: "runs" })), el("th", {}, "Contact", el("small", { text: "runs" })));
     t.append(el("thead", {}, head));
     const body = el("tbody");
     const names = Object.fromEntries(GROUPS.map((g) => [g.key, g.label])); names.total = "All counts";
     for (const r of rows) {
-      const tr = el("tr", { class: r.group === "total" ? "total" : "" }, el("td", { text: names[r.group] }), el("td", { text: r.pitches.toLocaleString() }));
+      const tr = el("tr", { class: r.group === "total" ? "total" : "" }, el("td", { text: names[r.group] }), el("td", { class: "nar", text: r.pitches.toLocaleString() }));
       for (const k of ["chase", "far", "whiff"]) {
         const cls = k === "chase" ? "" : "nar";
         if (leagueOnly) tr.append(el("td", { class: cls, text: pct(r[k]) }));
+        else if (k === "whiff" && r.chases != null && r.chases < FEW_CHASES)   // a rate from a handful of chases is not one
+          tr.append(el("td", { class: cls, title: "Too few chases for a miss rate" }, el("strong", { text: r.chases ? `${Math.round(r.whiff * r.chases)} of ${r.chases}` : "–" }), el("span", { class: "avg few", text: "chases" })));
         else tr.append(el("td", { class: cls }, el("strong", { text: pct(r[k]) }), el("span", { class: "avg", text: pct(r[k + "_league"]) })));
       }
-      if (!leagueOnly) tr.append(el("td", {}, el("strong", { text: xw(r.xwoba) }), el("span", { class: "avg", text: xw(r.xwoba_league) })), el("td", { text: runs(r.choices) }), el("td", { text: runs(r.contact) }));
+      if (!leagueOnly) tr.append(el("td", { class: "nar" }, el("strong", { text: xw(r.xwoba) }), el("span", { class: "avg", text: xw(r.xwoba_league) })), el("td", { text: runs(r.choices) }), el("td", { text: runs(r.contact) }));
       body.append(tr);
     }
     t.append(body);
     const wrap = el("div", { class: "tablewrap" }, t);
-    const btn = el("button", { class: "tablebtn", type: "button", text: "Show far-off and misses" });
-    btn.addEventListener("click", () => { const all = wrap.classList.toggle("all"); btn.textContent = all ? "Fewer columns" : "Show far-off and misses"; });
+    const btn = el("button", { class: "tablebtn", type: "button", text: "Show every column" });
+    btn.addEventListener("click", () => { const all = wrap.classList.toggle("all"); btn.textContent = all ? "Fewer columns" : "Show every column"; });
     return el("div", {}, wrap, btn);
   }
 
@@ -904,19 +975,22 @@ summary { cursor: pointer; font-weight: 700; }
     const lastL = D.leagueTrend[D.leagueTrend.length - 1];
     let avgY = sy(lastL[1]) + 4;
     if (series.length) {
-      if (series.length >= 3) add("path", { d: path(series), fill: "none", stroke: "var(--ink)", "stroke-width": 2.4, "stroke-linecap": "round", "stroke-linejoin": "round" });
+      // a line only joins seasons in a row, so a season he did not qualify is not drawn over
+      const spans = [];
+      series.forEach(([y, v], k) => (k && y === series[k - 1][0] + 1 ? spans[spans.length - 1].push([y, v]) : spans.push([[y, v]])));
+      if (series.length >= 3) spans.filter((sp) => sp.length >= 2).forEach((sp) => add("path", { d: path(sp), fill: "none", stroke: "var(--ink)", "stroke-width": 2.4, "stroke-linecap": "round", "stroke-linejoin": "round" }));
       series.forEach(([y, v]) => add("circle", { cx: sx(y), cy: sy(v), r: 4.5, fill: "var(--ink)", stroke: "var(--surface)", "stroke-width": 2 }));
       const last = series[series.length - 1];
       add("text", { x: sx(last[0]) + 10, y: sy(last[1]) + 4, "font-size": 13, "font-weight": 800, fill: "var(--ink)" }, "you");
       if (Math.abs(sy(last[1]) - sy(lastL[1])) < 14) avgY = Math.max(sy(last[1]), sy(lastL[1])) + 18;
     }
-    add("text", { x: sx(lastL[0]) + 10, y: avgY, "font-size": 13, fill: "var(--muted)" }, "avg");
+    add("text", { x: sx(lastL[0]) + 10, y: avgY, "font-size": 13, fill: "var(--muted)" }, "league");
     return svg;
   }
 
   function aside(p) {
-    const a = document.getElementById("aside");
-    a.replaceChildren();
+    const a = document.getElementById("aside"), more = document.getElementById("more");
+    a.replaceChildren(); more.replaceChildren();
     if (p.reference) {
       const guide = el("ol", { class: "guide" });
       const dark = M.hexRgb(T.surface).reduce((x, y) => x + y, 0) < 1.5;
@@ -961,15 +1035,16 @@ summary { cursor: pointer; font-weight: 700; }
     const leakSec = el("section", {}, el("div", { class: "sechead" }, el("h2", { text: hand === "all" ? "Biggest leaks" : `Biggest leaks vs ${handWords}` })));
     leakSec.append(leaks.length ? list : el("p", { class: "empty", text: "None worth 0.75 runs per 600 PA." }));
     if (leaks.length) leakSec.append(el("p", { class: "evidence", text: hand === "all"
-      ? "Numbered on the pictures, on the row of the hand a leak names. Ranked by what the choices cost, per 600 PA; the plan takes up to two, in the order to work on them, so it can leave a bigger one out."
+      ? "Numbered on the pictures, on the row of the hand a leak names" + (p.bats === "S" ? " (for a switch hitter, on the side of the plate most of its extra chases came from; the leak counts both sides)" : "")
+        + ". A picture counts every pitch type, so pick a leak's own under Pitches to see it alone; numbers show with Chase choices. Ranked by what the choices cost, per 600 PA; the plan takes up to two, in the order to work on them, so it can leave a bigger one out."
       : `Ranked by what the choices cost against ${handWords}, per 600 PA. A number is the leak's number on the pictures and in the plan; a dash is a leak that shows up against ${handWords} only, so it is not on the pictures or in the plan.` }));
-    if (p.target_text && hand === "all") leakSec.append(el("p", { class: "evidence target", text: `Target: ${p.target_text}` }));
+    if (p.target_text && hand === "all") leakSec.append(el("p", { class: "evidence target", text: (p.target_text.startsWith("No ") ? "" : "Target: ") + p.target_text }));
     a.append(leakSec);
-    a.append(el("section", {}, el("h2", { text: hand === "all" ? "By count" : `By count vs ${handWords}` }), countTable(p.tables[hand], false),
+    more.append(el("section", {}, el("h2", { text: hand === "all" ? "By count" : `By count vs ${handWords}` }), countTable(p.tables[hand], false),
       el("p", { class: "evidence", text: D.countNote })));
     const seasons = p.trend.length && p.trend.length < 3 ? ` (${p.trend.length} season${p.trend.length > 1 ? "s" : ""})` : "";
-    a.append(el("section", { class: "trend" }, el("h2", { text: "Far-off chase rate by season" + seasons }), trendSvg(p.trend, `${p.name} far-off chase rate by season against the league`)));
-    a.append(el("p", { class: "evidence", text: D.evidence }));
+    more.append(el("section", { class: "trend" }, el("h2", { text: "Far-off chase rate by season" + seasons }), trendSvg(p.trend, `${p.name} far-off chase rate by season against the league`)));
+    more.append(el("p", { class: "evidence", text: D.evidence }));
   }
 
   function stateLine(p) {
@@ -987,7 +1062,7 @@ summary { cursor: pointer; font-weight: 700; }
     t.replaceChildren();
     if (p.reference) { note.textContent = "The average card's numbers are in the table on the right."; return; }
     const metric = state.metric;
-    note.textContent = `All pitchers${state.pitch === "all" ? "" : ", " + PITCH_NAMES[+state.pitch]}. Each cell: ${metric === "whiff" ? "misses per chase" : "chase rate"}, you then the average hitter on the same pitches, and how many ${metric === "whiff" ? "chases" : "pitches"}.`;
+    note.textContent = `All pitchers, ${state.pitch === "all" ? "every pitch type (a leak counts one type, so its rates differ)" : PITCH_NAMES[+state.pitch]}. Each cell: ${metric === "whiff" ? "misses per chase" : "chase rate"}, you then the average hitter on the same pitches, and how many ${metric === "whiff" ? "chases" : "pitches"}.`;
     const regions = ["up-in", "up", "up-away", "in", "away", "down-in", "down", "down-away"];
     const E = 0.83;
     // regions are batter-relative: inside means the side the batter stands on
@@ -1006,7 +1081,7 @@ summary { cursor: pointer; font-weight: 700; }
       GROUPS.forEach((g, gi) => {
         let n = 0, y = 0, e = 0;
         for (const i of indices(p, gi, "all", metric)) if (region(i) === r) { n++; y += obs[i]; e += exp[i]; }
-        tr.append(el("td", { text: n ? `${pct(y / n)} / ${pct(e / n)} (${n})` : "–" }));
+        tr.append(el("td", { text: n ? `${pct(y / n)} / ${pct(e / n)} (${n})` : "none" }));
       });
       body.append(tr);
     }
@@ -1040,34 +1115,42 @@ summary { cursor: pointer; font-weight: 700; }
     const top = (p.leaks.all || [])[0] || null, t = p.target;
     const beat = p.target_beat !== undefined ? p.target_beat
       : !t ? "" : Math.round(t.predicted * 100) <= 2 ? "no target" : `under ${Math.round(t.predicted * 100)} (was ${Math.round(t.excess * 100)})`;
+    // the plan's first pitch line names its leak when that is not leak 1, the one the Top leak
+    // columns describe, and Top leak says when the plan leaves it for later
+    const lines = (p.plan_items || []).filter((it) => it.kind === "pitch");
+    const lead = lines.length ? lines[0].n : null;
     return { slug: p.slug, player: p.name, key: fold(p.name), team: p.team, teams: p.teams, bats: p.bats,
              xchase: Math.round(p.xchase_plus), rank: p.rank, rank_txt: ordinal(p.rank), pa: p.pa,
              stake: r1(p.runs_at_stake), choices: r1(p.choices), contact: r1(p.contact),
              kind: ARCHETYPE_WORDS[p.archetype] || p.archetype, noted: !!p.noted,
-             leak: top ? top.phrase : "", leak_runs: top ? r1(top.choices) : null,
-             check: top ? (STATUS_WORDS[top.count_status] || "") : "", depth: top ? Math.round(top.depth_in) : null,
-             target: beat, excess: t ? Math.round(t.excess * 100) : null,
-             plan: p.start_with || (p.plan_items && p.plan_items.length ? p.plan_items[0].text : "") };
+             leak: top ? top.phrase + (lines.some((it) => it.n === 1) ? "" : " (not in the plan yet)") : "",
+             leak_runs: top ? r1(top.choices) : null,
+             check: top ? (STATUS_WORDS[top.count_status] || "") : "", depth: top ? Math.round(top.depth_in * 10) / 10 : null,
+             target: beat, beat_sort: t && beat.startsWith("under") ? t.predicted : null,
+             plan: (lead && lead !== 1 ? `Leak ${lead}: ` : "") + (p.start_with || (p.plan_items && p.plan_items.length ? p.plan_items[0].text : "")) };
   });
+  // the hitter first (it stays in view while the table scrolls sideways), then what to do
   const COLS = [
-    ["team", "Team", false], ["player", "Hitter", false], ["bats", "Bats", false],
-    ["xchase", "xChase+ · rank", true], ["pa", "PA", true],
-    ["stake", "Runs at stake", true], ["choices", "Choices", true], ["contact", "Contact", true],
+    ["player", "Hitter", false], ["team", "Team", false], ["xchase", "xChase+ · rank", true],
+    ["plan", "Start with", false], ["target", "Beat", true],
+    ["stake", "Far-off cost", true], ["choices", "Choices", true], ["contact", "Contact", true],
     ["kind", "Problem", false], ["leak", "Top leak", false], ["leak_runs", "Leak runs", true],
-    ["depth", "Inches off", true], ["check", "Count check", false], ["target", "Beat", true],
-    ["plan", "Start with", false],
+    ["depth", "Inches off", true], ["check", "Count check", false],
+    ["pa", "PA", true], ["bats", "Bats", false],
   ].filter(([k]) => HAS_TARGET || k !== "target");
   const PHONE = new Set(["team", "player", "stake", "leak", "plan"]);   // the rest opens on a tap
   let rosterRows = [];                     // the rows as last shown, in order
+  let rosterView = null, rosterScroll = [0, 0];   // the order and filters last shown, and where the reader was
   const fmtCell = (k, v) => {
     if (v === null || v === undefined || v === "") return "";
     if (k === "choices" || k === "contact" || k === "leak_runs") return (v > 0 ? "+" : v < 0 ? "−" : "") + Math.abs(v).toFixed(1);
     if (k === "stake") return v.toFixed(1);
+    if (k === "depth") return v < 4 ? "under 4" : String(Math.round(v));   // under 4 inches is a video item
     return String(v);
   };
   document.getElementById("roster-title").textContent = `Chase decisions by team, ${D.season}`;
   document.getElementById("roster-lede").textContent = `Every qualified hitter, sorted by the runs his swing choices on far-off pitches cost per 600 plate appearances. Tap a name for his decision card.${HAS_TARGET ? ` Beat is the number to get under in ${D.season + 1}: what the frozen line expects with no change at all, with this season's number beside it.` : ""} On a phone, tap a hitter for the rest of his row.`;
-  document.getElementById("roster-glossary").textContent = "Runs are per 600 plate appearances. Choices is what the swing decisions cost, with each chase priced at what an average chase costs in the same count and at the same distance off the zone; contact is what his chases produced against that price. Problem: the share of the loss that is choices (step 13). Top leak: the costliest count, pitch group and side of the zone, with the pitcher hand when that hand threw most of its pitches and carries most of its extra chases and their cost (“mostly vs RHP”), and how far off the zone the chased pitches were (median inches). Count check: how he hits once the count reaches the leak's counts, shrunk for noise, against the league in the same counts." + (HAS_TARGET ? " Beat: how far above the league's chase rate, in points, the frozen line expects the hitter to chase in all of the card's leaks next season with no change, with this season's number beside it (step 19); a fix is anything under it, and a card whose leaks are all video items has none." : "") + " Start with: the plan's first pitch line, with the two rates when they print 5 or more points apart (otherwise what the swings cost) and the inches off; the rest of the plan is on the card. A traded hitter lists every team, most plate appearances first, and is on each team's roster.";
+  document.getElementById("roster-glossary").textContent = "Runs are per 600 plate appearances. xChase+: what a hitter's chase decisions saved or cost, counting what his chases produced; 100 is league average, higher is better. Far-off cost: runs his choices on pitches 4+ inches off the plate lost (0.0: no net loss). Choices is what the swing decisions cost, with each chase priced at what an average chase costs in the same count and at the same distance off the zone; contact is what his chases produced against that price; on both, negative is runs lost. Problem: step 13's split of a net loss between choices and contact (mixed when neither leads, or when there is no net loss). noted: the card has a coach's note. Top leak: the costliest count, pitch group and side of the zone, with the pitcher hand when that hand threw most of its pitches and carries most of its extra chases and their cost (“mostly vs RHP”), and how far off the zone the chased pitches were (median inches). Count check: how he hits once the count reaches the leak's counts, shrunk for noise, against the league in the same counts." + (HAS_TARGET ? " Beat: how far above the league's chase rate, in points, the frozen line expects the hitter to chase in all of the card's leaks next season with no change, with this season's number beside it (step 19); a fix is anything under it. \u201cno target\u201d: the forecast is already within 2 points of the league; \u201cnone: video only\u201d: every leak is a video item; blank: no leaks." : "") + " Start with: the plan's first pitch line, with the two rates when they print 5 or more points apart (otherwise what the swings cost) and the inches off; it names its leak when that is not leak 1, Top leak says when the plan leaves leak 1 for later, and the rest of the plan is on the card. Inches off: under 4 is a video item, not a take rule. A traded hitter lists every team, most plate appearances first, and is on each team's roster.";
 
   function renderRoster() {
     const head = document.querySelector("#roster-table thead tr"); head.replaceChildren();
@@ -1082,7 +1165,7 @@ summary { cursor: pointer; font-weight: 700; }
     }
     const q = fold(state.q.trim());
     let rows = ROSTER.filter((r) => (!state.team || r.teams.includes(state.team)) && (!q || r.key.includes(q)) && (!state.kind || r.kind === state.kind));
-    const key = state.sort === "target" ? "excess" : state.sort;
+    const key = state.sort === "target" ? "beat_sort" : state.sort;
     rows = rows.slice().sort((a, b) => {
       const x = a[key], y = b[key];
       if (x === null || x === undefined || x === "") return 1;
@@ -1090,14 +1173,20 @@ summary { cursor: pointer; font-weight: 700; }
       return (typeof x === "number" ? x - y : String(x).localeCompare(String(y))) * state.dir;
     });
     rosterRows = rows;
-    document.querySelector("#roster .scroll").scrollTop = 0;   // a new order or filter starts at its first row
+    // a new order or filter starts at its first row; coming back from a card keeps the place
+    const box = document.querySelector("#roster-view .scroll"), view = [state.team, state.q, state.kind, state.sort, state.dir].join("|");
+    if (view !== rosterView) { box.scrollTop = 0; rosterView = view; rosterScroll = [0, 0]; }
     const body = document.querySelector("#roster-table tbody"); body.replaceChildren();
     for (const r of rows) {
       const tr = el("tr");
       tr.addEventListener("click", (e) => { if (!e.target.closest("a")) tr.classList.toggle("open"); });
       for (const [k, label, num] of COLS) {
         const td = el("td", { class: [num ? "right" : "", k === "plan" ? "plan" : "", k === "leak" ? "leak" : "", PHONE.has(k) ? "" : "more"].filter(Boolean).join(" "), "data-label": label });
-        if (k === "player") { td.append(el("a", { href: "#" + r.slug, text: r.player })); if (r.noted) td.append(" ", el("span", { class: "tag", text: "noted" })); }
+        if (k === "player") {
+          const a = el("a", { href: "#" + r.slug, text: r.player });
+          a.addEventListener("click", () => { rosterScroll = [box.scrollTop, window.scrollY]; });
+          td.append(a); if (r.noted) td.append(" ", el("span", { class: "tag", text: "noted" }));
+        }
         else if (k === "team") td.textContent = r.teams.join(", ");
         else if (k === "xchase") td.textContent = `${r.xchase} · ${r.rank_txt}`;
         else if (k === "choices" || k === "contact" || k === "leak_runs") { td.textContent = fmtCell(k, r[k]); if (r[k] < -0.05) td.classList.add("neg"); else if (r[k] > 0.05) td.classList.add("pos"); }
@@ -1107,6 +1196,7 @@ summary { cursor: pointer; font-weight: 700; }
       body.append(tr);
     }
     document.getElementById("roster-none").hidden = rows.length > 0;
+    if (rosterScroll[0] || rosterScroll[1]) { box.scrollTop = rosterScroll[0]; window.scrollTo(0, rosterScroll[1]); }
     const phone = window.matchMedia("(max-width: 720px)").matches;   // no column heads to click there
     document.getElementById("state").textContent = `${rows.length} of ${ROSTER.length} hitters${state.team ? ` · ${state.team}` : ""} · sorted by ${COLS.find((c) => c[0] === state.sort)[1].toLowerCase()}${state.dir < 0 ? ", most first" : ""}.${phone ? "" : " Click a column to sort by it."}`;
   }
@@ -1132,7 +1222,7 @@ summary { cursor: pointer; font-weight: 700; }
   }
   function showView() {
     document.body.dataset.view = state.view;
-    document.getElementById("roster").hidden = state.view !== "roster";
+    document.getElementById("roster-view").hidden = state.view !== "roster";
     document.getElementById("back").hidden = state.view !== "card";
     if (state.view === "roster") { document.getElementById("card").hidden = true; document.getElementById("tip").hidden = true; }
     document.querySelectorAll('input[name="view"]').forEach((r) => (r.checked = r.value === state.view));
@@ -1157,11 +1247,14 @@ summary { cursor: pointer; font-weight: 700; }
     } else {
       state.view = "card";
       let from = ""; try { from = sessionStorage.getItem("chaseFrom") || ""; sessionStorage.removeItem("chaseFrom"); } catch (e) {}
-      if (bySlug.has(h.slug)) state.slug = h.slug;
-      else if (h.slug) {                   // a hitter carried over from another season who has no card here
-        const who = from || h.slug.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+      const found = bySlug.has(h.slug) ? h.slug : byKey.get(slugKey(h.slug || ""));
+      if (found) state.slug = found;
+      else if (h.slug) {                   // a hitter with no card here: carried over from another season, or mistyped
+        const who = from || h.slug.replace(/_+/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
         state.slug = D.references[0].slug;
-        note = `${who} has no ${D.season} card: he did not qualify that season. Showing ${bySlug.get(state.slug).name.toLowerCase()} instead.`;
+        const instead = `Showing ${bySlug.get(state.slug).name.toLowerCase()} instead.`;
+        note = from ? `${who} has no ${D.season} card: he did not qualify that season. ${instead}`
+          : `No ${D.season} card for “${who}”: that hitter did not qualify in ${D.season}, or the link is mistyped. ${instead}`;
       } else if (!bySlug.has(state.slug)) state.slug = D.defaultSlug;
       showView(); showCard();
     }
@@ -1205,6 +1298,12 @@ summary { cursor: pointer; font-weight: 700; }
   document.getElementById("mesh").addEventListener("change", () => lastRender && drawTerrain(lastRender));
   document.getElementById("terrain-box").addEventListener("toggle", () => { if (lastRender && document.getElementById("terrain-box").open) drawTerrain(lastRender); });
   document.getElementById("footer").textContent = D.footer;
+  // the reading guide is on the average hitter's card; on a phone the picture switches fold behind a button
+  document.getElementById("guide-link").href = "#" + D.references[0].slug;
+  const optbtn = document.getElementById("optbtn");
+  optbtn.addEventListener("click", () => { const on = document.body.classList.toggle("showopts"); optbtn.setAttribute("aria-expanded", String(on)); });
+  // the Problem filter offers only the kinds this season has
+  [...document.getElementById("kind").options].forEach((o) => { if (o.value && !ROSTER.some((r) => r.kind === o.value)) o.remove(); });
   window.addEventListener("hashchange", applyHash);
 
   readTheme();
