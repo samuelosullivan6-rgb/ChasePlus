@@ -401,7 +401,7 @@ xChase+ 76 (252 of 261). Far-off chases cost 8.8 runs per 600 PA. Choices −12.
 **What to work on**
 
 1. With two strikes, let fastballs above the zone go. You swung at 78% of them; hitters on average swing at 52%. The ones you swung at were typically 5 inches off the zone. (leak ①)
-2. At 0-1 or 1-1, mostly against right-handers, breaking balls below the zone are one to go over on video with your coaches, not a take rule. You swung at 84% of them; hitters on average swing at 41%. The ones you swung at were typically under 4 inches off the zone, too close for a take rule. (leak ③)
+2. At 0-1 or 1-1, mostly against right-handers, breaking balls below the zone are one to go over on video with your coaches, not a take rule. You swung at 84% of them; hitters on average swing at 41%. The ones you swung at were typically under 4 inches off the zone, too close for a take rule. In this count your chases pay for themselves overall (contact +3.1 against choices −2.2 in the count table); this pitch is where they don't: it costs about 1 run, and what you hit on these chases loses a little more. (leak ③)
 - Leak 2 (two strikes, mostly vs RHP, breaking balls away) costs more than line 2, but the ones you swung at were typically under 4 inches off the zone: one to go over on video with your coaches. Your choices also cost about 3 runs a season on the first pitch and 3 when you're ahead in the count, spread over many pitches rather than one take.
 - Keep swinging at strikes. The change to start with is the first pitch above; the staff takes the second to video with you first.
 

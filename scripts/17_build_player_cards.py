@@ -122,7 +122,8 @@ where the web puts it: a leak named for a pitcher hand on that hand's
 row, a switch hitter's leaks on the side they came from (both sides
 drawn and named), the misses row for a hitter whose problem is contact,
 and the all-pitchers row for the rest. The pictures take the room the
-text leaves, and the build stops if a page would run into its footer.
+text leaves (a plan long enough to squeeze them is set a size smaller),
+and the build stops if a page would run into its footer.
 Page 2 has a guide to the card in the player's own words, the average
 hitter's two-strike picture, the season chart and what fixing a leak
 paid. --print NAME [NAME ...] draws the same for any hitter into
@@ -576,14 +577,16 @@ CLEARLY_OFF_IN = 4              # a take rule needs the chased pitches typically
 # a take) never ahead of a take. For a noted hitter the coach's note names
 # the leak to lead with. A pitch line quotes the hitter's chase rate
 # against the league's only when the two print well apart; otherwise it
-# says which counts the extra swings came in and what they cost. After
-# the pitch lines: a line naming a bigger leak the order left for later,
-# or a costly count no line or sentence covers; a framing line when the
-# loss is spread thin or the hitter's choices are average or better; and
-# a closing line that says to keep swinging at strikes. A hitter whose
-# problem is contact reads why in his first take line, or as the plan's
-# one line when it has no take. "Nothing stands out" is said only when
-# the count table agrees.
+# says which counts the extra swings came in and what they cost. A line in
+# a count the table shows as a plus says why it is there anyway, and one in
+# a costly count whose chases pay for themselves says so, and what this
+# pitch gets back of what it costs. After the pitch lines: a line naming a
+# bigger leak the order left for later, or a costly count no line or
+# sentence covers; a framing line when the loss is spread thin or the
+# hitter's choices are average or better; and a closing line that says to
+# keep swinging at strikes. A hitter whose problem is contact reads why in
+# his first take line, or as the plan's one line when it has no take.
+# "Nothing stands out" is said only when the count table agrees.
 PLAN_LINES = 2                  # pitch lines in a plan
 PLAN_LEAD_MIN_PITCHES = 20      # a take before two strikes goes first only on this many
                                 # pitches: in step 16's backtest, leaks on fewer kept 15%
@@ -753,6 +756,13 @@ def pays_back(rows, costly):
                                 for g in costly)
 
 
+def count_pays(row):
+    """In this count group what the hitter hit on his chases produced at
+    least what his choices there cost, as the page stores both."""
+
+    return row["contact"] > 0 and stored(row["contact"]) >= -stored(row["choices"])
+
+
 def productive_line(rows, costly):
     """The costly counts are counts where the hitter's chases have produced
     more than his choices cost (the leak rule never names such a pitch).
@@ -886,6 +896,53 @@ def strength_clause(rows, lk):
             "pitch is where they give some back.")
 
 
+def gets_back(lk):
+    """What the hitter's contact on a leak's chases gets back of what his
+    choices on it cost: in whole runs, the 4 of the leak row's −4.1; to one
+    decimal, as the row prints it, when the two would print the same whole
+    number or the contact rounds to none. The leak rule (leak_rules.py)
+    never names a pitch whose contact covers its choices, so this is always
+    less than all of it; a one-decimal tie says "nearly all". The cost is
+    rounded from the signed value, as the row prints it."""
+
+    cost, back = lk["choices"], lk["contact"]
+    k, c = abs(page_runs(cost)), page_runs(back)
+    if c < 0:
+        more = f"about {whole_runs(back)}" if whole_runs(back) else "a little"
+        return (f"it costs about {runs_phrase(cost)}, and what you hit on these chases loses "
+                f"{more} more")
+    if c == 0:
+        return f"it costs about {runs_phrase(cost)}, and what you hit on these chases gets none of it back"
+    if c >= k:
+        return f"you get back nearly all of the {k:.1f} runs it costs, but not all"
+    if whole_runs(back) and whole_runs(back) < whole_runs(cost):
+        return f"you get back about {whole_runs(back)} of the {whole_runs(cost)} runs it costs"
+    return f"you get back {c:.1f} of the {k:.1f} runs it costs"
+
+
+def pays_clause(rows, lk, first):
+    """A pitch line in a costly count where what the hitter hits on his
+    chases pays for his choices there says so, and that this pitch is the
+    exception. Jake Mangum, 2026: with two strikes his choices cost −9.2
+    and his contact adds +11.3, so a staff that knows him as a two-strike
+    contact hitter would object to "let fastballs above the zone go" with
+    no word of it; on that pitch he gets back about 3 of the 4 runs. The
+    advice stays on the one pitch, the count's runs are its context. The
+    first line in the count quotes the count table; a second line in the
+    same count says only its own runs. None when the count does not pay
+    or does not cost a run (strength_clause speaks for a count the table
+    shows as a plus)."""
+
+    row = rows[lk["count_group"]]
+    if stored(row["choices"]) > -COSTLY_COUNT_RUNS or not count_pays(row):
+        return None
+    if not first:
+        return f"This pitch doesn't pay for itself either: {gets_back(lk)}."
+    return (f"In this count your chases pay for themselves overall (contact {fmt_runs(row['contact'])} "
+            f"against choices {fmt_runs(row['choices'])} in the count table); this pitch is where they "
+            f"don't: {gets_back(lk)}.")
+
+
 def far_off_zero(summary):
     """The header's far-off cost prints 0.0."""
 
@@ -987,7 +1044,7 @@ def next_line(leak_list, chosen, rows, costly, start=None):
                          + (", after the line your coaches start you with." if start else "."))
     out = [(n, lk) for n, lk in left_off(leak_list, chosen) if not big or n != big[0]]
     left = [g for g in costly if g not in covered]
-    paid = [g for g in left if rows[g]["contact"] > 0 and rows[g]["contact"] >= -rows[g]["choices"]]
+    paid = [g for g in left if count_pays(rows[g])]
     # one sentence for the counts that cost: those holding a leak left off
     # say what it is, the rest are spread over many pitches
     held, spread = [], []
@@ -1073,13 +1130,20 @@ def plan_items(leak_list, summary, table, start=None):
     contact_led = summary["contact_led"]
     if contact_led and takes:
         takes[0]["text"] += " " + contact_clause(summary)
-    # each line in a count the table shows as a plus says why, once a count
-    explained = set()
+    # each line in a count the table shows as a plus says why, once a count;
+    # each line in a costly count whose chases pay for themselves says so,
+    # the count's runs on the first line in it
+    explained, paying = set(), set()
     for it, (_, lk) in zip(items, chosen):
-        why = None if lk["count_group"] in explained else strength_clause(rows, lk)
+        g = lk["count_group"]
+        why = None if g in explained else strength_clause(rows, lk)
         if why:
             it["text"] += " " + why
-            explained.add(lk["count_group"])
+            explained.add(g)
+        why = pays_clause(rows, lk, first=g not in paying)
+        if why:
+            it["text"] += " " + why
+            paying.add(g)
     named = sum(-lk["choices"] for _, lk in chosen)
     spread = loss >= SPREAD_MIN_RUNS and named < SPREAD_SHARE * loss
     if spread:
@@ -1930,9 +1994,13 @@ def spec_cell(p, spec, g, t, mask):
 
 
 LEAK_NAME_CHARS = 54             # a leak's name in the card's list fits in this many characters at size 15
+PNG_PLAN_SETS = ((16, 22, 4, 78),   # the plan's size, line, gap under a line and wrap: one or two lines;
+                 (15, 19, 2, 78),   # three or more, set tighter so the column keeps its place; and two
+                 (14, 17, 2, 84),   # tighter sets, as wide, for a column that would still run into
+                 (13, 16, 2, 90))   # the trend and target under it
 
 
-def player_card(summary, theme_name, out_path):
+def player_card(summary, theme_name, out_path, tighter=0):
     card = Card(theme_name)
     t = card.t
     p = df[df["batter"] == summary["id"]]
@@ -1986,15 +2054,15 @@ def player_card(summary, theme_name, out_path):
     card.text(RIGHT_X, y, "What to work on", size=22, weight="bold")
     y += 32
     n_lines = sum(1 for it in summary["plan_items"] if it["kind"] != "keep")
-    dense = n_lines >= 3          # a three-line plan is set tighter so the column keeps its place
-    size, lead = (15, 19) if dense else (16, 22)
+    plan_set = min((n_lines >= 3) + tighter, len(PNG_PLAN_SETS) - 1)
+    size, lead, gap, chars = PNG_PLAN_SETS[plan_set]
     for it in summary["plan_items"]:
         if it["kind"] == "keep":
             y += 2
             y = card.wrapped(RIGHT_X + 22, y, it["text"], 90, size=13, line=17, color="ink2")
             continue
         card.plan_mark(RIGHT_X + 10, y - 6, it, 10, 12, RIGHT_X + RIGHT_W)
-        y = card.wrapped(RIGHT_X + 30, y, it["text"], 78, size=size, line=lead) + (2 if dense else 4)
+        y = card.wrapped(RIGHT_X + 30, y, it["text"], chars, size=size, line=lead) + gap
     if summary["coach_note"]:
         y += 4
         card.text(RIGHT_X, y, "COACH'S NOTE, FOR THE STAFF", size=12, color="muted", weight="bold")
@@ -2028,6 +2096,10 @@ def player_card(summary, theme_name, out_path):
     card.hline(RIGHT_X, RIGHT_X + RIGHT_W, y - 8)
     y = draw_table(card, RIGHT_X, y + 16, summary["tables"]["all"])
     if y > BOTTOM_BLOCK - 12:
+        # drawn again with the plan a size tighter, until the tightest set
+        if plan_set < len(PNG_PLAN_SETS) - 1:
+            plt.close(card.fig)
+            return player_card(summary, theme_name, out_path, tighter + 1)
         print(f"  warning: {summary['name']} right column runs to y={y:.0f}")
     y = BOTTOM_BLOCK
     card.hline(RIGHT_X, RIGHT_X + RIGHT_W, y - 8)
@@ -2060,6 +2132,8 @@ PRINT_LABEL_W = 132                # the row names, left of the pictures
 PRINT_GAP = 14                     # px between pictures
 PRINT_HEAD = 50                    # the count names over the first row
 PRINT_MIN_W = 96                   # a picture narrower than this is a layout to fix, not to print
+PRINT_PLAN_SETS = ((18, 26, 86),   # the plan's size, line and wrap; the tighter second set, as
+                   (16, 23, 96))   # wide, only when the first leaves the pictures under PRINT_MIN_W
 PRINT_MARKER_PX = 10.5             # a leak marker's smallest radius, so its number fits inside
 PRINT_KEY_CHARS = 196              # the key under the pictures wraps at this many characters
 
@@ -2116,6 +2190,19 @@ def print_key(specs):
     if any(sp[4] == "whiff" for sp in specs):
         words += " Misses row: purple, more misses than the average hitter on the same chases; green, fewer."
     return words
+
+
+class Measure:
+    """Stands in for a Card to find where text would end, drawing nothing."""
+
+    def text(self, *args, **kwargs):
+        pass
+
+    def plan_mark(self, *args, **kwargs):
+        pass
+
+    def wrapped(self, x, y, s, width_chars, size=18, line=26, **kwargs):
+        return y + len(textwrap.wrap(s, width_chars, break_on_hyphens=False)) * line
 
 
 def print_cell_w(n_rows, height):
@@ -2225,18 +2312,17 @@ def print_pages(summary, out_pdf, theme_name="light"):
         y = 252
         card.text(x0, y, "What to work on", size=24, weight="bold")
         y += 38
-        for it in summary["plan_items"]:
-            if it["kind"] == "keep":
-                y = card.wrapped(x0 + 24, y, it["text"], 96, size=15, line=21, color="ink2") + 6
-                continue
-            card.plan_mark(x0 + 11, y - 7, it, 11, 13, xr)
-            y = card.wrapped(x0 + 32, y, it["text"], 86, size=18, line=26) + 8
-        y = print_notes(card, x0, xr, y, summary)
-        y += 20
-        card.hline(x0, xr, y)
-        y += 40
-        card.text(x0, y, "Where you chase", size=22, weight="bold")
-        top = y + 14
+
+        def plan_block(c, y, plan_set):
+            size, line, chars = plan_set
+            for it in summary["plan_items"]:
+                if it["kind"] == "keep":
+                    y = c.wrapped(x0 + 24, y, it["text"], 96, size=15, line=21, color="ink2") + 6
+                    continue
+                c.plan_mark(x0 + 11, y - 7, it, 11, 13, xr)
+                y = c.wrapped(x0 + 32, y, it["text"], chars, size=size, line=line) + 8
+            return print_notes(c, x0, xr, y, summary) + 20
+
         # Under the pictures, from their bottom edge: the side labels and the
         # key (46 to the key's first line, 16 a line), then 34 to "Biggest
         # leaks", 34 a leak, 30 to the caption and 6 under it.
@@ -2244,6 +2330,16 @@ def print_pages(summary, out_pdf, theme_name="light"):
         key = print_key(specs)
         key_lines = len(textwrap.wrap(key, PRINT_KEY_CHARS, break_on_hyphens=False))
         below = 46 + 16 * key_lines + 34 + 34 * max(len(leak_list), 1) + 30 + 6
+        # the pictures take the room the plan leaves; a plan long enough to
+        # squeeze them under PRINT_MIN_W is set tighter (Kyle Stowers, 2026)
+        plan_set = next((s for s in PRINT_PLAN_SETS
+                         if print_cell_w(len(specs), PRINT_END - below - (plan_block(Measure(), y, s) + 54))
+                         >= PRINT_MIN_W), PRINT_PLAN_SETS[-1])
+        y = plan_block(card, y, plan_set)
+        card.hline(x0, xr, y)
+        y += 40
+        card.text(x0, y, "Where you chase", size=22, weight="bold")
+        top = y + 14
         w = print_cell_w(len(specs), PRINT_END - below - top)
         if w < PRINT_MIN_W:
             raise SystemExit(f"printable card for {summary['name']}: {len(specs)} rows of pictures "

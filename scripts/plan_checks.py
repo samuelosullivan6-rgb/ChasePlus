@@ -39,6 +39,14 @@ contact, a "Nothing to change" line quoting the season's contact instead
 of its counts', a loss called "about average", an ASCII minus, and a
 number to beat on a different scale from the rows with no word of it.
 
+A review of Jake Mangum's 2026 card (2026-10-20) found a take line in a
+count where his chases pay for themselves: with two strikes his choices
+cost −9.2 runs and what he hit on those chases +11.3, and the plan said
+"let fastballs above the zone go" with no word of it. 34 of 261 cards
+had a line like that. Such a line now says the count pays and what the
+pitch itself gets back of its cost (it never pays: the leak rule leaves
+out a pitch whose contact covers its choices), and a kind checks it.
+
 Run on a built page it counts each kind without stopping, which is how
 the before and after counts were taken:
 
@@ -143,6 +151,11 @@ KINDS = {
     "ascii minus": "a sentence prints a negative number with a hyphen, where the page's tables use a minus sign",
     "target scale or unit unsaid": "a number to beat several points from what the leak rows add up to does "
                                    "not say it is on another league rate, or its forecast has no unit",
+    # A count whose chases pay for themselves (the 2026-10-20 review of Mangum's card)
+    "paying count unsaid": "a pitch line in a count costing a run or more, where the count table's contact "
+                           "covers its choices, does not say so with the table's runs and what the pitch "
+                           "gets back of its own, or a line says it of a count that does not pay",
+    "take on a pitch that pays": "a pitch line's own chases produce at least what its choices cost",
 }
 
 
@@ -413,6 +426,81 @@ def order_problems(items, leaks, rows, player):
     return out
 
 
+def count_pays(row):
+    """The count table's contact in this count covers its choices: what
+    the hitter hit on his chases there paid for his decisions to chase."""
+
+    return row["contact"] > 0 and stored(row["contact"]) >= -stored(row["choices"])
+
+
+def gets_back_holds(text, lk):
+    """The pitch half of a paying-count sentence quotes the leak's cost as
+    its row prints it (whole, or to one decimal) and its contact rounded the
+    same way, and never says the pitch gets back all of it. Read from the
+    words, whichever form they take, not by running step 17's choice of
+    form again."""
+
+    cost, back = abs(shown(lk["choices"])), shown(lk["contact"])
+    m = re.search(r"you get back about (\d+) of the (\d+) runs it costs", text)
+    if m:
+        return (int(m.group(1)), int(m.group(2))) == (whole_runs(lk["contact"]), whole_runs(lk["choices"])) \
+            and back > 0 and int(m.group(1)) < int(m.group(2))
+    m = re.search(r"you get back (\d+\.\d) of the (\d+\.\d) runs it costs", text)
+    if m:
+        return (float(m.group(1)), float(m.group(2))) == (back, cost) and 0 < back < cost
+    m = re.search(r"you get back nearly all of the (\d+\.\d) runs it costs, but not all", text)
+    if m:
+        return float(m.group(1)) == cost and back >= cost
+    m = re.search(r"it costs about (\d+) runs?, and what you hit on these chases (gets none of it back|"
+                  r"loses about (\d+) more|loses a little more)", text)
+    if m:
+        if int(m.group(1)) != whole_runs(lk["choices"]):
+            return False
+        if m.group(2) == "gets none of it back":
+            return back == 0
+        if m.group(3):
+            return back < 0 and int(m.group(3)) == whole_runs(lk["contact"]) > 0
+        return back < 0 and whole_runs(lk["contact"]) == 0
+    return False
+
+
+def paying_problems(items, leaks, rows):
+    """A pitch line in a costly count whose chases pay for themselves says
+    so: the first line in the count with the count table's two numbers,
+    and every line in it with what its own pitch gets back of what it
+    costs. Jake Mangum's 2026 card told him to take two-strike fastballs
+    above the zone with no word that his two-strike chases pay (+11.3
+    against −9.2), the first thing a staff that knows him would object
+    to. A line in a count that does not pay says none of it, and no line
+    is on a pitch whose own chases pay for themselves."""
+
+    out = []
+    said = set()
+    for it in (it for it in items if it["kind"] == "pitch"):
+        g, lk, text = tuple(it["cell"])[0], leaks[it["n"] - 1], it["text"]
+        row = rows[g]
+        if stored(lk["contact"]) >= -stored(lk["choices"]):
+            out.append(("take on a pitch that pays", f"{fmt_runs(lk['contact'])} against "
+                                                     f"{fmt_runs(lk['choices'])}: {lk['phrase']}"))
+        count_says = re.search(r"In this count your chases pay for themselves overall \(contact ([^ ]+) "
+                               r"against choices ([^ ]+) in the count table\); this pitch is where they "
+                               r"don't: ", text)
+        either = "This pitch doesn't pay for itself either: " in text
+        if not (stored(row["choices"]) <= -RULES["COSTLY_COUNT_RUNS"] and count_pays(row)):
+            if count_says or either:
+                out.append(("paying count unsaid", f"said of {g} {fmt_runs(row['choices'])}, "
+                                                   f"contact {fmt_runs(row['contact'])}"))
+            continue
+        ok = (count_says and g not in said
+              and (count_says.group(1), count_says.group(2)) == (fmt_runs(row["contact"]), fmt_runs(row["choices"]))
+              ) or (either and g in said and not count_says)
+        if not ok or not gets_back_holds(text, lk):
+            out.append(("paying count unsaid", f"{g} contact {fmt_runs(row['contact'])} against "
+                                               f"{fmt_runs(row['choices'])}, line {it.get('step')}"))
+        said.add(g)
+    return out
+
+
 def card_gap(leaks):
     """The leaks' pooled rate less their pooled league rate, in points,
     each rounded as a leak row prints it: for one leak, its row's two
@@ -541,6 +629,7 @@ def problems(player):
     out = plan_problems(player["plan_items"], player["leaks"]["all"], rows, player)
     out += order_problems(player["plan_items"], player["leaks"]["all"], rows, player)
     out += sentence_problems(player["plan_items"], rows, player)
+    out += paying_problems(player["plan_items"], player["leaks"]["all"], rows)
     out += target_problems(player) + label_problems(player) + hand_problems(player)
     if player.get("plan_items_by_hand"):
         out.append(("two plans", "plan_items_by_hand"))
