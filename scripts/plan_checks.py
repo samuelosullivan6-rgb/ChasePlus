@@ -97,14 +97,15 @@ KINDS = {
                               "and nothing says why",
     "good chooser unframed": "a hitter whose choices are better than average gets pitch lines "
                              "and nothing says so",
-    "plus count, no why": "a pitch line in a count the table shows as a plus, with no line above it in "
-                          "that count, does not say why",
+    "plus count, no why": "a pitch line in a count the table shows as a plus or 0.0, with no line above "
+                          "it in that count, does not say why",
     # Sentences that quote a number must quote the one beside them
     "rates misquoted": "a pitch line's two rates are not its leak's",
     "inches misquoted": "a take line's inches off the zone are not its leak's",
     "framing misquoted": "a framing line's runs or level are not the hitter's",
-    "plus count misquoted": "a plus-count sentence's runs are not the count table's, or it calls a count "
-                            "under a run 'a plus overall' (or one over it 'about even')",
+    "plus count misquoted": "a plus-count sentence's runs are not the count table's, it calls a count "
+                            "under a run 'a plus overall' (or one over it 'about even'), or it is said "
+                            "of a count whose choices print as a loss",
     "keep line miscounts": "the closing line's 'pitch above' / 'pitches above' is not the plan's",
     # The target can be read and tracked (evaluation item 4)
     "target without unit or leaks": "the target sentence does not say it is points above the league's "
@@ -269,18 +270,18 @@ def plan_problems(items, leaks, rows, player):
     if "nothing net" in texts and not zero:
         out.append(("framing misquoted", f"far-off cost {player['runs_at_stake']:.1f}, not 0.0"))
 
-    # every line in a count the table calls a plus says why, once a count
+    # every line in a count the table calls a plus, or prints 0.0, says why, once a count
     explained = set()
     for it in pitches:
         g = tuple(it["cell"])[0]
         v = shown(rows[g]["choices"])
         m = re.search(r"In this count your choices (are a plus overall|come out about even) \(([^ ]+) runs",
                       it["text"])
-        if v > 0 and g not in explained and not m:
+        if v >= 0 and g not in explained and not m:
             out.append(("plus count, no why", f"{g} {fmt_runs(v)}"))
         if m:
             want = "are a plus overall" if v >= RULES["PLUS_COUNT_MIN_RUNS"] else "come out about even"
-            if m.group(1) != want or m.group(2) != fmt_runs(v) or g in explained:
+            if v < 0 or m.group(1) != want or m.group(2) != fmt_runs(v) or g in explained:
                 out.append(("plus count misquoted", f"{m.group(1)} {m.group(2)} vs {fmt_runs(v)}"))
             explained.add(g)
 

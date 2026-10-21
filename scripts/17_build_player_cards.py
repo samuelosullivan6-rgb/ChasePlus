@@ -884,13 +884,16 @@ PLUS_COUNT_MIN_RUNS = 1.0       # a count at or over this is "a plus overall"; u
 
 def strength_clause(rows, lk):
     """A pitch line in a count where the count table shows the hitter's
-    choices as a plus says why it is there, so the table does not argue
-    with it: "a plus overall" from a run up, "about even" under that. The
-    line has already named its count, so the clause says "in this count".
-    None when the count is not a plus as printed."""
+    choices as a plus, or as 0.0, says why it is there, so the table does
+    not argue with it: "a plus overall" from a run up, "about even" under
+    that. A 0.0 needs it as much as a +0.4: Trevor Larnach's 2026
+    two-strike choices print 0.0 beside a line to let fastballs above the
+    zone go. The line has already named its count, so the clause says "in
+    this count". None when the count's choices print as a loss
+    (pays_clause speaks for those)."""
 
     v = page_runs(rows[lk["count_group"]]["choices"])
-    if v <= 0:
+    if v < 0:
         return None
     level = "are a plus overall" if v >= PLUS_COUNT_MIN_RUNS else "come out about even"
     return (f"In this count your choices {level} ({fmt_runs(v)} runs in the count table); this "
@@ -935,7 +938,7 @@ def pays_clause(rows, lk, first):
     line in the count quotes the count table; a second line in the same
     count says only its own runs. None when the count does not pay or its
     choices do not print as a loss (strength_clause speaks for a count
-    the table shows as a plus)."""
+    the table shows as a plus or 0.0)."""
 
     row = rows[lk["count_group"]]
     if page_runs(row["choices"]) >= 0 or not count_pays(row):
@@ -1134,7 +1137,7 @@ def plan_items(leak_list, summary, table, start=None):
     contact_led = summary["contact_led"]
     if contact_led and takes:
         takes[0]["text"] += " " + contact_clause(summary)
-    # each line in a count the table shows as a plus says why, once a count;
+    # each line in a count the table shows as a plus or 0.0 says why, once a count;
     # each line in a count whose choices print a loss but whose chases pay
     # for themselves says so, the count's runs on the first line in it
     explained, paying = set(), set()
