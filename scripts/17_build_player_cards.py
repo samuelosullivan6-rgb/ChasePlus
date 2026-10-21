@@ -2001,11 +2001,26 @@ def spec_cell(p, spec, g, t, mask):
 
 
 LEAK_NAME_CHARS = 54             # a leak's name in the card's list fits in this many characters at size 15
-PNG_PLAN_SETS = ((16, 22, 4, 78),   # the plan's size, line, gap under a line and wrap: one or two lines;
-                 (15, 19, 2, 78),   # three or more, set tighter so the column keeps its place; two
-                 (14, 17, 2, 84),   # tighter sets, as wide, for a column that would still run into
-                 (13, 16, 2, 90),   # the trend and target under it; and the last at the same size,
-                 (13, 16, 2, 108))  # wrapped into the room left of the leak tags (Ronald Acuña, 2022)
+# The PNG plan's size, line, gap under a line and wrap, then the wraps of a line
+# with no leak tag, of the keep line and of the coach's note (both 13 px). One or
+# two lines take the first set; three or more the second, set tighter so the column
+# keeps its place. A column that would still run into the trend and target under it
+# takes the next: two tighter sets, as wide; one at the same size, wrapped into the
+# room left of the leak tags (Ronald Acuña, 2022); and the last with the lines that
+# carry no tag, the keep line and the note run to the column's edge (Jeremy Peña, 2026).
+PNG_PLAN_SETS = ((16, 22, 4, 78, 78, 90, 98),
+                 (15, 19, 2, 78, 78, 90, 98),
+                 (14, 17, 2, 84, 84, 90, 98),
+                 (13, 16, 2, 90, 90, 90, 98),
+                 (13, 16, 2, 108, 108, 90, 98),
+                 (13, 16, 2, 108, 120, 128, 124))
+# The target beside the trend: its left edge in the column, the trend's width, and
+# the target's size, line and wrap. A target that would run into the footer is set a
+# size smaller (Luis García, 2026), then wider, with the trend narrower, for the
+# longest (most 2022-2025 targets run 280 to 340 characters).
+PNG_TARGET_SETS = ((470, 360, 13, 17, 46),
+                   (470, 360, 12, 15, 50),
+                   (410, 300, 12, 15, 60))
 
 
 def player_card(summary, theme_name, out_path, tighter=0):
@@ -2063,18 +2078,20 @@ def player_card(summary, theme_name, out_path, tighter=0):
     y += 32
     n_lines = sum(1 for it in summary["plan_items"] if it["kind"] != "keep")
     plan_set = min((n_lines >= 3) + tighter, len(PNG_PLAN_SETS) - 1)
-    size, lead, gap, chars = PNG_PLAN_SETS[plan_set]
+    size, lead, gap, chars, untagged_chars, keep_chars, note_chars = PNG_PLAN_SETS[plan_set]
     for it in summary["plan_items"]:
         if it["kind"] == "keep":
             y += 2
-            y = card.wrapped(RIGHT_X + 22, y, it["text"], 90, size=13, line=17, color="ink2")
+            y = card.wrapped(RIGHT_X + 22, y, it["text"], keep_chars, size=13, line=17, color="ink2")
             continue
         card.plan_mark(RIGHT_X + 10, y - 6, it, 10, 12, RIGHT_X + RIGHT_W)
-        y = card.wrapped(RIGHT_X + 30, y, it["text"], chars, size=size, line=lead) + gap
+        y = card.wrapped(RIGHT_X + 30, y, it["text"], chars if it["kind"] == "pitch" else untagged_chars,
+                         size=size, line=lead) + gap
     if summary["coach_note"]:
         y += 4
         card.text(RIGHT_X, y, "COACH'S NOTE, FOR THE STAFF", size=12, color="muted", weight="bold")
-        y = card.wrapped(RIGHT_X, y + 19, summary["coach_note"], 98, size=13, line=17, color="ink2")
+        y = card.wrapped(RIGHT_X, y + 19, summary["coach_note"], note_chars, size=13, line=17,
+                         color="ink2")
     y += 18
     card.hline(RIGHT_X, RIGHT_X + RIGHT_W, y - 8)
     card.text(RIGHT_X, y + 20, "Biggest leaks", size=19, weight="bold")
@@ -2110,14 +2127,25 @@ def player_card(summary, theme_name, out_path, tighter=0):
             return player_card(summary, theme_name, out_path, tighter + 1)
         print(f"  warning: {summary['name']} right column runs to y={y:.0f}")
     y = BOTTOM_BLOCK
+    foot = 1040
+    tgt = summary["target_text"] or ""
+
+    def target_end(t_set):
+        # the target's last line, which stays as far above the footer's rule as the
+        # column's last line does above the trend's
+        return y + 36 + (len(textwrap.wrap(tgt, t_set[4], break_on_hyphens=False)) - 1) * t_set[3]
+
+    t_set = next((s for s in PNG_TARGET_SETS if target_end(s) <= foot - 28), PNG_TARGET_SETS[-1])
+    if target_end(t_set) > foot - 28:
+        print(f"  warning: {summary['name']} target runs to y={target_end(t_set):.0f}")
+    tgt_x, trend_w, tgt_size, tgt_line, tgt_chars = t_set
     card.hline(RIGHT_X, RIGHT_X + RIGHT_W, y - 8)
     card.text(RIGHT_X, y + 16, trend_title(summary["trend"]), size=16, weight="bold")
-    draw_trend(card, RIGHT_X + 44, y + 32, 360, 46, summary["trend"], league_trend)
-    tgt = summary["target_text"]
+    draw_trend(card, RIGHT_X + 44, y + 32, trend_w, 46, summary["trend"], league_trend)
     if tgt:
-        card.text(RIGHT_X + 470, y + 16, "TARGET", size=12, color="muted", weight="bold")
-        card.wrapped(RIGHT_X + 470, y + 36, tgt, 46, size=13, line=17, color="ink2")
-    foot = 1040
+        card.text(RIGHT_X + tgt_x, y + 16, "TARGET", size=12, color="muted", weight="bold")
+        card.wrapped(RIGHT_X + tgt_x, y + 36, tgt, tgt_chars, size=tgt_size, line=tgt_line,
+                     color="ink2")
     card.hline(RIGHT_X, RIGHT_X + RIGHT_W, foot - 24)
     card.wrapped(RIGHT_X, foot - 6, EVIDENCE_LINE, 118, size=12, line=15, color="muted")
     card.text(W - 64, H - 14, f"xChase+ 1.1  ·  Statcast {SEASON}  ·  catcher's view, "
