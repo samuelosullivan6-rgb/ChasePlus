@@ -46,6 +46,10 @@ cost −9.2 runs and what he hit on those chases +11.3, and the plan said
 had a line like that. Such a line now says the count pays and what the
 pitch itself gets back of its cost (it never pays: the leak rule leaves
 out a pitch whose contact covers its choices), and a kind checks it.
+The same day it was extended to counts costing under a run: J. T.
+Realmuto's 2026 two-strike choices print −0.8 against contact +5.1, and
+95 lines over six seasons (16 in 2026) were in a count like that with no
+word of it. Any count whose choices print as a loss now counts.
 
 Run on a built page it counts each kind without stopping, which is how
 the before and after counts were taken:
@@ -152,8 +156,8 @@ KINDS = {
     "target scale or unit unsaid": "a number to beat several points from what the leak rows add up to does "
                                    "not say it is on another league rate, or its forecast has no unit",
     # A count whose chases pay for themselves (the 2026-10-20 review of Mangum's card)
-    "paying count unsaid": "a pitch line in a count costing a run or more, where the count table's contact "
-                           "covers its choices, does not say so with the table's runs and what the pitch "
+    "paying count unsaid": "a pitch line in a count whose choices print as a loss, where the count table's "
+                           "contact covers them, does not say so with the table's runs and what the pitch "
                            "gets back of its own, or a line says it of a count that does not pay",
     "take on a pitch that pays": "a pitch line's own chases produce at least what its choices cost",
 }
@@ -465,14 +469,17 @@ def gets_back_holds(text, lk):
 
 
 def paying_problems(items, leaks, rows):
-    """A pitch line in a costly count whose chases pay for themselves says
-    so: the first line in the count with the count table's two numbers,
-    and every line in it with what its own pitch gets back of what it
-    costs. Jake Mangum's 2026 card told him to take two-strike fastballs
-    above the zone with no word that his two-strike chases pay (+11.3
-    against −9.2), the first thing a staff that knows him would object
-    to. A line in a count that does not pay says none of it, and no line
-    is on a pitch whose own chases pay for themselves."""
+    """A pitch line in a count whose choices print as a loss and whose
+    chases pay for themselves says so: the first line in the count with
+    the count table's two numbers, and every line in it with what its own
+    pitch gets back of what it costs. Jake Mangum's 2026 card told him to
+    take two-strike fastballs above the zone with no word that his
+    two-strike chases pay (+11.3 against −9.2), the first thing a staff
+    that knows him would object to; J. T. Realmuto's said nothing of his
+    two-strike +5.1 because the choices beside it cost under a run
+    (−0.8). A line in a count that does not pay, or whose choices print
+    0.0 or a plus, says none of it, and no line is on a pitch whose own
+    chases pay for themselves."""
 
     out = []
     said = set()
@@ -486,7 +493,7 @@ def paying_problems(items, leaks, rows):
                                r"against choices ([^ ]+) in the count table\); this pitch is where they "
                                r"don't: ", text)
         either = "This pitch doesn't pay for itself either: " in text
-        if not (stored(row["choices"]) <= -RULES["COSTLY_COUNT_RUNS"] and count_pays(row)):
+        if not (shown(row["choices"]) < 0 and count_pays(row)):
             if count_says or either:
                 out.append(("paying count unsaid", f"said of {g} {fmt_runs(row['choices'])}, "
                                                    f"contact {fmt_runs(row['contact'])}"))

@@ -579,8 +579,9 @@ CLEARLY_OFF_IN = 4              # a take rule needs the chased pitches typically
 # against the league's only when the two print well apart; otherwise it
 # says which counts the extra swings came in and what they cost. A line in
 # a count the table shows as a plus says why it is there anyway, and one in
-# a costly count whose chases pay for themselves says so, and what this
-# pitch gets back of what it costs. After the pitch lines: a line naming a
+# a count whose choices print a loss (any loss, not only a costly count)
+# but whose chases pay for themselves says so, and what this pitch gets
+# back of what it costs. After the pitch lines: a line naming a
 # bigger leak the order left for later, or a costly count no line or
 # sentence covers; a framing line when the loss is spread thin or the
 # hitter's choices are average or better; and a closing line that says to
@@ -921,20 +922,23 @@ def gets_back(lk):
 
 
 def pays_clause(rows, lk, first):
-    """A pitch line in a costly count where what the hitter hits on his
-    chases pays for his choices there says so, and that this pitch is the
-    exception. Jake Mangum, 2026: with two strikes his choices cost −9.2
-    and his contact adds +11.3, so a staff that knows him as a two-strike
-    contact hitter would object to "let fastballs above the zone go" with
-    no word of it; on that pitch he gets back about 3 of the 4 runs. The
-    advice stays on the one pitch, the count's runs are its context. The
-    first line in the count quotes the count table; a second line in the
-    same count says only its own runs. None when the count does not pay
-    or does not cost a run (strength_clause speaks for a count the table
-    shows as a plus)."""
+    """A pitch line in a count whose choices print as a loss, where what
+    the hitter hits on his chases pays for his choices there, says so,
+    and that this pitch is the exception. Jake Mangum, 2026: with two
+    strikes his choices cost −9.2 and his contact adds +11.3, so a staff
+    that knows him as a two-strike contact hitter would object to "let
+    fastballs above the zone go" with no word of it; on that pitch he
+    gets back about 3 of the 4 runs. A count costing under a run needs it
+    as much: J. T. Realmuto's two-strike choices print −0.8 against +5.1,
+    and "come out about even" would leave the +5.1 unsaid. The advice
+    stays on the one pitch, the count's runs are its context. The first
+    line in the count quotes the count table; a second line in the same
+    count says only its own runs. None when the count does not pay or its
+    choices do not print as a loss (strength_clause speaks for a count
+    the table shows as a plus)."""
 
     row = rows[lk["count_group"]]
-    if stored(row["choices"]) > -COSTLY_COUNT_RUNS or not count_pays(row):
+    if page_runs(row["choices"]) >= 0 or not count_pays(row):
         return None
     if not first:
         return f"This pitch doesn't pay for itself either: {gets_back(lk)}."
@@ -1131,8 +1135,8 @@ def plan_items(leak_list, summary, table, start=None):
     if contact_led and takes:
         takes[0]["text"] += " " + contact_clause(summary)
     # each line in a count the table shows as a plus says why, once a count;
-    # each line in a costly count whose chases pay for themselves says so,
-    # the count's runs on the first line in it
+    # each line in a count whose choices print a loss but whose chases pay
+    # for themselves says so, the count's runs on the first line in it
     explained, paying = set(), set()
     for it, (_, lk) in zip(items, chosen):
         g = lk["count_group"]
@@ -1995,9 +1999,10 @@ def spec_cell(p, spec, g, t, mask):
 
 LEAK_NAME_CHARS = 54             # a leak's name in the card's list fits in this many characters at size 15
 PNG_PLAN_SETS = ((16, 22, 4, 78),   # the plan's size, line, gap under a line and wrap: one or two lines;
-                 (15, 19, 2, 78),   # three or more, set tighter so the column keeps its place; and two
+                 (15, 19, 2, 78),   # three or more, set tighter so the column keeps its place; two
                  (14, 17, 2, 84),   # tighter sets, as wide, for a column that would still run into
-                 (13, 16, 2, 90))   # the trend and target under it
+                 (13, 16, 2, 90),   # the trend and target under it; and the last at the same size,
+                 (13, 16, 2, 108))  # wrapped into the room left of the leak tags (Ronald Acuña, 2022)
 
 
 def player_card(summary, theme_name, out_path, tighter=0):
