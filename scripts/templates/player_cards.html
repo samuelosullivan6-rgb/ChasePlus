@@ -95,36 +95,51 @@ button, input, select { font: inherit; color: inherit; }
 .bars .val { font-weight: 800; text-align: right; font-variant-numeric: tabular-nums; }
 .bars .lab { color: var(--ink2); }
 
-/* two columns: the pictures on the left; the plan and leaks, then the tables and chart, on the right.
-   On one column the plan and leaks come first, then the pictures, then the rest (grid areas below). */
-.body { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); grid-template-areas: "zones aside" "zones more";
-        grid-template-rows: auto 1fr; gap: 32px; }
+/* two columns, then a band: the pictures on the left and the plan and leaks on the right, then the
+   count table and the trend side by side under both, with the 3D view, the zone numbers and the
+   notes folded under them. On one column the plan and leaks come first, then the pictures, then the band. */
+.body { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); grid-template-areas: "zones aside" "more more"; gap: 32px; }
 /* a minmax(0, 1fr) column, not the implicit auto one: an auto column grows to a wide table's
    min-content width, so the table would spill past the card instead of scrolling in its .tablewrap */
 .zones { grid-area: zones; display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; min-width: 0; align-content: start; }
 .zgrid { display: grid; grid-template-columns: 92px repeat(4, minmax(0, 1fr)); gap: 8px; align-items: center; }
-.zgrid .colhead { text-align: center; font-weight: 800; font-size: 15px; line-height: 1.2; }
+.zgrid .colhead { text-align: center; font-weight: 800; font-size: 15px; line-height: 1.2; align-self: end; }   /* one head wrapping to two lines leaves the others on the same bottom */
 .zgrid .colhead span { display: block; font-weight: 400; font-size: 12px; color: var(--muted); }
 .zgrid .rowhead { font-weight: 800; font-size: 14px; line-height: 1.2; }
 .zgrid .rowhead span { display: block; font-weight: 400; font-size: 12px; color: var(--muted); margin-top: 2px; }
 .zgrid canvas { width: 100%; aspect-ratio: var(--panel-aspect); display: block; border-radius: 4px; cursor: crosshair; touch-action: none; }
-.zfoot { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px 24px; align-items: end; padding-left: 100px; }
+/* under the first picture, Inside at its left edge and Away at its right, as the PNG card: a key for every picture */
+.zgrid .sides { display: flex; justify-content: space-between; color: var(--muted); font-size: 13px; padding: 0 2px; }
+.zfoot { display: grid; gap: 6px; padding-left: 100px; }
 .orient { color: var(--muted); font-size: 13px; }
-.legend { display: grid; gap: 4px; font-size: 13px; color: var(--ink2); max-width: 300px; }
+/* the legend's words run the column's width above the ramp; the ramp and its ticks keep their 300 px */
+.legend { display: grid; gap: 4px; font-size: 13px; color: var(--ink2); }
+.legend .rampbox { display: grid; gap: 4px; max-width: 300px; }
 .legend .ramp { height: 12px; border-radius: 2px; }
 .legend .ticks { display: flex; justify-content: space-between; color: var(--muted); font-size: 12px; }
 
 aside { grid-area: aside; }
-.col-rest { grid-area: more; }   /* the tables and chart under the plan (not the roster's td.more) */
+.col-rest { grid-area: more; }   /* the band under both columns (not the roster's td.more) */
 aside, .col-rest { display: grid; gap: 22px; align-content: start; min-width: 0; }
+/* the band's top row: the count table beside the trend and the target; one under the other on one column */
+.band { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 22px 32px; align-items: start; min-width: 0; }   /* the table's side a little wider, so its eight columns fit from 1100 px up */
+.band:empty { display: none; }
+@media (max-width: 900px) { .band { grid-template-columns: minmax(0, 1fr); } }   /* the table over the trend; it scrolls in its .tablewrap */
+/* 2. the target under the trend, with its own eyebrow as on the PNG card */
+.targetbox { display: grid; gap: 2px; }
+.targetbox p { margin: 0; }
+/* the picture switches, above the pictures they change; on a phone they fold behind one button */
+.ztools { gap: 10px 20px; padding-bottom: 4px; }
+.ztools .seg label { padding: 5px 10px; font-size: 13px; }
+.vh { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 aside section, .col-rest section { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; min-width: 0; }   /* the column as in .zones */
 aside h2, .col-rest h2 { font-size: 20px; font-weight: 800; }
 .plan { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; font-size: 16px; max-width: 68ch; }
-.plan li { display: grid; grid-template-columns: 26px minmax(0, 1fr) auto; gap: 8px; align-items: start; }
+.plan li { display: grid; grid-template-columns: 26px minmax(0, 1fr); gap: 8px; align-items: start; }
 .plan .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--ink); margin: 8px 0 0 8px; }
 /* a plan line's step is filled, so it is never read as a leak number; the leak's own number is the small tag */
 .plan .step { width: 24px; height: 24px; border-radius: 50%; background: var(--ink); color: var(--surface); display: grid; place-items: center; font-size: 13px; font-weight: 800; }
-.plan .leaktag { display: inline-flex; align-items: center; gap: 4px; color: var(--muted); font-size: 12px; white-space: nowrap; margin-top: 3px; }
+.plan .leaktag { display: inline-flex; align-items: center; gap: 4px; color: var(--muted); font-size: 12px; white-space: nowrap; margin-left: 6px; }   /* after the line's last word */
 .plan .leaktag .num { width: 18px; height: 18px; font-size: 11px; border-width: 1.2px; border-color: var(--muted); color: var(--ink2); }
 .plan .keep { color: var(--ink2); font-size: 14px; }
 /* on a pitcher-hand tab: the line's pitches from that hand, under the unchanged line */
@@ -135,11 +150,15 @@ aside h2, .col-rest h2 { font-size: 20px; font-weight: 800; }
 .coach { border-left: 3px solid var(--axis); padding-left: 12px; color: var(--ink2); font-size: 14px; max-width: 72ch; }
 .coach .eyebrow { display: block; margin-bottom: 2px; }
 .tabs { display: flex; gap: 4px; flex-wrap: wrap; }
-.tabs button { border: 1px solid var(--axis); background: transparent; border-radius: 999px; padding: 2px 10px; font-size: 13px; cursor: pointer; color: var(--ink2); }
-.tabs button[aria-pressed="true"] { background: var(--ink); color: var(--surface); border-color: var(--ink); }
+/* pills: buttons, or radio inputs with their labels (the pitcher-hand switch on the leaks heading) */
+.tabs input { position: absolute; opacity: 0; pointer-events: none; }
+.tabs button, .tabs label { border: 1px solid var(--axis); background: transparent; border-radius: 999px; padding: 2px 10px; font-size: 13px; cursor: pointer; color: var(--ink2); font-weight: 600; }
+.tabs button[aria-pressed="true"], .tabs input:checked + label { background: var(--ink); color: var(--surface); border-color: var(--ink); }
+.tabs input:focus-visible + label { outline: 2px solid var(--focus); outline-offset: 2px; }
+.tabs[aria-disabled="true"] { opacity: .45; }
 .sechead { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
 .leaks { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
-.leaks li { display: grid; grid-template-columns: 26px minmax(0, 1fr) 120px auto; gap: 10px; align-items: center; }
+.leaks li { display: grid; grid-template-columns: 26px minmax(0, 1fr) minmax(120px, max-content) auto; gap: 10px; align-items: center; }
 .num { width: 24px; height: 24px; border: 1.6px solid var(--ink); border-radius: 50%; display: grid; place-items: center; font-size: 13px; font-weight: 800; }
 .leaks .what { min-width: 0; }
 .leaks .rate { color: var(--ink2); font-size: 13px; font-variant-numeric: tabular-nums; }
@@ -160,12 +179,16 @@ thead th small { display: block; font-weight: 400; }
 /* the league's number under the hitter's, so the eight columns fit the right-hand column */
 td .avg { display: block; color: var(--muted); font-size: 12px; line-height: 1.2; }
 td .few { color: var(--muted); font-size: 12px; }
-@media (min-width: 1201px) { .col-rest th, .col-rest td { padding: 4px 5px; } }
+@media (min-width: 901px) { .col-rest th, .col-rest td { padding: 4px 5px; } }   /* the table shares the band's row */
 tr.total td { font-weight: 800; border-top: 1px solid var(--hair); }
 .trend svg { width: 100%; height: auto; max-width: 520px; display: block; }
 .evidence { color: var(--muted); font-size: 13px; max-width: 80ch; }
 .evidence.target { color: var(--ink2, var(--muted)); }
 details { border-top: 1px solid var(--hair); padding-top: 12px; }
+/* the notes behind "What the numbers mean": each under the heading of the section it explains */
+.notes { display: grid; gap: 12px; padding-top: 10px; }
+.notes p { margin: 0; }
+.notes .eyebrow { display: block; margin-bottom: 2px; }
 .terrain { display: grid; gap: 8px; border-top: 1px solid var(--hair); padding-top: 14px; min-width: 0; }
 .terrain h2 { font-size: 20px; font-weight: 800; }
 .terrain-plot { width: 100%; height: 480px; min-width: 0; }
@@ -232,18 +255,28 @@ summary { cursor: pointer; font-weight: 700; }
   .roster tbody tr.open td.more { display: flex; }
 }
 
-/* one column: the plan and leaks first, so a phone opens on the plan, then the pictures they are numbered on */
-@media (max-width: 1200px) { .body { grid-template-columns: minmax(0, 1fr); grid-template-areas: "aside" "zones" "more"; grid-template-rows: auto; } }
-/* phones: the picture switches fold behind one button, so the first screen reaches the card */
-.optbtn { display: none; }
-.optbtn button { border: 1px solid var(--axis); background: var(--surface); border-radius: 6px; padding: 7px 12px; font-size: 14px; color: var(--ink2); cursor: pointer; }
+/* one column: the plan and leaks first, so a phone opens on the plan, then the pictures they are numbered on, then the band */
+@media (max-width: 1200px) {
+  .body { grid-template-columns: minmax(0, 1fr); grid-template-areas: "aside" "zones" "more"; }
+}
+/* 9. one column above a phone: the pictures keep a desktop size instead of filling the card */
+@media (min-width: 641px) and (max-width: 1200px) { .zgrid, .zfoot { max-width: 640px; } }
+/* between 1201 and 1440 px the left column is about 600 px: the toolbar's labels sit a touch tighter so
+   Show, Pitches and the Picture options button stay on one row */
+@media (min-width: 1201px) and (max-width: 1440px) { .ztools { gap: 10px 10px; } .ztools .seg label { padding: 5px 7px; font-size: 12px; } .ztools .optbtn button { padding: 5px 7px; font-size: 12px; } }
+/* the Picture options button ends the toolbar's row and unfolds Compare with at every width;
+   on a phone it goes first and unfolds every switch, so the first screen reaches the card */
+.optbtn { display: grid; order: 10; }
+.optbtn button { border: 1px solid var(--axis); background: var(--surface); border-radius: 6px; padding: 5px 10px; font-size: 13px; color: var(--ink2); cursor: pointer; }
+.picopt.fold { display: none; order: 11; }
+body.showopts[data-view="card"] .picopt.fold { display: grid; }
 @media (max-width: 640px) {
-  .optbtn { display: grid; }
+  .optbtn { order: -1; }
   .picopt { display: none; }
   body.showopts[data-view="card"] .picopt { display: grid; }
+  .picopt.fold { order: 0; }
   /* the first screen reaches the plan: the name, then the plan and leaks, then the cost tiles and
-     the pictures; the switches show their own state, so the "Showing" line goes */
-  body[data-view="card"] #state { display: none; }
+     the pictures */
   .head, .body { display: contents; }
   .head > :first-child { order: 0; padding-bottom: 14px; border-bottom: 1px solid var(--hair); }
   aside { order: 1; grid-area: auto; }
@@ -261,11 +294,9 @@ summary { cursor: pointer; font-weight: 700; }
   .zgrid .rowhead { font-size: 12px; }
   .zgrid .rowhead span, .zgrid .colhead span { display: none; }
   .zfoot { padding-left: 0; }
+  .zgrid .sides { grid-column: 2 / -1; font-size: 12px; }   /* a 55 px picture cannot hold both words: the key spans the row */
   .leaks li { grid-template-columns: 26px minmax(0, 1fr) auto; }
   .leaks .rate { grid-column: 2; }
-  /* the leak tag goes under its line, so the line keeps the width */
-  .plan li { grid-template-columns: 26px minmax(0, 1fr); }
-  .plan .leaktag { grid-column: 2; margin-top: -4px; }
   .bars { grid-template-columns: auto 120px auto; }
 }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
@@ -305,38 +336,6 @@ summary { cursor: pointer; font-weight: 700; }
       <label for="kind">Problem</label>
       <div class="picker"><select id="kind" aria-label="Filter by the kind of problem"><option value="">Any</option><option>choices</option><option>mostly choices</option><option>mixed</option><option>mostly contact</option><option>contact</option></select></div>
     </div>
-    <div class="control card-only optbtn"><span class="label">Pictures</span><button type="button" id="optbtn" aria-expanded="false">Picture options</button></div>
-    <div class="control card-only picopt">
-      <span class="label" id="lab-base">Compare with</span>
-      <div class="seg" role="radiogroup" aria-labelledby="lab-base" id="seg-base">
-        <input type="radio" name="base" id="base-match" value="match" checked><label for="base-match">Same side and hand</label>
-        <input type="radio" name="base" id="base-all" value="all"><label for="base-all">All hitters</label>
-      </div>
-    </div>
-    <div class="control card-only picopt">
-      <span class="label" id="lab-metric">Show</span>
-      <div class="seg" role="radiogroup" aria-labelledby="lab-metric" id="seg-metric">
-        <input type="radio" name="metric" id="metric-chase" value="chase" checked><label for="metric-chase">Chase choices</label>
-        <input type="radio" name="metric" id="metric-whiff" value="whiff"><label for="metric-whiff">Misses on chases</label>
-      </div>
-    </div>
-    <div class="control card-only picopt">
-      <span class="label" id="lab-pitch">Pitches</span>
-      <div class="seg" role="radiogroup" aria-labelledby="lab-pitch" id="seg-pitch">
-        <input type="radio" name="pitch" id="pitch-all" value="all" checked><label for="pitch-all">All</label>
-        <input type="radio" name="pitch" id="pitch-fastball" value="0"><label for="pitch-fastball">Fastballs</label>
-        <input type="radio" name="pitch" id="pitch-breaking" value="1"><label for="pitch-breaking">Breaking</label>
-        <input type="radio" name="pitch" id="pitch-offspeed" value="2"><label for="pitch-offspeed">Changeups</label>
-      </div>
-    </div>
-    <div class="control card-only">
-      <span class="label" id="lab-hand">Leaks and table</span>
-      <div class="seg" role="radiogroup" aria-labelledby="lab-hand" id="seg-hand">
-        <input type="radio" name="hand" id="hand-all" value="all" checked><label for="hand-all">All pitchers</label>
-        <input type="radio" name="hand" id="hand-R" value="R"><label for="hand-R">vs RHP</label>
-        <input type="radio" name="hand" id="hand-L" value="L"><label for="hand-L">vs LHP</label>
-      </div>
-    </div>
   </div>
   <p class="state" id="state"></p>
   <p class="notice" id="notice" hidden></p>
@@ -353,11 +352,41 @@ summary { cursor: pointer; font-weight: 700; }
     </div>
     <div class="body">
       <div class="zones">
+        <div class="controls ztools" role="group" aria-label="Picture controls">
+          <div class="control picopt fold">
+            <span class="label vh" id="lab-base">Compare with</span>
+            <div class="seg" role="radiogroup" aria-labelledby="lab-base" id="seg-base">
+              <input type="radio" name="base" id="base-match" value="match" checked><label for="base-match">Same side and hand</label>
+              <input type="radio" name="base" id="base-all" value="all"><label for="base-all">All hitters</label>
+            </div>
+          </div>
+          <div class="control picopt">
+            <span class="label vh" id="lab-metric">Show</span>
+            <div class="seg" role="radiogroup" aria-labelledby="lab-metric" id="seg-metric">
+              <input type="radio" name="metric" id="metric-chase" value="chase" checked><label for="metric-chase">Chase choices</label>
+              <input type="radio" name="metric" id="metric-whiff" value="whiff"><label for="metric-whiff">Misses on chases</label>
+            </div>
+          </div>
+          <div class="control picopt">
+            <span class="label vh" id="lab-pitch">Pitches</span>
+            <div class="seg" role="radiogroup" aria-labelledby="lab-pitch" id="seg-pitch">
+              <input type="radio" name="pitch" id="pitch-all" value="all" checked><label for="pitch-all">All</label>
+              <input type="radio" name="pitch" id="pitch-fastball" value="0"><label for="pitch-fastball">Fastballs</label>
+              <input type="radio" name="pitch" id="pitch-breaking" value="1"><label for="pitch-breaking">Breaking</label>
+              <input type="radio" name="pitch" id="pitch-offspeed" value="2"><label for="pitch-offspeed">Changeups</label>
+            </div>
+          </div>
+          <div class="control optbtn"><span class="label vh">Pictures</span><button type="button" id="optbtn" aria-expanded="false">Picture options</button></div>
+        </div>
         <div class="zgrid" id="zgrid"></div>
         <div class="zfoot">
           <div class="orient" id="orient"></div>
           <div class="legend" id="legend"></div>
         </div>
+      </div>
+      <aside id="aside"></aside>
+      <div class="col-rest">
+        <div class="band" id="more"></div>
         <details class="terrain" id="terrain-box">
           <summary>In 3D: the selected picture as a hill, taller where you swing more</summary>
           <label class="check" for="mesh"><input type="checkbox" id="mesh" checked> Show the average hitter as a mesh</label>
@@ -369,11 +398,22 @@ summary { cursor: pointer; font-weight: 700; }
           <p class="evidence" id="numbers-note"></p>
           <div class="tablewrap"><table id="numbers-table"></table></div>
         </details>
+        <details id="meaning">
+          <summary>What the numbers mean</summary>
+          <div class="notes" id="meaning-body"></div>
+        </details>
       </div>
-      <aside id="aside"></aside>
-      <div class="col-rest" id="more"></div>
     </div>
   </article>
+  <!-- the pitcher-hand switch's home between cards: a card's leaks heading takes it, the average card leaves it here -->
+  <div id="hand-park" hidden>
+    <div class="tabs" role="radiogroup" aria-labelledby="lab-hand" id="seg-hand">
+      <span class="vh" id="lab-hand">Leaks and table</span>
+      <input type="radio" name="hand" id="hand-all" value="all" checked><label for="hand-all">All pitchers</label>
+      <input type="radio" name="hand" id="hand-R" value="R"><label for="hand-R">vs RHP</label>
+      <input type="radio" name="hand" id="hand-L" value="L"><label for="hand-L">vs LHP</label>
+    </div>
+  </div>
 
   <section class="roster" id="roster-view" aria-label="The roster" hidden>
     <div class="rhead">
@@ -427,6 +467,13 @@ summary { cursor: pointer; font-weight: 700; }
   const state = { view: "card", team: "", slug: D.defaultSlug, base: "match", metric: "chase", pitch: "all", hand: "all", sel: null, selFor: null,
                   q: "", kind: "", sort: "stake", dir: -1 };
   let panels = {};                         // "row|group" -> what the 3D view needs
+  let scrollTo3D = false;                  // a clicked picture brings the 3D fold into view once drawn
+  function showTerrainBox() {
+    if (!scrollTo3D) return;
+    scrollTo3D = false;
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    document.getElementById("terrain-box").scrollIntoView({ block: "nearest", behavior: reduced ? "auto" : "smooth" });
+  }
   function parseHash() {
     let h = location.hash.slice(1);
     try { h = decodeURIComponent(h); } catch (e) {}
@@ -759,7 +806,7 @@ summary { cursor: pointer; font-weight: 700; }
         const key = ri + "|" + g.key;
         canvas.tabIndex = 0;
         canvas.dataset.key = key;
-        const pick = () => { state.sel = key; state.selFor = p.slug; markSelected(); document.getElementById("terrain-box").open = true; drawTerrain(p); };
+        const pick = () => { state.sel = key; state.selFor = p.slug; markSelected(); document.getElementById("terrain-box").open = true; scrollTo3D = true; drawTerrain(p); };
         canvas.addEventListener("click", pick);
         canvas.addEventListener("keydown", (ev) => { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); pick(); } });
         if (metric === "rate") {
@@ -799,17 +846,20 @@ summary { cursor: pointer; font-weight: 700; }
         });
       });
     });
+    // a one-sided hitter's pictures get the Inside / Away key under the first one, as the PNG card;
+    // a switch hitter's row sublabels already say where inside is
+    if (p.bats !== "S") {
+      const [left, right] = p.bats === "R" ? ["Inside", "Away"] : ["Away", "Inside"];
+      grid.append(el("div"), el("div", { class: "sides" }, el("span", { text: left }), el("span", { text: right })));
+    }
     const orient = document.getElementById("orient");
     const who = p.reference ? `the average ${p.word}-handed hitter` : p.name;
-    orient.textContent = `Catcher's view, drawn to scale around ${who}'s own strike zone; the line at the bottom is home plate. ` +
-      (p.bats === "S" ? "Batting left, inside is on the right; batting right, inside is on the left."
-        : p.bats === "L" ? "A left-handed batter stands on the right, so inside is on the right."
-        : "A right-handed batter stands on the left, so inside is on the left.");
+    orient.textContent = `Catcher's view, drawn to scale around ${who}'s own strike zone; the line at the bottom is home plate.`;
     const legend = document.getElementById("legend");
     const ramp = el("div", { class: "ramp" });
     if (p.reference) {
       ramp.style.background = `linear-gradient(90deg, ${T.ramp.join(",")})`;
-      legend.replaceChildren(el("span", { text: "Chase rate at each spot" }), ramp, el("div", { class: "ticks" }, el("span", { text: "0%" }), el("span", { text: "70%+" })));
+      legend.replaceChildren(el("span", { text: "Chase rate at each spot" }), el("div", { class: "rampbox" }, ramp, el("div", { class: "ticks" }, el("span", { text: "0%" }), el("span", { text: "70%+" }))));
     } else {
       const whiff = state.metric === "whiff";
       ramp.style.background = whiff ? `linear-gradient(90deg, ${T.whiffLess}, ${T.mid}, ${T.whiffMore})` : `linear-gradient(90deg, ${T.blue}, ${T.mid}, ${T.red})`;
@@ -817,7 +867,7 @@ summary { cursor: pointer; font-weight: 700; }
                           : "Chases vs the average hitter at the same spot and count. Blue: takes more. Red: chases more.";
       const dark = M.hexRgb(T.surface).reduce((x, y) => x + y, 0) < 1.5;   // the midpoint is a dark gray there
       legend.replaceChildren(el("span", { text: `${words} ${dark ? "Dark gray" : "Gray"}: about average. Background: too few pitches to say. Outline: +15 pts.` }),
-        ramp, el("div", { class: "ticks" }, el("span", { text: "−30 pts" }), el("span", { text: "average" }), el("span", { text: "+30 pts" })));
+        el("div", { class: "rampbox" }, ramp, el("div", { class: "ticks" }, el("span", { text: "−30 pts" }), el("span", { text: "average" }), el("span", { text: "+30 pts" }))));
     }
     if (state.selFor !== p.slug || !panels[state.sel]) {
       // open on the plan's first line, on the row its marker is drawn on;
@@ -850,7 +900,7 @@ summary { cursor: pointer; font-weight: 700; }
       box.hidden = true;
       ensurePlotly().then(
         () => { if (state.view === "card" && state.slug === p.slug) drawTerrain(p); },
-        () => { note.textContent = "The 3D view loads a charting library from the internet and could not reach it. The flat pictures above show the same thing."; });
+        () => { note.textContent = "The 3D view loads a charting library from the internet and could not reach it. The flat pictures above show the same thing."; showTerrainBox(); });
       return;
     }
     box.hidden = false;
@@ -923,6 +973,7 @@ summary { cursor: pointer; font-weight: 700; }
         camera: { eye: { x: -0.75, y: -1.45, z: 1.95 } },
       },
     }, { displaylogo: false, responsive: true, modeBarButtonsToRemove: ["toImage", "resetCameraLastSave3d"] });
+    showTerrainBox();
   }
 
   function countTable(rows, leagueOnly) {
@@ -988,18 +1039,25 @@ summary { cursor: pointer; font-weight: 700; }
     return svg;
   }
 
+  // The pitcher-hand switch is one element for the page: a card's leaks heading takes it, so its
+  // radios, ids and listeners go with it; the average card has no leaks, so it waits in the park.
+  const handSeg = document.getElementById("seg-hand"), handPark = document.getElementById("hand-park");
   function aside(p) {
     const a = document.getElementById("aside"), more = document.getElementById("more");
-    a.replaceChildren(); more.replaceChildren();
+    const meaning = document.getElementById("meaning"), notes = document.getElementById("meaning-body");
+    a.replaceChildren(); more.replaceChildren(); notes.replaceChildren();
     if (p.reference) {
+      handPark.append(handSeg);
+      meaning.hidden = true;
       const guide = el("ol", { class: "guide" });
       const dark = M.hexRgb(T.surface).reduce((x, y) => x + y, 0) < 1.5;
       D.guide.forEach((g) => guide.append(el("li", { text: g.replace("{more}", dark ? "brighter" : "darker").replace("{avg}", dark ? "Dark gray" : "Gray").replace("{none}", dark ? "The background showing through" : "White") })));
       a.append(el("section", {}, el("h2", { text: "How to read a player card" }), guide));
-      a.append(el("section", {}, el("h2", { text: "The average, by count" }), countTable(p.table, true)));
-      a.append(el("section", { class: "trend" }, el("h2", { text: "Far-off chase rate by season, every hitter" }), trendSvg([], "League far-off chase rate by season")));
+      more.append(el("section", {}, el("h2", { text: "The average, by count" }), countTable(p.table, true)));
+      more.append(el("section", { class: "trend" }, el("h2", { text: "Far-off chase rate by season, every hitter" }), trendSvg([], "League far-off chase rate by season")));
       return;
     }
+    meaning.hidden = false;
     // One plan on every tab. A pitcher-hand tab keeps it word for word and adds, under
     // each pitch line, that line's pitches from the hand; its leaks and table are the hand's.
     const hand = state.hand, handWords = { R: "right-handers", L: "left-handers" }[hand];
@@ -1007,13 +1065,13 @@ summary { cursor: pointer; font-weight: 700; }
     p.plan_items.forEach((it) => {
       if (it.kind === "keep") { plan.append(el("li", {}, el("span"), el("span", { class: "keep", text: it.text }))); return; }
       if (it.kind !== "pitch") { plan.append(el("li", {}, el("span", { class: "dot" }), el("span", { text: it.text }))); return; }
-      const body = el("span", {}, it.text);
+      const body = el("span", {}, it.text,
+        el("span", { class: "leaktag", title: "This line's leak, numbered on the pictures and in the All pitchers leak list" }, "leak", el("span", { class: "num", text: String(it.n) })));
       const c = hand !== "all" && it.by_hand ? it.by_hand[hand] : null;
       if (c) body.append(el("span", { class: "handnote", text: c.pitches
         ? `Against ${handWords}: you swung at ${c.chases} of ${c.pitches} of these (${pct(c.rate)}); hitters on average swing at ${pct(c.league)}.`
         : `Against ${handWords}: none of these pitches.` }));
-      plan.append(el("li", {}, el("span", { class: "step", text: String(it.step) }), body,
-        el("span", { class: "leaktag", title: "This line's leak, numbered on the pictures and in the All pitchers leak list" }, "leak", el("span", { class: "num", text: String(it.n) }))));
+      plan.append(el("li", {}, el("span", { class: "step", text: String(it.step) }), body));
     });
     const sec = el("section", {}, el("h2", { text: "What to work on" }), plan);
     if (hand !== "all") sec.append(el("p", { class: "evidence", text: `The plan is the same on every tab. Under each line: those pitches from ${handWords} only. The leaks and the table below are against ${handWords} only.` + ((p.target_beat || "").startsWith("under") ? " The target is on the All pitchers view." : "") }));
@@ -1032,28 +1090,24 @@ summary { cursor: pointer; font-weight: 700; }
         el("span", { class: "rate", text: `${pct(lk.rate)} vs ${pct(lk.league)} avg · ${lk.chases} of ${lk.pitches}` }),
         el("span", { class: "runs", text: runs(lk.choices) })));
     });
-    const leakSec = el("section", {}, el("div", { class: "sechead" }, el("h2", { text: hand === "all" ? "Biggest leaks" : `Biggest leaks vs ${handWords}` })));
+    const leakTitle = hand === "all" ? "Biggest leaks" : `Biggest leaks vs ${handWords}`, countTitle = hand === "all" ? "By count" : `By count vs ${handWords}`;
+    const leakSec = el("section", {}, el("div", { class: "sechead" }, el("h2", { text: leakTitle }), handSeg));
     leakSec.append(leaks.length ? list : el("p", { class: "empty", text: "None worth 0.75 runs per 600 PA." }));
-    if (leaks.length) leakSec.append(el("p", { class: "evidence", text: hand === "all"
+    a.append(leakSec);
+    // the band: the count table beside the trend, with the target under the trend; the notes on
+    // how to read the leaks, the table and the evidence fold behind "What the numbers mean"
+    more.append(el("section", {}, el("h2", { text: countTitle }), countTable(p.tables[hand], false)));
+    const seasons = p.trend.length && p.trend.length < 3 ? ` (${p.trend.length} season${p.trend.length > 1 ? "s" : ""})` : "";
+    const trendSec = el("section", { class: "trend" }, el("h2", { text: "Far-off chase rate by season" + seasons }), trendSvg(p.trend, `${p.name} far-off chase rate by season against the league`));
+    if (p.target_text && hand === "all") trendSec.append(el("div", { class: "targetbox" }, el("span", { class: "eyebrow", text: "Target" }), el("p", { class: "evidence target", text: p.target_text })));
+    more.append(trendSec);
+    const note = (title, text) => el("div", {}, title ? el("span", { class: "eyebrow", text: title }) : null, el("p", { class: "evidence", text }));
+    if (leaks.length) notes.append(note(leakTitle, hand === "all"
       ? "Numbered on the pictures, on the row of the hand a leak names" + (p.bats === "S" ? " (for a switch hitter, on the side of the plate most of its extra chases came from; the leak counts both sides)" : "")
         + ". A picture counts every pitch type, so pick a leak's own under Pitches to see it alone; numbers show with Chase choices. Ranked by what the choices cost, per 600 PA; the plan takes up to two, in the order to work on them, so it can leave a bigger one out."
-      : `Ranked by what the choices cost against ${handWords}, per 600 PA. A number is the leak's number on the pictures and in the plan; a dash is a leak that shows up against ${handWords} only, so it is not on the pictures or in the plan.` }));
-    if (p.target_text && hand === "all") leakSec.append(el("p", { class: "evidence target", text: (p.target_text.startsWith("No ") ? "" : "Target: ") + p.target_text }));
-    a.append(leakSec);
-    more.append(el("section", {}, el("h2", { text: hand === "all" ? "By count" : `By count vs ${handWords}` }), countTable(p.tables[hand], false),
-      el("p", { class: "evidence", text: D.countNote })));
-    const seasons = p.trend.length && p.trend.length < 3 ? ` (${p.trend.length} season${p.trend.length > 1 ? "s" : ""})` : "";
-    more.append(el("section", { class: "trend" }, el("h2", { text: "Far-off chase rate by season" + seasons }), trendSvg(p.trend, `${p.name} far-off chase rate by season against the league`)));
-    more.append(el("p", { class: "evidence", text: D.evidence }));
-  }
-
-  function stateLine(p) {
-    const line = document.getElementById("state");
-    if (p.reference) { line.textContent = ""; return; }
-    const pitches = state.pitch === "all" ? "all pitches" : PITCH_NAMES[+state.pitch];
-    const base = state.base === "all" ? "compared with every hitter" : "compared with hitters of your side against the same hand";
-    const hand = { all: "all pitchers", R: "right-handers", L: "left-handers" }[state.hand];
-    line.textContent = `Showing: ${state.metric === "whiff" ? "misses on chases" : "chase choices"} · ${pitches} · ${base} · leaks and table vs ${hand}.`;
+      : `Ranked by what the choices cost against ${handWords}, per 600 PA. A number is the leak's number on the pictures and in the plan; a dash is a leak that shows up against ${handWords} only, so it is not on the pictures or in the plan.`));
+    notes.append(note(countTitle, D.countNote));
+    notes.append(note(null, D.evidence));
   }
 
   function numbersTable(p) {
@@ -1098,7 +1152,8 @@ summary { cursor: pointer; font-weight: 700; }
     MASK = M.zoneMask(XS, ZS, ZONE[0], ZONE[1]);
     setSegEnabled("seg-base", !p.reference); setSegEnabled("seg-metric", !p.reference); setSegEnabled("seg-pitch", !p.reference); setSegEnabled("seg-hand", !p.reference);
     document.getElementById("card").hidden = false;
-    header(p); zones(p); aside(p); numbersTable(p); stateLine(p);
+    header(p); zones(p); aside(p); numbersTable(p);
+    document.getElementById("state").textContent = "";   // the switches show their own state
     lastRender = p;
     try { if (location.hash !== "#" + p.slug) history.replaceState(null, "", "#" + p.slug); } catch (e) {}
   }
@@ -1293,7 +1348,7 @@ summary { cursor: pointer; font-weight: 700; }
   document.getElementById("kind").addEventListener("change", (e) => { state.kind = e.target.value; renderRoster(); });
   for (const [name, key] of [["base", "base"], ["metric", "metric"], ["pitch", "pitch"]])
     document.querySelectorAll(`input[name="${name}"]`).forEach((r) => r.addEventListener("change", () => { state[key] = r.value; render(); }));
-  document.querySelectorAll('input[name="hand"]').forEach((r) => r.addEventListener("change", () => { state.hand = r.value; if (lastRender) { aside(lastRender); stateLine(lastRender); } }));
+  document.querySelectorAll('input[name="hand"]').forEach((r) => r.addEventListener("change", () => { state.hand = r.value; if (lastRender) aside(lastRender); }));
 
   document.getElementById("mesh").addEventListener("change", () => lastRender && drawTerrain(lastRender));
   document.getElementById("terrain-box").addEventListener("toggle", () => { if (lastRender && document.getElementById("terrain-box").open) drawTerrain(lastRender); });
