@@ -1701,9 +1701,13 @@ class Card:
 PANEL_ASPECT = (ZS[-1] - ZS[0]) / (XS[-1] - XS[0])
 GRID_LEFT, GRID_TOP = 64, 196
 GRID_BOTTOM = 960               # the pictures end here; the key sits under them
+PANEL_W = 165                   # a picture's width at most: two or three rows reach it, four rows
+                                # are set by the height; what the pictures leave is the right column's
 BOTTOM_BLOCK = 896              # y where the trend + target block starts
+COLUMN_END = BOTTOM_BLOCK - 22  # the By count table's last line stays above this
 ROW_LABEL_W = 118
-RIGHT_X, RIGHT_W = 1086, 770
+RIGHT_X, RIGHT_W = 1026, 830    # the right column: the plan, the leaks, the table, the trend
+KEY_CHARS = 92                  # the key's words beside the ramp stop short of the right column
 
 
 def draw_grid(card, rows, cells, zone, markers=None, orient=None, whiff_row=None):
@@ -1714,17 +1718,17 @@ def draw_grid(card, rows, cells, zone, markers=None, orient=None, whiff_row=None
 
     n = len(rows)
     avail_h = GRID_BOTTOM - (GRID_TOP + 46)
-    w = min(196, (avail_h - (n - 1) * 14) / n / PANEL_ASPECT)
+    w = min(PANEL_W, (avail_h - (n - 1) * 14) / n / PANEL_ASPECT)
     h = w * PANEL_ASPECT
     x0 = GRID_LEFT + ROW_LABEL_W
-    labels = COUNT_LABELS if w >= 165 else COUNT_SHORT
+    labels = COUNT_LABELS if w >= PANEL_W else COUNT_SHORT
     if orient:
         side = "left" if orient == "R" else "right"
         card.text(GRID_LEFT, GRID_TOP - 6, f"Catcher's view, to scale. Inside is on the {side}.",
                   size=13, color="muted")
     for j, g in enumerate(COUNT_GROUPS):
         cx = x0 + j * (w + 14) + w / 2
-        card.text(cx, GRID_TOP + 18, labels[g], size=19 if w >= 165 else 17, weight="bold", ha="center")
+        card.text(cx, GRID_TOP + 18, labels[g], size=19 if w >= PANEL_W else 17, weight="bold", ha="center")
         card.text(cx, GRID_TOP + 40, COUNT_DETAIL[g], size=14, color="muted", ha="center")
     for i, (label, sub) in enumerate(rows):
         y = GRID_TOP + 52 + i * (h + 14)
@@ -1763,7 +1767,7 @@ def draw_key(card, x, y, whiff=False):
              f"{KEY_WORDS[card.theme_name]['none']}: too few pitches to say. Outline: 15 points or more over.")
     if whiff:
         words += " Misses row: purple, more misses than the average hitter on the same chases; green, fewer."
-    card.wrapped(x + 330, y + 10, words, 100, size=12, line=15, color="ink2")
+    card.wrapped(x + 330, y + 10, words, KEY_CHARS, size=12, line=15, color="ink2")
 
 
 def draw_legend(card, x, y, kind="gap", label_left="", label_right=""):
@@ -1801,12 +1805,14 @@ def xw(v):
 
 def draw_table(card, x, y, rows, league_only=False):
     # A player's table adds the count check: xwOBA once the count gets
-    # there, next to the league's. The average card keeps the narrow table.
+    # there, next to the league's, across the right column. The average card
+    # keeps the narrow table. What the columns mean (GLOSSARY) is on the
+    # page, folded away, not on the card. Returns the last row's line.
     if league_only:
         at = {"pitches": 190, "chase": 290, "far": 400, "whiff": 510}
     else:
-        at = {"pitches": 190, "chase": 275, "far": 360, "whiff": 445, "xwoba": 550,
-              "choices": 660, "contact": 760}
+        at = {"pitches": 200, "chase": 290, "far": 380, "whiff": 470, "xwoba": 580,
+              "choices": 700, "contact": RIGHT_W}
     cols = [("", 0, "left"), ("Pitches", at["pitches"], "right"), ("Chases", at["chase"], "right"),
             ("Far-off", at["far"], "right"), ("Misses", at["whiff"], "right")]
     if not league_only:
@@ -1821,7 +1827,7 @@ def draw_table(card, x, y, rows, league_only=False):
         card.text(x + (at["choices"] + at["contact"]) / 2 - 22, y + 17, "runs per 600 PA",
                   size=12, color="muted", ha="center")
     y += 26
-    card.hline(x, x + 770 if not league_only else x + 520, y + 4)
+    card.hline(x, x + RIGHT_W if not league_only else x + 520, y + 4)
     names = dict(COUNT_LABELS, total="All counts")
     for r in rows:
         y += 22
@@ -1842,9 +1848,6 @@ def draw_table(card, x, y, rows, league_only=False):
                 v = r[key]
                 card.text(x + at[key], y, fmt_runs(v), size=15, ha="right",
                           color="ink" if abs(v) >= 1 else "ink2", weight=bold)
-    if not league_only:
-        y += 24
-        y = card.wrapped(x, y, GLOSSARY, 132, size=12, line=15, color="muted") - 15
     return y
 
 
@@ -2000,30 +2003,84 @@ def spec_cell(p, spec, g, t, mask):
     return compose(diverging(s["gap"], t, metric), s["evidence"], t, mask), s["gap"], s["evidence"]
 
 
-LEAK_NAME_CHARS = 54             # a leak's name in the card's list fits in this many characters at size 15
+LEAK_NAME_CHARS = 64             # a leak's name in the card's list fits in this many characters at size 15
 # The PNG plan's size, line, gap under a line and wrap, then the wraps of a line
-# with no leak tag, of the keep line and of the coach's note (both 13 px). One or
-# two lines take the first set; three or more the second, set tighter so the column
-# keeps its place. A column that would still run into the trend and target under it
-# takes the next: two tighter sets, as wide; one at the same size, wrapped into the
-# room left of the leak tags (Ronald Acuña, 2022); and the last with the lines that
-# carry no tag, the keep line and the note run to the column's edge (Jeremy Peña, 2026).
-PNG_PLAN_SETS = ((16, 22, 4, 78, 78, 90, 98),
-                 (15, 19, 2, 78, 78, 90, 98),
-                 (14, 17, 2, 84, 84, 90, 98),
-                 (13, 16, 2, 90, 90, 90, 98),
-                 (13, 16, 2, 108, 108, 90, 98),
-                 (13, 16, 2, 108, 120, 128, 124))
+# with no leak tag, of the keep line and of the coach's note (both 13 px), each
+# wrap the most characters whose widest line over six seasons' cards stays inside
+# the column (a tagged line stops short of its leak tag). One or two lines take
+# the first set; three or more the second, set tighter so the column keeps its
+# place. A column that would still run into the trend and target under it takes
+# the third, a size tighter again; no card in six seasons needs it (Jeremy Peña's
+# 2026 card, the longest, ends 5 px above the line at 15 px), and the build warns
+# when a column would not fit at it.
+PNG_PLAN_SETS = ((16, 22, 4, 97, 104, 136, 134),
+                 (15, 19, 2, 104, 111, 136, 134),
+                 (14, 17, 2, 111, 119, 136, 134))
 # The target beside the trend: its left edge in the column, the trend's width, and
-# the target's size, line and wrap. A target that would run into the footer is set a
-# size smaller (Luis García, 2026), then wider, with the trend narrower, for the
-# longest (most 2022-2025 targets run 280 to 340 characters).
-PNG_TARGET_SETS = ((470, 360, 13, 17, 46),
-                   (470, 360, 12, 15, 50),
-                   (410, 300, 12, 15, 60))
+# the target's size, line and wrap. A target over five lines at 13 px (about 280
+# characters, most 2022-2025 targets) is set a size smaller; the last set, wider
+# with the trend narrower, is for a longer one still, which no card in six seasons
+# has, and the build warns when a target would not fit at it.
+PNG_TARGET_SETS = ((470, 360, 13, 17, 56),
+                   (470, 360, 12, 15, 61),
+                   (410, 300, 12, 15, 73))
 
 
-def player_card(summary, theme_name, out_path, tighter=0):
+def plan_column(card, summary, plan_set):
+    """The right column above the trend: the plan, each line tagged with its
+    leak's number, the coach's note, the leaks and the By count table. card
+    may be a Measure, to find where the table would end before anything is
+    drawn. Returns the table's last line."""
+
+    t = card.t
+    y = 214
+    card.text(RIGHT_X, y, "What to work on", size=22, weight="bold")
+    y += 32
+    size, lead, gap, chars, untagged_chars, keep_chars, note_chars = plan_set
+    for it in summary["plan_items"]:
+        if it["kind"] == "keep":
+            y += 2
+            y = card.wrapped(RIGHT_X + 22, y, it["text"], keep_chars, size=13, line=17, color="ink2")
+            continue
+        card.plan_mark(RIGHT_X + 10, y - 6, it, 10, 12, RIGHT_X + RIGHT_W)
+        y = card.wrapped(RIGHT_X + 30, y, it["text"], chars if it["kind"] == "pitch" else untagged_chars,
+                         size=size, line=lead) + gap
+    if summary["coach_note"]:
+        y += 4
+        card.text(RIGHT_X, y, "COACH'S NOTE, FOR THE STAFF", size=12, color="muted", weight="bold")
+        y = card.wrapped(RIGHT_X, y + 19, summary["coach_note"], note_chars, size=13, line=17,
+                         color="ink2")
+    y += 16
+    card.hline(RIGHT_X, RIGHT_X + RIGHT_W, y - 8)
+    card.text(RIGHT_X, y + 20, "Biggest leaks", size=19, weight="bold")
+    card.text(RIGHT_X + RIGHT_W, y + 20, "numbered on the pictures  ·  ranked by runs; the plan "
+              "takes up to two, in the order to work on them", size=12, color="muted", ha="right")
+    y += 26
+    if not summary["leaks"]["all"]:
+        y += 24
+        card.text(RIGHT_X, y, "None worth 0.75 runs per 600 PA.", size=16, color="ink2")
+    worst = max((abs(lk["choices"]) for lk in summary["leaks"]["all"]), default=1.0)
+    for n, lk in enumerate(summary["leaks"]["all"], start=1):
+        y += 28
+        card.ax.add_patch(Circle((RIGHT_X + 12, y - 6), 12, fc=t["surface"], ec=t["ink"], lw=px(1.6)))
+        card.text(RIGHT_X + 12, y - 5, str(n), size=14, weight="bold", ha="center", va="center")
+        # a long name ("mostly vs RHP", changeups / splitters) is set smaller so it clears the bar
+        card.text(RIGHT_X + 34, y, lk["phrase"], size=min(15, 15 * LEAK_NAME_CHARS / len(lk["phrase"])))
+        # the bar is the run cost, which is what ranks the list
+        tx0, tw = RIGHT_X + RIGHT_W - 304, 84
+        card.ax.add_patch(Rectangle((tx0, y - 9), tw, 6, fc=t["hair"], ec="none", zorder=2))
+        card.ax.add_patch(Rectangle((tx0, y - 9), tw * abs(lk["choices"]) / worst, 6,
+                                    fc=t["ink2"], ec="none", zorder=3))
+        card.text(tx0 + tw + 12, y, f"{lk['rate'] * 100:.0f}% vs {lk['league'] * 100:.0f}%  ·  "
+                  f"{lk['chases']} of {lk['pitches']}", size=13, color="ink2")
+        card.text(RIGHT_X + RIGHT_W, y, fmt_runs(lk["choices"]), size=16, weight="bold",
+                  ha="right")
+    y += 22
+    card.hline(RIGHT_X, RIGHT_X + RIGHT_W, y - 8)
+    return draw_table(card, RIGHT_X, y + 14, summary["tables"]["all"])
+
+
+def player_card(summary, theme_name, out_path):
     card = Card(theme_name)
     t = card.t
     p = df[df["batter"] == summary["id"]]
@@ -2072,59 +2129,14 @@ def player_card(summary, theme_name, out_path, tighter=0):
                        None if summary["bats"] == "S" else summary["bats"], whiff_row)
     draw_key(card, GRID_LEFT + ROW_LABEL_W, bottom + 44, whiff=whiff_row is not None)
 
-    # Right column: the plan, numbered to the leaks it comes from
-    y = 214
-    card.text(RIGHT_X, y, "What to work on", size=22, weight="bold")
-    y += 32
-    n_lines = sum(1 for it in summary["plan_items"] if it["kind"] != "keep")
-    plan_set = min((n_lines >= 3) + tighter, len(PNG_PLAN_SETS) - 1)
-    size, lead, gap, chars, untagged_chars, keep_chars, note_chars = PNG_PLAN_SETS[plan_set]
-    for it in summary["plan_items"]:
-        if it["kind"] == "keep":
-            y += 2
-            y = card.wrapped(RIGHT_X + 22, y, it["text"], keep_chars, size=13, line=17, color="ink2")
-            continue
-        card.plan_mark(RIGHT_X + 10, y - 6, it, 10, 12, RIGHT_X + RIGHT_W)
-        y = card.wrapped(RIGHT_X + 30, y, it["text"], chars if it["kind"] == "pitch" else untagged_chars,
-                         size=size, line=lead) + gap
-    if summary["coach_note"]:
-        y += 4
-        card.text(RIGHT_X, y, "COACH'S NOTE, FOR THE STAFF", size=12, color="muted", weight="bold")
-        y = card.wrapped(RIGHT_X, y + 19, summary["coach_note"], note_chars, size=13, line=17,
-                         color="ink2")
-    y += 18
-    card.hline(RIGHT_X, RIGHT_X + RIGHT_W, y - 8)
-    card.text(RIGHT_X, y + 20, "Biggest leaks", size=19, weight="bold")
-    card.text(RIGHT_X + RIGHT_W, y + 20, "numbered on the pictures  ·  ranked by runs; the plan "
-              "takes up to two, in the order to work on them", size=12, color="muted", ha="right")
-    y += 30
-    if not summary["leaks"]["all"]:
-        y += 24
-        card.text(RIGHT_X, y, "None worth 0.75 runs per 600 PA.", size=16, color="ink2")
-    worst = max((abs(lk["choices"]) for lk in summary["leaks"]["all"]), default=1.0)
-    for n, lk in enumerate(summary["leaks"]["all"], start=1):
-        y += 28
-        card.ax.add_patch(Circle((RIGHT_X + 12, y - 6), 12, fc=t["surface"], ec=t["ink"], lw=px(1.6)))
-        card.text(RIGHT_X + 12, y - 5, str(n), size=14, weight="bold", ha="center", va="center")
-        # a long name ("mostly vs RHP", changeups / splitters) is set smaller so it clears the bar
-        card.text(RIGHT_X + 34, y, lk["phrase"], size=min(15, 15 * LEAK_NAME_CHARS / len(lk["phrase"])))
-        # the bar is the run cost, which is what ranks the list
-        tx0, tw = RIGHT_X + 466, 84
-        card.ax.add_patch(Rectangle((tx0, y - 9), tw, 6, fc=t["hair"], ec="none", zorder=2))
-        card.ax.add_patch(Rectangle((tx0, y - 9), tw * abs(lk["choices"]) / worst, 6,
-                                    fc=t["ink2"], ec="none", zorder=3))
-        card.text(tx0 + tw + 12, y, f"{lk['rate'] * 100:.0f}% vs {lk['league'] * 100:.0f}%  ·  "
-                  f"{lk['chases']} of {lk['pitches']}", size=13, color="ink2")
-        card.text(RIGHT_X + RIGHT_W, y, fmt_runs(lk["choices"]), size=16, weight="bold",
-                  ha="right")
-    y += 26
-    card.hline(RIGHT_X, RIGHT_X + RIGHT_W, y - 8)
-    y = draw_table(card, RIGHT_X, y + 16, summary["tables"]["all"])
-    if y > BOTTOM_BLOCK - 12:
-        # drawn again with the plan a size tighter, until the tightest set
-        if plan_set < len(PNG_PLAN_SETS) - 1:
-            plt.close(card.fig)
-            return player_card(summary, theme_name, out_path, tighter + 1)
+    # Right column: the plan, numbered to the leaks it comes from, then the
+    # leaks and the By count table, at the first plan set whose column ends
+    # above the trend, measured before anything is drawn
+    first = 1 if sum(1 for it in summary["plan_items"] if it["kind"] != "keep") >= 3 else 0
+    plan_set = next((s for s in PNG_PLAN_SETS[first:]
+                     if plan_column(Measure(), summary, s) <= COLUMN_END), PNG_PLAN_SETS[-1])
+    y = plan_column(card, summary, plan_set)
+    if y > COLUMN_END:
         print(f"  warning: {summary['name']} right column runs to y={y:.0f}")
     y = BOTTOM_BLOCK
     foot = 1040
@@ -2156,8 +2168,9 @@ def player_card(summary, theme_name, out_path, tighter=0):
 # --------------------------------------------------
 # THE PRINTABLE CARD: the web card on two letter-size pages
 # --------------------------------------------------
-# Page 1 is the card: the plan, the target, the coach's note for a noted
-# hitter, the pictures the leaks are numbered on, the key and the leaks.
+# Page 1 is the card: the plan, with the target and the coach's note for a
+# noted hitter beside it, the pictures the leaks are numbered on, the key
+# and the leaks.
 # Page 2 is the guide in the player's words, the average hitter's
 # two-strike picture, the season chart and what fixing a leak paid.
 
@@ -2168,8 +2181,13 @@ PRINT_LABEL_W = 132                # the row names, left of the pictures
 PRINT_GAP = 14                     # px between pictures
 PRINT_HEAD = 50                    # the count names over the first row
 PRINT_MIN_W = 96                   # a picture narrower than this is a layout to fix, not to print
-PRINT_PLAN_SETS = ((18, 26, 86),   # the plan's size, line and wrap; the tighter second set, as
-                   (16, 23, 96))   # wide, only when the first leaves the pictures under PRINT_MIN_W
+PRINT_PLAN_W = 740                 # page 1's plan column, from the margin; the target and the
+PRINT_COL_GAP = 30                 # coach's note stand beside it, this far right, to the margin
+PRINT_PLAN_SETS = ((18, 26, 76),   # the plan's size, line and wrap; the tighter second set, as
+                   (16, 23, 86))   # wide, only when the first leaves the pictures under PRINT_MIN_W
+PRINT_KEEP_CHARS = 100             # the keep line, 15 px, runs to the plan column's edge
+PRINT_NOTE_CHARS = 49              # the target and the note, 15 px, fill the right column (each
+                                   # wrap the most characters whose widest line over six seasons fits)
 PRINT_MARKER_PX = 10.5             # a leak marker's smallest radius, so its number fits inside
 PRINT_KEY_CHARS = 196              # the key under the pictures wraps at this many characters
 
@@ -2231,10 +2249,20 @@ def print_key(specs):
 class Measure:
     """Stands in for a Card to find where text would end, drawing nothing."""
 
+    class _Axes:
+        def add_patch(self, *args, **kwargs):
+            pass
+
+    ax = _Axes()
+    t = THEMES["light"]
+
     def text(self, *args, **kwargs):
         pass
 
     def plan_mark(self, *args, **kwargs):
+        pass
+
+    def hline(self, *args, **kwargs):
         pass
 
     def wrapped(self, x, y, s, width_chars, size=18, line=26, **kwargs):
@@ -2279,25 +2307,19 @@ def print_grid(card, p, summary, specs, markers, top, w, marker_r):
     return y - PRINT_GAP, right
 
 
-def print_notes(card, x0, xr, y, summary):
-    """The target and the coach's note under the plan, side by side when the
-    card has both. Returns the y under them."""
+def print_notes(card, x, y, summary):
+    """The target and the coach's note, one under the other in page 1's
+    right column, beside the plan. Returns the y under them."""
 
     notes = [(label, text) for label, text in (("TARGET", summary["target_text"]),
                                                ("COACH'S NOTE, FOR THE STAFF", summary["coach_note"]))
              if text]
-    if not notes:
-        return y
-    y += 8
-    two = len(notes) == 2
-    col = (xr - x0 - 40) / len(notes)
-    ends = []
     for k, (label, text) in enumerate(notes):
-        x = x0 + k * (col + 40)
+        if k:
+            y += 20
         card.text(x, y, label, size=12, color="muted", weight="bold")
-        ends.append(card.wrapped(x, y + 24, text, 68 if two else 92, size=15 if two else 16,
-                                 line=21 if two else 22, color="ink2"))
-    return max(ends)
+        y = card.wrapped(x, y + 24, text, PRINT_NOTE_CHARS, size=15, line=21, color="ink2")
+    return y
 
 
 def print_pages(summary, out_pdf, theme_name="light"):
@@ -2350,14 +2372,18 @@ def print_pages(summary, out_pdf, theme_name="light"):
         y += 38
 
         def plan_block(c, y, plan_set):
+            # the plan in its column on the left, the target and the coach's
+            # note beside it on the right; the block ends under the longer
             size, line, chars = plan_set
+            top = y
             for it in summary["plan_items"]:
                 if it["kind"] == "keep":
-                    y = c.wrapped(x0 + 24, y, it["text"], 96, size=15, line=21, color="ink2") + 6
+                    y = c.wrapped(x0 + 24, y, it["text"], PRINT_KEEP_CHARS, size=15, line=21,
+                                  color="ink2") + 6
                     continue
-                c.plan_mark(x0 + 11, y - 7, it, 11, 13, xr)
+                c.plan_mark(x0 + 11, y - 7, it, 11, 13, x0 + PRINT_PLAN_W)
                 y = c.wrapped(x0 + 32, y, it["text"], chars, size=size, line=line) + 8
-            return print_notes(c, x0, xr, y, summary) + 20
+            return max(y, print_notes(c, x0 + PRINT_PLAN_W + PRINT_COL_GAP, top, summary)) + 20
 
         # Under the pictures, from their bottom edge: the side labels and the
         # key (46 to the key's first line, 16 a line), then 34 to "Biggest
@@ -2549,7 +2575,7 @@ def league_card(stand, theme_name, out_path):
         card.ax.add_patch(Circle((RIGHT_X + 12, y - 6), 12, fc=t_surface(card), ec=card.t["ink"],
                                  lw=px(1.6)))
         card.text(RIGHT_X + 12, y - 5, str(n), size=14, weight="bold", ha="center", va="center")
-        y = card.wrapped(RIGHT_X + 34, y, s, 88, size=15, line=20) + 8
+        y = card.wrapped(RIGHT_X + 34, y, s, 96, size=15, line=20) + 8
     y += 8
     card.hline(RIGHT_X, RIGHT_X + RIGHT_W, y - 8)
     rows_t = []
