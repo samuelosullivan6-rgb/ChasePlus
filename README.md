@@ -255,7 +255,7 @@ the first promise is fewer wasted counts, not a better slash line.
 **Frozen before 2027 (step 19).**
 [`leak_predictions_2026.csv`](results/xchase/coaching/leak_predictions_2026.csv)
 is a stamped pre-season prediction for every 2026 card's leaks (next =
-−3.8 + 0.72 × 2026), the same number as each card's target; step 20
+−3.8 + 0.72 × 2026), the same line as each card's target; step 20
 scores it after 2027.
 
 **The loop, tested on four earlier pairs (step 20).** Each of 2022-2025
@@ -299,16 +299,19 @@ Challenge System.
 `runs_saved_shrunk` ranks within a season (runs per 600 PA), `xchase_plus`
 compares across seasons, `runs_saved_vs_anchor_shrunk` prices every
 season against 2024; ± is `xchase_plus_posterior_sd` (7-10 points).
-`results/xchase/` holds everything for xChase+, `results/chase/` the
-same files for Chase+, with `matchups/`, `coaching/`,
-`player_cards/<season>/` and `noted_players/` beneath. Qualifying: 600
+`results/xchase/` holds everything for xChase+, including `matchups/`,
+`coaching/`, `player_cards/<season>/` and `noted_players/`;
+`results/chase/` has the same leaderboard, reliability and chart files
+for Chase+. Qualifying: 600
 out-of-zone pitches and 300 PA, prorated in-season.
 
 ## Limitations
 
-- **xwOBA only knows exit velocity and launch angle**; luck never
-  repeats, so there's no sign that hurts anyone.
-- **The xwOBA line is fit on chases only** (implied wOBA scale 1.15-1.21).
+- **xwOBA only knows exit velocity and launch angle**, not spray
+  direction or sprint speed; luck didn't repeat in any of the five pairs
+  of seasons, so there's no sign that hurts anyone.
+- **The xwOBA line is fit on chases only** (implied wOBA scale 1.15-1.21,
+  at or a little below the usual 1.2-1.25).
 - **Chase+ treats every out the same.**
 - **Shrinkage is a little strong at the extremes** (7-8 points).
 - **The called-strike model knows the side of the zone but not the
@@ -328,7 +331,7 @@ pip install -r requirements.txt
 ```
 
 Run the scripts in order; steps 4-8 build Chase+, and rerun with
-`--expected-contact` build xChase+ into `results/xchase/`.
+`--expected-contact` they build xChase+ into `results/xchase/`.
 
 <details>
 <summary>What each script does</summary>
@@ -430,8 +433,10 @@ can carry a team's data.
 </picture>
 
 They mostly agree (r = 0.91-0.95). Luck has an SD of 5.8-7.3 points and
-doesn't repeat; 12-20 hitters a season sit 2 standard errors from zero,
-about what chance gives (`regression_candidates.csv`). Same season,
+doesn't repeat; 12-20 hitters a season (4.5-7.1%) sit 2 standard errors
+from zero (`regression_candidates.csv`), against about 4.6% by chance
+alone, and only 2022 and 2023 (6.4% and 7.1%) run clearly above that.
+Same season,
 xChase+ tracks xwOBA better than Chase+ tracks wOBA; next season, once
 this year's xwOBA and chase rate are known, neither adds anything.
 xChase+ is a real, repeatable part of a hitter's approach, not a hidden
@@ -440,9 +445,11 @@ predictor of production.
 ## Appendix: xChase+ by matchup
 
 The same priced pitches split by batter/pitcher hand, one board per
-matchup per season. Hitters chase worse against same-handed pitchers
-(average 93-99) and better against opposite-handed ones (102-107), every
-season. Boards against righties repeat about like overall xChase+ (R/R
+matchup per season. 100 on a board is the average hitter in that
+matchup, not the league, so a board score and the overall score beside
+it are on different baselines. On the overall scale, hitters chase worse
+against same-handed pitchers (average 93-99) and better against
+opposite-handed ones (102-107), every season. Boards against righties repeat about like overall xChase+ (R/R
 0.74); boards against lefties rest on a quarter of the pitches and are
 noisier (L/L 0.44).
 
