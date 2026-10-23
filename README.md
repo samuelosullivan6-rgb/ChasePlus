@@ -2,34 +2,21 @@
 
 **Everything, hosted:** [samuelosullivan6-rgb.github.io/ChasePlus](https://samuelosullivan6-rgb.github.io/ChasePlus/)
 has every hitter's decision card, the roster by team, the noted hitters'
-report with printable cards, and this write-up. Nothing to download.
+report with printable cards, and this write-up.
 
-Chase rate counts how often a hitter swings at pitches outside the zone,
-and it treats every one of those swings as the same mistake. They aren't.
-On average a chase on 3-2 costs about 5.6 times as many runs as a chase on
-0-1. This project prices every chase decision in runs using Statcast data,
-builds a per-season leaderboard, and then tests whether the numbers hold
-up.
+Chase rate counts how often a hitter swings outside the zone and treats
+every one of those swings as the same mistake. They aren't: a chase on
+3-2 costs about 5.6 times as many runs as one on 0-1. This project prices
+every chase decision in runs from Statcast data (2021-2026), builds a
+per-season leaderboard, and tests whether the numbers hold up.
 
-It reports two scores on the same scale:
+Two scores, one scale: **xChase+** (the main number, version 1.1) prices
+a chase put in play by how it was hit, using Savant's xwOBA; **Chase+**
+(version 2.0) prices it by what actually happened. Takes, whiffs and
+fouls are priced the same in both, and Chase+ minus xChase+ is **luck**.
 
-- **xChase+** (the main number, version 1.1) prices a chase put in play
-  by how it was hit, using Savant's xwOBA. It measures the decision and
-  the contact, not where the ball landed, and it repeats better from one
-  season to the next.
-- **Chase+** (version 2.0) prices a chase put in play by what actually
-  happened: the league value of a single, double, triple, home run or
-  out, whatever the runners and outs were. It is the record of the
-  season, luck included.
-
-Takes, whiffs and fouls are priced the same way in both. The gap between
-them (Chase+ minus xChase+) is called **luck** below. It's the same idea
-as xwOBA next to wOBA. See [Version history](#version-history) for what
-changed between versions.
-
-**How to read the charts:** a solid mark (dot, line or bold number) is the
-estimate. The pale band or bar behind it, or the small ± figure, is its
-uncertainty. A thin gray line marks the league average (100).
+**Reading the charts:** solid mark = estimate, pale band or ± =
+uncertainty, thin gray line = league average (100).
 
 ## Results
 
@@ -41,7 +28,6 @@ uncertainty. A thin gray line marks the league average (100).
 </picture>
 
 A chase with three balls costs far more than one early in the count.
-Chase rate treats those as the same mistake; this project doesn't.
 
 ### Leaders and trailers, season by season
 
@@ -50,10 +36,9 @@ Chase rate treats those as the same mistake; this project doesn't.
   <img alt="Top 5 and bottom 5 hitters by xChase+ for each season from 2021 to 2026, with uncertainty bars and each hitter's Chase+ marked as a hollow ring" src="results/xchase/figures/leaderboard_by_season.png" width="720">
 </picture>
 
-About 250-280 hitters qualify each season. An xChase+ of 130 is about the
-top 7% of qualified hitters. The hollow ring is the same hitter's
-Chase+; the line between them is luck. Full tables, with both scores and
-the luck between them, are in `results/xchase/xchase_leaderboard_<season>.csv`.
+About 250-280 hitters qualify a season; 130 is about the top 7%. The
+hollow ring is the hitter's Chase+, the line between them luck. Full
+tables: `results/xchase/xchase_leaderboard_<season>.csv`.
 
 <details>
 <summary>Top 5 and bottom 5 as tables</summary>
@@ -167,12 +152,10 @@ partly what put them at the extremes.
   <img alt="xChase+ against chase rate for 2026, highlighting the ten hitters whose two rankings disagree most" src="results/xchase/figures/chase_plus_vs_chase_rate.png" width="720">
 </picture>
 
-Some hitters chase often but mostly when it's cheap, and some rarely
-chase but pay for it when they do. The highlighted hitters are the
-biggest disagreements between the two rankings. Compared like for like,
-xChase+ correlates 0.30-0.34 with a hitter's xwOBA each season, against
-0.23-0.30 (negative) for chase rate. See the appendix for how that's
-measured, and for what it does and doesn't say about next season.
+Some hitters chase often but cheaply; some rarely chase but pay when they
+do. The highlighted hitters are where the two rankings disagree most.
+xChase+ correlates 0.30-0.34 with a hitter's xwOBA each season; chase
+rate 0.23-0.30 (negative).
 
 ### Does it repeat?
 
@@ -181,689 +164,160 @@ measured, and for what it does and doesn't say about next season.
   <img alt="Year-to-year correlations averaged over five pairs of seasons: chase rate 0.85, xChase+ 0.73, the part of xChase+ chase rate doesn't explain 0.49, Chase+ 0.65, luck 0.03" src="results/xchase/figures/reliability_chase_vs_xchase.png" width="720">
 </picture>
 
-Yes. Across the five pairs of seasons from 2021 to 2026, xChase+ repeats at
-r = 0.70-0.76 (0.73 on average), Chase+ at 0.60-0.71 (0.65), and luck not
-at all (-0.07 to 0.11; 0.03). xChase+ beats Chase+ in every pair. That's
-the reason xChase+ is the main number: taking the ball-in-play luck out
-leaves more of the hitter. Both are noisier than plain chase rate (0.84-0.86),
-which only counts chases and doesn't price them.
-
-Chase rate alone explains 57-72% of the spread in xChase+ within a
-season, so part of xChase+ repeating is just chase rate repeating. The
-part chase rate doesn't explain (what's left after a straight-line fit
-on chase rate, each season) still repeats at r = 0.44-0.55 (0.49). That
-part is what pricing chases adds over counting them, and it carries over
-from one season to the next. The same part of Chase+ repeats at
-0.34-0.46 (0.40); xChase+ is ahead in every pair here too. The per-stat scatter
-plots are in `results/xchase/figures/reliability.png` and
-`results/chase/figures/reliability.png`.
+Yes. Over five pairs of seasons xChase+ repeats at r = 0.73, Chase+ at
+0.65, luck at 0.03, so xChase+ is the main number. Chase rate repeats at
+0.85 but only counts; the part of xChase+ it doesn't explain still
+repeats at 0.49, and that part is what pricing adds.
 
 ### From a number to a plan: player decision cards
 
-xChase+ says how many runs a hitter loses to chasing. A decision card says
-where, and what to do about it. Every qualified hitter gets one, written so
-a coach can hand it to a player and the player can read it alone.
+xChase+ says how many runs a hitter loses; a card says where and what to
+do. Every qualified hitter since 2021 has one on
+[the interactive page](https://samuelosullivan6-rgb.github.io/ChasePlus/results/xchase/player_cards/index.html),
+with a season switcher and a Roster view
+([`#roster`](https://samuelosullivan6-rgb.github.io/ChasePlus/results/xchase/player_cards/index.html#roster),
+or `#roster/NYY`).
 
-**Open them:** [samuelosullivan6-rgb.github.io/ChasePlus](https://samuelosullivan6-rgb.github.io/ChasePlus/)
-has every card and the roster on one page
-([the interactive page](https://samuelosullivan6-rgb.github.io/ChasePlus/results/xchase/player_cards/index.html);
-the Roster / Card switch is at the top, and
-[`#roster`](https://samuelosullivan6-rgb.github.io/ChasePlus/results/xchase/player_cards/index.html#roster)
-opens on the roster), served straight from this repository by GitHub
-Pages, for every season since 2021: a switcher on the page moves between
-seasons with the hitter, or the roster and its team, kept. No download
-needed.
-
-Start with the average hitter. This card is the baseline: how often an
-average right-handed hitter swings at a pitch outside the zone at each
-spot, in each count, against each pitcher hand. Everyone chases more with
-two strikes, and nobody should be judged for that.
+Start with the average right-handed hitter: his chase rate by spot, count
+and pitcher hand. Everyone chases more with two strikes.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="results/xchase/player_cards/2026/reference/average_rhb_dark.png">
   <img alt="The average right-handed hitter's chase rate by location, count and pitcher hand, with a numbered guide to reading a player card" src="results/xchase/player_cards/2026/reference/average_rhb_light.png" width="900">
 </picture>
 
-A player card shows the difference from that baseline instead: red where
-the player swings more than an average hitter would at the same spot, count
-and matchup, blue where they take more. Here is Salvador Pérez, 255th of
-261 by xChase+:
+A player card shows the difference from that baseline, red where he
+swings more than average and blue where he takes more. Salvador Pérez,
+255th of 261:
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="results/xchase/noted_players/cards/salvador_perez_dark.png">
   <img alt="Salvador Pérez's 2026 decision card: red below and away from the zone in every count, with a plan, leaks, a count table and a season trend" src="results/xchase/noted_players/cards/salvador_perez_light.png" width="900">
 </picture>
 
-How to read it, top to bottom:
+Top to bottom: the **header** names the problem (Pérez's choices cost
+23.0 runs per 600 PA while his chases produce 7.2 more than average: the
+choices, not the swing); the **zones** show where, around his own strike
+zone from the catcher's view; the **leaks** are ranked by runs (worst:
+two-strike breaking balls below the zone, chased 78% against 49%); the
+**plan** is written to the player, one pitch per line, each take saying
+how far off the zone those pitches were so "let it go" never means the
+borderline pitch, a take before two strikes first because it costs no
+strikeouts, ending "Keep swinging at strikes"; the **coach's note** says
+where to point the camera, since a card says where, not why; the **count
+table** says whether he struggles there; the **trend** says habit or
+slump; and the **target** is the number to get under, since leak chasing
+halves on its own.
 
-1. **The header says what kind of problem it is.** Pérez's swing choices
-   cost 23.0 runs per 600 PA, but those chases produce 7.2 more than an
-   average hitter's would. The swing is fine; the choices are not. That
-   makes it a coaching problem with a simple fix. The 16.9 "cost of
-   far-off chases" is the part of the choices from pitches at least 4
-   inches off the plate, the ones that are almost never called strikes;
-   the two bars beside it count all chases, which is why they don't add
-   to it.
-2. **The zones show where.** The rectangle is Pérez's own strike zone at
-   true height, seen from the catcher. Red runs below and away from it in
-   every count, against both hands. Gray is about average; white areas had
-   too few pitches to say anything. The outlines mark spots 15 points or
-   more above average.
-3. **The numbers on the zones are the leaks**, ranked by runs, each with
-   the pitcher hand when that hand threw most of its pitches and carries
-   most of its extra chases and their cost ("mostly vs RHP": its rates
-   count every pitch, so it says "mostly" unless that hand threw them
-   all) and the pitch count behind the rate. The
-   worst is two-strike breaking balls below the zone: Pérez swings at 78%,
-   where an average hitter on the same pitches swings at 49%.
-4. **The plan is written to the player**, in the words a hitter would use
-   in the cage, one pitch per line: "At 0-1 or 1-1, let breaking balls
-   below the zone go. You swung at 74% of them; hitters on average swing
-   at 42%. The ones you swung at were typically 4 inches off the zone."
-   That last sentence is on every take line, so "let it go" is never read
-   as "take the borderline pitch". The lines are numbered 1 and 2 in the
-   order to work on them, not the order of their runs, and each carries a
-   small tag with its leak's number from the list and the pictures: a
-   pitch he chases well above the league's rate comes before one he
-   chases at about it; among those, a take before two strikes comes
-   first, because it costs nothing in strikeouts and the league rarely
-   swings there, when it rests on 20 or more pitches (leaks on fewer
-   mostly do not repeat, step 16); the rest follow by runs. So Pérez's
-   line 1 is his third leak and his biggest, the two-strike breaking ball
-   below the zone, is line 2. The order also chooses: it can put a
-   smaller leak on the plan ahead of a bigger one, and a line under the
-   plan then names the bigger one and why it waits ("Leak 2 (two strikes,
-   mostly vs RHP, breaking balls away) costs more than line 1, but a take
-   before two strikes costs you no strikeouts, so line 1 goes first"), as
-   it names any count costing a run or more that no line sits in. A plan
-   that leaves anything for later calls its pitches the changes to start
-   with, never the only ones. A take on fewer than 20 pitches says it is
-   a small sample to go over on video first. A leak whose chased pitches
-   were typically under 4 inches off the zone is written as a video item, not a take
-   ("fastballs off the plate inside are one to go over on video with your
-   coaches, not a take rule"), and a plan of video items only says the
-   staff takes it from there. The two percentages are
-   quoted only when they print at least 5 points apart; a costly spot can
-   sit a point above the league rate when the extra swings come in its
-   costlier counts, and there the line says which counts and what they
-   cost, as on Vinnie Pasquantino's card: "You swung at these about as
-   often as other hitters do, but more of yours came at 0-2 and 3-2, and
-   over a season they cost you 0.9 runs."
-
-   The first printed line is always the first thing to do; everything
-   that frames the plan comes after the pitch lines. When the two pitches
-   explain less than a quarter of a loss of three runs or more, a line
-   says so, and calls them the biggest pieces only when they are: Trea
-   Turner's says his chase choices cost 7 runs across every count and the
-   two pitches above are two of the pieces, the ones to work on first. A
-   hitter whose choices are average or better overall is told so (J. P.
-   Crawford: "Overall your chase choices are better than average (+17.0
-   runs a season), and on far-off pitches as a whole they cost you nothing
-   net (the 0.0 at the top): the pitches above are spots to tighten, not a
-   new approach"), and a line in a count where the count table shows his
-   choices as a plus says why it is there ("In this count your choices are
-   a plus overall (+8.2 runs in the count table); this pitch is where they
-   give some back", or "come out about even" under a run). Contact is the
-   subject of a card when the chases lost 3 runs or more on what they
-   produced, more than the choices lost and more than the far-off tile:
-   the card's own numbers, not step 13's archetype, which exists only for
-   a net loss (the roster's Problem column still shows it). A hitter whose problem is contact
-   reads the reason in his first take line ("You miss on 68% of your
-   chases, against 45% for other hitters on the same pitches: contact is
-   your bigger cost, so this one is a take even when you could reach
-   it"), with the miss rates quoted when they print 5 points or more apart,
-   either way, and what his chases produced otherwise; with no take line it is the plan's
-   one line. Every plan ends with "Keep swinging at strikes." Every
-   sentence is written from the count table beside it, so a plan is empty
-   only when that table agrees that no count costs a run, and a hitter
-   who chases more with two strikes but produces there, like Luis Arráez,
-   is told there is nothing to change. Step 17 checks every plan against
-   the numbers beside it before it draws a card (see the checks below).
-5. **The coach's note is for the staff.** It says where to start: breaking
-   balls before two strikes, where a take costs nothing in strikeouts, and
-   it names the leak the plan leads with, so the player's first line and
-   the staff's first sentence are the same place; step 17 stops if they
-   are not. A card says where a hitter chases, not why. The same leak can
-   be pitch recognition, timing or a two-strike approach, and the drill is
-   different for each, so the card says where to point the camera.
-6. **The count table says whether he struggles there.** Next to his rates,
-   the xwOBA column is the count check (below): every plate appearance
-   that reached those counts, against the league's in the same counts.
-   Once Pérez reaches two strikes he is at .226 against the league's .234,
-   about average once noise is allowed for.
-7. **The season trend says whether it is a habit or a slump.** Pérez has
-   chased 32-39% of far-off pitches every season since 2021, against a
-   league rate of 18-22%. It is a habit, so the plan is worth the effort.
-   A caption under the trend says the 2026 point is measured against the
-   ABS box set from the hitter's height, about 3 inches shorter than the
-   zones before, so it is not on the same box as the earlier points (see
-   Limitations).
-8. **The target, beside the trend, is the number to get under.** Leaks
-   are a hitter's worst-looking spots, so about half of the excess goes
-   away on its own next season (see step 16 below). The card names the
-   leaks the target covers, all of them and not only the plan's, and says
-   how far above the league's chase rate, in points, he chased in them
-   together this season, what the frozen line expects next season with no
-   change at all, and that only under that is a fix; that is the number
-   step 20 scores. It is on the backtest's scale, so it need not match any
-   one leak's rates on the list. Pérez: "Leaks 1 to 3 together: you
-   chased 24 points above the league's chase rate in 2026 ... with no
-   change you'd be about 13 in 2027. Under 13 is a fix." On the 2022 to
-   2025 cards the target was set afterward, from a line fit only on the
-   seasons through that one, so the card says so and shows how the next
-   season came out ("You were at 13: not under it"). A hitter whose
-   forecast for next season is about at the league's rate gets no target
-   rather than a negative one, and the sentence says it is the forecast
-   ("about at it", or "at or under it" for a forecast more than 2 points
-   below): the plan beside it can still quote a rate well above the
-   league's. With no number to beat, its points for this season are the
-   card's own, the leak rows' rates pooled, so they always agree with the
-   rows above it (on the backtest's coarser baseline a two-strike breaking
-   ball the rows show above the league can come out below it). A card
-   whose leaks are all video items gets no number at all. A 2026 target
-   ends by saying its rates are measured against the ABS box set from the
-   hitter's height, not the zone of the seasons before.
-
-**Does taking more pay?** Before putting "take that pitch" on a card, step
-14 checked what happened to real hitters who did it. Across 941 pairs of
-back-to-back seasons, a 10-point cut in far-off chase rate came with:
-
-| Change | Per 10-point cut in far-off chase rate |
-|---|---:|
-| Walk rate | +3.1 pts |
-| Strikeout rate | -1.7 pts |
-| xwOBA | +.022 |
-| Swing rate at strikes | -2.5 pts |
-
-The last row is the cost: hitters who cut chases also got a little more
-passive on strikes. It is small next to the gain, and every card says it,
-so the message to the player is to take the far-off pitch, not to stop
-swinging.
+**Does taking more pay?** Across 941 back-to-back season pairs, a
+10-point cut in far-off chase rate came with +3.1 points of walk rate,
+−1.7 of strikeout rate, +.022 xwOBA and −2.5 points of swings at strikes:
+a small cost next to the gain.
 
 ### Checking the advice
 
-Step 14 tests the general idea. Steps 15 and 16 test the cards themselves:
-is the hitter actually struggling where his leaks are, and when hitters
-fixed the exact leaks on their card, did it pay?
+**The count check (step 15)** looks at the count, not the pitch: a
+hitter's xwOBA once a plate appearance reaches those counts, against the
+league's in the same counts. Ahead-in-the-count performance beyond a
+hitter's level barely repeats (r = 0.07); two-strike performance does
+(0.53). Both are shrunk (DerSimonian-Laird), and ±10 points of xwOBA
+marks *struggling* or *productive*.
 
-**The count check (step 15).** A leak is one pitch inside a count:
-"two strikes, breaking balls below the zone." Nobody should rebuild a
-hitter's whole two-strike approach over one pitch, so the check looks at
-the count, not the pitch: how the hitter does once a plate appearance
-reaches those counts. That is the xwOBA of every plate appearance that got
-there, against the league's in the same counts.
-
-The league comparison matters more than it looks. In 2026 the league's
-xwOBA is .358 once a plate appearance reaches a hitter's count and .234
-once it reaches two strikes, so a raw ".900 OPS after 2-0" is about
-average, not hot. Most of a count split is also noise:
-
-| xwOBA vs the league in the same counts | Split halves | Year to year |
-|---|---:|---:|
-| Overall | 0.57 | 0.66 |
-| Ahead in the count, beyond his overall level | 0.05 | 0.07 |
-| Even or behind, beyond his overall level | 0.17 | 0.29 |
-| Two strikes, beyond his overall level | 0.36 | 0.53 |
-
-How a hitter does when he's ahead in the count, once his overall level is
-known, doesn't repeat at all. How he does with two strikes does. So the
-check estimates the two parts separately (his overall level, and how much
-better or worse he does in those counts) and shrinks each by how much
-hitters really differ in it that season (DerSimonian-Laird). A hitter is
-*struggling* in those counts when the estimate is at least 10 points of
-xwOBA below the league, and *productive* when it is 10 above. On a
-hitter's card it is the xwOBA column of the count table. The noted-hitters
-report gives the verdict under each plan.
-
-**Does fixing a leak pay? (step 16).** For every hitter qualified in
-back-to-back seasons (756 pairs) and every qualified season split into
-first and second halves at the hitter's own plate-appearance midpoint
-(1,194 pairs), step 16 finds the first period's card leaks with the
-card's own rule and watches the same spots in the next period.
-
-The catch is regression to the mean. Leaks are a hitter's worst-looking
-spots, so part of each one is bad luck. On average, how far above the
-league a hitter chases in his leaks halves the next period with nobody
-doing anything: from 15 points to 7 season to season, and from 16 to 7
-half to half. So the test compares what each hitter did with what his
-first period predicted, and every regression holds the first period's
-level fixed. Standard errors are clustered by hitter.
-
-Per 10-point cut in leak chasing beyond what was predicted:
+**Does fixing a leak pay? (step 16)** For 756 season pairs and 1,194
+half-season pairs, each hitter's card leaks are found in the first period
+and watched in the next. Excess chasing in leaks halves on its own (15
+points to 7), so everything is measured against that prediction. Per
+10-point cut beyond predicted:
 
 | Change | Season to season | First half to second |
 |---|---:|---:|
 | xChase+ | +4.9 ± 0.6 | +4.2 ± 0.5 |
 | Offense, runs per 600 PA (xwOBA) | +1.4 ± 0.5 | +2.1 ± 0.4 |
-| Offense, runs per 600 PA (wOBA) | +0.9 ± 0.6 | +1.3 ± 0.5 |
 | Walk rate | +0.8 pts | +0.5 pts |
 | Strikeout rate | -0.1 pts | -0.3 pts |
 | Swing rate at strikes | -0.5 pts | -0.3 pts |
 
-Offense runs are batting runs above average built on xwOBA:
-(xwOBA − league xwOBA) / wOBA scale × 600. That puts them in the same
-units as xChase+'s runs, and xwOBA leaves out the ball-in-play luck that
-wOBA (the next row) keeps. Each season's wOBA scale (1.20-1.23) is fit
-from Savant's wOBA weights against this project's run values. wRC+ would
-need park factors this data doesn't have, and OPS weights on-base and
-slugging wrong.
+Each run of choices recovered came back as 0.75 ± 0.31 (seasons) and
+1.22 ± 0.27 (halves) runs of offense; 1 would mean the card's runs are
+the runs a hitter gets back. The count check doesn't change the payoff,
+so every leak stays in the plan.
 
-**The run accounting holds up.** Each run of choices a hitter recovered
-in his leaks, as the cards price it, came back as 0.75 ± 0.31 (season
-pairs) and 1.22 ± 0.27 (halves) runs of xwOBA offense. Exactly 1 would
-mean the card's runs are the runs a hitter gets back.
-
-**The count check doesn't change the payoff.** Hitters gained about as
-much from fixing a leak whether they were struggling in those counts or
-hitting well there:
-
-| In the leak's counts, first period | Season to season | First half to second |
-|---|---:|---:|
-| Struggling | +1.2 ± 1.2 (111 pairs) | +3.0 ± 0.9 (218) |
-| Average | +1.8 ± 0.8 (276) | +1.7 ± 0.7 (478) |
-| Productive | +1.4 ± 0.7 (369) | +1.8 ± 0.7 (498) |
-
-Offense runs per 600 PA per 10-point cut beyond what was predicted. As a
-straight interaction, +20 points of xwOBA in those counts moves the payoff
-by +0.01 ± 0.44 runs (seasons) and +0.04 ± 0.49 (halves). The raw,
-unshrunk split shows the same. A hitter who hits well in a count still
-gains from taking the one pitch he keeps chasing there. So the cards show
-the count check as context and keep every leak in the plan.
-
-**Limits.** Nobody assigned these hitters to fix anything, so this is
-association, not an experiment. A hitter who is healthy and seeing the
-ball well may chase less and hit better for the same reason. The run
-accounting landing near 1 says that isn't inflating the result much, but
-it can't rule it out. Season to season, most of the effect comes from
-hitters who chased more than predicted losing offense (-3.0 ± 1.1 runs
-against those who did as predicted). Those who cut more gained 7.2 ± 1.5
-xChase+ points but only +0.2 ± 1.2 runs of offense. Half to half, both
-sides show it (+3.4 ± 1.2 and -3.0 ± 1.1). So the first promise to a
-hitter is fewer wasted counts, not a better slash line, and every card
-and report says so in those words. The backtest's leak rule uses
-a simpler league baseline than the cards (league chase rate by count,
-distance, pitch group and side of the zone, instead of a smoothed
-location surface) and picks the same top leak for 207 of 219 hitters
-in 2026.
+**Limits.** Association, not an experiment. Season to season most of the
+effect is hitters who chased *more* than predicted losing offense (−3.0
+± 1.1 runs); those who cut more gained xChase+ but about broke even. So
+the first promise is fewer wasted counts, not a better slash line.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="results/xchase/figures/leak_fix_direction_dark.png">
   <img alt="Every hitter pair's change in offense against how much more or less he chased in his leaks than predicted, season to season and half to half, with the cut-more, as-predicted and chased-more groups marked" src="results/xchase/figures/leak_fix_direction.png" width="720">
 </picture>
 
-The same result as a picture: each dot is one hitter pair, and the
-markers are the three groups' changes against the as-predicted group with
-the first period's levels held fixed. Season to season the chased-more
-group is clearly below zero and the cut-more group is not clearly above
-it; half to half both sides move.
+**Frozen before 2027 (step 19).**
+[`leak_predictions_2026.csv`](results/xchase/coaching/leak_predictions_2026.csv)
+is a stamped pre-season prediction for every 2026 card's leaks (next =
+−3.8 + 0.72 × 2026), the same number as each card's target; step 20
+scores it after 2027.
 
-**Frozen before 2027 (step 19).** Everything above was scored after the
-fact. So before the 2027 season, step 19 wrote down a prediction for
-every 2026 qualified hitter's card leaks in
-[`leak_predictions_2026.csv`](results/xchase/coaching/leak_predictions_2026.csv):
-the spots on his card with their count check, how far above the league
-he chased there in 2026 on the backtest's scale (12.4 points on average),
-and the 2027 excess the season-to-season line predicts (next = −3.8 +
-0.72 × 2026, so 5.1 points on average). The file is stamped with its
-freeze date and the commit it was made from, and step 19 won't rewrite it
-with different numbers: a rerun rebuilds every frozen cell and each
-prediction from the frozen line on today's data and stops if one has
-moved. The columns that describe the card at the time (its rank, the
-card's league rate and runs, the count check) move with the pricing and
-are only reported. The October 2026 side-of-zone model re-ranked the
-leaks on 18 of the 2026 cards, so they no longer list all their frozen
-cells; their targets stay, named for the frozen spots, since those are
-what step 20 scores (12, 12, 9 and 3 cards in the 2022 to 2025 files).
-Step 16 now refits the season line at 0.71 × 2026 − 3.8 on 756 pairs;
-the frozen 0.72 is the one the cards and step 20 use. The same two numbers are the target on each
-hitter's card, so the player, the coach and the test are all looking at
-the same line. After 2027, step 20 scores the file on the same cells,
-not the hitter's 2027 leaks, for every hitter qualified in 2027 with at
-least 10 pitches there. Is the actual 2027 excess centered on the
-prediction? Against actual minus predicted, with the 2026 levels held
-fixed, do xChase+ and xwOBA offense change by the frozen +4.7 ± 0.6
-points and +1.4 ± 0.5 runs per 600 PA per 10-point cut? The line and
-payoffs to use are the frozen ones, not the ones step 16 refits once 2027
-is in. One caveat is known now: 41 hitters have a card leak (44 in all)
-that the backtest's simpler baseline puts at or below the league, so the
-line may not fit them. The file marks them, and the main test is the
-other 188.
-
-**The loop, tested on four pairs of seasons (step 20).** The 2027 test
-needs 2027. To check that the freeze-and-score loop works before then,
-the same three steps were run on every earlier season that has a next
-one. Each season's cards' leaks were frozen with a line fit only on the
-season pairs that end by that season
-([`leak_predictions_2022.csv`](results/xchase/coaching/leak_predictions_2022.csv)
-through `leak_predictions_2025.csv`, marked `out_of_sample = no`, since
-the method itself was built with every season in view), and step 20
-scored each file on the season that followed, for the 159 to 161
-hitters per pair who qualified again and saw at least 10 pitches in
-their frozen cells
-([`leak_scores_2023.csv`](results/xchase/coaching/leak_scores_2023.csv)
-through `leak_scores_2026.csv`, with every quoted number in
-`leak_scores_summary_<season>.csv`). Each pair's reference payoffs are
-the backtest refit on the season pairs ending by the frozen season, so
-the scored season is in neither the line nor the reference.
-
-**The slope held in all four pairs; the level held in two.** Actual
-leak chasing against predicted, actual = a + b × predicted, came out
-with b near 1 every time. In the two most recent pairs the prediction
-was centered. In the two earliest, whose lines were fit on only one and
-two pairs of seasons, hitters chased about 2 points more than the line
-predicted:
-
-| Leak chasing, points above the league | 2022 on 2023 | 2023 on 2024 | 2024 on 2025 | 2025 on 2026 |
-|---|---:|---:|---:|---:|
-| Hitters scored | 159 | 161 | 160 | 160 |
-| Frozen season | 12.3 | 12.4 | 13.9 | 12.8 |
-| Predicted next season | 4.1 | 4.8 | 6.5 | 5.6 |
-| Actual next season | 6.1 ± 0.9 | 7.1 ± 0.8 | 6.5 ± 0.9 | 5.0 ± 0.8 |
-| Actual − predicted | +2.1 ± 0.7 | +2.3 ± 0.7 | +0.0 ± 0.7 | −0.6 ± 0.7 |
-| Actual − predicted, main group | +1.6 ± 0.7 (126) | +2.1 ± 0.8 (129) | +0.2 ± 0.8 (130) | −1.1 ± 0.8 (130) |
-| a | +1.9 ± 0.9 | +3.3 ± 0.9 | −0.9 ± 1.1 | −0.8 ± 1.0 |
-| b | 1.04 ± 0.12 | 0.78 ± 0.12 | 1.14 ± 0.12 | 1.02 ± 0.12 |
-
-The main group is the hitters whose card leaks the backtest's rule would
-also have listed, which step 19 calls the main test. The hitters step 19
-marks, 30 to 33 per pair, chased more than the line predicted in three
-of the four pairs (+3.8 ± 1.7, +2.9 ± 1.5, −0.5 ± 1.5 and +1.5 ± 1.5).
-
-**The payoff held in all four pairs for what the cards promise first,
-and in two of four for offense.** Per 10-point cut beyond predicted,
-with the frozen season's levels held fixed, next to the range of the
-four references:
-
-| Per 10-point cut beyond predicted | 2022 on 2023 | 2023 on 2024 | 2024 on 2025 | 2025 on 2026 | Reference, pairs to the frozen season |
-|---|---:|---:|---:|---:|---:|
-| xChase+ | +6.0 ± 1.2 | +6.0 ± 1.4 | +3.3 ± 1.1 | +7.5 ± 1.5 | +4.1 to +5.1 |
-| Offense, runs per 600 PA (xwOBA) | +2.1 ± 1.0 | +0.1 ± 1.1 | +1.1 ± 1.3 | +3.6 ± 1.0 | +0.9 to +2.0 |
-| Offense, runs per 600 PA (wOBA) | +2.8 ± 1.3 | −1.1 ± 1.4 | +0.3 ± 1.2 | +3.1 ± 1.1 | +0.5 to +1.6 |
-| Walk rate | +0.9 pts | +0.7 pts | +0.7 pts | +1.1 pts | +0.7 to +0.8 pts |
-| Strikeout rate | +0.2 pts | −0.1 pts | −0.0 pts | −0.1 pts | −0.2 to −0.0 pts |
-| Swing rate at strikes | −0.4 pts | −0.2 pts | −0.6 pts | −0.7 pts | −0.5 to −0.4 pts |
-| Offense runs per run of leak choices recovered | 1.34 ± 0.72 | 0.70 ± 0.76 | 0.27 ± 0.73 | 0.78 ± 0.59 | 0.73 to 1.50 |
-
-xChase+ went up in every pair, by more than twice its standard error
-each time, and in three of the four pairs within one standard error of
-its reference; in 2025 on 2026 it came out larger, +7.5 against +4.1.
-Walks rose and strikeouts did not move in all four. Offense is noisier.
-xwOBA runs came out positive in all four pairs but clearly above zero in
-two (2022 on 2023 and 2025 on 2026) and within a standard error of zero
-in the other two; the average of the four, +1.7 runs, sits next to the
-backtest's pooled +1.4 ± 0.5. The wOBA version, which keeps the
-ball-in-play luck, is clearly positive in the same two pairs and not in
-the other two. The run accounting is positive in all four and consistent
-with 1 in all four, but with standard errors of 0.6 to 0.8 no single
-pair pins it down. So the four pairs say what the pooled backtest says:
-a hitter who cuts a leak beyond what regression gives him chases less,
-walks more and strikes out no more every season, and gains offense on
-average but not in every season. Any one pair of 160 hitters is a noisy
-test of the size, and 2026 is the first season with zones set from
-height, so the last column's sizes are the least settled; the direction,
-the slope and the run accounting are what the four pairs show. The 2027
-score should look like one of these columns: a slope near 1, xChase+ and
-walks up, and an offense number anywhere from zero to a few runs per
-10-point cut.
-
-**The split by the count check does not repeat.** In 2025 on 2026 the
-offense payoff was concentrated in hitters who were struggling or
-average in the leak's counts and small for those hitting well there.
-The three earlier pairs do not show it, and in 2022 on 2023 it ran the
-other way:
-
-| Offense runs per 10-point cut, by the count check in the frozen season | 2022 on 2023 | 2023 on 2024 | 2024 on 2025 | 2025 on 2026 |
-|---|---:|---:|---:|---:|
-| Struggling | −0.3 ± 1.9 (25) | +0.6 ± 1.4 (27) | +3.0 ± 2.9 (22) | +7.2 ± 3.0 (23) |
-| Average | +0.8 ± 1.6 (57) | −0.5 ± 2.2 (55) | +0.9 ± 2.1 (65) | +5.0 ± 1.5 (65) |
-| Productive | +3.8 ± 1.5 (77) | +0.2 ± 1.7 (79) | +1.1 ± 1.8 (73) | +0.5 ± 1.5 (72) |
-
-With 22 to 27 struggling hitters per pair, one pair cannot show a split,
-and the four together agree with the pooled backtest, which found none.
-The cards keep every leak in the plan and show the count check as
-context, and that call stands.
-
-The midseason check works the same way. Scored on the first half of 2026
-only (`--period h1`, 157 hitters,
-[`leak_scores_2026_h1.csv`](results/xchase/coaching/leak_scores_2026_h1.csv)),
-the 2025 predictions were again centered (5.7 predicted, 5.1 actual,
-−0.5 ± 0.8) and the payoffs sat on the half-to-half reference: +4.9 ± 1.5
-xChase+ points and +2.2 ± 1.2 runs per 10-point cut against +4.1 ± 0.5
-and +1.7 ± 0.5. That is the July check a coach can run on the spring's
-cards.
+**The loop, tested on four earlier pairs (step 20).** Each of 2022-2025
+was frozen with a line fit only through that season and scored on the
+next (`coaching/leak_predictions_<season>.csv`,
+`leak_scores_<season>.csv`). The slope held in all four (b = 0.78-1.14),
+the level in the two most recent; xChase+ and walks rose in every pair,
+strikeouts didn't move, and offense was positive in all four, clearly in
+two. Scored on the first half of 2026 alone (`--period h1`) the
+predictions were again centered: a July check for the spring's cards.
 
 ### Using the cards
 
-A card is a diagnosis in the player's own units: count, pitch type,
-location, and one pitch to take. Some things to keep straight when the
-cards go from a file to a cage.
-
-- **Start every session with the average hitter's card.** Everyone
-  chases more with two strikes. A player needs to see what normal looks
-  like before his own card, in the same colors, means anything.
-- **Promise fewer wasted counts, not a better line.** The backtest's
-  payoff is mostly runs not lost by hitters who chased more. Hitters who
-  cut more than predicted gained xChase+ points and walks, and about
-  broke even in offense season to season.
-- **Measure against the target, not the current rate.** Leak chasing
-  halves on its own. A coach who runs the plan and sees the number drop
-  from 15 to 7 has seen regression to the mean, not the plan. The target
-  on the card is what the line expects with no change; only below that
-  is a fix, and that is what step 20 scores.
-- **The card says where, not why.** The same leak can be pitch
-  recognition, timing, or a two-strike approach that protects too wide,
-  and the drill is different for each. The card points the camera; it
-  does not replace the video.
-- **It is the far-off pitch, every time.** Each take line in the plan says
-  how far off the zone the chased pitches were. A take rule is for the pitch
-  that is clearly a ball, never the borderline one, and a two-strike take
-  of a borderline pitch is a called third strike; a leak whose chased
-  pitches were typically under 4 inches off the zone is written as a video
-  item instead.
-- **Start before two strikes.** The plan's lines are in the order to work
-  on them: a take in an early count costs nothing in strikeouts and the
-  league rarely swings there, so it comes first even when a two-strike
-  leak costs more runs, as long as it rests on 20 or more pitches; the
-  plan then names the bigger leak and says it comes next. The leak list
-  stays ranked by runs; the plan's lines are numbered 1 and 2 and tagged
-  with their leaks' numbers.
-- **Check at midseason on the frozen cells.** The half-season pairs
-  carry the same payoff as the season pairs, so the spring's frozen cells
-  scored on the first half of the season (`step 20 --period h1`, split at
-  each hitter's plate-appearance midpoint) is a progress check with a
-  known yardstick in July instead of November.
-- **The method ports; the numbers don't.** For a college or minor-league
-  feed, re-fit the run values, the called-strike model and the league
-  baselines on that league's data before trusting any card. The league
-  comparison is what makes a card fair, and it has to be that league.
-  For TrackMan files, `scripts/college_build.py` does the refitting (see
-  [TrackMan files: the college path](#trackman-files-the-college-path)).
-
-The cards for the 17 hitters named in the two coaching reports are in
-[`results/xchase/noted_players/`](results/xchase/noted_players/README.md),
-each with a printable two-page letter-size version in
-[`noted_players/print/`](results/xchase/noted_players/print/): the plan,
-the target, the coach's note, the pictures the leaks are numbered on (a
-leak named for a pitcher hand on that hand's row, both sides of a switch
-hitter, the misses row for a contact problem) and the leaks on page 1,
-and on page 2 a guide to the card in the player's own words, the average
-hitter's two-strike picture and the season chart. Every qualified
-hitter's card, with switches for pitch type, the baseline and
-swing-and-miss, is in
-`results/xchase/player_cards/<season>/index.html` (hosted at the link
-above; one page per season, with a switcher on the page, and the season's
-pitches in `pitches.bin` beside it, fetched with the first card, so it
-needs a web server rather than a double-click). A card has one plan: the
-vs RHP and vs LHP tabs show it unchanged, with each pitch line's pitches
-from that hand under it, and switch the leaks and the count table to that
-hand. The same page's Roster view (`#roster`, or
-`#roster/NYY` for one team) is every hitter by team, sorted by runs at
-stake, with the top leak, the count check, the number to beat and the
-plan's first pitch line; a tap on a name opens his card, and a team
-picked there narrows the hitter list on the card. Every card is drawn from the
-catcher's view, to scale, around the hitter's own strike zone, which from
-2026 is set from each hitter's height. Nobody is mirrored, so a
-left-handed batter's inside is on the right. Switch hitters get one row
-for each side of the plate, which is also their pitcher-hand split.
+Start every session with the average hitter's card. Promise fewer wasted
+counts, not a better line. Measure against the target, not the current
+rate: 15 falling to 7 is regression, not the plan. The card says where,
+not why. It is the far-off pitch, every time, because a two-strike take
+of a borderline pitch is a called third strike. Start before two strikes.
+The 17 noted hitters' cards and printable versions are in
+[`results/xchase/noted_players/`](results/xchase/noted_players/README.md).
 
 ## How it works
 
-1. **Price each chase.** Cost = the value of taking the pitch minus the value
-   of what the swing produced. Both values come from count run values built
-   from that season's games. The take side weighs "ball" against "called strike" using
-   a called-strike model. That model is a logistic regression fit separately
-   for each season, on distance outside the zone plus the count, with its
-   own distance curve for each side of the zone the pitch missed on (above,
-   below, the side or a corner). Each curve is built so it can never rise
-   with distance. A whiff adds
-   a strike, a foul adds a strike unless there are already two. A ball in
-   play is worth, for Chase+, the league-average run value of its outcome
-   that season: single, double, triple, home run or out (double plays,
-   fielder's choices, sacrifices and reaching on an error count as outs,
-   as in wOBA). For xChase+ it gets a value from its xwOBA instead (a
-   straight line fit, each season, from xwOBA to those same outcome
-   values on chases put in play). Neither depends on the runners or outs,
-   so the swing side is context neutral like the take side. The roughly
-   1% of balls in play with no xwOBA keep their outcome's value in both.
-2. **Compare to the league.** Each pitch is compared with what the league
-   lost on average on the same kind of pitch: same season, count and
-   distance bucket. That way a hitter isn't charged for working deep counts
-   or credited for taking pitches nowhere near the zone.
-3. **Shrink small samples.** Each hitter-season is pulled toward its
-   season's mean in proportion to its standard error, using the
-   DerSimonian-Laird estimator.
-4. **Put it on a 100 scale.**
+1. **Price each chase.** Cost = the value of taking the pitch minus the
+   value of what the swing produced, from that season's count run values.
+   A per-season logistic called-strike model (distance, count, one curve
+   per side of the zone) weighs ball against called strike. A ball in
+   play is worth its outcome's league-average value (Chase+) or a
+   straight-line fit from xwOBA to those values (xChase+); neither depends
+   on runners or outs.
+2. **Compare to the league** on the same season, count and distance.
+3. **Shrink small samples** toward the season mean (DerSimonian-Laird).
+4. **Put it on a 100 scale:**
+   `xchase_plus = 100 + 100 * runs_saved_shrunk / league_chase_cost_per_600_pa`
 
-   ```
-   xchase_plus = 100 + 100 * runs_saved_shrunk / league_chase_cost_per_600_pa
-   ```
-
-   (Chase+ is the same formula on the Chase+ run.) 100 is league average.
-   130 means a hitter saved runs worth 30% of what an average hitter lost
-   to chasing that season. The xwOBA line keeps the league's average
-   ball-in-play value unchanged, so both scores use the same league scale.
-
-Everything is computed one season at a time: the run value tables, the
-called-strike model, the league baseline, shrinkage, ranks and
-qualification floors. Adding or removing a season never changes another
-season's numbers. The league
-environment shifts from year to year, and 2026 is the first season under
-MLB's ABS Challenge System.
+Every season is computed on its own; 2026 is the first under MLB's ABS
+Challenge System.
 
 ## Reading the leaderboard
 
-| Question | Column |
-|---|---|
-| Who was better within one season? | `runs_saved_shrunk` (runs per 600 PA vs. that season's league) |
-| Who was more dominant, comparable across seasons? | `xchase_plus` (100 = league average) |
-| How many runs on one fixed yardstick? | `runs_saved_vs_anchor_shrunk` (every season priced against 2024) |
-
-- **League chase cost:** the league lost 36.3, 35.2, 37.6, 35.8, 36.8 and
-  43.2 runs per 600 PA to chasing in 2021 through 2026. Part of 2026's
-  rise is the shorter ABS zone (see Limitations).
-- **Where the files are:** everything for xChase+ is in `results/xchase/`
-  (along with the files that compare the two) and everything for Chase+ in
-  `results/chase/`, with the same file names. The run value tables both
-  use are in `results/run_values/`. In
-  the xChase+ files the score columns are named `xchase_plus`,
-  `xchase_plus_se`, ... so the two can't be mixed up.
-- **Uncertainty:** the charts and tables show ± `xchase_plus_posterior_sd`,
-  the uncertainty left after shrinkage (usually 7-10 points; 9-12 for
-  Chase+). The files also have `xchase_plus_se`, the standard error before
-  shrinkage (usually about 10 points; about 12 for Chase+). xChase+ is
-  more precise because an xwOBA value varies less than an actual result.
-- **Other files:** `chase_cost_leaderboard.csv` adds each hitter's qualified
-  seasons into one career line. `hitter_value_leaderboard.csv` places chase
-  value next to total offense. `xchase_leaderboard_<season>.csv` ranks by
-  xChase+ with Chase+, both ranks and luck alongside. `matchups/` has
-  xChase+ by handedness matchup (see the appendix). `coaching/` splits
-  each hitter's loss into swing decisions and swing results: the bottom
-  10 in depth (`bottom10_<season>_*`, with draft notes in
-  `bottom10_<season>_coaching_notes.md`) and every qualified hitter
-  scored on how coachable the loss looks (`actionability_<season>.csv`,
-  with notes in `actionable_hitters_<season>.md`). It also holds the
-  checks on the advice: the count check for every hitter
-  (`count_check_<season>.csv`, how much each part repeats in
-  `count_check_reliability.csv`), the leak backtest (one row per
-  hitter pair in `leak_backtest_pairs.csv`, every quoted number in
-  `leak_backtest_summary.csv`), the frozen predictions
-  (`leak_predictions_<season>.csv`) and their scores on the next season
-  (`leak_scores_<season>.csv`, one row per hitter, and
-  `leak_scores_summary_<season>.csv`, with `_h1` for a midseason
-  check). `player_cards/<season>/` has every hitter's decision card for
-  that season and the roster (`index.html`, with a 3D view of any zone
-  picture, and its pitches in `pitches.bin`) and the average-hitter
-  reference cards; `player_cards/` itself has the CSVs behind them
-  (`player_cards_<season>.csv`, with each hitter's team, and
-  `team_view_<season>.csv`, the roster's columns), the season list the
-  switcher reads (`seasons.js`) and the 3D stills (`terrain/`);
-  `noted_players/` has the cards for the 17 hitters the coaching reports
-  name and their printable versions (`print/`).
-- **Version:** the `stat_version` column of `chase_plus_league_scale.csv`
-  says which version of the stat a results folder was built with.
-
-**Qualifying:** a hitter needs 600 out-of-zone pitches seen and 300 plate
-appearances in a season. A season still in progress gets proportionally
-lower floors. There is no
-chase-count minimum, but `cost_per_chase` is left blank for hitters with
-fewer than 120 chases.
+`runs_saved_shrunk` ranks within a season (runs per 600 PA), `xchase_plus`
+compares across seasons, `runs_saved_vs_anchor_shrunk` prices every
+season against 2024; ± is `xchase_plus_posterior_sd` (7-10 points).
+`results/xchase/` holds everything for xChase+, `results/chase/` the
+same files for Chase+, with `matchups/`, `coaching/`,
+`player_cards/<season>/` and `noted_players/` beneath. Qualifying: 600
+out-of-zone pitches and 300 PA, prorated in-season.
 
 ## Limitations
 
-- **xwOBA only knows exit velocity and launch angle.** It ignores spray
-  direction and sprint speed, so a hitter who beats xwOBA every year for
-  those reasons would be understated by xChase+. Luck doesn't repeat in
-  any of the five pairs of seasons, so there's no sign of that.
-- **The xwOBA line is fit on chases only.** Its implied wOBA scale is
-  1.15-1.21 each season, at or a little below the usual 1.2-1.25, because
-  it is fit on chased balls in play priced in this project's own run
-  values.
-- **Chase+ treats every out the same.** A chased ball in play that ends
-  in a double play, a sacrifice fly, a fielder's choice or an error is
-  priced as an average out, because those depend on the runners and the
-  fielders. That keeps Chase+ context neutral, but it also means a
-  productive out gets no extra credit.
-- **Shrinkage is a little too strong at the extremes.** The most and least
-  disciplined hitters come out about 3 runs per 600 PA too close to average
-  (7-8 Chase+ points), so the top and bottom values are understated.
-- **The called-strike model knows which side of the zone a pitch missed,
-  but nothing about the pitch.** Until October 2026 it had one distance
-  curve for every take, and its biggest misses were by side: out of fold,
-  corners were called strikes 120 to 192 fewer times per 1,000 takes near
-  the zone than it predicted, and takes just above the zone more often (in
-  2026, 234 more per 1,000 borderline and 118 just off). Each side now has
-  its own curve. Every cell of the side-by-distance check is within 20 per
-  1,000 out of fold, and none is worse than under the old model on the same
-  takes. The switch moved qualified hitters by a median of 0.2 to 0.4
-  xChase+ points a season (0.4 in 2026), at most 2.0 (Cedric Mullins, 86
-  to 88 in 2026; Spencer Steer went 94 to 92), and the league's chase cost
-  by 0.3 to 0.7 runs per 600 PA. What remains: the model still has no pitch type, catcher, umpire
-  or challenge, takes just above and below the zone in 2021-2024 come out
-  a little over-called (11 to 20 per 1,000, each within 2.5 standard
-  errors), and it
-  prices a take the way pitches were called that season, so a 2026 take
-  just above the ABS box counts as a likely strike because umpires called
-  the taller zone.
-- **Each season's run values come from that season alone.** That keeps
-  seasons independent, but a season in progress has noisier run
-  expectancy for rare base-out states than a full one.
-- **2026 is measured against a shorter zone.** From 2026 Statcast records
-  each hitter's zone as the ABS box, set from his height (the top at 53.5%
-  of it, the bottom at 27%): within a hitter, the recorded top does not
-  move at all in 2026, against a spread of 0.07-0.10 ft in earlier
-  seasons. The box is 2.86 inches shorter than the same hitters' 2025
-  stance zones (top 3.435 to 3.215 ft, bottom 1.605 to 1.622 ft), and
-  umpires kept calling a taller zone: takes 0-2 inches above the recorded
-  top were called strikes 76% of the time in 2026, against 41-58% in
-  2021-2025. So more pitches count as outside the zone, and about 2.1 of
-  the 2.6-point rise in chase rate (28.3% to 30.5%) is the box, not the
-  hitters. The league's chase cost rose from 36.8 to 43.2 runs per 600 PA:
-  out-of-zone pitches per plate appearance up 6%, chase rate up 8% and cost
-  per chase up 2%, the last mostly in borderline chases (0.063 to 0.076
-  runs). Chase+ and xChase+ are relative to each season's league, so a
-  ranking within 2026 is unaffected, and the 2025-2026 reliability pair is
-  in line with the others; but a 2026 chase rate, and the 2026 point on a
-  card's trend, sits on a different box from the seasons before.
+- **xwOBA only knows exit velocity and launch angle**; luck never
+  repeats, so there's no sign that hurts anyone.
+- **The xwOBA line is fit on chases only** (implied wOBA scale 1.15-1.21).
+- **Chase+ treats every out the same.**
+- **Shrinkage is a little strong at the extremes** (7-8 points).
+- **The called-strike model knows the side of the zone but not the
+  pitch**: no pitch type, catcher, umpire or challenge.
+- **2026 is measured against a shorter zone.** Statcast now records the
+  ABS box set from height, 2.86 inches shorter than 2025's, while umpires
+  kept calling the taller one. About 2.1 of the 2.6-point rise in chase
+  rate is the box; rankings within 2026 are unaffected, but a 2026 trend
+  point sits on a different box.
 
 ## Running it
 
@@ -873,11 +327,11 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-Run the scripts in order. Each one overwrites its own outputs. Steps 4-8
-build Chase+; rerun them with `--expected-contact` to build the same
-files for xChase+ into `results/xchase/` (the charts go to
-`results/xchase/figures/`). Chase+ goes to `results/chase/`, and neither
-run touches the other's files.
+Run the scripts in order; steps 4-8 build Chase+, and rerun with
+`--expected-contact` build xChase+ into `results/xchase/`.
+
+<details>
+<summary>What each script does</summary>
 
 | Step | Script | What it does |
 |---|---|---|
@@ -903,12 +357,7 @@ run touches the other's files.
 | 20 | `scripts/20_score_leak_predictions.py` | Scores a frozen file on the season that followed: is the actual leak chasing centered on the prediction, and did the frozen payoffs hold on the frozen cells? Run after the next season is in (needs step 19). `--period h1` scores the first half only, for a midseason check |
 | 22 | `scripts/22_build_season_pages.py` | The card site for every season: runs step 17 per season, freezing an earlier season's targets first (step 19 `--retrospective`) when its frozen file is missing, so every page carries the same wording and the same season switcher (needs the inputs of step 17 for each season) |
 
-Step 21 was the roster as a page of its own (`teams.html`). Since October
-2026 the roster is a view of step 17's page, with the team on every row
-of `player_cards_<season>.csv`, and the number is retired; the old
-addresses send on to the roster view.
-
-All together:
+</details>
 
 ```
 python scripts/01_download_baseline.py
@@ -939,219 +388,39 @@ python scripts/22_build_season_pages.py
 python scripts/18_make_terrain_figures.py
 ```
 
-Step 22 runs step 17 for every season since 2021, so the pages agree;
-one season alone is `python scripts/17_build_player_cards.py --season
-2026`.
-
-Step 19 is not in the list on purpose: it was run once, before 2027, and
-a rerun only checks that the frozen file still reproduces. Step 20 runs
-after 2027 is in the data (`python scripts/20_score_leak_predictions.py`).
-The retrospective test of that loop is three commands per season, run
-for 2022 through 2025 (step 22 runs the first two for any earlier season
-whose frozen file is missing):
-
-```
-python scripts/17_build_player_cards.py --season 2025 --data-only
-python scripts/19_freeze_leak_predictions.py --season 2025 --retrospective
-python scripts/20_score_leak_predictions.py --season 2025
-```
-
-`04_build_chase_leaderboard.py` prints a short summary by default. Add
-`--diagnostics` for the model and calibration tables, or `--verbose` for
-full explanations too. Those two flags only change what is printed.
-
-`09_build_xchase_comparison.py` first checks that the two runs differ only on
-balls in play (same data, same hitter-seasons, same takes, whiffs and
-fouls, same league scale) and stops if not. Then it writes, in
-`results/xchase/`:
-
-- `xchase_leaderboard_<season>.csv`: ranked by xChase+, with Chase+, both
-  ranks, luck, its standard error and z-score
-- `xchase_comparison_<season>.csv`: the same hitters sorted by luck
-- `regression_candidates.csv`: hitters whose luck is at least 2 standard
-  errors from zero, and which way their Chase+ should move
-- `xchase_reliability.csv`: year-to-year correlations of Chase+, xChase+
-  and luck
-- `offense_same_season.csv`: Chase+ against wOBA and xChase+ against
-  xwOBA, same season
-- `offense_next_season.csv`: whether each stat says anything about next
-  season's xwOBA beyond this season's xwOBA and chase rate
-
-The Statcast data files in `data/` are not committed, because the raw pull
-is several hundred MB. `results/` is committed, so the leaderboards and
-charts can be viewed without running anything, and GitHub Pages serves
-the repository as it is (main branch, root folder; `index.html` at the
-root is the landing page and `.nojekyll` keeps Pages from processing
-the files). Pushing to main republishes the cards.
+Step 19 was run once before 2027; step 20 runs after 2027 is in. `data/`
+is not committed; `results/` is, and GitHub Pages serves main as it is.
 
 ## Checks
 
-`python scripts/07_check_chase_invariants.py` rebuilds the key numbers from
-the pitch level and runs 22 checks, including:
-
-- league runs saved add to zero and league Chase+ is exactly 100
-- qualification follows the stated rule
-- shrinkage matches DerSimonian-Laird and never overshoots
-- the called-strike rate never rises with distance, on any side of the zone
-- the out-of-fold model check doesn't leak, and the side of the zone and
-  the count each improve it
-- the results on disk came from the current script and data (checked with
-  a fingerprint)
-- the files use the right column names for their run (`chase_plus` or
-  `xchase_plus`)
-
-Add `--expected-contact` to run the same checks on the xChase+ files, and
-`--rerun` to also rerun the leaderboard and confirm it writes
-byte-identical files (a 23rd check).
-
-The coach's notes on the 17 noted cards are the only hand-written text
-on a card, so step 17 checks them too. Each note in `scripts/coach_notes.py`
-sits next to the facts it states (every quoted percentage, run total and
-xwOBA, and patterns like "in every count" or "his contact pays for it")
-and names the leak the plan must lead with, and step 17 tests each fact
-against the data and each starting leak against the card before drawing
-any card. Each note's first sentence must also name the plan's first
-line in the plan's own words: its count, its pitch and side of the zone
-as the line prints them, and its pitcher hand when the line names one.
-If a fact no longer holds, after a data refresh or a method change, or a
-note's leak is no longer on the card or its first sentence no longer
-names the plan's first line, the run stops and names the note and the
-sentence.
-
-The plans are generated, but a sentence written for one case can land
-on a card whose numbers say the opposite. So `scripts/plan_checks.py`
-tests every card's plan against the lines and numbers beside it (and
-that the pitcher-hand tabs add notes to it rather than a second plan): the first printed line is a take whenever
-the plan has one, the lines are numbered 1, 2 down the page, a plan of
-video items says the staff takes it, "the biggest pieces" only when they
-are, no "already" in the no-target sentence, no "your fastball decisions
-are a strength" under a fastball line or beside a fastball leak, a good chooser and a 0.0 far-off
-header explained, a first line in a count the table shows as a plus
-explained, a target that names its unit and its leaks (and on an
-earlier season's card says it was set afterward and how the next season
-came out), no number on a card of video items only, no near-identical
-rates on the roster's start line, "mostly" wherever a leak's hand did not
-throw every pitch, and every rate, inch and run a sentence quotes equal
-to the one beside it. Since the 2026-10-18 audit it also checks the
-order and what the plan leaves out: no take before two strikes on under
-20 pitches put first only by the take-first order, no take at the
-league's rate ahead of one well above it, no bigger leak (1.25 times a
-plan line, 20+ pitches) and no count costing a run or more left without
-a word, and "the only changes" only when nothing is; that a no-target
-sentence's points are the leak rows' own and its "about at" or "at or
-under" matches the forecast; that a hand is named only where it carries
-most of the extra chases and cost; and that a switch hitter's leak is
-drawn on the side with most of its extra chases. The second round of
-fixes added checks that every quoted number rounds as the page rounds it,
-a small-sample take says so, a video line gives the 4-inch reason, every
-line in a plus count says why, a contact sentence fits the printed miss
-rates and appears only on a contact card, a "Nothing to change" line
-quotes its own counts' contact, no loss is called "about average", no
-negative number prints with a hyphen, and a target on a different league
-rate from the rows says so. Step 17 stops and lists the cards when any fails. Run on
-a built page (`python scripts/plan_checks.py
-results/xchase/player_cards/2026/index.html`) it counts each kind
-instead.
+`07_check_chase_invariants.py` rebuilds the key numbers from the pitch
+level and runs 22 checks: league Chase+ is exactly 100, shrinkage never
+overshoots, the called-strike rate never rises with distance, the
+out-of-fold check doesn't leak, and the results on disk match the current
+script and data. Step 17 tests every fact in the hand-written coach's
+notes, and `scripts/plan_checks.py` tests every generated plan against
+the numbers beside it; any failure stops the run and names the card.
 
 ## TrackMan files: the college path
 
-The method ports to any league with pitch tracking, but the numbers have
-to be refit on that league's own pitches. `scripts/college_build.py` does
-that for TrackMan, the system many college programs run. Give it a season of
-TrackMan game CSVs and a roster of heights, and it builds the same
-leaderboard and the same decision cards, roster view included, from
-those files alone:
+The method ports to any league with pitch tracking once the numbers are
+refit on its pitches. `scripts/college_build.py` does that for TrackMan
+in about 15 seconds for a 60-game season:
 
 ```
 python scripts/college_build.py --name clemson_2026 \
     --trackman college/clemson_2026/trackman --heights college/clemson_2026/heights.csv
 ```
 
-It takes about 15 seconds for a 60-game season. `college/<name>/BUILD.md`
-lists what it found and fit, and the cards are in
-`college/<name>/results/xchase/player_cards/<season>/index.html`. Open
-them through a local web server (`cd college/<name> && python -m
-http.server 8000`), as with the MLB cards.
-
-**What it needs.**
-
-- TrackMan's standard per-pitch CSV export, one file per game with both
-  teams' pitches, every game of the season the program has. The adapter
-  (`scripts/trackman_adapter.py`) reads the count (Balls, Strikes), the
-  location (PlateLocSide, PlateLocHeight), the call and the result
-  (PitchCall, KorBB, PlayResult, OutsOnPlay, RunsScored, TaggedHitType),
-  the batted ball (ExitSpeed, Angle), the pitch type (TaggedPitchType, or
-  AutoPitchType where it is blank), the players and their hands (Batter,
-  BatterId, BatterSide, Pitcher, PitcherThrows, HomeTeam, AwayTeam) and
-  the game state (Date, GameUID or GameID, PitchNo, Inning, Top/Bottom,
-  Outs, PAofInning). It stops and names any column that is missing.
-- A roster CSV with each hitter's height: BatterId or Batter ("Last,
-  First" or "First Last"), and HeightIn, or Height as 6-2 or 6'2".
-  TrackMan has no strike zone, so each hitter's zone is set from his
-  height the way MLB's 2026 zone is (top at 53.5% of his height, bottom at
-  27%). A hitter missing from the roster gets its median height and is
-  named in BUILD.md.
-
-**What it fits on the files.** The league is every hitter in the files:
-for one team's season, the team and all its opponents. Each piece the
-MLB build fits on the whole league is refit on them: run values from the
-files' own plate appearances (with the runners on base rebuilt play by
-play, since TrackMan does not record them), wOBA weights from those run
-values, an xwOBA from the files' own exit speeds and launch angles
-(college bats are metal, so Savant's MLB model does not apply), the
-called-strike model on the files' takes, and the league baseline. The
-adapter reads the sign of PlateLocSide off the files' hit-by-pitches,
-since TrackMan does not state it. A college season is about 17,500
-pitches, so qualifying drops to 100 plate appearances and 200 out-of-zone
-pitches, and the spread between hitters is fit on everyone with 40 or
-more out-of-zone pitches; `scripts/college_method.py` gives the reason
-for each choice. The league baseline keeps step 04's 48 cells: tested on
-every MLB team's first 60 games, coarser cells moved hitters further from
-the MLB build, not closer. Steps 02, 13, 15 and 17 are the MLB scripts, run
-from copies in `college/<name>/scripts/`; a copy that differs lists the
-lines at its top (the season kept, no coach's notes, "TrackMan" in the
-page footer).
-
-**How it was tested.** There is no college data in the repository, so
-`scripts/trackman_roundtrip.py` makes some: every MLB team's first 60
-games of 2026 written as TrackMan CSVs (no zone, no runners, no xwOBA,
-PlateLocSide mirrored), built exactly as a college season would be, and
-compared with the MLB build on the same pitches. The full comparison is
-in [results/trackman_roundtrip/](results/trackman_roundtrip/README.md).
-In short: with step 04's settings, the college code gives back steps 03
-and 04 exactly. The adapter read the sign right for all 30 teams, matched
-Savant's zone call on 99.8% or more of pitches and rebuilt the runners
-exactly at the start of 90% to 94% of plate appearances. Across 296
-qualified hitters, the college cards' xChase+ was 6.0 points from the MLB
-build's for the same pitches (RMSE), and named the same top leak for 92%
-of the hitters both builds found a leak for.
-About half of that gap is a shift every hitter on a team shares, because
-the college league is the team's own games rather than all 30 teams; it
-leaves the order of a team's hitters (rank correlation 0.95 within a
-team) and their leaks as they are. Predicting the same hitters' next 100
-games, the college build did as well as the MLB build with the whole
-league behind it (8.5 runs per 600 PA, RMSE, both).
-
-**Keeping team data private.** Everything goes into `college/<name>/`,
-which is in `.gitignore`: the TrackMan files, the roster and every file
-built from them, cards included. The build writes nothing into the
-repository's own `data/` or `results/`, so no commit can carry a team's data, and GitHub Pages
-serves only what is committed, so it cannot publish one. Never
-`git add -f` anything under `college/`. To share the cards with a staff,
-hand them the folder, or serve it on a laptop.
-
-**Reading the first real build.** Read BUILD.md before the cards. Check
-the PlateLocSide sign it found, the hitters missing from the roster, the
-pitches with no location or pitch type, and the share of balls in play
-with no exit speed (those get their hit type's average). The round trip
-was written from Statcast, so it cannot show how one program's operators
-record a foul tip, a bunt or an out on the bases. The adapter takes
-outs from the Outs column, not OutsOnPlay, and reports where the two
-disagree. The footer's "Does fixing a leak pay?" is the MLB backtest's
-finding, and a college card says so: step 16 needs the same hitters in
-back-to-back seasons. A college page has no target, so, as on the 2021
-page, the roster has no Beat column and no card mentions one: step 19 has
-no college line to freeze one with.
+It takes the season's per-pitch CSVs and a roster of heights (TrackMan
+has no strike zone, so each hitter's is set from height as MLB's 2026
+zone is) and refits run values, wOBA weights, xwOBA, the called-strike
+model and the league baseline on the files alone. A round trip of every
+MLB team's first 60 games of 2026
+([results/trackman_roundtrip/](results/trackman_roundtrip/README.md))
+landed 6.0 xChase+ points (RMSE) from the MLB build with the same top
+leak for 92% of hitters. `college/<name>/` is gitignored, so no commit
+can carry a team's data.
 
 ## Appendix: Chase+ vs xChase+
 
@@ -1160,116 +429,22 @@ no college line to freeze one with.
   <img alt="Chase+ against xChase+ for 2026, r = 0.93, with the five hitters the results flattered most and the five they hurt most" src="results/xchase/figures/chase_plus_vs_xchase_plus.png" width="720">
 </picture>
 
-They mostly agree: r = 0.91-0.95 in every season from 2021 to 2026. Swing
-decisions drive most of both, and those are priced the same way. Luck has
-an SD of 5.8-7.3 points and doesn't repeat from one season to the next,
-so it looks like ball-in-play luck rather than a skill xwOBA misses.
-2022 stands out a little: the two agree least that season (r = 0.91) and
-luck spreads the most (SD 7.3).
-
-**Regression candidates.** 12, 17, 20, 12, 13 and 13 hitters had luck at
-least 2 standard errors from zero in 2021 through 2026 (4.8%, 6.4%, 7.1%,
-4.5%, 4.9% and 5.0%). About 4.6% would land there by chance alone, so this
-is a list of who to watch, not proof anyone was lucky; only 2022 and 2023
-run clearly above chance. The list splits about evenly between hitters
-whose Chase+ should fall (43) and rise (44). The standard error of luck
-comes from how each ball was hit (the league's typical luck on balls
-with the same xwOBA), not from the hitter's own results, so a few lucky
-home runs can't also widen his own error bar. See
-`results/xchase/regression_candidates.csv`.
-
-**Offense, same season.** Each stat against the matching kind of offense:
-Chase+ (actual results) against wOBA, xChase+ (expected) against xwOBA.
-Plate appearances that ended on a chase put in play are left out of
-wOBA / xwOBA here, because those batted balls are also inside Chase+ and
-xChase+.
-
-| Season | Chase+ vs wOBA | xChase+ vs xwOBA | Chase rate vs wOBA | Chase rate vs xwOBA |
-|---|---:|---:|---:|---:|
-| 2021 | 0.29 | 0.34 | -0.26 | -0.27 |
-| 2022 | 0.25 | 0.32 | -0.16 | -0.23 |
-| 2023 | 0.28 | 0.34 | -0.22 | -0.27 |
-| 2024 | 0.23 | 0.30 | -0.20 | -0.24 |
-| 2025 | 0.27 | 0.32 | -0.27 | -0.30 |
-| 2026 | 0.29 | 0.32 | -0.18 | -0.26 |
-
-In every season xChase+ tracks expected offense more closely than Chase+
-tracks actual offense, and more closely than chase rate does.
-
-**Next season.** For hitters qualified in consecutive seasons: does the
-stat say anything about next season's xwOBA once this season's xwOBA and
-chase rate are known?
-
-| Seasons | Stat | r with next xwOBA | R² gain | t |
-|---|---|---:|---:|---:|
-| 2021-22 (181) | xChase+ | 0.22 | 0.000 | -0.2 |
-| 2022-23 (191) | xChase+ | 0.20 | 0.003 | -1.1 |
-| 2023-24 (192) | xChase+ | 0.23 | 0.001 | -0.6 |
-| 2024-25 (189) | xChase+ | 0.29 | 0.001 | 0.5 |
-| 2025-26 (188) | xChase+ | 0.13 | 0.009 | -1.7 |
-| All (941) | xChase+ | 0.22 | 0.001 | -1.3 |
-| All (941) | Chase+ | 0.19 | 0.001 | -0.9 |
-
-No. Both correlate with next year's xwOBA on their own, but that's because
-good hitters have good chase decisions: once this year's xwOBA is known,
-neither adds anything, and the sign isn't even consistent from one pair of
-seasons to the next. With 941 hitter pairs, a gain of about half a percent
-of R² or more would likely have shown up. So xChase+ describes a real,
-repeatable part of a hitter's approach, but it isn't a hidden predictor
-of next year's production.
-
-The Chase+ versions of every chart above are in `results/chase/figures/`.
+They mostly agree (r = 0.91-0.95). Luck has an SD of 5.8-7.3 points and
+doesn't repeat; 12-20 hitters a season sit 2 standard errors from zero,
+about what chance gives (`regression_candidates.csv`). Same season,
+xChase+ tracks xwOBA better than Chase+ tracks wOBA; next season, once
+this year's xwOBA and chase rate are known, neither adds anything.
+xChase+ is a real, repeatable part of a hitter's approach, not a hidden
+predictor of production.
 
 ## Appendix: xChase+ by matchup
 
-A separate look at xChase+, not a change to it: the same priced pitches,
-split by handedness matchup (batter/pitcher), with a leaderboard for each
-matchup in each season. The overall xChase+ above is still the main
-number; these show how a hitter's chase decisions held up in one kind of
-matchup.
-
-**The matchup matters.** The average hitter in each matchup, on the main
-xChase+ scale:
-
-| Season | R/R | L/L | R/L | L/R |
-|---|---:|---:|---:|---:|
-| 2021 | 93.1 | 99.0 | 103.0 | 106.5 |
-| 2022 | 94.1 | 95.1 | 104.7 | 105.5 |
-| 2023 | 92.9 | 97.6 | 103.3 | 106.9 |
-| 2024 | 94.3 | 97.7 | 102.3 | 105.4 |
-| 2025 | 94.3 | 93.2 | 102.1 | 106.4 |
-| 2026 | 93.9 | 97.7 | 102.7 | 104.2 |
-
-Hitters chase worse against same-handed pitchers (93-99) and better
-against opposite-handed ones (102-107), every season.
-
-**How the boards work.** Each pitch is compared with what the league
-lost on the same kind of pitch in the same matchup (season, matchup,
-count and distance bucket), so 100 on a board is the average hitter *in
-that matchup*, not the league average. A point is worth the same runs as
-on the main leaderboard. To qualify, a hitter needs the main floors
-times the league's share of plate appearances against that pitcher hand:
-in a full season 79-90 PA and 159-180 out-of-zone pitches against
-lefties, 210-221 PA and 420-441 against righties. Each board is shrunk
-on its own, like the main one. Switch hitters appear on R/L and L/R, the
-side they batted from.
-
-**How much to trust them.** Year to year, hitters on the same board in
-both seasons, five pairs of seasons:
-
-| Board | Hitters per pair | r (average) |
-|---|---:|---|
-| R/R | 95 | 0.70-0.78 (0.74) |
-| L/R | 93 | 0.55-0.70 (0.64) |
-| R/L | 138 | 0.42-0.56 (0.47) |
-| L/L | 43 | 0.24-0.55 (0.44) |
-
-The boards against right-handed pitchers repeat about as well as overall
-xChase+. The boards against lefties rest on about a quarter of a
-season's pitches and are noisier, so read their extremes with the ± in
-mind. Within one season, the gap between a hitter's matchup score and
-his overall score is mostly noise, so a big gap isn't on its own a sign
-of a real platoon split.
+The same priced pitches split by batter/pitcher hand, one board per
+matchup per season. Hitters chase worse against same-handed pitchers
+(average 93-99) and better against opposite-handed ones (102-107), every
+season. Boards against righties repeat about like overall xChase+ (R/R
+0.74); boards against lefties rest on a quarter of the pitches and are
+noisier (L/L 0.44).
 
 <details>
 <summary>2026 top 5 and bottom 5 on each board</summary>
@@ -1340,35 +515,23 @@ of a real platoon split.
 
 </details>
 
-Full boards for every season are in
-`results/xchase/matchups/xchase_matchup_leaderboard_<season>.csv`, the
-league table and floors in `xchase_matchup_league.csv`, and the
-year-to-year correlations in `xchase_matchup_reliability.csv`.
+Full boards: `results/xchase/matchups/`.
 
 ## Version history
 
-- **xChase+ 1.1, Chase+ 2.0.** A chase put in play is now priced context
-  neutral. Chase+ uses the league-average value of its outcome (single,
-  double, triple, home run or out) instead of its plate appearance's RE24
-  value, which depended on the runners and outs: a chased grounder into a
-  double play used to cost far more than the same grounder with the bases
-  empty. xChase+'s xwOBA line is now fit to those outcome values. xChase+
-  barely moved (r = 0.999 with 1.0, 0.4 points on average, the same top
-  and bottom five every season), hence 1.1. Chase+ moved more (r = 0.95
-  with 1.0, 4 points on average), hence 2.0. Luck (Chase+ minus xChase+)
-  is now only contact luck, its standard error comes from how each ball
-  was hit rather than the hitter's own results, and the README adds a
-  year-to-year test of the part of xChase+ that chase rate doesn't
-  explain.
+- **xChase+ 1.1, Chase+ 2.0.** Balls in play priced context neutral
+  (league-average outcome value instead of RE24). xChase+ barely moved
+  (r = 0.999 with 1.0); Chase+ moved more (r = 0.95). Luck is now contact
+  luck only.
 - **xChase+ 1.0, Chase+ 1.0.** First release.
 
 ## Use of AI
 
-AI tools (Claude) were used for code cleanup, refactoring and review, and
-to build the chart script. Changes were checked against the invariant
-tests above and by comparing outputs before and after on the same data.
+AI tools (Claude) were used for code cleanup, refactoring, review and the
+chart script, checked against the invariant tests and by comparing
+outputs before and after on the same data.
 
 ## License
 
-Code is released under the MIT License (see `LICENSE`). Statcast data is
-the property of MLB Advanced Media and is not covered by this license.
+Code is MIT (see `LICENSE`). Statcast data is the property of MLB
+Advanced Media and is not covered by this license.
