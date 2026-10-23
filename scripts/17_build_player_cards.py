@@ -199,6 +199,16 @@ PA_SCALE = 600
 FAR_OFF_FT = 0.35
 SWITCH_SHARE = 0.15             # bats from each side on 15%+ of pitches
 ABS_TOP_SHARE = 0.535           # 2026 zone top = 53.5% of the batter's height
+ABS_FIRST_SEASON = 2026         # Statcast's zone is the ABS box from here on
+# Every rate on a card is measured against Statcast's recorded zone. From
+# 2026 that is the ABS box set from the hitter's height, 2.86 inches
+# shorter on average than the same hitters' 2025 stance zones, so a trend
+# that reaches 2026 and a 2026 target say so.
+ABS_TREND_NOTE = (f"From {ABS_FIRST_SEASON} Statcast measures the zone as the ABS box set from the "
+                  "hitter's height, about 3 inches shorter than the zones before, so the "
+                  f"{ABS_FIRST_SEASON} point is not on the same box as the earlier ones.")
+ABS_TARGET_NOTE = ("These rates are measured against the ABS box set from your height, not the "
+                   "zone of the seasons before.")
 TREND_MIN_FAR_PITCHES = 150
 
 COUNT_GROUPS = ["first", "ahead", "even", "two"]
@@ -1278,14 +1288,15 @@ PRED_FILE = XCHASE / "coaching" / f"leak_predictions_{SEASON}.csv"
 TARGETS = {}
 if PRED_FILE.exists():
     frozen = pd.read_csv(PRED_FILE)
-    frozen_leaks = {b: set(map(tuple, g[lr.LEAK_CELL].itertuples(index=False)))
+    frozen_leaks = {b: list(map(tuple, g.sort_values("row")[lr.LEAK_CELL].itertuples(index=False)))
                     for b, g in frozen[frozen["row"] != "hitter"].groupby("batter")}
     for r in frozen[(frozen["row"] == "hitter") & (frozen["leaks"] > 0)].itertuples():
         TARGETS[int(r.batter)] = {
             "season": SEASON, "next_season": SEASON + 1,
             "excess": float(getattr(r, f"excess_{SEASON}")),
             "predicted": float(getattr(r, f"predicted_excess_{SEASON + 1}")),
-            "cells": frozen_leaks.get(int(r.batter), set()),
+            "cells": frozen_leaks.get(int(r.batter), []),
+            "freeze_date": str(r.freeze_date),
             "out_of_sample": str(getattr(r, "out_of_sample", "yes")),
             "actual": None,
         }
@@ -1303,6 +1314,15 @@ if TARGETS and SCORE_FILE.exists():
 
 TARGET_MIN_PTS = 2              # no target when the no-change forecast rounds to this or less
 TARGET_SCALE_NOTE_PTS = 3       # a number to beat this far from the leak rows' own gap says so
+
+
+def frozen_spots(cells):
+    """The frozen cells of a target whose card now lists other leaks, by
+    name and without a pitcher hand: "two strikes, breaking balls below the
+    zone; 0-1 or 1-1, fastballs above the zone"."""
+
+    return "; ".join(f"{COUNT_LABELS[g][0].lower() + COUNT_LABELS[g][1:]}, {LEAK_PITCH[pg]} "
+                     f"{LEAK_REGION[r]}" for g, pg, r in cells)
 
 
 def leaks_named(n):
@@ -1358,7 +1378,13 @@ def target_text(summary):
     if not t:
         return None
     leaks_all = summary["leaks"]["all"]
-    if all(is_video(lk) for lk in leaks_all):
+    # A target frozen on spots the card no longer lists all of (the leaks
+    # were re-ranked after the freeze) is still the one step 20 scores, so
+    # it stays, named for its own spots; the leak rows say nothing about it.
+    spots = t.get("frozen_cells")
+    lead = (f"Frozen on {t['freeze_date']} for spots the re-ranked leaks above no longer all cover "
+            f"({frozen_spots(spots)})" if spots else "")
+    if not spots and all(is_video(lk) for lk in leaks_all):
         return (f"No number to beat: the one leak on this card was {VIDEO_DEPTH}, one for video, "
                 "not a take rule." if len(leaks_all) == 1 else
                 f"No number to beat: every leak on this card was {VIDEO_DEPTH}: video items, not "
@@ -1370,33 +1396,41 @@ def target_text(summary):
     if pred <= TARGET_MIN_PTS:
         head = "No chase target" if summary["contact_led"] else "No target"
         verb = "was" if len(leaks_all) == 1 else "were"
-        x, xf = card_gap(leaks_all), round(t["excess"] * 100)
+        xf = round(t["excess"] * 100)
+        x = xf if spots else card_gap(leaks_all)
         where = (f"{points(x)} above the league's chase rate" if x > 0 else
                  "about at the league's chase rate")
         # the forecast is on step 19's league rate; when the rows add up to something
         # else, say what the forecast starts from
-        scale = ("" if abs(x - xf) < TARGET_SCALE_NOTE_PTS else
+        scale = ("" if spots or abs(x - xf) < TARGET_SCALE_NOTE_PTS else
                  f" ({xf} on the simpler league rate the target uses)" if xf > 0 else
                  " (at or under it on the simpler league rate the target uses)")
         at = "at or under" if pred < -TARGET_MIN_PTS else "about at"
-        line = f"{head}: {which.lower()} {verb} {where} in {season}{scale}, and "
+        line = (f"{head}: {lead}. There you were {where} in {season}, and " if spots else
+                f"{head}: {which.lower()} {verb} {where} in {season}{scale}, and ")
         line += (f"a line fit afterward on seasons through {season} put {nxt} {at} the "
                  "league's rate." if retro else f"with no change should be {at} it in {nxt}.")
         if retro and t["actual"] is not None:
             line += f" You were at {minus(f'{t['actual'] * 100:.0f}')}."
         if summary["contact_led"]:
             line += " The number to move is contact on chases."
+        if season >= ABS_FIRST_SEASON:
+            line += f" {ABS_TARGET_NOTE}"
         return line
     # The number to beat is on step 19's scale, which the leak rows do not
     # use; when the rows add up to something else, the sentence says so.
-    x, rows_x = round(t["excess"] * 100), card_gap(leaks_all)
+    x = round(t["excess"] * 100)
+    rows_x = x if spots else card_gap(leaks_all)
     scale = ("" if abs(rows_x - x) < TARGET_SCALE_NOTE_PTS else
              f" ({rows_x} on the rows above; the target uses a simpler league rate, the one it is "
              "scored on)")
-    now = f"{which}: you chased {points(x)} above the league's chase rate in {season}{scale}."
+    now = (f"{lead}: you chased {points(x)} above the league's chase rate there in {season}."
+           if spots else
+           f"{which}: you chased {points(x)} above the league's chase rate in {season}{scale}.")
     if not retro:
         return (f"{now} Those spots get better on their own, so with no change you'd be about "
-                f"{points(pred)} above it in {nxt}. Under {pred} is a fix.")
+                f"{points(pred)} above it in {nxt}. Under {pred} is a fix."
+                + (f" {ABS_TARGET_NOTE}" if season >= ABS_FIRST_SEASON else ""))
     line = (f"{now} Set afterward from seasons through {season}, the line put {nxt} at about "
             f"{points(pred)} above it with no change.")
     a = t["actual"]
@@ -1416,7 +1450,7 @@ def target_beat(summary):
     t = summary["target"]
     if not t:
         return ""
-    if all(is_video(lk) for lk in summary["leaks"]["all"]):
+    if not t["frozen_cells"] and all(is_video(lk) for lk in summary["leaks"]["all"]):
         return "none: video only"
     if round(t["predicted"] * 100) <= TARGET_MIN_PTS:
         return "no target"
@@ -1471,9 +1505,14 @@ for _, row in board.sort_values("xchase_plus", ascending=False).iterrows():
     summary["start_with"] = start_with(summary["plan_items"], summary["leaks"]["all"])
     target = TARGETS.get(bid)
     cells = {(lk["count_group"], lk["pitch_group"], lk["region"]) for lk in summary["leaks"]["all"]}
+    # The frozen target is what step 20 scores, so it stays on the card even
+    # when the card's leaks have moved since the freeze; it then names its
+    # own spots (frozen_cells) instead of the leak rows.
     summary["target"] = ({k: target[k] for k in ("season", "next_season", "excess", "predicted",
-                                                   "out_of_sample", "actual")}
-                         if target and target["cells"] == cells else None)
+                                                   "out_of_sample", "actual", "freeze_date")}
+                         | {"frozen_cells": (None if set(target["cells"]) == cells
+                                             else [list(c) for c in target["cells"]])}
+                         if target else None)
     summary["target_text"] = target_text(summary)
     summary["target_beat"] = target_beat(summary)
     t = trend[trend["batter"] == bid]
@@ -1489,9 +1528,9 @@ for _, row in board.sort_values("xchase_plus", ascending=False).iterrows():
 print(f"  {len(players)} hitters, {len(switch & set(board['batter']))} switch hitters")
 if TARGETS:
     with_target = sum(1 for p in players if p["target"])
-    stale = sum(1 for p in players if p["id"] in TARGETS and not p["target"])
+    stale = sum(1 for p in players if p["target"] and p["target"]["frozen_cells"])
     print(f"  targets from {PRED_FILE.name}: {with_target} hitters"
-          + (f"; {stale} whose frozen leaks are not the card's leaks (no target shown)"
+          + (f"; {stale} whose frozen spots are not all the card's leaks (named for the spots)"
              if stale else ""))
 if (plan_checks.CLEARLY_OFF_IN, plan_checks.COUNT_PHRASES) != (CLEARLY_OFF_IN, COUNT_PHRASES):
     raise SystemExit("plan_checks.py's CLEARLY_OFF_IN or COUNT_PHRASES differ from step 17's.")
@@ -2020,10 +2059,12 @@ PNG_PLAN_SETS = ((16, 22, 4, 97, 104, 136, 134),
 # the target's size, line and wrap. A target over five lines at 13 px (about 280
 # characters, most 2022-2025 targets) is set a size smaller; the last set, wider
 # with the trend narrower, is for a longer one still, which no card in six seasons
-# has, and the build warns when a target would not fit at it.
+# had until a target named its frozen spots (José Caballero's 2026 card, set a size
+# smaller again), and the build warns when a target would not fit at the last.
 PNG_TARGET_SETS = ((470, 360, 13, 17, 56),
                    (470, 360, 12, 15, 61),
-                   (410, 300, 12, 15, 73))
+                   (410, 300, 12, 15, 73),
+                   (410, 300, 11, 13, 79))
 
 
 def plan_column(card, summary, plan_set):
@@ -2689,6 +2730,7 @@ def build_page():
         "countGroups": [{"key": g, "label": COUNT_LABELS[g], "detail": COUNT_DETAIL[g]}
                         for g in COUNT_GROUPS],
         "leagueTrend": [[int(y), float(r)] for y, r in league_trend.items()],
+        "trendNote": ABS_TREND_NOTE if league_trend.index.max() >= ABS_FIRST_SEASON else "",
         "players": page_players, "references": references,
         "defaultSlug": slug(default), "guide": GUIDE, "evidence": EVIDENCE_LINE,
         "countNote": (GLOSSARY + " Every plate appearance starts at 0-0, so the First pitch "
@@ -2882,7 +2924,10 @@ def write_noted_report():
         "itself. A fix is a number under the prediction, not under this season's rate; that is",
         "also how step 20 will score the card. A hitter whose prediction for next season is",
         "about at the league's rate gets no target, and one whose leaks are all video items",
-        "gets no number.",
+        "gets no number."
+        + (f" {SEASON} rates are measured against the ABS box set from the hitter's height, about "
+           "3 inches shorter than the zones before, so the trend's last point and the target "
+           "are not on the same box as the earlier seasons." if SEASON >= ABS_FIRST_SEASON else ""),
         "",
         "**The count check.** Under each plan, how the hitter does once the count",
         "reaches the counts his leaks are in: the xwOBA of every plate appearance",

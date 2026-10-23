@@ -1054,7 +1054,9 @@ body.showopts[data-view="card"] .picopt.fold { display: grid; }
       D.guide.forEach((g) => guide.append(el("li", { text: g.replace("{more}", dark ? "brighter" : "darker").replace("{avg}", dark ? "Dark gray" : "Gray").replace("{none}", dark ? "The background showing through" : "White") })));
       a.append(el("section", {}, el("h2", { text: "How to read a player card" }), guide));
       more.append(el("section", {}, el("h2", { text: "The average, by count" }), countTable(p.table, true)));
-      more.append(el("section", { class: "trend" }, el("h2", { text: "Far-off chase rate by season, every hitter" }), trendSvg([], "League far-off chase rate by season")));
+      const refTrend = el("section", { class: "trend" }, el("h2", { text: "Far-off chase rate by season, every hitter" }), trendSvg([], "League far-off chase rate by season"));
+      if (D.trendNote) refTrend.append(el("p", { class: "evidence", text: D.trendNote }));
+      more.append(refTrend);
       return;
     }
     meaning.hidden = false;
@@ -1099,6 +1101,7 @@ body.showopts[data-view="card"] .picopt.fold { display: grid; }
     more.append(el("section", {}, el("h2", { text: countTitle }), countTable(p.tables[hand], false)));
     const seasons = p.trend.length && p.trend.length < 3 ? ` (${p.trend.length} season${p.trend.length > 1 ? "s" : ""})` : "";
     const trendSec = el("section", { class: "trend" }, el("h2", { text: "Far-off chase rate by season" + seasons }), trendSvg(p.trend, `${p.name} far-off chase rate by season against the league`));
+    if (D.trendNote) trendSec.append(el("p", { class: "evidence", text: D.trendNote }));   // the 2026 point is on the ABS box
     if (p.target_text && hand === "all") trendSec.append(el("div", { class: "targetbox" }, el("span", { class: "eyebrow", text: "Target" }), el("p", { class: "evidence target", text: p.target_text })));
     more.append(trendSec);
     const note = (title, text) => el("div", {}, title ? el("span", { class: "eyebrow", text: title }) : null, el("p", { class: "evidence", text }));

@@ -306,9 +306,14 @@ def test_pitch_table_basics():
 
 
 def test_called_strike_rate_never_rises_with_distance():
-    table = pitches().dropna(subset=["distance_outside_zone"])
-    table = table.sort_values(["game_year", "balls", "strikes", "distance_outside_zone"])
-    steps = table.groupby(["game_year", "balls", "strikes"])["called_strike_rate"].diff()
+    # each side of the zone has its own curve, so each is checked
+    table = pitches().dropna(subset=["distance_outside_zone", "zone_side"])
+    assert set(table["zone_side"]) <= {"side", "above", "below", "corner"}, (
+        f"unexpected sides of the zone: {sorted(set(table['zone_side']))}"
+    )
+    groups = ["game_year", "zone_side", "balls", "strikes"]
+    table = table.sort_values(groups + ["distance_outside_zone"])
+    steps = table.groupby(groups)["called_strike_rate"].diff()
     assert (steps.dropna() <= 1e-12).all(), "called-strike rate rises with distance somewhere"
 
 
@@ -779,7 +784,7 @@ def test_downstream_files_match_the_leaderboard():
         )
 
 
-def test_called_strike_check_was_written_and_count_helps():
+def test_called_strike_check_was_written_and_side_and_count_help():
     if not SETTINGS["RUN_OUT_OF_FOLD_CHECK"]:
         # nothing to read; test_outputs_match_this_script_and_data covers the rest
         return
@@ -788,9 +793,13 @@ def test_called_strike_check_was_written_and_count_helps():
     summary = check[check["check"] == "summary"]
 
     for year, season in summary.groupby("game_year"):
-        used = season[season["group"].str.startswith("distance + count")].iloc[0]
+        used = season[season["group"].str.startswith("distance by side of zone + count")].iloc[0]
+        no_side = season[season["group"].str.startswith("distance + count, no side of zone")].iloc[0]
         comparison = season[season["group"].str.startswith("distance only")].iloc[0]
-        assert used["log_loss"] < comparison["log_loss"], f"{year}: count does not help out of fold"
+        assert used["log_loss"] < no_side["log_loss"], (
+            f"{year}: the side of the zone does not help out of fold"
+        )
+        assert no_side["log_loss"] < comparison["log_loss"], f"{year}: count does not help out of fold"
         assert abs(used["calibration_slope"] - 1) < 0.05, (
             f"{year}: calibration slope {used['calibration_slope']}"
         )
@@ -810,15 +819,23 @@ def test_called_strike_check_was_written_and_count_helps():
         # That margin depends on how many numbers each model fitted, which
         # is recomputed here from the settings rather than trusted from the
         # check file: a spline basis of len(knots) + degree - 2 columns, an
-        # intercept, and for the used model one dummy per count except the
-        # reference (4 ball states x 3 strike states = 12).
+        # intercept, for the models with count one dummy per count except
+        # the reference (4 ball states x 3 strike states = 12), and for the
+        # used model, per side of the zone (side, above, below, corner), as
+        # many tail sums of the spline as the free model has spline columns
+        # plus the distance past the last knot, and a dummy per side except
+        # the reference.
         spline_columns = len(SETTINGS["CALLED_STRIKE_DISTANCE_KNOTS"]) + 3 - 2
+        sides = 4
         expected_coefficients = {
-            "distance + count": spline_columns + (4 * 3 - 1) + 1,
+            "distance by side of zone + count": (
+                sides * (spline_columns + 1) + (sides - 1) + (4 * 3 - 1) + 1
+            ),
+            "distance + count, no side of zone": spline_columns + (4 * 3 - 1) + 1,
             "distance only": spline_columns + 1,
         }
 
-        for row in (used, comparison):
+        for row in (used, no_side, comparison):
             for label, count in expected_coefficients.items():
                 if row["group"].startswith(label):
                     assert int(row["model_coefficients"]) == count, (
@@ -857,7 +874,8 @@ def test_called_strike_check_was_written_and_count_helps():
         rate = season["called_strike_rate"].clip(1e-15, 1 - 1e-15)
         in_sample = -np.mean(outcome * np.log(rate) + (1 - outcome) * np.log(1 - rate))
         recorded = summary[
-            (summary["game_year"] == year) & summary["group"].str.startswith("distance + count")
+            (summary["game_year"] == year)
+            & summary["group"].str.startswith("distance by side of zone + count")
         ]["in_sample_log_loss"].iloc[0]
         assert abs(in_sample - recorded) < 1e-9, (
             f"{year}: the recorded in-sample log loss does not match the pitch table"

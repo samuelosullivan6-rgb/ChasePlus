@@ -52,16 +52,40 @@ THE COUNT CHECK
   xwOBA once a plate appearance reaches the leak's counts, against the
   league's. The hitter row weights his leaks by pitches, as step 16 does.
 
+THE ZONE THE 2026 CELLS ARE ON
+  Every cell's side of the zone and distance bucket, and the league's
+  chase rate in it, are measured against Statcast's recorded zone. In
+  2026 that is the ABS box set from each hitter's height (top at 53.5%
+  of it, bottom at 27%), 2.86 inches shorter on average than the same
+  hitters' 2025 stance zones (top 3.435 to 3.215 ft, bottom 1.605 to
+  1.622 ft), while umpires kept calling a taller zone. So the 2026 rates
+  are not on the same box as 2021 to 2025, and about 2.1 of the league's
+  2.6-point rise in chase rate from 2025 is the box. The frozen cells are
+  the right yardstick for 2027 if 2027 keeps the box; if the zone changes
+  again, the 2027 rates step 20 scores are on a different box from the
+  frozen ones. This note was added after the freeze (October 2026); the
+  file is not rewritten for it.
+
 OUTPUT, in results/xchase/coaching/
   leak_predictions_2026.csv   one hitter row and up to three leak rows per
                               2026 qualified hitter, each stamped with the
                               freeze date and the commit it was made from
 
 A frozen file is not rewritten. Run again, this step rebuilds the
-predictions and checks them against the file: if they match (the stamps
-aside) the file is left alone, and if they don't it stops rather than
-change a prediction after the fact. It also refuses to write once the
-pitch file has 2027 pitches in it.
+predictions and checks them against the file: if every row matches (the
+stamps aside), or if the prediction itself still reproduces, the file is
+left alone, and otherwise it stops rather than change a prediction after
+the fact. The prediction is what was pre-registered: every frozen cell's
+pitches, chases, league rate and excess on today's data, and each
+hitter's predicted excess as the frozen line on his row times his frozen
+cells' excess. The other columns describe the card the hitter saw (its
+rank, the card's league rate and runs, the count check, whether the
+backtest would list a leak) and step 16's line at the time; they move
+when the pricing does, and a rerun reports how far. After the October
+2026 side-of-zone model, 18 of the 2026 cards list other leaks than
+their frozen cells (12, 12, 9 and 3 of the 2022 to 2025 cards); step 17
+keeps their frozen targets, named for the frozen cells. It also refuses
+to write once the pitch file has 2027 pitches in it.
 
 Options: --season (default 2026), --freeze-date (default today),
 --commit (default this checkout's HEAD, marked -dirty when a tracked
@@ -264,21 +288,88 @@ columns = ["season", f"rank_{SEASON}", "player", "batter", "row", "leaks", "coun
 rows = rows.sort_values([f"rank_{SEASON}", "batter", "row"])[columns]
 text = rows.to_csv(index=False, float_format="%.4f", lineterminator="\n")
 
+def frozen_prediction_problems(frozen):
+    """What the frozen file predicted, rebuilt from the data on its own
+    cells: every hitter is still qualified, every frozen cell has the same
+    pitches, chases, league rate and excess on step 16's pitches, and each
+    hitter's prediction is the frozen line (on his row) times his pooled
+    excess. Returns one line per thing that no longer holds.
+
+    This, not the whole row, is the pre-registration. The rank, the card's
+    league rate and runs, the count check and whether the backtest would
+    list a leak describe the card the hitter saw and move with the pricing
+    (the October 2026 side-of-zone model re-ranked 18 cards' leaks); step
+    16's refit of the line is a reference, and the frozen line is the one
+    step 20 uses."""
+
+    out = []
+    num = lambda c: pd.to_numeric(frozen[c], errors="coerce")
+    qualified = set(hitters["batter"].astype(str))
+    gone = set(frozen.loc[frozen["row"] == "hitter", "batter"]) - qualified
+    if gone:
+        out.append(f"{len(gone)} frozen hitters are no longer qualified in {SEASON}")
+    cells_now = cells.reset_index().astype({c: str for c in lr.LEAK_CELL})
+    cells_now["batter"] = cells_now["batter"].astype(str)
+    leak_rows = frozen[frozen["row"] != "hitter"].merge(
+        cells_now, on=["batter"] + lr.LEAK_CELL, how="left", suffixes=("", "_now"))
+    for col, fmt in [(f"pitches_{SEASON}", lambda v: v["pitches"]),
+                     (f"chases_{SEASON}", lambda v: v["chases"]),
+                     (f"league_rate_{SEASON}", lambda v: v["expected"] / v["pitches"]),
+                     (f"excess_{SEASON}", lambda v: (v["chases"] - v["expected"]) / v["pitches"])]:
+        now = fmt(leak_rows)
+        was = pd.to_numeric(leak_rows[col], errors="coerce")
+        tol = 0 if col.startswith(("pitches", "chases")) else 0.00005 + 1e-9
+        bad = ~((now - was).abs() <= tol)
+        if bad.any():
+            out.append(f"{int(bad.sum())} frozen cells have a different {col} on today's data")
+    pooled_now = leak_rows.groupby("batter")[["pitches", "chases", "expected"]].sum()
+    excess_now = (pooled_now["chases"] - pooled_now["expected"]) / pooled_now["pitches"]
+    h = frozen[(frozen["row"] == "hitter") & (num("leaks") > 0)].set_index("batter")
+    line = (pd.to_numeric(h["line_intercept"]) + pd.to_numeric(h["line_slope"])
+            * excess_now.reindex(h.index))
+    # the line is stored to 4 places, so the rebuilt prediction can differ in the 4th
+    bad = ~((line - pd.to_numeric(h[f"predicted_excess_{NEXT}"])).abs() <= 0.0002)
+    if bad.any():
+        out.append(f"{int(bad.sum())} hitters' predictions are not the frozen line times their "
+                   "frozen cells' excess")
+    return out
+
+
 if OUT_FILE.exists():
     frozen = pd.read_csv(OUT_FILE, dtype=str, keep_default_na=False)
     fresh = pd.read_csv(io.StringIO(text), dtype=str, keep_default_na=False)
     # The 2026 file was frozen before out_of_sample existed; a stamp
     # missing from the file is not a changed prediction.
-    if frozen.drop(columns=STAMPS, errors="ignore").equals(fresh.drop(columns=STAMPS)):
+    identical = frozen.drop(columns=STAMPS, errors="ignore").equals(fresh.drop(columns=STAMPS))
+    problems = [] if identical else frozen_prediction_problems(frozen)
+    if not problems:
         print(f"\nThe predictions match {OUT_FILE.relative_to(PROJECT_DIR)}, frozen on "
               f"{frozen['freeze_date'].iloc[0]} from commit {frozen['made_from_commit'].iloc[0]}."
-              + (" Rewriting its stamps (--overwrite)." if args.overwrite else
+              + (" Rewriting its stamps (--overwrite)." if args.overwrite and identical else
                  " Left as it is."))
-        write = args.overwrite
+        if not identical:
+            # the descriptive columns moved with the pricing; say how far
+            both = frozen.merge(fresh, on=["batter", "row"], suffixes=("", "_now"))
+            moved = [f"{c} on {int((both[c] != both[c + '_now']).sum())} rows"
+                     for c in [f"rank_{SEASON}", f"card_league_rate_{SEASON}",
+                               f"choices_runs_per_600_{SEASON}", f"count_status_{SEASON}",
+                               "also_a_backtest_leak", "line_slope"]
+                     if (both[c] != both[c + "_now"]).any()]
+            frozen_cells = frozen[frozen["row"] != "hitter"].groupby("batter")[lr.LEAK_CELL].apply(
+                lambda g: set(map(tuple, g.values)))
+            card_cells = fresh[fresh["row"] != "hitter"].groupby("batter")[lr.LEAK_CELL].apply(
+                lambda g: set(map(tuple, g.values)))
+            relisted = sum(1 for b, c in frozen_cells.items() if card_cells.get(b) != c)
+            print(f"Every frozen cell reproduces, and so does every prediction from the frozen "
+                  f"line. The card has moved since: {relisted} hitters' cards now list other "
+                  f"leaks than the frozen cells, and {', '.join(moved) or 'nothing else'} differ "
+                  "(the card and step 16's refit line; the frozen ones are what step 20 scores).")
+        write = args.overwrite and identical
     elif args.overwrite:
         print("\nThe predictions differ from the frozen file; replacing it (--overwrite).")
         write = True
     else:
+        print("\n" + "\n".join(problems))
         raise SystemExit(f"The predictions differ from {OUT_FILE.relative_to(PROJECT_DIR)}, "
                          f"frozen on {frozen['freeze_date'].iloc[0]}. A frozen prediction is not "
                          f"changed after the fact; pass --overwrite only to replace it before "

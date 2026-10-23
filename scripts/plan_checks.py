@@ -114,6 +114,9 @@ KINDS = {
                                           "not say how the next season came out",
     "number on a video-only card": "a card whose every leak is a video item prints a number to beat",
     "target result misquoted": "the next season's number on a retrospective card is not step 20's",
+    "frozen spots misnamed": "a target names its frozen spots when they are the card's leaks, or a target "
+                             "whose frozen spots are not the card's leaks does not name each of them and "
+                             "its freeze date",
     # Labels a staff can trust (evaluation items 5 and 7)
     "start line quotes near-identical rates": "the roster's start line quotes two rates under 5 points apart",
     "hand overstated": "a line or leak name gives one pitcher hand for pitches the other hand threw too",
@@ -527,6 +530,20 @@ def leaks_named(n):
     return "leak 1" if n == 1 else ("leaks 1 and 2" if n == 2 else f"leaks 1 to {n}")
 
 
+# A frozen spot's name, as a target that names its spots prints it
+SPOT_COUNT = {"first": "first pitch", "ahead": "ahead in the count", "even": "0-1 or 1-1",
+              "two": "two strikes"}
+SPOT_PITCH = {"fastball": "fastballs", "breaking": "breaking balls", "offspeed": "changeups / splitters"}
+SPOT_REGION = {"up": "above the zone", "down": "below the zone", "in": "inside", "away": "away",
+               "up-in": "up and in", "up-away": "up and away", "down-in": "down and in",
+               "down-away": "down and away"}
+
+
+def spot_name(cell):
+    count_group, pitch_group, region = cell
+    return f"{SPOT_COUNT[count_group]}, {SPOT_PITCH[pitch_group]} {SPOT_REGION[region]}"
+
+
 def all_video(player):
     leaks = player["leaks"]["all"]
     return bool(leaks) and all(lk["depth_in"] < CLEARLY_OFF_IN for lk in leaks)
@@ -540,15 +557,35 @@ def target_problems(player):
     t = player.get("target")
     if not t or not text:
         return out
-    if all_video(player):
+    # A target frozen on spots the card no longer lists all of (the leaks
+    # were re-ranked after the freeze) names those spots instead of the
+    # leak rows, and only then; the rows say nothing about its points.
+    spots = t.get("frozen_cells")
+    card_cells = {(lk["count_group"], lk["pitch_group"], lk["region"]) for lk in player["leaks"]["all"]}
+    if spots:
+        named = all(spot_name(c) in text for c in spots) and f"frozen on {t.get('freeze_date')}" in text.lower()
+        if {tuple(c) for c in spots} == card_cells or not named:
+            out.append(("frozen spots misnamed", text[:70]))
+    elif "re-ranked leaks" in text:
+        out.append(("frozen spots misnamed", text[:70]))
+    if not spots and all_video(player):
         if "Under" in text:
             out.append(("number on a video-only card", text[:60]))
         return out
     if (not any(w in text for w in ("points above the league's chase rate", "point above the league's chase rate",
                                     "about at the league's chase rate"))
-            or leaks_named(len(player["leaks"]["all"])) not in text.lower()):
+            or ("re-ranked leaks above" if spots else leaks_named(len(player["leaks"]["all"]))) not in text.lower()):
         out.append(("target without unit or leaks", text[:60]))
-    if text.startswith(("No target", "No chase target")):
+    if spots:
+        # its points are step 19's, on the frozen spots: nothing on the card to hold them to
+        if text.startswith(("No target", "No chase target")):
+            low = round(t["predicted"] * 100) < -RULES["TARGET_MIN_PTS"]
+            if low != (" at or under " in text):
+                out.append(("no target 'about at' a forecast below",
+                            f"forecast {t['predicted'] * 100:+.1f}: {text[-60:]}"))
+        elif not re.search(r"about \d+ points? above it", text):
+            out.append(("target scale or unit unsaid", text[:70]))
+    if not spots and text.startswith(("No target", "No chase target")):
         x = card_gap(player["leaks"]["all"])
         says = re.search(r"(?:were|was) (\d+) points? above the league's chase rate", text)
         quoted = int(says.group(1)) if says else 0 if "about at the league's chase rate" in text else None
@@ -558,12 +595,12 @@ def target_problems(player):
         if low != (" at or under " in text):
             out.append(("no target 'about at' a forecast below",
                         f"forecast {t['predicted'] * 100:+.1f}: {text[-60:]}"))
-    if text.startswith(("No target", "No chase target")):
+    if not spots and text.startswith(("No target", "No chase target")):
         xf = round(t["excess"] * 100)
         if (min(abs(r - xf) for r in card_gap(player["leaks"]["all"])) >= RULES["TARGET_SCALE_NOTE_PTS"]
                 and "simpler league rate" not in text):
             out.append(("target scale or unit unsaid", text[:70]))
-    if not text.startswith(("No target", "No chase target", "No number")):
+    if not spots and not text.startswith(("No target", "No chase target", "No number")):
         x = round(t["excess"] * 100)
         far = min(abs(r - x) for r in card_gap(player["leaks"]["all"])) >= RULES["TARGET_SCALE_NOTE_PTS"]
         if (far and "on the rows above" not in text) or not re.search(r"about \d+ points? above it", text):

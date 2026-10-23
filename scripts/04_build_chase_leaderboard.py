@@ -13,7 +13,8 @@ Both sides come from the count run value table, so the value of the
 current count cancels out.
   - value_if_taken weights "ball" and "called strike" by a called-strike
     probability from a per-season logistic model (distance outside the
-    zone + count), fit on this data's takes.
+    zone, with one curve for each side of the zone the pitch missed on,
+    + count), fit on this data's takes.
   - value_if_swung: a whiff or foul tip adds a strike, a foul adds a strike
     unless there are already two, and a ball in play gets the league
     average run value of its outcome (single, double, triple, home run or
@@ -107,6 +108,10 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 from scipy.stats import chi2
+from scipy.optimize import minimize
+from scipy.sparse import csr_matrix
+from scipy.special import expit, logit as log_odds
+from sklearn.base import BaseEstimator, ClassifierMixin
 from sklearn.compose import ColumnTransformer
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import brier_score_loss, log_loss, roc_auc_score
@@ -280,8 +285,17 @@ LEADERBOARD_SIZE = 10
 # Past the last knot the curve is linear in log-odds. Knots beyond 0.7 ft
 # let the thin tail bend back up past about 1.15 ft (a pitch four feet off
 # more likely to be a called strike than one a foot off), so they stop
-# at 0.7.
+# at 0.7. The model used for pricing has one curve per side of the zone,
+# each built so it cannot rise; the comparison model without the side has
+# one free curve on the same knots.
 CALLED_STRIKE_DISTANCE_KNOTS = [0.0, 0.10, 0.20, 0.30, 0.45, 0.70]
+
+# Ridge penalty on every coefficient of the called-strike model but the
+# intercept. Enough to keep the fit unique where a side of the zone has no
+# called strikes far out; at scikit-learn's default (1.0) it held the
+# tails up, so takes nowhere near the zone came out a little over-called
+# (by 0.1 to 0.4 per 1,000) above and below.
+CALLED_STRIKE_PENALTY = 0.01
 
 # Out-of-fold check of the called-strike model: each season's takes are
 # split into folds by game, and each fold is predicted by a model that
@@ -497,7 +511,7 @@ wanted_pitch_columns = [
     "is_chase",
     "distance_outside_zone",
     # location and the hitter's zone: only used to label which side of
-    # the zone a pitch missed on, for a calibration check
+    # the zone a pitch missed on, for the called-strike model
     "plate_x",
     "plate_z",
     "sz_top",
@@ -678,18 +692,27 @@ show_diagnostic(
 # have to know the count. The count x distance baseline further down is a
 # separate thing: a benchmark for which pitches a hitter was shown.
 #
+# Side of the zone: which way the take missed (above, below, to the side,
+# or off a corner). Each side gets its own distance curve, so a pitch
+# 0.1 ft above the zone and one 0.1 ft off the corner are priced apart.
+# Without it the model over-called corners and under-called the top every
+# season, and in 2026 the gap at the top more than doubled: from 2026
+# Statcast records the ABS box (set from the hitter's height, about 2.9 in
+# shorter than his stance zone) while umpires kept calling a taller zone,
+# so a take just above the recorded top is a called strike about three
+# times in four. Count only shifts each side's curve, the same shift on
+# every side.
+#
 # Deliberately not a pitch-quality model: no pitch type, velocity,
-# catcher, umpire, or side of the zone. Adding any of those needs its own
-# before/after test.
+# catcher or umpire. Adding any of those needs its own before/after test.
 #
 # One model per season: from 2026 calls can be challenged under the ABS
 # Challenge System, and calling drifts between seasons anyway (a 2024
 # model badly misses 2025's overall called-strike rate).
 # --------------------------------------------------
 
-# Which side of the zone each pitch missed on. NOT a model input; only
-# used in the out-of-fold check, because it is the model's biggest known
-# gap. Same geometry as distance_outside_zone in script 03.
+# Which side of the zone each pitch missed on. Same geometry as
+# distance_outside_zone in script 02.
 HALF_PLATE_PLUS_BALL = 0.83
 
 sideways_miss = (
@@ -713,13 +736,36 @@ opportunities["miss_direction"] = np.select(
     default="on the edge",
 )
 
+# The model's version. Statcast's out-of-zone flag counts a ball's width
+# above and below the zone (distance_outside_zone does not), so a take
+# that misses only above or below is at least a ball's radius off the
+# recorded edge. The few hundred a season that are closer were flagged
+# out by the side edge instead (every one sits within 0.11 ft of the
+# plate's edge as distance measures it, and is called a strike about as
+# often as a corner pitch), so they join the corners. A pitch "on the
+# edge" (no distance off either edge, about a hundred takes a season) was
+# also flagged out by the side edge, so it joins the side curve. An
+# unknown side is missing.
+BALL_RADIUS = 0.121
+
+opportunities["zone_side"] = (
+    opportunities["miss_direction"]
+    .replace({"on the edge": "side", "unknown": np.nan})
+)
+
+opportunities.loc[
+    opportunities["zone_side"].isin(["above", "below"])
+    & (opportunities["distance_outside_zone"] < BALL_RADIUS),
+    "zone_side"
+] = "corner"
+
 takes = opportunities[opportunities["is_swing"] == 0].copy()
 
 takes["was_called_strike"] = (
     takes["description"] == "called_strike"
 ).astype(int)
 
-model_inputs = ["distance_outside_zone", "balls", "strikes"]
+model_inputs = ["distance_outside_zone", "zone_side", "balls", "strikes"]
 
 # Takes are a subset of opportunities, so only opportunities are counted.
 missing_features = int(
@@ -735,6 +781,15 @@ if missing_features > 0:
         "season's called-strike rate for the count instead."
     )
     takes = takes.dropna(subset=model_inputs)
+
+unexpected_sides = set(opportunities["zone_side"].dropna()) - {
+    "side", "above", "below", "corner"
+}
+
+if unexpected_sides:
+    raise RuntimeError(
+        f"Unexpected zone_side values {sorted(unexpected_sides)}."
+    )
 
 # An impossible count would not raise an error in the count indicators;
 # it would silently be treated as 0-0. Stop instead.
@@ -756,21 +811,39 @@ COUNTS_IN_ORDER = [
 ]
 
 
+# The sides of the zone in the model, the first one the reference.
+ZONE_SIDES = ["side", "above", "below", "corner"]
+
+
 def called_strike_features(frame):
     """
-    Raw distance (the spline is built inside the model) plus one 0/1
-    column for every count except 0-0. The columns are the same for any
-    slice of pitches, so a model fit on one set can score another.
+    Raw distance (the splines are built inside the model), one 0/1 column
+    per side of the zone, and one 0/1 column for every count except 0-0.
+    The columns are the same for any slice of pitches, so a model fit on
+    one set can score another.
     """
 
-    features = pd.DataFrame(
-        {
-            "distance_outside_zone": (
-                frame["distance_outside_zone"].astype(float)
-            )
-        },
-        index=frame.index
-    )
+    features = no_side_features(frame)
+
+    zone_side = frame["zone_side"].to_numpy()
+
+    for position, side in enumerate(ZONE_SIDES):
+        features.insert(
+            1 + position,
+            f"side_{side}",
+            (zone_side == side).astype(float)
+        )
+
+    return features
+
+
+def no_side_features(frame):
+    """
+    Distance and the count indicators, without the side of the zone. The
+    model before October 2026; kept as the comparison in the check.
+    """
+
+    features = distance_only_features(frame)
 
     balls = frame["balls"].to_numpy()
     strikes = frame["strikes"].to_numpy()
@@ -798,25 +871,175 @@ def distance_only_features(frame):
     )
 
 
+def distance_spline():
+    """The cubic spline of distance, with fixed knots."""
+
+    return SplineTransformer(
+        knots=np.array(CALLED_STRIKE_DISTANCE_KNOTS).reshape(-1, 1),
+        degree=3,
+        extrapolation="linear",
+        include_bias=False
+    )
+
+
+class MonotoneCalledStrikeModel(BaseEstimator, ClassifierMixin):
+    """
+    Logistic regression with one distance curve per side of the zone, each
+    unable to rise with distance, plus the count indicators.
+
+    Each side's curve is a weighted sum of the cubic spline's tail sums
+    (the basis functions from the k-th on, added up), which never fall
+    with distance and stay flat past the last knot, plus the distance
+    past the last knot, which keeps the curve falling in the tail. Every weight is held at or above zero and enters with a minus
+    sign, so no side's curve can rise with distance, in any count. The
+    side and count terms are free. Fit by maximum likelihood with a light
+    ridge penalty (CALLED_STRIKE_PENALTY) on every term but the intercept.
+
+    Takes called_strike_features' columns.
+    """
+
+    def fit(self, X, y):
+
+        design, names, is_curve = self._design(X)
+        design_transposed = design.T.tocsr()
+        outcomes = np.asarray(y, dtype=float)
+
+        def loss_and_gradient(theta):
+
+            linear = design @ theta
+            loss = np.sum(np.logaddexp(0, linear) - outcomes * linear)
+            gradient = design_transposed @ (expit(linear) - outcomes)
+
+            penalized = theta.copy()
+            penalized[0] = 0.0
+
+            loss += 0.5 * CALLED_STRIKE_PENALTY * penalized @ penalized
+            gradient += CALLED_STRIKE_PENALTY * penalized
+
+            return loss, gradient
+
+        start = np.zeros(design.shape[1])
+        start[0] = log_odds(np.clip(outcomes.mean(), 1e-6, 1 - 1e-6))
+
+        result = minimize(
+            loss_and_gradient,
+            start,
+            jac=True,
+            method="L-BFGS-B",
+            bounds=[
+                (0.0, None) if curve else (None, None)
+                for curve in is_curve
+            ],
+            options={"maxiter": 20000, "ftol": 1e-13, "gtol": 1e-7},
+        )
+
+        self.coef_ = result.x
+        self.feature_names_ = names
+        self.converged_ = bool(result.success)
+        self.n_iter_ = int(result.nit)
+
+        return self
+
+    def coefficient(self, name):
+
+        return float(self.coef_[self.feature_names_.index(name)])
+
+    def decision_function(self, X):
+
+        design, _, _ = self._design(X)
+
+        return design @ self.coef_
+
+    def predict_proba(self, X):
+
+        chance = expit(self.decision_function(X))
+
+        return np.column_stack([1 - chance, chance])
+
+    @staticmethod
+    def _design(X):
+        """
+        The model's columns: intercept, one 0/1 column per side but the
+        reference, the count indicators, then each side's curve columns
+        (negative tail sums and negative distance past the last knot,
+        zero off that side). Also returns the names and which columns
+        are curve weights.
+        """
+
+        distance = X["distance_outside_zone"].to_numpy(dtype=float)
+        last_knot = CALLED_STRIKE_DISTANCE_KNOTS[-1]
+
+        basis = SplineTransformer(
+            knots=np.array(CALLED_STRIKE_DISTANCE_KNOTS).reshape(-1, 1),
+            degree=3,
+            extrapolation="constant",
+            include_bias=True
+        ).fit([[0.0], [last_knot]]).transform(
+            np.clip(distance, 0, last_knot).reshape(-1, 1)
+        )
+
+        # The first tail sum is the whole basis, 1 everywhere, so it is
+        # left out.
+        tail_sums = np.cumsum(basis[:, ::-1], axis=1)[:, ::-1][:, 1:]
+        past_last_knot = np.clip(distance - last_knot, 0, None)
+
+        curve = np.column_stack([tail_sums, past_last_knot])
+
+        sides = {
+            side: X[f"side_{side}"].to_numpy(dtype=float)
+            for side in ZONE_SIDES
+        }
+
+        count_columns = [
+            column for column in X.columns if column.startswith("count_")
+        ]
+
+        columns = [np.ones(len(X))]
+        names = ["intercept"]
+        is_curve = [False]
+
+        for side in ZONE_SIDES[1:]:
+            columns.append(sides[side])
+            names.append(f"side_{side}")
+            is_curve.append(False)
+
+        for column in count_columns:
+            columns.append(X[column].to_numpy(dtype=float))
+            names.append(column)
+            is_curve.append(False)
+
+        for side in ZONE_SIDES:
+            for position in range(curve.shape[1]):
+                columns.append(-curve[:, position] * sides[side])
+                names.append(
+                    f"{side}_past_last_knot"
+                    if position == curve.shape[1] - 1
+                    else f"{side}_tail_sum_{position + 1}"
+                )
+                is_curve.append(True)
+
+        # Each row is non-zero in about 11 of the 47 columns.
+        return csr_matrix(np.column_stack(columns)), names, is_curve
+
+
 def new_called_strike_model():
     """
-    Logistic regression on a scaled cubic spline of distance, with any
-    other columns (the count indicators) passed straight through. The
-    spline lives inside the pipeline, so each season learns its own curve.
+    The model used for pricing: a distance curve per side of the zone
+    that cannot rise with distance, plus count. Each season fits its own.
     """
 
-    knots = np.array(CALLED_STRIKE_DISTANCE_KNOTS).reshape(-1, 1)
+    return MonotoneCalledStrikeModel()
+
+
+def new_no_side_model():
+    """
+    The model without the side of the zone: one distance spline for every
+    take, any other columns (the count indicators) passed straight
+    through. Only used as a comparison in the check.
+    """
 
     distance_curve = Pipeline([
-        (
-            "spline",
-            SplineTransformer(
-                knots=knots,
-                degree=3,
-                extrapolation="linear",
-                include_bias=False
-            )
-        ),
+        ("spline", distance_spline()),
         ("scale", StandardScaler()),
     ])
 
@@ -838,12 +1061,6 @@ def count_effects(model):
     same distance, as a balls x strikes grid.
     """
 
-    names = list(model.named_steps["features"].get_feature_names_out())
-
-    coefficients = dict(
-        zip(names, model.named_steps["logit"].coef_[0])
-    )
-
     grid = pd.DataFrame(
         0.0,
         index=pd.Index(range(4), name="balls"),
@@ -851,33 +1068,36 @@ def count_effects(model):
     )
 
     for count_balls, count_strikes in COUNTS_IN_ORDER[1:]:
-        grid.loc[count_balls, count_strikes] = coefficients[
+        grid.loc[count_balls, count_strikes] = model.coefficient(
             f"count_{count_balls}_{count_strikes}"
-        ]
+        )
 
     return grid
 
 
-def pitches_at(distances, balls=0, strikes=0):
-    """Made-up takes at these distances, all in one count."""
+def pitches_at(distances, balls=0, strikes=0, zone_side="side"):
+    """Made-up takes at these distances, all in one count and side."""
 
     return pd.DataFrame({
         "distance_outside_zone": distances,
+        "zone_side": zone_side,
         "balls": balls,
         "strikes": strikes,
     })
 
 
 show_diagnostic_header(
-    "CALLED-STRIKE MODEL (logistic: distance curve + count, per season)"
+    "CALLED-STRIKE MODEL (logistic: distance curve per side of the zone "
+    "+ count, per season)"
 )
 
 # A 0-0 take at each of these distances shows the shape of the curve.
 DISTANCES_TO_SHOW = [0.05, 0.15, 0.25, 0.35, 0.50, 0.75, 1.00]
 
-# Count terms only shift the whole curve, so if the 0-0 curve never rises
-# with distance, no count's curve does either.
-monotone_check_pitches = pitches_at(np.linspace(0, 10, 4001))
+# Count terms only shift each side's whole curve, so if a side's 0-0
+# curve never rises with distance, no count's curve on that side does
+# either. Each side has its own curve, so each is checked.
+MONOTONE_CHECK_DISTANCES = np.linspace(0, 10, 4001)
 
 called_strike_models = {}
 
@@ -902,49 +1122,61 @@ for year in sorted(takes["game_year"].dropna().unique()):
     show_diagnostic("Count effect on the log-odds of a called strike, vs 0-0:")
     show_diagnostic(count_effects(model).round(3).to_string())
 
-    shown_rates = model.predict_proba(
-        called_strike_features(pitches_at(DISTANCES_TO_SHOW))
-    )[:, 1]
-
     show_diagnostic()
-    show_diagnostic("Called-strike chance of a 0-0 take, by feet outside the zone:")
     show_diagnostic(
-        "  "
-        + "  ".join(
-            f"{distance:.2f} ft {rate:.3f}"
-            for distance, rate in zip(DISTANCES_TO_SHOW, shown_rates)
-        )
+        "Called-strike chance of a 0-0 take, by feet outside the zone "
+        "and the side it missed on:"
     )
 
-    curve = model.predict_proba(
-        called_strike_features(monotone_check_pitches)
-    )[:, 1]
+    for side in ZONE_SIDES:
 
-    rises = np.diff(curve) > 1e-12
+        shown_rates = model.predict_proba(
+            called_strike_features(
+                pitches_at(DISTANCES_TO_SHOW, zone_side=side)
+            )
+        )[:, 1]
 
-    if rises.any():
-
-        first_rise = monotone_check_pitches["distance_outside_zone"].iloc[
-            int(np.argmax(rises)) + 1
-        ]
-
-        print(
-            f"WARNING: the fitted curve rises again past "
-            f"{first_rise:.2f} ft. A pitch farther off the plate should "
-            "never be likelier to be called a strike. Check the knots "
-            "before trusting value_if_taken for this season."
+        show_diagnostic(
+            f"  {side:<7}"
+            + "  ".join(
+                f"{distance:.2f} ft {rate:.3f}"
+                for distance, rate in zip(DISTANCES_TO_SHOW, shown_rates)
+            )
         )
 
-    else:
+    rising_sides = []
 
-        show_diagnostic("Curve never rises with distance (checked 0 to 10 ft): OK")
+    for side in ZONE_SIDES:
 
-    logit_step = model.named_steps["logit"]
+        curve = model.predict_proba(
+            called_strike_features(
+                pitches_at(MONOTONE_CHECK_DISTANCES, zone_side=side)
+            )
+        )[:, 1]
 
-    if int(logit_step.n_iter_[0]) >= logit_step.max_iter:
+        rises = np.diff(curve) > 1e-12
+
+        if rises.any():
+
+            first_rise = MONOTONE_CHECK_DISTANCES[int(np.argmax(rises)) + 1]
+            rising_sides.append(side)
+
+            print(
+                f"WARNING: the fitted {side} curve rises again past "
+                f"{first_rise:.2f} ft. A pitch farther off the plate "
+                "should never be likelier to be called a strike. Check "
+                "the knots before trusting value_if_taken for this season."
+            )
+
+    if not rising_sides:
+        show_diagnostic(
+            "No side's curve ever rises with distance (checked 0 to 10 ft): OK"
+        )
+
+    if not model.converged_:
         print(
             f"WARNING: the {int(year)} fit stopped at "
-            f"{int(logit_step.n_iter_[0])} iterations without converging."
+            f"{model.n_iter_} iterations without converging."
         )
 
 show_detail()
@@ -1042,9 +1274,9 @@ for year in sorted(called_strike_models):
 # same pitches, which is fine for pricing but cannot show whether the
 # model is right. So each season's takes are split into folds by GAME (a
 # game's umpire and catcher stay together, or the check would flatter
-# itself), and every fold is predicted by a model fit on the others. A
-# distance-only model gets the same treatment, to measure what the count
-# terms add.
+# itself), and every fold is predicted by a model fit on the others. The
+# model without the side of the zone and a distance-only model get the
+# same treatment, to measure what the side and the count terms add.
 #
 # How to read the output:
 #   - Calibration matters most: when the model says 5%, about 5% should
@@ -1058,6 +1290,15 @@ for year in sorted(called_strike_models):
 #     is shown next to it. Both are positive when the model under-calls
 #     strikes.
 # --------------------------------------------------
+
+def fitted_numbers(model):
+    """Every coefficient the fit chose, plus the intercept."""
+
+    if isinstance(model, MonotoneCalledStrikeModel):
+        return int(model.coef_.size)
+
+    return int(model[-1].coef_.size + model[-1].intercept_.size)
+
 
 def calibration_intercept_and_slope(outcomes, predicted):
     """
@@ -1184,6 +1425,15 @@ def calibration_check_row(year, check_name, group, row):
 
 called_strike_check_rows = []
 
+USED_MODEL_LABEL = "distance by side of zone + count (used)"
+NO_SIDE_MODEL_LABEL = "distance + count, no side of zone (comparison)"
+DISTANCE_ONLY_MODEL_LABEL = "distance only (comparison)"
+
+SIDE_TABLE_CHECK = "by distance bucket x side of zone"
+SIDE_TABLE_NO_SIDE_CHECK = (
+    "by distance bucket x side of zone, no side of zone (comparison)"
+)
+
 # The called-strike model is identical in the xChase+ run, so this check
 # gives the same numbers there. It still runs, so results/xchase/ has
 # every file results/chase/ has (07_check_chase_invariants.py --expected-contact
@@ -1207,6 +1457,7 @@ if run_out_of_fold_check:
         )
 
         oof_full = np.full(len(year_takes), np.nan)
+        oof_no_side = np.full(len(year_takes), np.nan)
         oof_distance_only = np.full(len(year_takes), np.nan)
 
         for train_rows, test_rows in folds.split(
@@ -1233,7 +1484,16 @@ if run_out_of_fold_check:
                 called_strike_features(test)
             )[:, 1]
 
-            distance_model = new_called_strike_model().fit(
+            no_side_model = new_no_side_model().fit(
+                no_side_features(train),
+                train["was_called_strike"]
+            )
+
+            oof_no_side[test_rows] = no_side_model.predict_proba(
+                no_side_features(test)
+            )[:, 1]
+
+            distance_model = new_no_side_model().fit(
                 distance_only_features(train),
                 train["was_called_strike"]
             )
@@ -1243,25 +1503,37 @@ if run_out_of_fold_check:
             )[:, 1]
 
         year_takes["oof_rate"] = oof_full
+        year_takes["oof_rate_no_side"] = oof_no_side
         year_takes["oof_rate_distance_only"] = oof_distance_only
 
         outcomes = year_takes["was_called_strike"].to_numpy()
 
-        # The same two models fit on the whole season and scored on their
+        # The same three models fit on the whole season and scored on their
         # own takes. Out of fold must come out worse than this by at least
         # the minimum gap. The used model was already fit above; the
-        # distance-only comparison model is fit here.
-        in_sample_distance_only = new_called_strike_model().fit(
+        # comparison models are fit here.
+        in_sample_no_side = new_no_side_model().fit(
+            no_side_features(year_takes),
+            year_takes["was_called_strike"]
+        )
+
+        in_sample_distance_only = new_no_side_model().fit(
             distance_only_features(year_takes),
             year_takes["was_called_strike"]
         )
 
         in_sample_of = {
-            "distance + count (used)": (
+            USED_MODEL_LABEL: (
                 called_strike_models[year],
                 year_takes["predicted_rate"].to_numpy()
             ),
-            "distance only (comparison)": (
+            NO_SIDE_MODEL_LABEL: (
+                in_sample_no_side,
+                in_sample_no_side.predict_proba(
+                    no_side_features(year_takes)
+                )[:, 1]
+            ),
+            DISTANCE_ONLY_MODEL_LABEL: (
                 in_sample_distance_only,
                 in_sample_distance_only.predict_proba(
                     distance_only_features(year_takes)
@@ -1272,19 +1544,16 @@ if run_out_of_fold_check:
         summary_rows = []
 
         for label, column in [
-            ("distance + count (used)", "oof_rate"),
-            ("distance only (comparison)", "oof_rate_distance_only"),
+            (USED_MODEL_LABEL, "oof_rate"),
+            (NO_SIDE_MODEL_LABEL, "oof_rate_no_side"),
+            (DISTANCE_ONLY_MODEL_LABEL, "oof_rate_distance_only"),
         ]:
 
             predicted = year_takes[column].to_numpy()
 
             fitted_model, in_sample_rate = in_sample_of[label]
 
-            # every coefficient the fit chose, plus the intercept
-            coefficients = int(
-                fitted_model[-1].coef_.size
-                + fitted_model[-1].intercept_.size
-            )
+            coefficients = fitted_numbers(fitted_model)
 
             in_sample_loss = log_loss(outcomes, in_sample_rate)
 
@@ -1313,9 +1582,14 @@ if run_out_of_fold_check:
 
         summary = pd.DataFrame(summary_rows)
 
-        count_gain = (
+        side_gain = (
             1
             - summary["log_loss"].iloc[0] / summary["log_loss"].iloc[1]
+        )
+
+        count_gain = (
+            1
+            - summary["log_loss"].iloc[1] / summary["log_loss"].iloc[2]
         )
 
         summary["gap_over_in_sample"] = (
@@ -1333,8 +1607,9 @@ if run_out_of_fold_check:
         show_diagnostic(printed.round(6).to_string(index=False))
         show_diagnostic()
         show_diagnostic(
-            f"The count terms lower out-of-fold log loss by "
-            f"{count_gain:.1%}. In sample the used model scores "
+            f"The side of the zone lowers out-of-fold log loss by "
+            f"{side_gain:.1%} and the count terms by {count_gain:.1%}. "
+            f"In sample the used model scores "
             f"{summary['in_sample_log_loss'].iloc[0]:.5f}, so out of "
             f"fold has to come in at least "
             f"{summary['minimum_out_of_fold_gap'].iloc[0]:.6f} worse "
@@ -1430,32 +1705,31 @@ if run_out_of_fold_check:
                 "is the real test of count.)"
             )
 
-        # Which side of the zone the take missed on is NOT in the model,
-        # and this is where it is furthest off (takes just above the zone
-        # are called strikes far more often than predicted, corners far
-        # less). Shown every run as a known limitation, not flagged.
-        by_miss = calibration_table(
-            year_takes,
-            ["distance_bucket", "miss_direction"],
-            "oof_rate"
-        )
+        # The side of the zone by distance bucket, for the used model and
+        # for the model without it: where the model was furthest off
+        # before the side went in (takes just above the zone called
+        # strikes far more often than predicted, corners far less, and in
+        # 2026 the top most of all, because Statcast records the shorter
+        # ABS box).
+        for check_name, column in [
+            (SIDE_TABLE_CHECK, "oof_rate"),
+            (SIDE_TABLE_NO_SIDE_CHECK, "oof_rate_no_side"),
+        ]:
 
-        show_diagnostic()
-        show_diagnostic(
-            "Calibration by distance bucket x which side of the zone "
-            "the take missed on (NOT in the model -- a known gap):"
-        )
-        print_calibration(by_miss)
-
-        for group, row in by_miss.iterrows():
-            called_strike_check_rows.append(
-                calibration_check_row(
-                    year,
-                    "by distance bucket x miss direction (not in model)",
-                    group,
-                    row
-                )
+            by_side = calibration_table(
+                year_takes,
+                ["distance_bucket", "zone_side"],
+                column
             )
+
+            show_diagnostic()
+            show_diagnostic(f"Calibration {check_name}:")
+            print_calibration(by_side)
+
+            for group, row in by_side.iterrows():
+                called_strike_check_rows.append(
+                    calibration_check_row(year, check_name, group, row)
+                )
 
 else:
 
@@ -3624,6 +3898,7 @@ opportunities[
         "strikes",
         "distance_outside_zone",
         "distance_bucket",
+        "zone_side",
         "is_chase",
         "called_strike_rate",
         "value_if_taken",
