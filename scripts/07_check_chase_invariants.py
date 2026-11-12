@@ -88,26 +88,35 @@ def read_results(path):
     return table
 
 
+SHARED_MODEL_SCRIPT = LEADERBOARD_SCRIPT.parent / "chase_model.py"
+
+
 def read_settings(names):
     """
     Read top-level literal assignments (NAME = <literal>) out of the
-    leaderboard script without running it.
+    leaderboard script, then out of chase_model.py (the called-strike
+    model's knots and penalty live there, shared with the college path),
+    without running either.
     """
 
-    tree = ast.parse(LEADERBOARD_SCRIPT.read_text())
     found = {}
 
-    for node in tree.body:
-        if isinstance(node, ast.Assign) and len(node.targets) == 1:
-            target = node.targets[0]
-            if isinstance(target, ast.Name) and target.id in names:
-                found[target.id] = ast.literal_eval(node.value)
+    for script in (LEADERBOARD_SCRIPT, SHARED_MODEL_SCRIPT):
+
+        tree = ast.parse(script.read_text())
+
+        for node in tree.body:
+            if isinstance(node, ast.Assign) and len(node.targets) == 1:
+                target = node.targets[0]
+                if isinstance(target, ast.Name) and target.id in names and target.id not in found:
+                    found[target.id] = ast.literal_eval(node.value)
 
     missing = set(names) - set(found)
 
     if missing:
         raise RuntimeError(
-            f"Could not find {sorted(missing)} in {LEADERBOARD_SCRIPT.name}"
+            f"Could not find {sorted(missing)} in {LEADERBOARD_SCRIPT.name} "
+            f"or {SHARED_MODEL_SCRIPT.name}"
         )
 
     return found
@@ -608,7 +617,8 @@ def test_keys_are_unique_and_tables_agree():
 
 def test_outputs_match_this_script_and_data():
     current = fingerprint_of([
-        LEADERBOARD_SCRIPT, PITCH_FILE, PA_VALUE_FILE, COUNT_VALUES, EVENT_VALUES,
+        LEADERBOARD_SCRIPT, SHARED_MODEL_SCRIPT, PITCH_FILE, PA_VALUE_FILE, COUNT_VALUES,
+        EVENT_VALUES,
     ])
 
     scale_prints = set(pd.read_csv(SCALE)["run_fingerprint"])

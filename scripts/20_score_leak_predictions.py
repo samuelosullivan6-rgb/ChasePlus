@@ -27,6 +27,21 @@ season and asks two questions on exactly those cells:
   Also the run accounting (offense runs per run of leak choices
   recovered) and the other outcomes step 16 reports.
 
+PRE-REGISTERED PASS CRITERION (written 2026-11-12, before any 2027 pitch)
+  The 2026 file passes if, on every scored hitter,
+    1. the level holds: |mean actual minus predicted| is under
+       LEVEL_TOLERANCE (1.5 points of leak chasing) or within 2 SE of 0;
+    2. the slope holds: the calibration slope's 1 SE band reaches
+       SLOPE_BAND (0.8 to 1.2);
+    3. the payoff holds: the offense-runs payoff per 10-point cut is
+       positive by at least 1 SE.
+  Each is recorded as a row (test "pre-registered: ...", value 1 pass /
+  0 fail) and the verdict is printed. The retrospective files (2022 to
+  2025) are scored on the same rule for reference; two of them (2023 and
+  2024 scored) miss the level by about 3 SE, which is why the rule allows
+  the tolerance in points as well as the SE test. The criterion is fixed
+  here so 2027 cannot be judged by a rule chosen after seeing it.
+
 WHO IS SCORED
   Every hitter in the file with at least one leak who qualified the
   next season and saw at least MIN_NEXT_PITCHES pitches in his frozen
@@ -74,6 +89,11 @@ OUT = XCHASE / "coaching"
 PA_SCALE = 600
 FAR_OFF_FT = 0.35
 MIN_NEXT_PITCHES = 10           # in the frozen cells, as step 16 requires
+
+# The pre-registered pass criterion (see the docstring). Do not change
+# these after a season has been scored out of sample.
+LEVEL_TOLERANCE = 0.015         # 1.5 points of leak chasing
+SLOPE_BAND = (0.8, 1.2)
 KEYS = ["game_pk", "at_bat_number", "pitch_number", "batter", "game_year"]
 OUTCOMES = ["xchase_plus", "offense_runs", "woba_runs", "bb_rate", "k_rate",
             "zone_swing_rate", "far_off_chase_rate"]
@@ -290,9 +310,19 @@ else:
     pairs = pairs.dropna(subset=["leak_excess_1", "leak_excess_2"]).copy()
     s_, i_ = np.polyfit(pairs["leak_excess_1"], pairs["leak_excess_2"], 1)
     if REF_KIND == "season" and (abs(s_ - slope) > 1e-3 or abs(i_ - intercept) > 1e-3):
-        raise SystemExit("The frozen file's line does not match a refit on the pairs ending by "
-                         f"{SEASON} (file {intercept:+.4f} + {slope:.4f} x, refit {i_:+.4f} + "
-                         f"{s_:.4f} x). Rebuild step 16 and refreeze with --retrospective.")
+        # Step 19 holds a frozen prediction fixed once its cells reproduce,
+        # even when a later pricing change (the side-of-zone model, October
+        # 2026) has moved step 16's pairs and so the refit line. The frozen
+        # line is what the scored hitters are judged against (predicted_2
+        # comes from the file); the refit line only defines the reference
+        # payoffs. So the gap is reported, not fatal.
+        print(f"NOTE: the frozen file's line (next = {intercept * 100:+.1f} + {slope:.3f} x) is "
+              f"not the refit on the pairs ending by {SEASON} (next = {i_ * 100:+.1f} + "
+              f"{s_:.3f} x): the backtest moved after the file was frozen. The hitters are "
+              "scored against the frozen line; the reference payoffs use the refit.")
+        record("frozen line slope minus refit slope", "leak_excess", slope - s_, np.nan, np.nan)
+        record("frozen line intercept minus refit intercept", "leak_excess", intercept - i_,
+               np.nan, np.nan)
     pairs["fix"] = pairs["leak_excess_2"] - (i_ + s_ * pairs["leak_excess_1"])
     reference = {}
     for m in OUTCOMES:
@@ -355,6 +385,20 @@ for status, S in scored.groupby("count_status"):
         beta, se = lr.ols(S["change_" + m], [S["fix"], S["excess_1"], S[m + "_1"]], S.index.to_numpy())
         record(f"payoff per 10-pt cut beyond predicted, {status} in the counts", m,
                -0.1 * beta[1], 0.1 * se[1], len(S))
+
+# The pre-registered criterion, on every scored hitter
+_rows = pd.DataFrame(summary).set_index(["group", "measure", "test"])
+_level = _rows.loc[("all", "leak_excess", "actual minus predicted")]
+_slope = _rows.loc[("all", "leak_excess", "calibration slope (actual on predicted)")]
+level_pass = (abs(_level["value"]) < LEVEL_TOLERANCE) or (abs(_level["value"]) <= 2 * _level["se"])
+slope_pass = (_slope["value"] + _slope["se"] >= SLOPE_BAND[0]) and (_slope["value"] - _slope["se"] <= SLOPE_BAND[1])
+payoff_pass = payoff["offense_runs"][0] - payoff["offense_runs"][1] > 0
+record("pre-registered: level holds", "leak_excess", float(level_pass), np.nan, len(scored))
+record("pre-registered: slope holds", "leak_excess", float(slope_pass), np.nan, len(scored))
+record("pre-registered: offense payoff positive at 1 SE", "offense_runs", float(payoff_pass), np.nan,
+       len(scored))
+record("pre-registered: verdict", "all", float(level_pass and slope_pass and payoff_pass), np.nan,
+       len(scored))
 
 # --------------------------------------------------
 # WRITE
@@ -423,5 +467,13 @@ for status in ("struggling", "average", "productive"):
         r = S.loc[key]
         print(f"    {status:10s} in the counts ({int(r['n_hitters']):3d} hitters): "
               f"{r['value']:+.2f} ± {r['se']:.2f} runs per 10-pt cut")
+print(f"\nPre-registered criterion ({'out of sample' if out_of_sample == 'yes' else 'retrospective, for reference'}):")
+print(f"  level:  |{_level['value'] * 100:+.1f}| pts vs {LEVEL_TOLERANCE * 100:.1f} or 2 SE "
+      f"({2 * _level['se'] * 100:.1f}): {'PASS' if level_pass else 'FAIL'}")
+print(f"  slope:  {_slope['value']:.2f} ± {_slope['se']:.2f} vs {SLOPE_BAND[0]}-{SLOPE_BAND[1]}: "
+      f"{'PASS' if slope_pass else 'FAIL'}")
+print(f"  payoff: offense {payoff['offense_runs'][0]:+.2f} ± {payoff['offense_runs'][1]:.2f} runs "
+      f"per 10-pt cut: {'PASS' if payoff_pass else 'FAIL'}")
+print(f"  verdict: {'PASS' if level_pass and slope_pass and payoff_pass else 'FAIL'}")
 print(f"\nWrote leak_scores{SUFFIX}.csv and leak_scores_summary{SUFFIX}.csv to "
       f"{OUT.relative_to(PROJECT_DIR)}/")

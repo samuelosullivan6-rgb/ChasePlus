@@ -703,8 +703,13 @@ candidates = full_comparison[
     full_comparison["luck_z"].abs() >= REGRESSION_Z
 ].copy()
 
+# The direction comes from the UNSHRUNK gap, the same number luck_z tests.
+# The shrunk `luck` is Chase+ minus xChase+ after each was shrunk by its
+# own run's factor (the two runs have different tau^2), so it can differ
+# in sign from the raw gap on a few hitters; labelling from it once put a
+# hitter with raw luck of +2 SE under "rise".
 candidates["expect_chase_plus_to"] = np.where(
-    candidates["luck"] > 0,
+    candidates["luck_raw"] > 0,
     "fall",
     "rise"
 )
@@ -718,6 +723,7 @@ candidates = candidates[
         "chase_plus",
         "xchase_plus",
         "luck",
+        "luck_raw",
         "luck_z",
         "chases_in_play",
         "plate_appearances",
@@ -742,17 +748,18 @@ for season in seasons:
     print(
         f"{int(season)}: {len(in_season)} of {qualified} hitters "
         f"({len(in_season) / qualified:.1%}; about 4.6% would land here by "
-        "chance alone)"
+        f"chance alone, give or take {100 * np.sqrt(0.0455 * 0.9545 / qualified):.1f} "
+        "points at this many hitters)"
     )
 
     if len(in_season) > 0:
 
         view = in_season[
             ["player", "expect_chase_plus_to", "chase_plus", "xchase_plus",
-             "luck", "luck_z", "chases_in_play"]
+             "luck", "luck_raw", "luck_z", "chases_in_play"]
         ].copy()
 
-        for column in ["chase_plus", "xchase_plus", "luck", "luck_z"]:
+        for column in ["chase_plus", "xchase_plus", "luck", "luck_raw", "luck_z"]:
             view[column] = view[column].round(1)
 
         print(view.to_string(index=False))

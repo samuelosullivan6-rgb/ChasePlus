@@ -32,9 +32,13 @@ Writes, in results/xchase/coaching/:
 
 import argparse
 from pathlib import Path
+import sys
 
 import numpy as np
 import pandas as pd
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import chase_model as cm  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
 RESULTS = ROOT / "results" / "xchase"
@@ -51,9 +55,11 @@ SEASON, N = args.season, args.bottom
 HIST = sorted(set(args.history_seasons) | {SEASON})
 PA_PER_SEASON = 600
 
-FASTBALLS = {"FF", "SI", "FC", "FA"}
-BREAKING = {"SL", "ST", "CU", "KC", "SV", "CS"}
-HALF_PLATE_PLUS_BALL = 0.83  # same geometry as script 04's miss_direction
+# Pitch groups and the zone edge come from chase_model.py, shared with
+# every other script.
+FASTBALLS = set(cm.FASTBALLS)
+BREAKING = set(cm.BREAKING)
+HALF_PLATE_PLUS_BALL = cm.HALF_PLATE_PLUS_BALL
 WHIFFS = {"swinging_strike", "swinging_strike_blocked", "foul_tip"}
 
 # --------------------------------------------------

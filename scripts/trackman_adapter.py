@@ -90,6 +90,9 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import chase_model as cm  # noqa: E402
+
 
 # --------------------------------------------------
 # SETTINGS
@@ -100,9 +103,9 @@ import pandas as pd
 ZONE_TOP_SHARE = 0.535
 ZONE_BOTTOM_SHARE = 0.27
 
-# Inside the zone: the ball touches it (feet).
-HALF_PLATE_PLUS_BALL = 0.83
-BALL_RADIUS = 0.121
+# Inside the zone: the ball touches it (feet). Set once in chase_model.py.
+HALF_PLATE_PLUS_BALL = cm.HALF_PLATE_PLUS_BALL
+BALL_RADIUS = cm.BALL_RADIUS
 
 # The sign check on PlateLocSide.
 MIN_HBP_FOR_SIGN = 10

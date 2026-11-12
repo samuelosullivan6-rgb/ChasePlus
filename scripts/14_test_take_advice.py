@@ -21,18 +21,31 @@ and asks two questions:
 
 Changes in one season's stat are partly regression to the mean: a hitter
 coming off a bad year tends to improve whatever he does. So every slope is
-fit with the hitter's first-season level as a second predictor, which
-compares hitters who started at the same far-off chase rate.
+fit with the hitter's first-season far-off chase rate AND his first-season
+level of the outcome as further predictors, the same design as step 16.
+Without the outcome's own level, a bad xwOBA year that happened to be a
+high-chase year reverts on both counts at once and the slope takes the
+credit. Standard errors are clustered by hitter (step 16's helper in
+leak_rules.py), since the same hitter appears in up to five pairs.
+
+The 2025 -> 2026 pair straddles the 2026 ABS strike-zone box: Statcast
+records a shorter zone in 2026, so which pitches count as "far off" moves
+with it. Every slope is therefore fit twice, on all pairs and on the pairs
+that end in 2025 or earlier, and both are printed and saved.
 
 Writes results/xchase/coaching/take_advice_backtest.csv (one row per
 hitter pair of seasons) and take_advice_summary.csv (the slopes and group
 means quoted in the README).
 """
 
+import sys
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import leak_rules as lr  # noqa: E402
 
 PROJECT_DIR = Path(__file__).resolve().parents[1]
 CLEAN = PROJECT_DIR / "data" / "cleaned"
@@ -77,13 +90,21 @@ has_x = ends["estimated_woba_using_speedangle"].notna()
 # the actual wOBA value for everything else.
 ends["x_value"] = np.where(in_play & has_x,
                            ends["estimated_woba_using_speedangle"],
-                           ends["woba_value"])
+                           ends["woba_value"]).astype(float)
+# Only plate appearances in the wOBA denominator carry an xwOBA, the same
+# definition as leak_rules.plate_appearances() in step 16. Statcast gives
+# the rows outside it a non-zero woba_value anyway (sacrifice bunts 0.2 or
+# 0.9 with woba_denom 0; intentional walks 0.4 with woba_denom missing), so
+# summing x_value over every PA end and dividing by the denominator count
+# overstated xwOBA, by more for bunters and intentionally walked hitters.
+ends["in_woba"] = (ends["woba_denom"] == 1).fillna(False).astype(bool)
+ends["x_in"] = ends["x_value"].where(ends["in_woba"])
 outcomes = ends.groupby(keys).agg(
     pa=("events", "size"),
     k=("events", lambda s: s.isin(STRIKEOUTS).sum()),
     bb=("events", lambda s: s.isin(WALKS).sum()),
-    x_sum=("x_value", "sum"),
-    denom=("woba_denom", "sum"),
+    x_sum=("x_in", "sum"),
+    denom=("in_woba", "sum"),
 )
 outcomes["k_rate"] = outcomes["k"] / outcomes["pa"]
 outcomes["bb_rate"] = outcomes["bb"] / outcomes["pa"]
@@ -121,31 +142,44 @@ pairs["group"] = np.select(
 
 # --------------------------------------------------
 # SLOPES: change in outcome per 10-point cut in far-off chase rate,
-# holding the first-season far-off chase rate fixed.
+# holding the first-season far-off chase rate and the first-season level
+# of the outcome fixed. Fit on all pairs and again without 2025 -> 2026.
 # --------------------------------------------------
 
-def slope(outcome):
-    y = pairs[f"change_{outcome}"].to_numpy()
-    X = np.column_stack([
-        np.ones(len(pairs)),
-        pairs["change_far_off_chase_rate"].to_numpy(),
-        pairs["far_off_chase_rate_1"].to_numpy(),
-    ])
-    ok = np.isfinite(y) & np.isfinite(X).all(axis=1)
-    y, X = y[ok], X[ok]
-    beta, *_ = np.linalg.lstsq(X, y, rcond=None)
+ABS_SEASON = 2026   # first season on the ABS box; the pair into it is set aside
+
+def slope(outcome, P, with_level=True):
+    """Per 10-point CUT in far-off chase rate (negative change), so a
+    positive number means the outcome went up when chasing went down.
+    Returns the estimate, its classical and hitter-clustered standard
+    errors, and the pair and hitter counts. with_level=False drops the
+    outcome's first-season level, the specification this step used before
+    it matched step 16; kept so the two can be compared."""
+    controls = ["change_far_off_chase_rate", "far_off_chase_rate_1"]
+    if with_level:
+        controls.append(f"{outcome}_1")
+    Q = P.dropna(subset=[f"change_{outcome}"] + controls)
+    y = Q[f"change_{outcome}"].to_numpy(float)
+    beta, se_cl = lr.ols(y, [Q[c] for c in controls], Q["batter"].to_numpy())
+    # classical standard error alongside, for the comparison with the old file
+    X = np.column_stack([np.ones(len(Q))] + [Q[c].to_numpy(float) for c in controls])
     residual = y - X @ beta
     sigma2 = residual @ residual / (len(y) - X.shape[1])
     se = np.sqrt(np.diag(sigma2 * np.linalg.inv(X.T @ X)))
-    # report per 10-point CUT (negative change), so a positive number
-    # means the outcome went up when chasing went down
-    return -0.10 * beta[1], 0.10 * se[1], len(y)
+    return -0.10 * beta[1], 0.10 * se[1], 0.10 * se_cl[1], len(Q), Q["batter"].nunique()
 
+before_abs = pairs[pairs["season_2"] < ABS_SEASON]
 rows = []
 for m in METRICS[1:]:
-    b, se, n = slope(m)
-    rows.append({"measure": m, "kind": "slope_per_10pt_cut",
-                 "value": b, "se": se, "n_pairs": n})
+    for kind, with_level in [("slope_per_10pt_cut", True),
+                             ("slope_per_10pt_cut (far-off level only)", False)]:
+        b, se, se_cl, n, h = slope(m, pairs, with_level)
+        b_x, _, se_cl_x, n_x, h_x = slope(m, before_abs, with_level)
+        rows.append({"measure": m, "kind": kind,
+                     "value": b, "se": se, "n_pairs": n,
+                     "se_clustered": se_cl, "n_hitters": h,
+                     "value_excl_2026": b_x, "se_clustered_excl_2026": se_cl_x,
+                     "n_pairs_excl_2026": n_x, "n_hitters_excl_2026": h_x})
 for g, sub in pairs.groupby("group"):
     for m in METRICS:
         col = sub[f"change_{m}"].dropna()
@@ -166,8 +200,12 @@ pd.set_option("display.width", 200)
 print(f"{len(pairs)} consecutive qualified season pairs, "
       f"{pairs['season_1'].min()}-{pairs['season_2'].max()}")
 print(pairs["group"].value_counts().to_string())
-print("\nPer 10-point cut in far-off chase rate (first-season level held fixed):")
 s = summary[summary["kind"] == "slope_per_10pt_cut"].set_index("measure")
+print(f"\nPer 10-point cut in far-off chase rate (first-season far-off rate and\n"
+      f"outcome level held fixed; ± is the standard error clustered by hitter):\n"
+      f"  {'':16s} {'all pairs':>20s}   {'without 2025->2026':>20s}")
+print(f"  {'':16s} {'(' + str(int(s['n_pairs'].iloc[0])) + ' pairs)':>20s}   "
+      f"{'(' + str(int(s['n_pairs_excl_2026'].iloc[0])) + ' pairs)':>20s}")
 for m, label, scale, unit in [
     ("xchase_plus", "xChase+", 1, " pts"),
     ("zone_swing_rate", "zone swing rate", 100, " pct pts"),
@@ -175,7 +213,16 @@ for m, label, scale, unit in [
     ("bb_rate", "BB%", 100, " pct pts"),
     ("xwoba", "xwOBA", 1000, " pts (x1000)"),
 ]:
-    print(f"  {label:16s} {s.loc[m, 'value'] * scale:+6.2f} ± {s.loc[m, 'se'] * scale:4.2f}{unit}")
+    r = s.loc[m]
+    print(f"  {label:16s} {r['value'] * scale:+9.2f} ± {r['se_clustered'] * scale:5.2f}   "
+          f"{r['value_excl_2026'] * scale:+9.2f} ± {r['se_clustered_excl_2026'] * scale:5.2f}{unit}")
+old = summary[summary["kind"] == "slope_per_10pt_cut (far-off level only)"].set_index("measure")
+print("\nSame without the outcome's first-season level (the step's old design),\n"
+      "all pairs, classical ± then clustered ±:")
+for m, label, scale in [("xchase_plus", "xChase+", 1), ("zone_swing_rate", "zone swing rate", 100),
+                        ("k_rate", "K%", 100), ("bb_rate", "BB%", 100), ("xwoba", "xwOBA", 1000)]:
+    r = old.loc[m]
+    print(f"  {label:16s} {r['value'] * scale:+9.2f} ± {r['se'] * scale:5.2f} / ± {r['se_clustered'] * scale:5.2f}")
 print("\nMean change by group:")
 g = summary[summary["kind"].str.startswith("mean_change")].copy()
 g["group"] = g["kind"].str.replace("mean_change: ", "")

@@ -13,9 +13,13 @@ Output: data/cleaned/baseline_chase_pitches.parquet
 """
 
 from pathlib import Path
+import sys
 
 import numpy as np
 import pandas as pd
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from chase_model import HALF_PLATE_PLUS_BALL  # noqa: E402
 
 
 # --------------------------------------------------
@@ -374,9 +378,10 @@ df["plate_z_normalized"] = (
 
 # How far outside the zone the pitch was, in feet (0 inside the zone).
 # Horizontally the zone edge is 0.83 ft from the middle of the plate: half
-# the plate (8.5 in) plus a ball radius (1.45 in). Vertically it is the
-# hitter's own sz_top / sz_bot, with no ball radius added.
-half_plate_plus_ball = 0.83
+# the plate (8.5 in) plus a ball radius (1.45 in), set once in
+# chase_model.py for every script. Vertically it is the hitter's own
+# sz_top / sz_bot, with no ball radius added.
+half_plate_plus_ball = HALF_PLATE_PLUS_BALL
 
 horizontal_miss = (
     df["plate_x"].abs() - half_plate_plus_ball

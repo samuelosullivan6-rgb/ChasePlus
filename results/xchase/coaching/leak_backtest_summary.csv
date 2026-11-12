@@ -1,77 +1,101 @@
-pair_kind,measure,test,value,se,n_pairs,n_hitters
-half,leak_excess,first period mean,0.15789,,1194,490
-half,leak_excess,second period mean,0.07406,,1194,490
-half,leak_excess,carried over (slope),0.60726,,1194,490
-half,leak_excess,carried over (intercept),-0.02182,,1194,490
-half,leak_chase_rate,first period mean,0.58462,,1194,490
-half,leak_chase_rate,second period mean,0.50355,,1194,490
-half,xchase_plus,per 10-pt cut beyond expected,4.24580,0.49088,1194,490
-half,offense_runs,per 10-pt cut beyond expected,2.06096,0.41260,1194,490
-half,woba_runs,per 10-pt cut beyond expected,1.31664,0.51128,1194,490
-half,bb_rate,per 10-pt cut beyond expected,0.00534,0.00064,1194,490
-half,k_rate,per 10-pt cut beyond expected,-0.00281,0.00112,1194,490
-half,zone_swing_rate,per 10-pt cut beyond expected,-0.00303,0.00093,1194,490
-half,far_off_chase_rate,per 10-pt cut beyond expected,-0.01433,0.00097,1194,490
-half,offense_runs,per run of leak choices recovered,1.22059,0.26546,1194,490
-half,woba_runs,per run of leak choices recovered,0.82834,0.32941,1194,490
-half,xchase_plus,per run of leak choices recovered,2.85472,0.29296,1194,490
-half,offense_runs,count check: payoff at league average in the counts,2.04679,0.42969,1194,490
-half,offense_runs,count check: payoff change per +20 pts xwOBA in the counts,0.03665,0.49314,1194,490
-half,offense_runs,"per 10-pt cut beyond expected, average in the counts",1.74257,0.65227,478,315
-half,xchase_plus,"per 10-pt cut beyond expected, average in the counts",3.95391,0.73189,478,315
-half,offense_runs,"per 10-pt cut beyond expected, productive in the counts",1.84525,0.65576,498,278
-half,xchase_plus,"per 10-pt cut beyond expected, productive in the counts",3.73167,0.77495,498,278
-half,offense_runs,"per 10-pt cut beyond expected, struggling in the counts",2.96193,0.90725,218,168
-half,xchase_plus,"per 10-pt cut beyond expected, struggling in the counts",6.55427,1.08051,218,168
-half,xchase_plus,group vs as expected: cut more than expected,7.62844,1.39396,263,200
-half,xchase_plus,group vs as expected: chased more than expected,-6.17592,1.30853,291,214
-half,offense_runs,group vs as expected: cut more than expected,3.44141,1.20224,263,200
-half,offense_runs,group vs as expected: chased more than expected,-2.98593,1.06391,291,214
-half,woba_runs,group vs as expected: cut more than expected,1.21755,1.54160,263,200
-half,woba_runs,group vs as expected: chased more than expected,-2.63537,1.34565,291,214
-half,bb_rate,group vs as expected: cut more than expected,0.00657,0.00185,263,200
-half,bb_rate,group vs as expected: chased more than expected,-0.00944,0.00171,291,214
-half,k_rate,group vs as expected: cut more than expected,-0.00649,0.00295,263,200
-half,k_rate,group vs as expected: chased more than expected,0.00309,0.00280,291,214
-half,zone_swing_rate,group vs as expected: cut more than expected,-0.00523,0.00249,263,200
-half,zone_swing_rate,group vs as expected: chased more than expected,0.00375,0.00252,291,214
-half,far_off_chase_rate,group vs as expected: cut more than expected,-0.01591,0.00238,263,200
-half,far_off_chase_rate,group vs as expected: chased more than expected,0.02777,0.00260,291,214
-season,leak_excess,first period mean,0.15092,,756,333
-season,leak_excess,second period mean,0.07021,,756,333
-season,leak_excess,carried over (slope),0.71490,,756,333
-season,leak_excess,carried over (intercept),-0.03769,,756,333
-season,leak_chase_rate,first period mean,0.58250,,756,333
-season,leak_chase_rate,second period mean,0.50948,,756,333
-season,xchase_plus,per 10-pt cut beyond expected,4.90743,0.57413,756,333
-season,offense_runs,per 10-pt cut beyond expected,1.44751,0.46974,756,333
-season,woba_runs,per 10-pt cut beyond expected,0.85996,0.56174,756,333
-season,bb_rate,per 10-pt cut beyond expected,0.00784,0.00078,756,333
-season,k_rate,per 10-pt cut beyond expected,-0.00093,0.00134,756,333
-season,zone_swing_rate,per 10-pt cut beyond expected,-0.00533,0.00136,756,333
-season,far_off_chase_rate,per 10-pt cut beyond expected,-0.01700,0.00138,756,333
-season,offense_runs,per run of leak choices recovered,0.74511,0.30983,756,333
-season,woba_runs,per run of leak choices recovered,0.51346,0.36065,756,333
-season,xchase_plus,per run of leak choices recovered,2.66041,0.38524,756,333
-season,offense_runs,count check: payoff at league average in the counts,1.46917,0.51460,756,333
-season,offense_runs,count check: payoff change per +20 pts xwOBA in the counts,0.01495,0.43760,756,333
-season,offense_runs,"per 10-pt cut beyond expected, average in the counts",1.76320,0.76886,276,192
-season,xchase_plus,"per 10-pt cut beyond expected, average in the counts",5.96834,1.08305,276,192
-season,offense_runs,"per 10-pt cut beyond expected, productive in the counts",1.38199,0.73312,369,212
-season,xchase_plus,"per 10-pt cut beyond expected, productive in the counts",3.70791,0.74857,369,212
-season,offense_runs,"per 10-pt cut beyond expected, struggling in the counts",1.17670,1.22650,111,90
-season,xchase_plus,"per 10-pt cut beyond expected, struggling in the counts",6.75931,1.44161,111,90
-season,xchase_plus,group vs as expected: cut more than expected,7.19223,1.51283,135,116
-season,xchase_plus,group vs as expected: chased more than expected,-6.11675,1.42066,130,107
-season,offense_runs,group vs as expected: cut more than expected,0.22729,1.21193,135,116
-season,offense_runs,group vs as expected: chased more than expected,-3.00809,1.09566,130,107
-season,woba_runs,group vs as expected: cut more than expected,0.47459,1.52002,135,116
-season,woba_runs,group vs as expected: chased more than expected,-1.55055,1.30844,130,107
-season,bb_rate,group vs as expected: cut more than expected,0.00759,0.00180,135,116
-season,bb_rate,group vs as expected: chased more than expected,-0.01230,0.00173,130,107
-season,k_rate,group vs as expected: cut more than expected,-0.00233,0.00333,135,116
-season,k_rate,group vs as expected: chased more than expected,0.00140,0.00319,130,107
-season,zone_swing_rate,group vs as expected: cut more than expected,-0.01074,0.00326,135,116
-season,zone_swing_rate,group vs as expected: chased more than expected,0.00488,0.00329,130,107
-season,far_off_chase_rate,group vs as expected: cut more than expected,-0.02193,0.00295,135,116
-season,far_off_chase_rate,group vs as expected: chased more than expected,0.02154,0.00346,130,107
+pair_kind,measure,test,value,se,n_pairs,n_hitters,measure_type
+half,leak_excess,first period mean,0.15789,,1194,490,design
+half,leak_excess,second period mean,0.07406,,1194,490,design
+half,leak_excess,carried over (slope),0.60726,,1194,490,design
+half,leak_excess,carried over (intercept),-0.02182,,1194,490,design
+half,leak_chase_rate,first period mean,0.58462,,1194,490,design
+half,leak_chase_rate,second period mean,0.50355,,1194,490,design
+half,leak_excess,noise share of the fix (binomial / var),0.59790,,1194,490,design
+half,leak_excess,median second-period pitches in the cells,37.00000,,1194,490,design
+half,xchase_plus,per 10-pt cut beyond expected,4.24580,0.49088,1194,490,accounting
+half,xchase_plus,"per 10-pt cut beyond expected, weighted by pitches",4.91934,0.55610,1194,490,accounting
+half,offense_runs,per 10-pt cut beyond expected,2.06096,0.41260,1194,490,outcome
+half,offense_runs,"per 10-pt cut beyond expected, weighted by pitches",2.41433,0.47859,1194,490,outcome
+half,woba_runs,per 10-pt cut beyond expected,1.31664,0.51128,1194,490,outcome
+half,woba_runs,"per 10-pt cut beyond expected, weighted by pitches",1.62931,0.60172,1194,490,outcome
+half,bb_rate,per 10-pt cut beyond expected,0.00534,0.00064,1194,490,accounting
+half,bb_rate,"per 10-pt cut beyond expected, weighted by pitches",0.00643,0.00068,1194,490,accounting
+half,k_rate,per 10-pt cut beyond expected,-0.00281,0.00112,1194,490,outcome
+half,k_rate,"per 10-pt cut beyond expected, weighted by pitches",-0.00249,0.00130,1194,490,outcome
+half,zone_swing_rate,per 10-pt cut beyond expected,-0.00303,0.00093,1194,490,outcome
+half,zone_swing_rate,"per 10-pt cut beyond expected, weighted by pitches",-0.00344,0.00107,1194,490,outcome
+half,far_off_chase_rate,per 10-pt cut beyond expected,-0.01433,0.00097,1194,490,accounting
+half,far_off_chase_rate,"per 10-pt cut beyond expected, weighted by pitches",-0.01783,0.00110,1194,490,accounting
+half,offense_runs,per run of leak choices recovered,1.22059,0.26546,1194,490,outcome
+half,offense_runs,"per run of leak choices recovered, weighted by pitches",1.26444,0.28772,1194,490,outcome
+half,woba_runs,per run of leak choices recovered,0.82834,0.32941,1194,490,outcome
+half,woba_runs,"per run of leak choices recovered, weighted by pitches",0.99039,0.35777,1194,490,outcome
+half,xchase_plus,per run of leak choices recovered,2.85472,0.29296,1194,490,accounting
+half,xchase_plus,"per run of leak choices recovered, weighted by pitches",2.73955,0.31613,1194,490,accounting
+half,offense_runs,count check: payoff at league average in the counts,2.04679,0.42969,1194,490,outcome
+half,offense_runs,count check: payoff change per +20 pts xwOBA in the counts,0.03665,0.49314,1194,490,outcome
+half,offense_runs,"per 10-pt cut beyond expected, average in the counts",1.74257,0.65227,478,315,outcome
+half,xchase_plus,"per 10-pt cut beyond expected, average in the counts",3.95391,0.73189,478,315,accounting
+half,offense_runs,"per 10-pt cut beyond expected, productive in the counts",1.84525,0.65576,498,278,outcome
+half,xchase_plus,"per 10-pt cut beyond expected, productive in the counts",3.73167,0.77495,498,278,accounting
+half,offense_runs,"per 10-pt cut beyond expected, struggling in the counts",2.96193,0.90725,218,168,outcome
+half,xchase_plus,"per 10-pt cut beyond expected, struggling in the counts",6.55427,1.08051,218,168,accounting
+half,xchase_plus,group vs as expected: cut more than expected,7.62844,1.39396,263,200,accounting
+half,xchase_plus,group vs as expected: chased more than expected,-6.17592,1.30853,291,214,accounting
+half,offense_runs,group vs as expected: cut more than expected,3.44141,1.20224,263,200,outcome
+half,offense_runs,group vs as expected: chased more than expected,-2.98593,1.06391,291,214,outcome
+half,woba_runs,group vs as expected: cut more than expected,1.21755,1.54160,263,200,outcome
+half,woba_runs,group vs as expected: chased more than expected,-2.63537,1.34565,291,214,outcome
+half,bb_rate,group vs as expected: cut more than expected,0.00657,0.00185,263,200,accounting
+half,bb_rate,group vs as expected: chased more than expected,-0.00944,0.00171,291,214,accounting
+half,k_rate,group vs as expected: cut more than expected,-0.00649,0.00295,263,200,outcome
+half,k_rate,group vs as expected: chased more than expected,0.00309,0.00280,291,214,outcome
+half,zone_swing_rate,group vs as expected: cut more than expected,-0.00523,0.00249,263,200,outcome
+half,zone_swing_rate,group vs as expected: chased more than expected,0.00375,0.00252,291,214,outcome
+half,far_off_chase_rate,group vs as expected: cut more than expected,-0.01591,0.00238,263,200,accounting
+half,far_off_chase_rate,group vs as expected: chased more than expected,0.02777,0.00260,291,214,accounting
+season,leak_excess,first period mean,0.15092,,756,333,design
+season,leak_excess,second period mean,0.07021,,756,333,design
+season,leak_excess,carried over (slope),0.71490,,756,333,design
+season,leak_excess,carried over (intercept),-0.03769,,756,333,design
+season,leak_chase_rate,first period mean,0.58250,,756,333,design
+season,leak_chase_rate,second period mean,0.50948,,756,333,design
+season,leak_excess,noise share of the fix (binomial / var),0.49551,,756,333,design
+season,leak_excess,median second-period pitches in the cells,77.00000,,756,333,design
+season,xchase_plus,per 10-pt cut beyond expected,4.90743,0.57413,756,333,accounting
+season,xchase_plus,"per 10-pt cut beyond expected, weighted by pitches",6.19356,0.70441,756,333,accounting
+season,offense_runs,per 10-pt cut beyond expected,1.44751,0.46974,756,333,outcome
+season,offense_runs,"per 10-pt cut beyond expected, weighted by pitches",1.62442,0.56795,756,333,outcome
+season,woba_runs,per 10-pt cut beyond expected,0.85996,0.56174,756,333,outcome
+season,woba_runs,"per 10-pt cut beyond expected, weighted by pitches",0.95377,0.68134,756,333,outcome
+season,bb_rate,per 10-pt cut beyond expected,0.00784,0.00078,756,333,accounting
+season,bb_rate,"per 10-pt cut beyond expected, weighted by pitches",0.00990,0.00087,756,333,accounting
+season,k_rate,per 10-pt cut beyond expected,-0.00093,0.00134,756,333,outcome
+season,k_rate,"per 10-pt cut beyond expected, weighted by pitches",0.00009,0.00155,756,333,outcome
+season,zone_swing_rate,per 10-pt cut beyond expected,-0.00533,0.00136,756,333,outcome
+season,zone_swing_rate,"per 10-pt cut beyond expected, weighted by pitches",-0.00825,0.00168,756,333,outcome
+season,far_off_chase_rate,per 10-pt cut beyond expected,-0.01700,0.00138,756,333,accounting
+season,far_off_chase_rate,"per 10-pt cut beyond expected, weighted by pitches",-0.02050,0.00143,756,333,accounting
+season,offense_runs,per run of leak choices recovered,0.74511,0.30983,756,333,outcome
+season,offense_runs,"per run of leak choices recovered, weighted by pitches",0.80621,0.32701,756,333,outcome
+season,woba_runs,per run of leak choices recovered,0.51346,0.36065,756,333,outcome
+season,woba_runs,"per run of leak choices recovered, weighted by pitches",0.58958,0.36192,756,333,outcome
+season,xchase_plus,per run of leak choices recovered,2.66041,0.38524,756,333,accounting
+season,xchase_plus,"per run of leak choices recovered, weighted by pitches",2.85799,0.42020,756,333,accounting
+season,offense_runs,count check: payoff at league average in the counts,1.46917,0.51460,756,333,outcome
+season,offense_runs,count check: payoff change per +20 pts xwOBA in the counts,0.01495,0.43760,756,333,outcome
+season,offense_runs,"per 10-pt cut beyond expected, average in the counts",1.76320,0.76886,276,192,outcome
+season,xchase_plus,"per 10-pt cut beyond expected, average in the counts",5.96834,1.08305,276,192,accounting
+season,offense_runs,"per 10-pt cut beyond expected, productive in the counts",1.38199,0.73312,369,212,outcome
+season,xchase_plus,"per 10-pt cut beyond expected, productive in the counts",3.70791,0.74857,369,212,accounting
+season,offense_runs,"per 10-pt cut beyond expected, struggling in the counts",1.17670,1.22650,111,90,outcome
+season,xchase_plus,"per 10-pt cut beyond expected, struggling in the counts",6.75931,1.44161,111,90,accounting
+season,xchase_plus,group vs as expected: cut more than expected,7.19223,1.51283,135,116,accounting
+season,xchase_plus,group vs as expected: chased more than expected,-6.11675,1.42066,130,107,accounting
+season,offense_runs,group vs as expected: cut more than expected,0.22729,1.21193,135,116,outcome
+season,offense_runs,group vs as expected: chased more than expected,-3.00809,1.09566,130,107,outcome
+season,woba_runs,group vs as expected: cut more than expected,0.47459,1.52002,135,116,outcome
+season,woba_runs,group vs as expected: chased more than expected,-1.55055,1.30844,130,107,outcome
+season,bb_rate,group vs as expected: cut more than expected,0.00759,0.00180,135,116,accounting
+season,bb_rate,group vs as expected: chased more than expected,-0.01230,0.00173,130,107,accounting
+season,k_rate,group vs as expected: cut more than expected,-0.00233,0.00333,135,116,outcome
+season,k_rate,group vs as expected: chased more than expected,0.00140,0.00319,130,107,outcome
+season,zone_swing_rate,group vs as expected: cut more than expected,-0.01074,0.00326,135,116,outcome
+season,zone_swing_rate,group vs as expected: chased more than expected,0.00488,0.00329,130,107,outcome
+season,far_off_chase_rate,group vs as expected: cut more than expected,-0.02193,0.00295,135,116,accounting
+season,far_off_chase_rate,group vs as expected: chased more than expected,0.02154,0.00346,130,107,accounting

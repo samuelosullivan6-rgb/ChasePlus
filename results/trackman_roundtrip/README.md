@@ -30,7 +30,7 @@ choice the college path makes, not a slip in copying.
 | called_strike_rate | 0 |
 | chase_cost | 2.2e-16 |
 | expected_cost_per_pitch | 4.2e-17 |
-| runs_saved | 4.4e-16 |
+| runs_saved | 2.2e-16 |
 | xChase+ | 2.8e-14 |
 | pitches priced (college method / step 04) | 0 |
 | qualified hitters (college method / step 04) | 0 |
@@ -48,12 +48,12 @@ league put a hitter's raw runs saved?
 
 | League baseline cells | Runs per 600 PA from the MLB build (RMSE) | Same, step 03's count values | Correlation | xChase+ points (RMSE) |
 |---|---:|---:|---:|---:|
-| **12 counts x 4 buckets (MLB)** | 3.25 | 3.26 | 0.956 | 6.8 |
-| 12 counts x 3 buckets | 3.39 | 3.40 | 0.952 | 7.1 |
-| 12 counts x 2 buckets | 3.40 | 3.41 | 0.952 | 7.1 |
-| 12 counts, no buckets | 3.49 | 3.49 | 0.949 | 7.2 |
-| 4 count groups x 4 buckets | 4.21 | 4.16 | 0.923 | 9.0 |
-| 4 count groups x 2 buckets | 4.28 | 4.24 | 0.921 | 9.2 |
+| **12 counts x 4 buckets (MLB)** | 3.27 | 3.28 | 0.955 | 7.0 |
+| 12 counts x 3 buckets | 3.41 | 3.42 | 0.951 | 7.2 |
+| 12 counts x 2 buckets | 3.42 | 3.43 | 0.951 | 7.3 |
+| 12 counts, no buckets | 3.51 | 3.51 | 0.948 | 7.4 |
+| 4 count groups x 4 buckets | 4.22 | 4.17 | 0.923 | 9.2 |
+| 4 count groups x 2 buckets | 4.29 | 4.25 | 0.920 | 9.4 |
 
 A college season is small, so the obvious move is coarser cells. They came
 out worse, not better, so the college path keeps step 04's: 12 counts x 4 distance buckets, 48 cells of
@@ -66,13 +66,13 @@ own (step 03's) makes no difference here.
 
 | Spread between hitters fit on | Hitters in the fit (median) | Talent SD, xChase+ points (median) | Error predicting the next 100 games | Gap to the MLB build, same pitches |
 |---|---:|---:|---:|---:|
-| qualified only | 10 | 18.4 | 10.32 | 2.91 |
-| 20+ out-of-zone pitches | 124 | 27.2 | 10.33 | 2.81 |
-| 40+ out-of-zone pitches | 36 | 21.9 | 10.14 | 2.64 |
-| 80+ out-of-zone pitches | 14 | 19.5 | 10.20 | 2.81 |
-| 150+ out-of-zone pitches | 12 | 18.8 | 10.23 | 2.83 |
-| no shrinkage (raw slice) |  |  | 11.31 | 5.01 |
-| MLB build on the same pitches, its own prior |  |  | 10.02 | 0.00 |
+| qualified only | 10 | 19.0 | 10.24 | 2.93 |
+| 20+ out-of-zone pitches | 124 | 27.3 | 10.23 | 2.83 |
+| 40+ out-of-zone pitches | 36 | 22.3 | 10.05 | 2.66 |
+| 80+ out-of-zone pitches | 14 | 19.7 | 10.12 | 2.83 |
+| 150+ out-of-zone pitches | 12 | 19.5 | 10.16 | 2.85 |
+| no shrinkage (raw slice) |  |  | 11.24 | 5.06 |
+| MLB build on the same pitches, its own prior |  |  | 9.93 | 0.00 |
 
 Shrinkage, priced with the chosen settings. Step 04 fits the spread
 between hitters on its qualified hitters; a slice has about ten, so the
@@ -128,12 +128,12 @@ teams: walk 0.76, hit by pitch 0.79, single 0.90, double 1.24, triple 1.62, home
 
 | Per pitch | Pitches | College mean | MLB build mean | Correlation | Correlation, all 30 teams |
 |---|---:|---:|---:|---:|---:|
-| called-strike chance if taken | 9,063 | +0.0479 | +0.0484 | 0.965 | 0.971 |
-| value if taken | 9,063 | +0.0389 | +0.0441 | 0.991 | 0.984 |
+| called-strike chance if taken | 9,063 | +0.0517 | +0.0525 | 0.964 | 0.963 |
+| value if taken | 9,063 | +0.0384 | +0.0434 | 0.992 | 0.983 |
 | value of the swing (chases) | 2,650 | -0.0897 | -0.0806 | 0.964 | 0.962 |
-| chase cost (chases) | 2,650 | +0.1172 | +0.1159 | 0.967 | 0.962 |
-| the league's expected cost (baseline) | 9,063 | +0.0343 | +0.0364 | 0.970 | 0.955 |
-| runs saved | 9,063 | +0.0000 | +0.0025 | 0.968 | 0.967 |
+| chase cost (chases) | 2,650 | +0.1154 | +0.1136 | 0.967 | 0.961 |
+| the league's expected cost (baseline) | 9,063 | +0.0337 | +0.0358 | 0.971 | 0.954 |
+| runs saved | 9,063 | +0.0000 | +0.0026 | 0.968 | 0.966 |
 
 Every out-of-zone pitch the two builds both price, side by side. The
 college build's league is the team and its opponents in 60 games, so its
@@ -144,25 +144,25 @@ build's pitches; each pitch's price still follows the MLB build's closely.
 
 | Hitter | PA | xChase+, college build | MLB build, same pitches | MLB build, full season | Top leak, college card | Top leak, MLB build, same pitches |
 |---|---:|---:|---:|---:|---|---|
-| Lane Thomas | 130 | **137** ± 13 | 137 | 126 | ahead, fastballs above | ahead, fastballs above |
-| Isaac Collins | 193 | **114** ± 10 | 113 | 118 | two strikes, breaking balls below | two strikes, breaking balls below |
+| Lane Thomas | 130 | **140** ± 13 | 139 | 127 | ahead, fastballs above | ahead, fastballs above |
+| Isaac Collins | 193 | **113** ± 10 | 112 | 119 | two strikes, breaking balls below | two strikes, breaking balls below |
 | Maikel García | 246 | **111** ± 10 | 112 | 116 | two strikes, fastballs above | two strikes, fastballs above |
-| Vinnie Pasquantino | 246 | **104** ± 11 | 110 | 113 | two strikes, fastballs above | two strikes, fastballs above |
-| Carter Jensen | 200 | **93** ± 12 | 95 | 102 | two strikes, breaking balls below | two strikes, breaking balls below |
+| Vinnie Pasquantino | 246 | **106** ± 11 | 111 | 115 | two strikes, fastballs above | two strikes, fastballs above |
+| Carter Jensen | 200 | **92** ± 12 | 95 | 102 | two strikes, breaking balls below | two strikes, breaking balls below |
 | Bobby Witt | 264 | **84** ± 10 | 96 | 105 | two strikes, breaking balls below | two strikes, breaking balls below |
-| Salvador Pérez | 238 | **80** ± 13 | 94 | 73 | two strikes, breaking balls below | two strikes, breaking balls below |
 | Michael Massey | 125 | **80** ± 14 | 90 | 93 | two strikes, breaking balls below | two strikes, breaking balls below |
-| Jac Caglianone | 200 | **78** ± 11 | 89 | 78 | two strikes, breaking balls below | two strikes, breaking balls below |
-| Kyle Isbel | 165 | **70** ± 11 | 74 |  | two strikes, breaking balls below | two strikes, breaking balls below |
+| Salvador Pérez | 238 | **79** ± 13 | 93 | 72 | two strikes, breaking balls below | two strikes, breaking balls below |
+| Jac Caglianone | 200 | **77** ± 11 | 89 | 77 | two strikes, breaking balls below | two strikes, breaking balls below |
+| Kyle Isbel | 165 | **69** ± 12 | 74 |  | two strikes, breaking balls below | two strikes, breaking balls below |
 
-Across all 30 teams, the college build's xChase+ is 6.0 points from
-the MLB build's on the same pitches (RMSE; correlation 0.95; 90% of
-hitters within 10 points, the largest gap 20). Of that, 4.1 points
+Across all 30 teams, the college build's xChase+ is 6.1 points from
+the MLB build's on the same pitches (RMSE; correlation 0.95; 89% of
+hitters within 10 points, the largest gap 20). Of that, 4.2 points
 (RMSE) is a shift every hitter on a team shares (see where the
 differences come from, below), and 4.4 is left within a team. So the
 college build orders each team's hitters nearly as the MLB build does:
 rank correlation 0.95 within a team, on average. Before shrinkage the two
-are 3.3 runs per 600 PA apart (correlation 0.95). The two also shrink
+are 3.4 runs per 600 PA apart (correlation 0.95). The two also shrink
 a little differently, the MLB build toward its qualified hitters and the
 college build toward the average of everyone in its files with 40 or more
 out-of-zone pitches, which moves the college number -0.8 points on
@@ -170,24 +170,24 @@ average.
 
 Two checks on what the gap means. Against each hitter's MLB card for the
 full season (162 games, a bigger and different sample), the college
-xChase+ correlates 0.80, and the MLB build's for the same 60 games
+xChase+ correlates 0.81, and the MLB build's for the same 60 games
 0.84. Predicting the same hitters' raw runs saved over the team's
 next 100 games, the college build is off by 8.5 runs per 600 PA (RMSE)
-and the MLB build on the same 60 games by 8.5. Most of the distance
+and the MLB build on the same 60 games by 8.4. Most of the distance
 to the full season is the 60-game sample, which a college season has too;
-the college pricing adds little to it. KC, shown above, is 7.8 points from the MLB build (RMSE; the 30 teams run from 1.7 to 9.9). Pérez, Witt and Caglianone come out 11-14 points lower than on the MLB build: about 51% of their raw gap is the shift KC's hitters share (the league), and about 44% their contact on chases, which the college xwOBA values differently from Savant's.
+the college pricing adds little to it. KC, shown above, is 8.2 points from the MLB build (RMSE; the 30 teams run from 1.8 to 10.1). Pérez, Witt, Caglianone and Massey come out 11-14 points lower than on the MLB build: about 50% of their raw gap is the shift KC's hitters share (the league), and about 47% their contact on chases, which the college xwOBA values differently from Savant's.
 
 ### Leaks
 
 | Leaks, college card against the MLB build on the same pitches | All 30 teams |
 |---|---:|
-| Hitters with a leak on both | 218 of 296 |
+| Hitters with a leak on both | 216 of 296 |
 | Hitters with no leak on either | 50 |
-| A leak on one only (college / MLB build) | 11 / 17 |
-| Same top leak, of those with a leak on both | 92% |
-| College top leak among the MLB build's three, same | 97% |
-| Leaks the two lists share, of up to three, same | 1.9 |
-| Leaks per card, college / MLB build | 1.6 / 1.6 |
+| A leak on one only (college / MLB build) | 13 / 17 |
+| Same top leak, of those with a leak on both | 93% |
+| College top leak among the MLB build's three, same | 98% |
+| Leaks the two lists share, of up to three, same | 1.8 |
+| Leaks per card, college / MLB build | 1.5 / 1.6 |
 
 A card's leaks are its three costliest spots where the hitter chases more
 than the league would on the same pitches, by step 17's own rule, and the
@@ -195,12 +195,12 @@ college card's come from step 17 itself, run on the college build. The MLB
 build's for the same pitches are rebuilt here with step 17's per-pitch
 expectation and labels from the 2026 page (that rebuild reproduces the MLB
 cards' leaks for 100% of 261 hitters over the full season). The two
-agree on whether a hitter has a leak at all for 268 of 296. Of the
-218 both find one for, the college card names the same top leak as the
-MLB build on the same pitches for 92%, and its top leak is among the
-MLB build's three for 97%. How much a leak moves with the sample: for hitters with a
+agree on whether a hitter has a leak at all for 266 of 296. Of the
+216 both find one for, the college card names the same top leak as the
+MLB build on the same pitches for 93%, and its top leak is among the
+MLB build's three for 98%. How much a leak moves with the sample: for hitters with a
 full-season MLB card, the college top leak is among the full season's three
-for 74% and the MLB build's 60-game top leak for 72%.
+for 73% and the MLB build's 60-game top leak for 73%.
 Sixty games is a small sample for a leak, whoever prices it; the college
 pricing adds little to that.
 
@@ -208,12 +208,12 @@ pricing adds little to that.
 
 | Priced with | Runs per 600 PA from the MLB build (RMSE) | Shared by the team | Within the team |
 |---|---:|---:|---:|
-| the college build as it is | 3.33 | 2.48 | 2.22 |
-| the college build with the MLB build's run values (step 03's tables) | 2.98 | 2.43 | 1.73 |
-| the college build with the MLB build's expected contact (Savant's xwOBA and its line to runs) | 2.93 | 2.58 | 1.38 |
-| the college build with the MLB build's called-strike chance | 3.33 | 2.47 | 2.23 |
-| the college build with all three: every pitch priced as the MLB build prices it, against the 60 games' own league | 2.64 | 2.54 | 0.73 |
-| ...and against the whole MLB league's baseline: the MLB build | 0.36 | 0.11 | 0.35 |
+| the college build as it is | 3.35 | 2.50 | 2.24 |
+| the college build with the MLB build's run values (step 03's tables) | 3.01 | 2.45 | 1.76 |
+| the college build with the MLB build's expected contact (Savant's xwOBA and its line to runs) | 2.95 | 2.60 | 1.41 |
+| the college build with the MLB build's called-strike chance | 3.35 | 2.50 | 2.23 |
+| the college build with all three: every pitch priced as the MLB build prices it, against the 60 games' own league | 2.66 | 2.56 | 0.74 |
+| ...and against the whole MLB league's baseline: the MLB build | 0.37 | 0.10 | 0.35 |
 
 Each hitter's raw runs saved per 600 PA, priced again with ingredients
 taken from the MLB build: run values, expected contact and the
@@ -221,23 +221,23 @@ called-strike chance, each on its own and then all three. Each time the
 league baseline is recomputed from the 60 games' pitches at the new prices,
 because a baseline is the league's average price and means nothing next to
 costs priced another way. The last row adds the whole league's baseline on
-top, and that is the MLB build itself; what is left (0.36 runs) is the
+top, and that is the MLB build itself; what is left (0.37 runs) is the
 0.1% of pitches whose zone call differs. Each gap is split into its team's
 average gap, one number shared by every hitter on the team, and what is
 left within the team.
 
 The two parts have different causes. The part a team shares is the
 league. Priced exactly as the MLB build prices them, a team's hitters
-still sit 2.54 runs above or below the MLB build together, until the
-baseline is the whole league's (0.11). Sixty games of one team are a
+still sit 2.56 runs above or below the MLB build together, until the
+baseline is the whole league's (0.10). Sixty games of one team are a
 different league from all 30 teams: half its plate appearances are the
 team's own hitters, and a 190-pitch cell has noise of its own. A shift
 every hitter on a team shares does not change which of them chases most,
 or where, so the order of a team's hitters and their leaks come through it
-(above). The part within a team is the pricing: 2.22 runs as built,
-0.73 with all three ingredients from the MLB build. Expected contact
+(above). The part within a team is the pricing: 2.24 runs as built,
+0.74 with all three ingredients from the MLB build. Expected contact
 matters most (the college xwOBA is fit on about 3,000 batted balls; with
-Savant's, the within-team gap is 1.38), then the run values (1.73);
+Savant's, the within-team gap is 1.41), then the run values (1.76);
 the called-strike model makes no difference (2.23).
 
 In college the part a team shares is the point, not a flaw. A Clemson

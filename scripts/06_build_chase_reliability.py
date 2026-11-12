@@ -201,7 +201,20 @@ def one_season_values(season, suffix):
 
 pair_rows = []
 
-season_pairs = list(zip(seasons[:-1], seasons[1:]))
+# Adjacent seasons only: a missing season in the data must not quietly
+# pair 2023 with 2025 as if they were back to back.
+season_pairs = [
+    (first, second)
+    for first, second in zip(seasons[:-1], seasons[1:])
+    if int(second) == int(first) + 1
+]
+
+if len(season_pairs) < len(seasons) - 1:
+    print()
+    print(
+        "WARNING: the seasons in the data are not all consecutive; only "
+        f"back-to-back pairs are compared: {season_pairs}"
+    )
 
 for first_season, second_season in season_pairs:
 

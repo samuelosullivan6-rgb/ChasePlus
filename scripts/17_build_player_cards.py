@@ -53,9 +53,10 @@ picture: how often they miss when they do chase, against the league on
 the same pitches. That is decided on the card's own numbers (contact_led:
 chases that lost CONTACT_LED_RUNS or more on what they produced, more than
 the choices lost and more than the far-off tile), not on step 13's
-archetype, which exists only for a net loss and so split hitters at a net
-of zero (+8.8 / -9.1 heard about contact, +9.0 / -8.7 never did). The
-roster's Problem column still shows step 13's archetype.
+archetype, which splits only a net loss (a hitter whose chases saved runs
+is "above average" there) and so would split hitters at a net of zero
+(+8.8 / -9.1 heard about contact, +9.0 / -8.7 never did). The roster's
+Problem column still shows step 13's archetype.
 
 TEAM
   Statcast's pitch file has no batter team, only the home and away

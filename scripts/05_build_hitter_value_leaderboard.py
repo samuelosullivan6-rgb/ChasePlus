@@ -11,7 +11,12 @@ compares the two, one season at a time:
      cost_per_chase blank below 120 chases).
   3. Does chase value predict offense? If it does not, the chase metric
      measures something real but unimportant, and the writeup should say
-     so.
+     so. The offense side of that check leaves out the plate appearances
+     that ended on a chased ball in play, because those batted balls are
+     already inside chase value (their actual result in the Chase+ run,
+     their expected result in the xChase+ run), and the race against
+     chase rate is run on the unshrunk runs saved, since chase rate is
+     unshrunk too.
 
 Two ways to value a plate appearance are reported:
   - RE24 (run_value): the actual change in run expectancy. Context
@@ -24,12 +29,16 @@ The gap between them reflects the chances a hitter's teammates gave him.
 Inputs:  data/cleaned/plate_appearance_run_values.parquet
          results/run_values/run_value_by_event.csv
          results/chase/chase_cost_leaderboard_by_season.csv (optional)
+         data/cleaned/chase_costs_by_pitch.parquet and
+         data/cleaned/baseline_chase_pitches.parquet (optional; which
+         plate appearances ended on a chased ball in play)
 Output:  results/chase/hitter_value_leaderboard.csv
 
 With --expected-contact the chase columns come from the xChase+ run
 instead: it reads results/xchase/chase_cost_leaderboard_by_season.csv and
-writes results/xchase/hitter_value_leaderboard.csv. The offense side is
-the same either way.
+data/cleaned/xchase_costs_by_pitch.parquet, and writes
+results/xchase/hitter_value_leaderboard.csv. The offense side is the same
+either way.
 """
 
 import argparse
@@ -100,6 +109,17 @@ EVENT_VALUE_FILE = RESULTS_DIR / "run_values" / "run_value_by_event.csv"
 CHASE_LEADERBOARD_FILE = (
     CHASE_DIR / "chase_cost_leaderboard_by_season.csv"
 )
+
+# Which pitches were chases, as priced by step 04 for this run (the
+# cleaned pitch file carries a few hundred chases a season that were never
+# priced, so the priced file is the one that says what is inside
+# runs_saved), and the cleaned pitch file for what happened on them.
+if EXPECTED_CONTACT:
+    CHASE_COST_FILE = CLEAN_DIR / "xchase_costs_by_pitch.parquet"
+else:
+    CHASE_COST_FILE = CLEAN_DIR / "chase_costs_by_pitch.parquet"
+
+PITCH_FILE = CLEAN_DIR / "baseline_chase_pitches.parquet"
 
 OUTPUT_FILE = CHASE_DIR / "hitter_value_leaderboard.csv"
 
@@ -293,6 +313,76 @@ if missing_neutral > 0:
 
 
 # --------------------------------------------------
+# PLATE APPEARANCES THAT ENDED ON A CHASED BALL IN PLAY
+#
+# A chase that is put in play ends the plate appearance, and its result is
+# already inside chase value: the Chase+ run prices it at what the ball
+# actually did, the xChase+ run at what a ball hit that hard at that angle
+# usually does. The same result is also inside the hitter's total offense.
+# Correlating the two with those plate appearances left in would put the
+# same batted balls on both sides, and part of the agreement would be
+# mechanical. So a second offense measure is built without them, and that
+# is the one the "does chase value predict offense" check uses. Step 09
+# does the same for its wOBA and xwOBA comparison.
+#
+# The chase is found in the per-pitch cost file for this run (is_chase),
+# what happened on it in the cleaned pitch file (description), and the two
+# meet on the pitch key. The plate appearance is then the game, at-bat and
+# batter in the run-value file.
+# --------------------------------------------------
+
+pa["ended_on_chased_ball_in_play"] = False
+
+HAVE_CHASED_IN_PLAY = CHASE_COST_FILE.exists() and PITCH_FILE.exists()
+
+if HAVE_CHASED_IN_PLAY:
+
+    pitch_key = ["game_pk", "at_bat_number", "pitch_number"]
+
+    chased_pitches = pd.read_parquet(
+        CHASE_COST_FILE, columns=pitch_key + ["is_chase"]
+    )
+    chased_pitches = chased_pitches[chased_pitches["is_chase"] == 1]
+
+    outcomes = pd.read_parquet(
+        PITCH_FILE, columns=pitch_key + ["batter", "description"]
+    )
+
+    chased_in_play = chased_pitches.merge(
+        outcomes[outcomes["description"] == "hit_into_play"],
+        on=pitch_key,
+        how="inner"
+    )[["game_pk", "at_bat_number", "batter"]].drop_duplicates()
+
+    pa_key = ["game_pk", "at_bat_number", "batter"]
+
+    pa["ended_on_chased_ball_in_play"] = (
+        pd.MultiIndex.from_frame(pa[pa_key])
+        .isin(pd.MultiIndex.from_frame(chased_in_play))
+    )
+
+    print()
+    print(
+        f"{int(pa['ended_on_chased_ball_in_play'].sum()):,} of "
+        f"{len(pa):,} plate appearances "
+        f"({pa['ended_on_chased_ball_in_play'].mean():.1%}) ended on a "
+        "chased ball in play. They are inside chase value already, so "
+        "the offense measure that is correlated with chase value below "
+        "leaves them out."
+    )
+
+else:
+
+    print()
+    print(
+        f"No per-pitch chase file at {CHASE_COST_FILE} (or no cleaned "
+        f"pitch file at {PITCH_FILE}), so the offense measure without "
+        "chased balls in play is the same as the full one. Run "
+        "04_build_chase_leaderboard.py first for the honest comparison."
+    )
+
+
+# --------------------------------------------------
 # QUALIFICATION FLOORS, BY SEASON
 #
 # Same proration as the chase leaderboard (games in the season divided by
@@ -349,8 +439,29 @@ hitters = (
     .reset_index()
 )
 
+# The same totals without the plate appearances that ended on a chased
+# ball in play. Every qualified hitter keeps hundreds of plate appearances
+# here, so a hitter-season is never lost to the exclusion.
+without = (
+    pa[~pa["ended_on_chased_ball_in_play"]]
+    .groupby(["batter", "game_year"])
+    .agg(
+        plate_appearances_without_chased_in_play=("run_value", "size"),
+        mean_run_value_without_chased_in_play=("run_value", "mean"),
+        run_value_spread_without_chased_in_play=("run_value", "std"),
+    )
+    .reset_index()
+)
+
+hitters = hitters.merge(without, on=["batter", "game_year"], how="left")
+
 hitters["runs_per_600_pa"] = (
     hitters["mean_run_value"]
+    * PLATE_APPEARANCES_PER_SEASON
+)
+
+hitters["runs_per_600_pa_without_chased_in_play"] = (
+    hitters["mean_run_value_without_chased_in_play"]
     * PLATE_APPEARANCES_PER_SEASON
 )
 
@@ -371,6 +482,19 @@ hitters["standard_error_per_600_pa"] = (
     hitters["run_value_spread"]
     / np.sqrt(hitters["plate_appearances"])
     * PLATE_APPEARANCES_PER_SEASON
+)
+
+hitters["standard_error_per_600_pa_without_chased_in_play"] = (
+    hitters["run_value_spread_without_chased_in_play"]
+    / np.sqrt(hitters["plate_appearances_without_chased_in_play"])
+    * PLATE_APPEARANCES_PER_SEASON
+)
+
+hitters = hitters.drop(
+    columns=[
+        "mean_run_value_without_chased_in_play",
+        "run_value_spread_without_chased_in_play",
+    ]
 )
 
 hitters = hitters.merge(
@@ -433,6 +557,29 @@ for season in seasons:
     ) = shrink(
         one_season["runs_per_600_pa"],
         one_season["standard_error_per_600_pa"]
+    )
+
+    # The version without chased balls in play is shrunk the same way,
+    # with its own prior, so the correlation check below compares two
+    # shrunk quantities just as it did before.
+    excluded_se = one_season[
+        "standard_error_per_600_pa_without_chased_in_play"
+    ]
+
+    if not (excluded_se.notna() & (excluded_se > 0)).all():
+        raise RuntimeError(
+            f"{season}: a qualified hitter has no usable plate "
+            "appearances once chased balls in play are left out."
+        )
+
+    (
+        one_season["runs_per_600_shrunk_without_chased_in_play"],
+        _,
+        _,
+        _
+    ) = shrink(
+        one_season["runs_per_600_pa_without_chased_in_play"],
+        excluded_se
     )
 
     shrunk_seasons.append(one_season)
@@ -672,8 +819,22 @@ for season in seasons:
     # DOES CHASE VALUE PREDICT OFFENSE (collected here, printed below)
     # --------------------------------------------------
 
+    # The offense side leaves out the plate appearances that ended on a
+    # chased ball in play (see the block that flags them), so the batted
+    # balls inside chase value are not also inside the thing it is asked
+    # to predict. The full-offense correlation is kept alongside to show
+    # how much of the old number was the shared batted balls.
+    #
+    # The race against chase rate uses the UNSHRUNK runs saved per 600
+    # PA. Chase rate is never shrunk, so pitting shrunk runs saved
+    # against it would hand runs saved the noise reduction and call the
+    # difference information. The shrunk runs saved, which is what the
+    # leaderboard ranks on, is correlated too and reported on its own.
     paired = one_season.merge(
-        chase_season[["batter", "chase_rate", "runs_saved_shrunk"]],
+        chase_season[
+            ["batter", "chase_rate", "runs_saved_per_600_pa",
+             "runs_saved_shrunk"]
+        ],
         on="batter",
         how="inner"
     )
@@ -681,13 +842,25 @@ for season in seasons:
     if len(paired) <= 10:
         continue
 
-    chase_correlation = (
-        paired["runs_saved_shrunk"]
-        .corr(paired["runs_per_600_shrunk"])
+    offense_target = paired["runs_per_600_shrunk_without_chased_in_play"]
+
+    raw_correlation = (
+        paired["runs_saved_per_600_pa"]
+        .corr(offense_target)
     )
 
     rate_correlation = (
         paired["chase_rate"]
+        .corr(offense_target)
+    )
+
+    shrunk_correlation = (
+        paired["runs_saved_shrunk"]
+        .corr(offense_target)
+    )
+
+    shrunk_full_offense_correlation = (
+        paired["runs_saved_shrunk"]
         .corr(paired["runs_per_600_shrunk"])
     )
 
@@ -695,9 +868,13 @@ for season in seasons:
         {
             "game_year": season,
             "hitters": len(paired),
-            "runs_saved_vs_offense": chase_correlation,
+            "runs_saved_raw_vs_offense": raw_correlation,
             "chase_rate_vs_offense": rate_correlation,
-            "offense_explained": chase_correlation ** 2,
+            "offense_explained": raw_correlation ** 2,
+            "runs_saved_shrunk_vs_offense": shrunk_correlation,
+            "runs_saved_shrunk_vs_full_offense": (
+                shrunk_full_offense_correlation
+            ),
         }
     )
 
@@ -720,23 +897,35 @@ if len(correlation_rows) > 0:
 
     print()
     print(
+        "Offense here is runs per 600 PA, shrunk within season, WITHOUT "
+        "the plate appearances that ended on a chased ball in play "
+        "(those batted balls are already inside chase value). The last "
+        "column keeps them in, for the size of the double count."
+    )
+
+    print()
+    print(
         "The comparison is the point. If runs saved tracks offense "
         "more closely than chase rate does, then my metric carries "
         "information about hitting that chase rate throws away, and "
         "that is the strongest argument the project has. Reading it "
         "one season at a time also shows whether the answer holds "
-        "up or whether one year is carrying it."
+        "up or whether one year is carrying it. The race is run on "
+        "the unshrunk runs saved per 600 PA, because chase rate is "
+        "unshrunk too; the shrunk runs saved the leaderboard ranks on "
+        "is reported beside it, not raced."
     )
 
     wins = (
-        correlations["runs_saved_vs_offense"].abs()
+        correlations["runs_saved_raw_vs_offense"].abs()
         > correlations["chase_rate_vs_offense"].abs()
     ).sum()
 
     print()
     print(
-        f"Runs saved beats plain chase rate in {wins} of "
-        f"{len(correlations)} seasons."
+        f"Unshrunk runs saved beats plain chase rate in {wins} of "
+        f"{len(correlations)} seasons (both unshrunk, offense without "
+        "chased balls in play)."
     )
 
     print()
@@ -749,15 +938,20 @@ if len(correlation_rows) > 0:
 
     print()
     print(
-        "CAVEAT: this is not a fully independent check. "
-        "runs_saved_shrunk and neutral_runs_per_600_pa are both "
-        "built on the same run-expectancy and event-value tables "
-        "from 03_build_run_value_tables.py, so part of the correlation "
-        "above is shared plumbing, not two independently-measured "
-        "quantities happening to agree. It is still informative "
-        "-- chase rate is built on nothing shared with offense at "
-        "all, and it still correlates more weakly -- but it is "
-        "construct validation, not a fully independent one."
+        "CAVEAT: this is not a fully independent check. The plate "
+        "appearances that ended on a chased ball in play are left out "
+        "of the offense side, so the batted balls priced inside runs "
+        "saved are no longer also inside the thing it predicts, and "
+        "runs_saved_shrunk_vs_full_offense shows what that double "
+        "count was worth. What remains shared is the plumbing: runs "
+        "saved and runs_per_600_pa are both built on the "
+        "run-expectancy and event-value tables from "
+        "03_build_run_value_tables.py, and a chase that is not put in "
+        "play still changes the count of a plate appearance whose "
+        "outcome is counted in offense. So part of the correlation "
+        "above is construct validation, not two independently-measured "
+        "quantities happening to agree. Chase rate shares nothing with "
+        "offense and is the clean comparison."
     )
 
 

@@ -77,14 +77,11 @@ WHAT CHANGES FOR A COLLEGE SEASON, AND WHY
 
 import numpy as np
 import pandas as pd
-from sklearn.compose import ColumnTransformer
-from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import KFold
 from sklearn.neighbors import KNeighborsRegressor
-from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import SplineTransformer, StandardScaler
 
 import leak_rules as lr
+import chase_model as cm
 
 
 # --------------------------------------------------
@@ -104,7 +101,8 @@ MLB_SETTINGS = {
     "minimum_plate_appearances": 300,
     "minimum_chases_for_cost_per_chase": 120,
     "minimum_chases_in_play_with_xwoba": 1000,
-    "called_strike_knots": [0.0, 0.10, 0.20, 0.30, 0.45, 0.70],
+    "called_strike_knots": cm.CALLED_STRIKE_DISTANCE_KNOTS,
+    "called_strike_penalty": cm.CALLED_STRIKE_PENALTY,
     "shrink_pool_minimum_opportunities": None,      # None: the qualified hitters
 }
 
@@ -119,9 +117,9 @@ COLLEGE_SETTINGS = {
 }
 
 PLATE_APPEARANCES_PER_SEASON = 600
-HALF_PLATE_PLUS_BALL = 0.83
+HALF_PLATE_PLUS_BALL = cm.HALF_PLATE_PLUS_BALL
 IN_PLAY_HIT_EVENTS = ["single", "double", "triple", "home_run"]
-COUNTS_IN_ORDER = [(b, s) for b in range(4) for s in range(3)]
+COUNTS_IN_ORDER = cm.COUNTS_IN_ORDER
 
 STRIKE_DESCRIPTIONS = {"swinging_strike", "swinging_strike_blocked", "foul_tip"}
 FOUL_DESCRIPTIONS = {"foul"}
@@ -327,25 +325,16 @@ def fit_xwoba(bip, value_col="woba_value"):
 # PRICING (step 04)
 # --------------------------------------------------
 
-def called_strike_features(frame):
-    features = pd.DataFrame({"distance_outside_zone": frame["distance_outside_zone"].astype(float)},
-                            index=frame.index)
-    balls = frame["balls"].to_numpy()
-    strikes = frame["strikes"].to_numpy()
-    for b, s in COUNTS_IN_ORDER[1:]:
-        features[f"count_{b}_{s}"] = ((balls == b) & (strikes == s)).astype(float)
-    return features
+# The called-strike model is step 04's, imported from chase_model.py: one
+# distance curve per side of the zone that cannot rise with distance, plus
+# count. Before 2026-11-12 this file carried its own copy of the earlier
+# model (one free spline, no side of the zone) and had drifted from step
+# 04 without the round trip noticing; now there is one model to drift.
+called_strike_features = cm.called_strike_features
 
 
-def new_called_strike_model(knots):
-    distance_curve = Pipeline([
-        ("spline", SplineTransformer(knots=np.array(knots).reshape(-1, 1), degree=3,
-                                     extrapolation="linear", include_bias=False)),
-        ("scale", StandardScaler()),
-    ])
-    features = ColumnTransformer([("distance", distance_curve, ["distance_outside_zone"])],
-                                 remainder="passthrough", verbose_feature_names_out=False)
-    return Pipeline([("features", features), ("logit", LogisticRegression(max_iter=1000))])
+def new_called_strike_model(knots, penalty=cm.CALLED_STRIKE_PENALTY):
+    return cm.new_called_strike_model(knots=knots, penalty=penalty)
 
 
 def in_play_outcome(events):
@@ -420,38 +409,33 @@ def price(pitches, run_values, settings, expected_contact, swap=None):
                       for r in in_play_values.itertuples()}
     diagnostics["in_play_values"] = in_play_values
 
-    # The called-strike model, one per season, on the takes
+    # The called-strike model, one per season, on the takes: step 04's,
+    # with the side of the zone each take missed on (chase_model). The
+    # curves are built so they cannot rise with distance, so a small
+    # season's thin tail no longer needs holding down by hand.
+    opp["miss_direction"], opp["zone_side"] = cm.label_zone_side(opp)
     takes = opp[opp["is_swing"] == 0].copy()
     takes["was_called_strike"] = (takes["description"] == "called_strike").astype(int)
-    inputs = ["distance_outside_zone", "balls", "strikes"]
+    inputs = ["distance_outside_zone", "zone_side", "balls", "strikes"]
     takes = takes.dropna(subset=inputs)
     opp["called_strike_rate"] = np.nan
     models = {}
     rises = {}
     for year in sorted(takes["game_year"].unique()):
         year_takes = takes[takes["game_year"] == year]
-        model = new_called_strike_model(settings["called_strike_knots"])
+        model = new_called_strike_model(settings["called_strike_knots"],
+                                        settings.get("called_strike_penalty", cm.CALLED_STRIKE_PENALTY))
         model.fit(called_strike_features(year_takes), year_takes["was_called_strike"])
         models[year] = model
         mask = (opp["game_year"] == year) & opp[inputs].notna().all(axis=1)
         opp.loc[mask, "called_strike_rate"] = model.predict_proba(
             called_strike_features(opp.loc[mask]))[:, 1]
-        grid = np.linspace(0, 10, 4001)
-        curve = model.decision_function(called_strike_features(pd.DataFrame({
-            "distance_outside_zone": grid, "balls": 0, "strikes": 0})))
-        if (np.diff(curve) > 1e-12).any():
-            # A small season's thin tail can bend the curve back up (step 04
-            # warns; its MLB curves never do). A pitch farther off is never
-            # likelier to be called a strike, so the distance curve is held
-            # at its lowest point so far wherever it would rise. The count
-            # terms shift the whole curve, so they are untouched.
-            rises[int(year)] = float(grid[int(np.argmax(np.diff(curve) > 1e-12)) + 1])
-            held = np.minimum.accumulate(curve)
-            d = opp.loc[mask, "distance_outside_zone"].to_numpy(float)
-            at_zero = called_strike_features(opp.loc[mask].assign(distance_outside_zone=0.0))
-            count_term = model.decision_function(at_zero) - curve[0]
-            logit = np.interp(np.clip(d, 0, 10), grid, held) + count_term
-            opp.loc[mask, "called_strike_rate"] = 1 / (1 + np.exp(-logit))
+        for side in cm.ZONE_SIDES:
+            if not cm.curve_never_rises(model, side):
+                rises[int(year)] = side
+    if rises:
+        raise SystemExit(f"A called-strike curve rises with distance: {rises}. The monotone "
+                         "model should make this impossible; check the fit.")
     diagnostics["called_strike_curve_held_from_ft"] = rises
     unscored = opp["called_strike_rate"].isna()
     if unscored.any():
@@ -546,15 +530,8 @@ def price(pitches, run_values, settings, expected_contact, swap=None):
     return opp, diagnostics
 
 
-def dersimonian_laird(effects, standard_errors):
-    """Step 04's estimator: tau^2, the weighted mean, Cochran's Q."""
-
-    effects = np.asarray(effects, float)
-    w = 1.0 / np.asarray(standard_errors, float) ** 2
-    mean = np.sum(w * effects) / np.sum(w)
-    q = np.sum(w * (effects - mean) ** 2)
-    scaling = np.sum(w) - np.sum(w ** 2) / np.sum(w)
-    return max((q - (len(effects) - 1)) / scaling, 0.0), mean, q
+# Step 04's DerSimonian-Laird estimator, from chase_model.py.
+dersimonian_laird = cm.estimate_between_hitter_variance
 
 
 def hitter_seasons(opp, pitches, settings):

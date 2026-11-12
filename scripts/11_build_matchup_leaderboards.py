@@ -67,7 +67,7 @@ LIST_SIZE = 5
 
 # A (season, matchup, count, distance) baseline cell with fewer pitches
 # than this is counted as thin.
-THIN_CELL_WARNING_PITCHES = 50
+# THIN_CELL_WARNING_PITCHES is read from step 04 below, with the floors.
 
 
 # --------------------------------------------------
@@ -141,7 +141,10 @@ SETTINGS = read_settings([
     "MINIMUM_PLATE_APPEARANCES_PER_SEASON",
     "PRORATE_FLOORS_BY_SEASON_LENGTH",
     "XCHASE_PLUS_VERSION",
+    "THIN_CELL_WARNING_PITCHES",
 ])
+
+THIN_CELL_WARNING_PITCHES = SETTINGS["THIN_CELL_WARNING_PITCHES"]
 
 
 # --------------------------------------------------

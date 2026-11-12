@@ -89,6 +89,19 @@ PA_SCALE = 600
 FAR_OFF_FT = 0.35
 MIN_SECOND_PERIOD_PITCHES = 10     # in the first period's leak cells
 GROUP_CUTOFF = 0.08                # fix of 8+ points either way, for the group table
+
+# Which outcomes are evidence and which are accounting. xChase+, the
+# far-off chase rate and BB% are built from the same swings as the fix:
+# a hitter who takes the pitches in his leak cells mechanically gains
+# xChase+ points (about 2.7 per run of leak choices, the season scale),
+# chases far-off pitches less and walks more. They confirm the cells were
+# priced consistently; they are not a test of whether taking paid off.
+# Offense runs (xwOBA over every plate appearance), wOBA runs, K% and
+# the swing rate at strikes are the outcomes that can fail.
+MEASURE_TYPE = {"xchase_plus": "accounting", "far_off_chase_rate": "accounting",
+                "bb_rate": "accounting", "offense_runs": "outcome", "woba_runs": "outcome",
+                "k_rate": "outcome", "zone_swing_rate": "outcome", "leak_excess": "design",
+                "leak_chase_rate": "design"}
 KEYS = ["game_pk", "at_bat_number", "pitch_number", "batter", "game_year"]
 
 # --------------------------------------------------
@@ -292,7 +305,23 @@ for kind, P in pairs.groupby("kind"):
     record(kind, "leak_chase_rate", "first period mean", P["leak_chase_rate_1"].mean(), np.nan, n, hitters)
     record(kind, "leak_chase_rate", "second period mean", P["leak_chase_rate_2"].mean(), np.nan, n, hitters)
 
-    # 1. payoff per 10-point cut beyond expected
+    # How much of the fix is a coin flip: the binomial variance of the
+    # second period's chase rate over its pitches in the cells, against
+    # the variance of the fix across pairs. Around half, so the payoff
+    # slopes below are attenuated (errors in the regressor pull them
+    # toward zero) and the "cut more than expected" group is partly luck.
+    r2 = P["leak_chase_rate_2"]
+    binomial = (r2 * (1 - r2) / P["pitches_2"]).mean()
+    record(kind, "leak_excess", "noise share of the fix (binomial / var)",
+           binomial / P["fix"].var(), np.nan, n, hitters)
+    record(kind, "leak_excess", "median second-period pitches in the cells",
+           P["pitches_2"].median(), np.nan, n, hitters)
+    weights = P["pitches_2"].to_numpy(float)
+
+    # 1. payoff per 10-point cut beyond expected, unweighted (the number
+    #    the README has always quoted) and weighted by the second period's
+    #    pitches in the cells (a 13-pitch pair and a 200-pitch pair no
+    #    longer count the same)
     for m in OUTCOMES:
         ok = P["change_" + m].notna() & P[m + "_1"].notna()
         Q = P[ok]
@@ -300,12 +329,20 @@ for kind, P in pairs.groupby("kind"):
                        Q["batter"].to_numpy())
         record(kind, m, "per 10-pt cut beyond expected", -0.1 * beta[1], 0.1 * se[1], len(Q),
                Q["batter"].nunique())
+        beta, se = ols(Q["change_" + m], [Q["fix"], Q["leak_excess_1"], Q[m + "_1"]],
+                       Q["batter"].to_numpy(), weights=Q["pitches_2"].to_numpy(float))
+        record(kind, m, "per 10-pt cut beyond expected, weighted by pitches", -0.1 * beta[1],
+               0.1 * se[1], len(Q), Q["batter"].nunique())
 
     # 2. run accounting
     for m in ("offense_runs", "woba_runs", "xchase_plus"):
         beta, se = ols(P["change_" + m], [P["change_leak_choices"], P["leak_choices_per_600_1"],
                                           P[m + "_1"]], cluster)
         record(kind, m, "per run of leak choices recovered", beta[1], se[1], n, hitters)
+        beta, se = ols(P["change_" + m], [P["change_leak_choices"], P["leak_choices_per_600_1"],
+                                          P[m + "_1"]], cluster, weights=weights)
+        record(kind, m, "per run of leak choices recovered, weighted by pitches", beta[1], se[1],
+               n, hitters)
 
     # 3. does the count check change the payoff?
     Q = P.dropna(subset=["leak_count_gap"])
@@ -345,6 +382,7 @@ for kind, P in pairs.groupby("kind"):
     pairs.loc[P.index, "count_status"] = P["count_status"]
 
 summary = pd.DataFrame(summary)
+summary["measure_type"] = summary["measure"].map(MEASURE_TYPE).fillna("outcome")
 
 # --------------------------------------------------
 # WRITE
@@ -392,17 +430,30 @@ for kind, label in (("season", "Season to next season"), ("half", "First half to
           f"{S.loc[(kind, 'leak_excess', 'first period mean'), 'value'] * 100:.1f} -> "
           f"{S.loc[(kind, 'leak_excess', 'second period mean'), 'value'] * 100:.1f} "
           f"(next = {i * 100:+.1f} + {s:.2f} x first)")
-    print("  per 10-point cut beyond expected:")
-    for m, lab, k, unit in [("xchase_plus", "xChase+", 1, "pts"),
-                            ("offense_runs", "offense (xwOBA)", 1, "runs / 600 PA"),
+    noise = S.loc[(kind, "leak_excess", "noise share of the fix (binomial / var)"), "value"]
+    med = S.loc[(kind, "leak_excess", "median second-period pitches in the cells"), "value"]
+    print(f"  the fix is {noise:.0%} coin-flip noise (median {med:.0f} second-period pitches "
+          "in the cells), so the slopes below are attenuated")
+    print("  per 10-point cut beyond expected (unweighted | weighted by pitches):")
+    for m, lab, k, unit in [("offense_runs", "offense (xwOBA)", 1, "runs / 600 PA"),
                             ("woba_runs", "offense (wOBA)", 1, "runs / 600 PA"),
-                            ("bb_rate", "BB%", 100, "pts"), ("k_rate", "K%", 100, "pts"),
+                            ("k_rate", "K%", 100, "pts"),
                             ("zone_swing_rate", "zone swing rate", 100, "pts"),
+                            ("xchase_plus", "xChase+", 1, "pts"),
+                            ("bb_rate", "BB%", 100, "pts"),
                             ("far_off_chase_rate", "far-off chase rate", 100, "pts")]:
         r = S.loc[(kind, m, "per 10-pt cut beyond expected")]
-        print(f"    {lab:20s} {r['value'] * k:+6.2f} ± {r['se'] * k:4.2f} {unit}")
+        w = S.loc[(kind, m, "per 10-pt cut beyond expected, weighted by pitches")]
+        tag = "  (accounting: built from the same swings)" if MEASURE_TYPE[m] == "accounting" else ""
+        print(f"    {lab:20s} {r['value'] * k:+6.2f} ± {r['se'] * k:4.2f} | "
+              f"{w['value'] * k:+6.2f} ± {w['se'] * k:4.2f} {unit}{tag}")
     r = S.loc[(kind, "offense_runs", "per run of leak choices recovered")]
-    print(f"  offense runs per run of leak choices recovered: {r['value']:+.2f} ± {r['se']:.2f}")
+    w = S.loc[(kind, "offense_runs", "per run of leak choices recovered, weighted by pitches")]
+    print(f"  offense runs per run of leak choices recovered: {r['value']:+.2f} ± {r['se']:.2f} "
+          f"(weighted {w['value']:+.2f} ± {w['se']:.2f})")
+    r = S.loc[(kind, "xchase_plus", "per run of leak choices recovered")]
+    print(f"  xChase+ per run of leak choices recovered: {r['value']:+.2f} ± {r['se']:.2f} "
+          f"(the season scale is about 2.7 points per run: an identity, not a payoff)")
     r = S.loc[(kind, "offense_runs", "count check: payoff change per +20 pts xwOBA in the counts")]
     print(f"  payoff change per +20 pts xwOBA in the leak's counts: {r['value']:+.2f} ± {r['se']:.2f} runs")
     for status in ("struggling", "average", "productive"):

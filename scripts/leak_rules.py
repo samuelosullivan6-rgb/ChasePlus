@@ -42,9 +42,11 @@ import numpy as np
 import pandas as pd
 
 import card_surfaces as cs
+import chase_model as cm
 
-FASTBALLS = {"FF", "SI", "FC", "FA"}
-BREAKING = {"SL", "ST", "CU", "KC", "SV", "CS"}
+# The pitch groups, set once in chase_model.py
+FASTBALLS = set(cm.FASTBALLS)
+BREAKING = set(cm.BREAKING)
 WHIFFS = {"swinging_strike", "swinging_strike_blocked", "foul_tip"}
 
 COUNT_GROUPS = ["first", "ahead", "even", "two"]
@@ -282,12 +284,21 @@ def woba_scale(run_values):
     return pd.Series(scale)
 
 
-def ols(y, columns, cluster):
+def ols(y, columns, cluster, weights=None):
     """OLS with an intercept; standard errors clustered by `cluster`.
-    Returns (coefficients, standard errors), the intercept first."""
+    Returns (coefficients, standard errors), the intercept first.
+
+    weights: optional per-row weights for weighted least squares (each
+    row scaled by sqrt(weight), the clustered sandwich on the scaled
+    rows). Step 16 weights pairs by the pitches the second period holds
+    in the leak cells, since a 13-pitch cell's chase rate is mostly noise."""
 
     X = np.column_stack([np.ones(len(y))] + [np.asarray(c, float) for c in columns])
     y = np.asarray(y, float)
+    if weights is not None:
+        root = np.sqrt(np.asarray(weights, float))
+        X = X * root[:, None]
+        y = y * root
     beta, *_ = np.linalg.lstsq(X, y, rcond=None)
     resid = y - X @ beta
     bread = np.linalg.inv(X.T @ X)

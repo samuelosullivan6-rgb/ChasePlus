@@ -108,16 +108,29 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 from scipy.stats import chi2
-from scipy.optimize import minimize
-from scipy.sparse import csr_matrix
-from scipy.special import expit, logit as log_odds
-from sklearn.base import BaseEstimator, ClassifierMixin
-from sklearn.compose import ColumnTransformer
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import brier_score_loss, log_loss, roc_auc_score
 from sklearn.model_selection import GroupKFold
-from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import SplineTransformer, StandardScaler
+import sys
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from chase_model import (  # noqa: E402
+    BALL_RADIUS,
+    CALLED_STRIKE_DISTANCE_KNOTS,
+    COUNTS_IN_ORDER,
+    HALF_PLATE_PLUS_BALL,
+    PITCH_GROUPS,
+    ZONE_SIDES,
+    MonotoneCalledStrikeModel,
+    called_strike_features,
+    distance_only_features,
+    estimate_between_hitter_variance,
+    label_zone_side,
+    new_called_strike_model,
+    new_no_side_model,
+    no_side_features,
+    pitch_group,
+)
 
 
 # --------------------------------------------------
@@ -281,21 +294,9 @@ PLATE_APPEARANCES_PER_SEASON = 600
 
 LEADERBOARD_SIZE = 10
 
-# Knots of the called-strike distance spline, in feet outside the zone.
-# Past the last knot the curve is linear in log-odds. Knots beyond 0.7 ft
-# let the thin tail bend back up past about 1.15 ft (a pitch four feet off
-# more likely to be a called strike than one a foot off), so they stop
-# at 0.7. The model used for pricing has one curve per side of the zone,
-# each built so it cannot rise; the comparison model without the side has
-# one free curve on the same knots.
-CALLED_STRIKE_DISTANCE_KNOTS = [0.0, 0.10, 0.20, 0.30, 0.45, 0.70]
-
-# Ridge penalty on every coefficient of the called-strike model but the
-# intercept. Enough to keep the fit unique where a side of the zone has no
-# called strikes far out; at scikit-learn's default (1.0) it held the
-# tails up, so takes nowhere near the zone came out a little over-called
-# (by 0.1 to 0.4 per 1,000) above and below.
-CALLED_STRIKE_PENALTY = 0.01
+# The called-strike distance knots and ridge penalty
+# (CALLED_STRIKE_DISTANCE_KNOTS, CALLED_STRIKE_PENALTY) are set in
+# chase_model.py, which step 07 also reads.
 
 # Out-of-fold check of the called-strike model: each season's takes are
 # split into folds by game, and each fold is predicted by a model that
@@ -401,6 +402,7 @@ def fingerprint_of(paths):
 
 RUN_FINGERPRINT = fingerprint_of([
     Path(__file__).resolve(),
+    Path(__file__).resolve().parent / "chase_model.py",
     PITCH_FILE,
     PA_VALUE_FILE,
     COUNT_VALUE_FILE,
@@ -510,6 +512,8 @@ wanted_pitch_columns = [
     "is_swing",
     "is_chase",
     "distance_outside_zone",
+    # only for the pitch-group baseline comparison further down
+    "pitch_type",
     # location and the hitter's zone: only used to label which side of
     # the zone a pitch missed on, for the called-strike model
     "plate_x",
@@ -542,6 +546,10 @@ opportunities["distance_bucket"] = pd.cut(
     bins=DISTANCE_BINS,
     labels=DISTANCE_LABELS
 ).astype(str)
+
+# fastball / breaking / offspeed / other, for the comparison baseline
+# below. The pricing itself never uses it.
+opportunities["pitch_group"] = pitch_group(opportunities["pitch_type"])
 
 
 # --------------------------------------------------
@@ -711,53 +719,13 @@ show_diagnostic(
 # model badly misses 2025's overall called-strike rate).
 # --------------------------------------------------
 
-# Which side of the zone each pitch missed on. Same geometry as
-# distance_outside_zone in script 02.
-HALF_PLATE_PLUS_BALL = 0.83
-
-sideways_miss = (
-    opportunities["plate_x"].abs() - HALF_PLATE_PLUS_BALL
-).clip(lower=0)
-
-above_miss = (opportunities["plate_z"] - opportunities["sz_top"]).clip(lower=0)
-below_miss = (opportunities["sz_bot"] - opportunities["plate_z"]).clip(lower=0)
-
-opportunities["miss_direction"] = np.select(
-    [
-        opportunities[["plate_x", "plate_z", "sz_top", "sz_bot"]]
-        .isna()
-        .any(axis=1),
-        (sideways_miss > 0) & ((above_miss > 0) | (below_miss > 0)),
-        sideways_miss > 0,
-        above_miss > 0,
-        below_miss > 0,
-    ],
-    ["unknown", "corner", "side", "above", "below"],
-    default="on the edge",
+# Which side of the zone each pitch missed on (chase_model.label_zone_side:
+# same geometry as distance_outside_zone in script 02; "on the edge"
+# joins the side curve, a take above or below but within a ball's radius
+# of the recorded edge joins the corners, unknown is missing).
+opportunities["miss_direction"], opportunities["zone_side"] = (
+    label_zone_side(opportunities)
 )
-
-# The model's version. Statcast's out-of-zone flag counts a ball's width
-# above and below the zone (distance_outside_zone does not), so a take
-# that misses only above or below is at least a ball's radius off the
-# recorded edge. The few hundred a season that are closer were flagged
-# out by the side edge instead (every one sits within 0.11 ft of the
-# plate's edge as distance measures it, and is called a strike about as
-# often as a corner pitch), so they join the corners. A pitch "on the
-# edge" (no distance off either edge, about a hundred takes a season) was
-# also flagged out by the side edge, so it joins the side curve. An
-# unknown side is missing.
-BALL_RADIUS = 0.121
-
-opportunities["zone_side"] = (
-    opportunities["miss_direction"]
-    .replace({"on the edge": "side", "unknown": np.nan})
-)
-
-opportunities.loc[
-    opportunities["zone_side"].isin(["above", "below"])
-    & (opportunities["distance_outside_zone"] < BALL_RADIUS),
-    "zone_side"
-] = "corner"
 
 takes = opportunities[opportunities["is_swing"] == 0].copy()
 
@@ -804,255 +772,9 @@ if impossible_counts.any():
         "outside 0-3 balls / 0-2 strikes. Fix that upstream first."
     )
 
-COUNTS_IN_ORDER = [
-    (balls, strikes)
-    for balls in range(4)
-    for strikes in range(3)
-]
-
-
-# The sides of the zone in the model, the first one the reference.
-ZONE_SIDES = ["side", "above", "below", "corner"]
-
-
-def called_strike_features(frame):
-    """
-    Raw distance (the splines are built inside the model), one 0/1 column
-    per side of the zone, and one 0/1 column for every count except 0-0.
-    The columns are the same for any slice of pitches, so a model fit on
-    one set can score another.
-    """
-
-    features = no_side_features(frame)
-
-    zone_side = frame["zone_side"].to_numpy()
-
-    for position, side in enumerate(ZONE_SIDES):
-        features.insert(
-            1 + position,
-            f"side_{side}",
-            (zone_side == side).astype(float)
-        )
-
-    return features
-
-
-def no_side_features(frame):
-    """
-    Distance and the count indicators, without the side of the zone. The
-    model before October 2026; kept as the comparison in the check.
-    """
-
-    features = distance_only_features(frame)
-
-    balls = frame["balls"].to_numpy()
-    strikes = frame["strikes"].to_numpy()
-
-    for count_balls, count_strikes in COUNTS_IN_ORDER[1:]:
-
-        features[f"count_{count_balls}_{count_strikes}"] = (
-            (balls == count_balls)
-            & (strikes == count_strikes)
-        ).astype(float)
-
-    return features
-
-
-def distance_only_features(frame):
-    """Distance alone. Only used as the comparison model in the check."""
-
-    return pd.DataFrame(
-        {
-            "distance_outside_zone": (
-                frame["distance_outside_zone"].astype(float)
-            )
-        },
-        index=frame.index
-    )
-
-
-def distance_spline():
-    """The cubic spline of distance, with fixed knots."""
-
-    return SplineTransformer(
-        knots=np.array(CALLED_STRIKE_DISTANCE_KNOTS).reshape(-1, 1),
-        degree=3,
-        extrapolation="linear",
-        include_bias=False
-    )
-
-
-class MonotoneCalledStrikeModel(BaseEstimator, ClassifierMixin):
-    """
-    Logistic regression with one distance curve per side of the zone, each
-    unable to rise with distance, plus the count indicators.
-
-    Each side's curve is a weighted sum of the cubic spline's tail sums
-    (the basis functions from the k-th on, added up), which never fall
-    with distance and stay flat past the last knot, plus the distance
-    past the last knot, which keeps the curve falling in the tail. Every weight is held at or above zero and enters with a minus
-    sign, so no side's curve can rise with distance, in any count. The
-    side and count terms are free. Fit by maximum likelihood with a light
-    ridge penalty (CALLED_STRIKE_PENALTY) on every term but the intercept.
-
-    Takes called_strike_features' columns.
-    """
-
-    def fit(self, X, y):
-
-        design, names, is_curve = self._design(X)
-        design_transposed = design.T.tocsr()
-        outcomes = np.asarray(y, dtype=float)
-
-        def loss_and_gradient(theta):
-
-            linear = design @ theta
-            loss = np.sum(np.logaddexp(0, linear) - outcomes * linear)
-            gradient = design_transposed @ (expit(linear) - outcomes)
-
-            penalized = theta.copy()
-            penalized[0] = 0.0
-
-            loss += 0.5 * CALLED_STRIKE_PENALTY * penalized @ penalized
-            gradient += CALLED_STRIKE_PENALTY * penalized
-
-            return loss, gradient
-
-        start = np.zeros(design.shape[1])
-        start[0] = log_odds(np.clip(outcomes.mean(), 1e-6, 1 - 1e-6))
-
-        result = minimize(
-            loss_and_gradient,
-            start,
-            jac=True,
-            method="L-BFGS-B",
-            bounds=[
-                (0.0, None) if curve else (None, None)
-                for curve in is_curve
-            ],
-            options={"maxiter": 20000, "ftol": 1e-13, "gtol": 1e-7},
-        )
-
-        self.coef_ = result.x
-        self.feature_names_ = names
-        self.converged_ = bool(result.success)
-        self.n_iter_ = int(result.nit)
-
-        return self
-
-    def coefficient(self, name):
-
-        return float(self.coef_[self.feature_names_.index(name)])
-
-    def decision_function(self, X):
-
-        design, _, _ = self._design(X)
-
-        return design @ self.coef_
-
-    def predict_proba(self, X):
-
-        chance = expit(self.decision_function(X))
-
-        return np.column_stack([1 - chance, chance])
-
-    @staticmethod
-    def _design(X):
-        """
-        The model's columns: intercept, one 0/1 column per side but the
-        reference, the count indicators, then each side's curve columns
-        (negative tail sums and negative distance past the last knot,
-        zero off that side). Also returns the names and which columns
-        are curve weights.
-        """
-
-        distance = X["distance_outside_zone"].to_numpy(dtype=float)
-        last_knot = CALLED_STRIKE_DISTANCE_KNOTS[-1]
-
-        basis = SplineTransformer(
-            knots=np.array(CALLED_STRIKE_DISTANCE_KNOTS).reshape(-1, 1),
-            degree=3,
-            extrapolation="constant",
-            include_bias=True
-        ).fit([[0.0], [last_knot]]).transform(
-            np.clip(distance, 0, last_knot).reshape(-1, 1)
-        )
-
-        # The first tail sum is the whole basis, 1 everywhere, so it is
-        # left out.
-        tail_sums = np.cumsum(basis[:, ::-1], axis=1)[:, ::-1][:, 1:]
-        past_last_knot = np.clip(distance - last_knot, 0, None)
-
-        curve = np.column_stack([tail_sums, past_last_knot])
-
-        sides = {
-            side: X[f"side_{side}"].to_numpy(dtype=float)
-            for side in ZONE_SIDES
-        }
-
-        count_columns = [
-            column for column in X.columns if column.startswith("count_")
-        ]
-
-        columns = [np.ones(len(X))]
-        names = ["intercept"]
-        is_curve = [False]
-
-        for side in ZONE_SIDES[1:]:
-            columns.append(sides[side])
-            names.append(f"side_{side}")
-            is_curve.append(False)
-
-        for column in count_columns:
-            columns.append(X[column].to_numpy(dtype=float))
-            names.append(column)
-            is_curve.append(False)
-
-        for side in ZONE_SIDES:
-            for position in range(curve.shape[1]):
-                columns.append(-curve[:, position] * sides[side])
-                names.append(
-                    f"{side}_past_last_knot"
-                    if position == curve.shape[1] - 1
-                    else f"{side}_tail_sum_{position + 1}"
-                )
-                is_curve.append(True)
-
-        # Each row is non-zero in about 11 of the 47 columns.
-        return csr_matrix(np.column_stack(columns)), names, is_curve
-
-
-def new_called_strike_model():
-    """
-    The model used for pricing: a distance curve per side of the zone
-    that cannot rise with distance, plus count. Each season fits its own.
-    """
-
-    return MonotoneCalledStrikeModel()
-
-
-def new_no_side_model():
-    """
-    The model without the side of the zone: one distance spline for every
-    take, any other columns (the count indicators) passed straight
-    through. Only used as a comparison in the check.
-    """
-
-    distance_curve = Pipeline([
-        ("spline", distance_spline()),
-        ("scale", StandardScaler()),
-    ])
-
-    features = ColumnTransformer(
-        [("distance", distance_curve, ["distance_outside_zone"])],
-        remainder="passthrough",
-        verbose_feature_names_out=False
-    )
-
-    return Pipeline([
-        ("features", features),
-        ("logit", LogisticRegression(max_iter=1000)),
-    ])
+# COUNTS_IN_ORDER, ZONE_SIDES, the feature columns and the models live in
+# chase_model.py, shared with the college path (college_method.py) so the
+# two builds cannot drift apart.
 
 
 def count_effects(model):
@@ -2183,6 +1905,79 @@ opportunities["runs_saved"] = (
 
 
 # --------------------------------------------------
+# A SECOND BASELINE THAT KNOWS THE PITCH (COMPARISON ONLY)
+#
+# The baseline above compares a hitter with the league on the same
+# season, count and distance, but not the same pitch. A slider a foot off
+# the plate is harder to take than a fastball a foot off, and pitchers do
+# not throw the two at random: results/xchase/pitch_mix_confound.md finds
+# that the share of breaking and offspeed pitches a hitter was shown
+# correlates about -0.36 with xChase+, of which an estimated 5 to 8
+# points between the 10th and 90th percentile hitters survives a
+# within-hitter test. So every pitch is priced a second time against the
+# league's cost in the same season, count, distance bucket AND pitch
+# group (fastball / breaking / offspeed), and the hitter table carries
+# the result beside the main number as runs_saved_pitch_group_per_600_pa
+# and chase_plus_pitch_group.
+#
+# It is a comparison, not the headline, because the pitch mix a hitter
+# sees is partly his own doing (pitchers throw sliders off the plate to
+# hitters who chase them), so this baseline also removes part of the
+# habit the stat is meant to measure. The gap between the two is the
+# most a pitch-aware baseline could move anyone.
+#
+# Cells of a pitch group "other" (rare or unlabelled types), and any cell
+# below PITCH_GROUP_CELL_MINIMUM pitches, fall back to the count x
+# distance baseline, so a thin cell never prices a pitch.
+# --------------------------------------------------
+
+PITCH_GROUP_CELL_MINIMUM = 100
+
+PITCH_GROUP_CELL = ["game_year", "balls", "strikes", "distance_bucket", "pitch_group"]
+
+league_by_pitch_cell = (
+    opportunities[opportunities["pitch_group"].isin(PITCH_GROUPS)]
+    .groupby(PITCH_GROUP_CELL)
+    .agg(
+        expected_cost_pitch_group=("chase_cost", "mean"),
+        pitch_cell_pitches=("is_chase", "size"),
+    )
+    .reset_index()
+)
+
+league_by_pitch_cell = league_by_pitch_cell[
+    league_by_pitch_cell["pitch_cell_pitches"] >= PITCH_GROUP_CELL_MINIMUM
+]
+
+opportunities = opportunities.merge(
+    league_by_pitch_cell[PITCH_GROUP_CELL + ["expected_cost_pitch_group"]],
+    on=PITCH_GROUP_CELL,
+    how="left"
+)
+
+pitch_cell_fallback = opportunities["expected_cost_pitch_group"].isna()
+
+opportunities["expected_cost_pitch_group"] = (
+    opportunities["expected_cost_pitch_group"]
+    .fillna(opportunities["expected_cost_per_pitch"])
+)
+
+opportunities["runs_saved_pitch_group"] = (
+    opportunities["expected_cost_pitch_group"]
+    - opportunities["chase_cost"]
+)
+
+show_diagnostic()
+show_diagnostic(
+    f"Pitch-group baseline: {len(league_by_pitch_cell):,} season x count x "
+    f"bucket x pitch-group cells with at least {PITCH_GROUP_CELL_MINIMUM} "
+    f"pitches; {int(pitch_cell_fallback.sum()):,} opportunities "
+    f"({pitch_cell_fallback.mean():.2%}, mostly pitch group 'other') fall "
+    "back to the count x distance baseline."
+)
+
+
+# --------------------------------------------------
 # QUALIFICATION FLOORS, BY SEASON
 #
 # Each floor is scaled by the season's games / the longest season's games,
@@ -2378,6 +2173,7 @@ hitter_seasons = (
         expected_cost=("expected_cost_per_pitch", "sum"),
         expected_cost_count_only=("expected_cost_count_only", "sum"),
         expected_cost_anchor=("expected_cost_anchor", "sum"),
+        expected_cost_pitch_group=("expected_cost_pitch_group", "sum"),
         mean_runs_saved=("runs_saved", "mean"),
         standard_deviation=("runs_saved", "std"),
     )
@@ -2451,6 +2247,14 @@ hitter_seasons["runs_saved_vs_anchor_per_600_pa"] = (
 # The count-only version, for comparison only
 hitter_seasons["runs_saved_count_only_per_600_pa"] = (
     (hitter_seasons["expected_cost_count_only"] - hitter_seasons["total_cost"])
+    / hitter_seasons["plate_appearances"]
+    * PLATE_APPEARANCES_PER_SEASON
+)
+
+# The pitch-group version (count x distance x pitch group baseline), for
+# comparison only
+hitter_seasons["runs_saved_pitch_group_per_600_pa"] = (
+    (hitter_seasons["expected_cost_pitch_group"] - hitter_seasons["total_cost"])
     / hitter_seasons["plate_appearances"]
     * PLATE_APPEARANCES_PER_SEASON
 )
@@ -2603,36 +2407,7 @@ show_diagnostic(qualification_summary.to_string())
 # between hitters is itself a fact about a season.
 # --------------------------------------------------
 
-def estimate_between_hitter_variance(effects, standard_errors):
-    """
-    Returns tau squared (the real spread between hitters, with measurement
-    noise removed), the inverse-variance-weighted mean, and Cochran's Q.
-    """
-
-    effects = np.asarray(effects, dtype=float)
-    standard_errors = np.asarray(standard_errors, dtype=float)
-
-    weights = 1.0 / (standard_errors ** 2)
-
-    weighted_mean = (
-        np.sum(weights * effects)
-        / np.sum(weights)
-    )
-
-    q_statistic = np.sum(
-        weights * (effects - weighted_mean) ** 2
-    )
-
-    k = len(effects)
-
-    scaling = (
-        np.sum(weights)
-        - np.sum(weights ** 2) / np.sum(weights)
-    )
-
-    tau_squared = (q_statistic - (k - 1)) / scaling
-
-    return max(tau_squared, 0.0), weighted_mean, q_statistic
+# estimate_between_hitter_variance (DerSimonian-Laird) is in chase_model.py.
 
 
 seasons = sorted(qualified["game_year"].unique())
@@ -2731,6 +2506,47 @@ qualified["chase_plus"] = (
     + 100
     * qualified["runs_saved_shrunk"]
     / qualified["league_chase_cost_per_600_pa"]
+)
+
+# The pitch-group comparison on the same scale: raw, and shrunk with the
+# hitter's own shrinkage factor (the standard error is the same number of
+# pitches either way) toward the pitch-group version's own
+# inverse-variance-weighted mean.
+qualified["chase_plus_pitch_group_raw"] = (
+    100
+    + 100
+    * qualified["runs_saved_pitch_group_per_600_pa"]
+    / qualified["league_chase_cost_per_600_pa"]
+)
+
+pitch_group_shrunk = []
+
+for season in seasons:
+
+    one_season = qualified[qualified["game_year"] == season]
+    weights = 1.0 / one_season["standard_error_per_600_pa"] ** 2
+    pooled = (
+        np.sum(weights * one_season["runs_saved_pitch_group_per_600_pa"])
+        / np.sum(weights)
+    )
+
+    pitch_group_shrunk.append(
+        one_season["runs_saved_pitch_group_per_600_pa"]
+        - one_season["shrinkage_factor"]
+        * (one_season["runs_saved_pitch_group_per_600_pa"] - pooled)
+    )
+
+qualified["runs_saved_pitch_group_shrunk"] = pd.concat(pitch_group_shrunk)
+
+qualified["chase_plus_pitch_group"] = (
+    100
+    + 100
+    * qualified["runs_saved_pitch_group_shrunk"]
+    / qualified["league_chase_cost_per_600_pa"]
+)
+
+qualified["pitch_group_shift"] = (
+    qualified["chase_plus_pitch_group"] - qualified["chase_plus"]
 )
 
 # chase_plus_se is the standard error of the unshrunk measurement. The
@@ -3486,7 +3302,58 @@ adjustment_summary = (
         ),
         count_x_distance=("runs_saved_per_600_pa", "std"),
         count_x_distance_shrunk=("runs_saved_shrunk", "std"),
+        count_x_distance_x_pitch_group=(
+            "runs_saved_pitch_group_per_600_pa", "std"
+        ),
     )
+)
+
+# What a pitch-aware baseline would move. One row per season, saved for
+# the README's limitation on the pitch mix.
+pitch_group_rows = []
+
+for season in seasons:
+
+    one_season = qualified[qualified["game_year"] == season]
+    shift = one_season["pitch_group_shift"]
+    biggest = one_season.loc[shift.abs().idxmax()]
+
+    pitch_group_rows.append({
+        "game_year": int(season),
+        "hitters": len(one_season),
+        "r_with_main": one_season["chase_plus"].corr(
+            one_season["chase_plus_pitch_group"]
+        ),
+        "r_raw_with_main_raw": one_season["chase_plus_raw"].corr(
+            one_season["chase_plus_pitch_group_raw"]
+        ),
+        "shift_sd": shift.std(),
+        "shift_p10": shift.quantile(0.10),
+        "shift_p90": shift.quantile(0.90),
+        "shift_max_abs": shift.abs().max(),
+        "biggest_mover": biggest["batter"],
+        "biggest_mover_shift": biggest["pitch_group_shift"],
+        "rank_moves_5_or_more": int(
+            (
+                one_season["chase_plus_pitch_group"].rank(ascending=False)
+                - one_season["value_rank"]
+            ).abs().ge(5).sum()
+        ),
+    })
+
+pitch_group_comparison = pd.DataFrame(pitch_group_rows)
+
+show_diagnostic()
+show_diagnostic(
+    "The pitch-group baseline against the main one (chase_plus_pitch_group "
+    "minus chase_plus, Chase+ points, qualified hitters):"
+)
+show_diagnostic()
+show_diagnostic(
+    pitch_group_comparison
+    .drop(columns=["biggest_mover"])
+    .round(3)
+    .to_string(index=False)
 )
 
 show_diagnostic()
@@ -3788,6 +3655,11 @@ output_columns = [
         "runs_saved_vs_anchor_per_600_pa",
         "runs_saved_vs_anchor_shrunk",
         "runs_saved_count_only_per_600_pa",
+        "runs_saved_pitch_group_per_600_pa",
+        "runs_saved_pitch_group_shrunk",
+        "chase_plus_pitch_group_raw",
+        "chase_plus_pitch_group",
+        "pitch_group_shift",
         "shrinkage_factor",
         "chase_rate_rank",
         "value_rank",
@@ -3795,6 +3667,7 @@ output_columns = [
         "total_cost",
         "expected_cost",
         "expected_cost_anchor",
+        "expected_cost_pitch_group",
         "mean_runs_saved",
         "standard_deviation",
         "scale_to_600_pa",
@@ -3909,10 +3782,24 @@ opportunities[
         "expected_cost_anchor",
         "runs_saved",
         "runs_saved_vs_anchor",
+        "pitch_group",
+        "expected_cost_pitch_group",
+        "runs_saved_pitch_group",
     ]
 ].to_parquet(OUTPUT_PITCH_COSTS, index=False)
 
 written_files.append(OUTPUT_PITCH_COSTS)
+
+OUTPUT_PITCH_GROUP_COMPARISON = OUTPUT_DIR / "pitch_group_baseline_comparison.csv"
+
+columns_for_saving(
+    attach_names(pitch_group_comparison.rename(columns={"biggest_mover": "batter"}))
+    .rename(columns={"batter": "biggest_mover", "player": "biggest_mover_name"})
+).assign(run_fingerprint=RUN_FINGERPRINT).to_csv(
+    OUTPUT_PITCH_GROUP_COMPARISON, index=False
+)
+
+written_files.append(OUTPUT_PITCH_GROUP_COMPARISON)
 
 # These two are written last and carry the run fingerprint, so a results
 # folder can be checked against the current script and data

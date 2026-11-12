@@ -40,14 +40,22 @@ chasing far-off pitches at the league rate.
 
 ARCHETYPES (qualified hitters only)
 
+    above average   runs_saved >= 0: there is no loss to split, so the
+                    shares below are not defined for him
     decision-only   decision <= -8 and execution >= -1: his chases turn
                     out as well as the league's, he just takes too many
     decision-led    decision <= -8 and at least 60% of the loss
     execution-led   less than half the loss is decision
-    mixed           everything else
+    mixed           everything else (a net loss, split between the two)
 
 The decision-only group is where a "take that pitch" adjustment is most
 likely to pay: there is nothing wrong with the swing, only the choice.
+
+`xchase_plus_if_far_off_fixed` adds the far-off credit to the hitter's
+xChase+. That number is shrunk toward the league (step 04), so the
+credit is shrunk by the same factor before it is converted to points;
+otherwise a low-PA hitter's fix would be priced at full strength on top
+of a discounted score.
 
 OUTPUTS, in results/xchase/coaching/
 
@@ -59,6 +67,12 @@ OUTPUTS, in results/xchase/coaching/
                                   losing at least 5 runs per 600 PA
     far_off_history.csv           far-off chase rate and decision runs
                                   per hitter-season, for persistence
+    league_reference.csv          the league's rates per season
+
+"League" in the last two files and in the cell tables means every
+hitter with a priced pitch that season (650-1,020 hitters), not the
+qualified hitters alone: those rates are taken before the table is cut
+to qualified hitter-seasons.
 
 Run after `04_build_chase_leaderboard.py --expected-contact`,
 `09_build_xchase_comparison.py` and `12_build_coaching_profiles.py` (the
@@ -66,20 +80,26 @@ bottom-10 profiles; this script scores every qualified hitter).
 """
 
 from pathlib import Path
+import sys
 
 import numpy as np
 import pandas as pd
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import chase_model as cm  # noqa: E402
 
 PLATE_APPEARANCES_PER_SEASON = 600
 DECISION_FLOOR = -8.0          # runs per 600 PA
 EXECUTION_NEUTRAL = -1.0       # runs per 600 PA
 CELL_TABLE_FLOOR = -5.0        # runs per 600 PA; cell tables only for hitters losing this much
-HALF_PLATE_PLUS_BALL = 0.83    # same geometry as scripts 03 and 04
+# The zone edge and the pitch groups come from chase_model.py, shared with
+# every other script (step 22 reads them from there too).
+HALF_PLATE_PLUS_BALL = cm.HALF_PLATE_PLUS_BALL
 FAR_BUCKETS = {"clearly off", "nowhere near"}
 
-FASTBALLS = {"FF", "SI", "FC", "FA"}
-BREAKING = {"SL", "ST", "CU", "KC", "SV", "CS"}
-OFFSPEED = {"CH", "FS", "FO", "EP", "KN"}
+FASTBALLS = set(cm.FASTBALLS)
+BREAKING = set(cm.BREAKING)
+OFFSPEED = set(cm.OFFSPEED)
 
 PROJECT_DIR = Path(__file__).resolve().parent
 if not (PROJECT_DIR / "data").exists():
@@ -93,6 +113,9 @@ X_PITCHES = CLEAN_DIR / "xchase_costs_by_pitch.parquet"
 PITCH_FILE = CLEAN_DIR / "baseline_chase_pitches.parquet"
 LEADERBOARD = "xchase_leaderboard_{season}.csv"
 SCALE_FILE = XCHASE_DIR / "chase_plus_league_scale.csv"
+# Step 04's per-season leaderboards carry shrinkage_factor; the per-season
+# files exist in a college build too (the stacked by_season file does not).
+SHRINKAGE_FILES = sorted(XCHASE_DIR.glob("chase_cost_leaderboard_20??.csv"))
 
 for needed in (X_PITCHES, PITCH_FILE, SCALE_FILE):
     if not needed.exists():
@@ -131,6 +154,17 @@ qualified = leaderboard[["batter", "game_year", "player", "plate_appearances",
 
 scale = pd.read_csv(SCALE_FILE).set_index("game_year")["league_chase_cost_per_600_pa"]
 
+# How far step 04 pulled each hitter's runs saved toward the league mean
+# (SE^2 / (SE^2 + tau^2)); the same per-season boards, so every qualified
+# hitter-season has one.
+if not SHRINKAGE_FILES:
+    raise SystemExit(f"No chase_cost_leaderboard_<season>.csv in {XCHASE_DIR}; run step 04 "
+                     "--expected-contact first.")
+shrinkage = pd.concat([pd.read_csv(f)[["batter", "game_year", "shrinkage_factor"]]
+                       for f in SHRINKAGE_FILES], ignore_index=True)
+if shrinkage.duplicated(["batter", "game_year"]).any():
+    raise SystemExit(f"{SHRINKAGE_FILE.name} lists a hitter-season twice.")
+
 # --------------------------------------------------
 # DECISION / EXECUTION SPLIT
 # --------------------------------------------------
@@ -142,6 +176,8 @@ league_cost_per_chase = (
     .rename("league_cost_per_chase")
 )
 df = df.join(league_cost_per_chase, on=cell_keys)
+# A cell with no league chase has no mean; it can only hold takes, where
+# is_chase is 0 and the cost multiplies out anyway, so 0 changes nothing.
 df["league_cost_per_chase"] = df["league_cost_per_chase"].fillna(0.0)
 
 df["decision"] = df["expected_cost_per_pitch"] - df["is_chase"] * df["league_cost_per_chase"]
@@ -180,6 +216,33 @@ df["decision_class"] = np.select(
     ["A", "B", "C"], "D",
 )
 
+# --------------------------------------------------
+# LEAGUE REFERENCE
+# --------------------------------------------------
+
+# Taken here, before the cut to qualified hitters, so "league" means every
+# hitter with a priced pitch that season (650-1,020 hitters), the same
+# population the step 04 baseline is built from. The per-cell league chase
+# rate for the far-off tables comes from the same frame.
+league_rows = []
+for season, g in df.groupby("game_year"):
+    chases = g[g["is_chase"] == 1]
+    far = g[g["far_off"]]
+    league_rows.append({
+        "game_year": season,
+        "hitters": g["batter"].nunique(),
+        "pitches": len(g),
+        "chase_rate": g["is_chase"].mean(),
+        "whiff_rate_on_chases": chases["whiff"].mean(),
+        "xwoba_on_chases_in_play": chases.loc[chases["in_play"] == 1, "estimated_woba_using_speedangle"].mean(),
+        "far_off_chase_rate_lt2k": far.loc[far["strikes"] < 2, "is_chase"].mean(),
+        "far_off_chase_rate_2k": far.loc[far["strikes"] == 2, "is_chase"].mean(),
+    })
+league = pd.DataFrame(league_rows)
+
+cell = ["game_year", "strikes", "pitch_group", "zone_miss"]
+league_cells = df[df["far_off"]].groupby(cell)["is_chase"].mean().rename("league_chase_rate")
+
 # Qualified hitter-seasons only, scaled to 600 PA
 df = df.merge(qualified[["batter", "game_year", "plate_appearances"]], on=["batter", "game_year"], how="inner")
 df["scale"] = PLATE_APPEARANCES_PER_SEASON / df["plate_appearances"]
@@ -212,45 +275,56 @@ def per_hitter(group):
 
 table = df.groupby(["batter", "game_year"]).apply(per_hitter).reset_index()
 table = table.merge(qualified, on=["batter", "game_year"])
+table = table.merge(shrinkage, on=["batter", "game_year"], how="left")
+if table["shrinkage_factor"].isna().any():
+    raise SystemExit("Some qualified hitter-seasons have no shrinkage_factor in step 04's file.")
 
+# Share of a net loss that is decision; undefined when there is no loss.
 table["decision_share"] = np.where(
     table["runs_saved_per_600"] < 0,
     table["decision_per_600"] / table["runs_saved_per_600"], np.nan,
 )
+
+# Each far-off class is clipped at 0 before the sign flip, so a class where
+# the hitter already chases less than the league earns nothing and cannot
+# offset a loss in the other class: the credit is one-sided, a floor on
+# what taking those pitches at the league rate would return, never a debit.
 table["far_off_recoverable"] = -(
     table["decision_A_early_far"].clip(upper=0) + table["decision_B_2k_far"].clip(upper=0)
 )
+
+# xchase_plus is built on runs saved shrunk toward the league by
+# shrinkage_factor (step 04), so the recoverable runs are shrunk by the
+# same factor before they become points: adding them unshrunk would price
+# the fix at full strength on top of a discounted score, and overstate it
+# most for the low-PA hitters who are shrunk the most.
 table["xchase_plus_if_far_off_fixed"] = (
-    table["xchase_plus"] + 100 * table["far_off_recoverable"] / table["game_year"].map(scale)
+    table["xchase_plus"]
+    + 100 * (1 - table["shrinkage_factor"]) * table["far_off_recoverable"] / table["game_year"].map(scale)
 )
+
+# Above average first: with no loss to split, decision_share is NaN and
+# every comparison on it is False, which used to drop these hitters into
+# the "mixed" default (and a few, with a big decision loss covered by
+# better contact, into "decision-only"). The remaining conditions see only
+# hitters with a net loss, where the share is defined.
 table["archetype"] = np.select(
     [
+        table["runs_saved_per_600"] >= 0,
         (table["decision_per_600"] <= DECISION_FLOOR) & (table["execution_per_600"] >= EXECUTION_NEUTRAL),
         (table["decision_per_600"] <= DECISION_FLOOR) & (table["decision_share"] >= 0.6),
         table["decision_share"] < 0.5,
     ],
-    ["decision-only", "decision-led", "execution-led"], "mixed",
+    ["above average", "decision-only", "decision-led", "execution-led"], "mixed",
 )
-
-league_rows = []
-for season, g in df.groupby("game_year"):
-    chases = g[g["is_chase"] == 1]
-    far = g[g["far_off"]]
-    league_rows.append({
-        "game_year": season,
-        "chase_rate": g["is_chase"].mean(),
-        "whiff_rate_on_chases": chases["whiff"].mean(),
-        "xwoba_on_chases_in_play": chases.loc[chases["in_play"] == 1, "estimated_woba_using_speedangle"].mean(),
-        "far_off_chase_rate_lt2k": far.loc[far["strikes"] < 2, "is_chase"].mean(),
-        "far_off_chase_rate_2k": far.loc[far["strikes"] == 2, "is_chase"].mean(),
-    })
-league = pd.DataFrame(league_rows)
+if (table.loc[table["archetype"] != "above average", "decision_share"].isna()).any():
+    raise SystemExit("A hitter with a net loss has no decision_share.")
 
 columns = [
     "game_year", "xchase_plus_rank", "player", "batter", "plate_appearances", "xchase_plus",
     "runs_saved_per_600", "decision_per_600", "execution_per_600", "decision_share", "archetype",
     "decision_A_early_far", "decision_B_2k_far", "decision_C_3ball_near", "decision_D_near",
-    "far_off_recoverable", "xchase_plus_if_far_off_fixed",
+    "far_off_recoverable", "xchase_plus_if_far_off_fixed", "shrinkage_factor",
     "chase_rate", "far_off_chase_rate_lt2k", "far_off_chase_rate_2k",
     "whiff_rate_on_chases", "xwoba_on_chases_in_play",
 ]
@@ -260,9 +334,9 @@ table = table[columns].sort_values(["game_year", "runs_saved_per_600"])
 # FAR-OFF CELLS
 # --------------------------------------------------
 
-cell = ["game_year", "strikes", "pitch_group", "zone_miss"]
+# Per qualified hitter; the league rate joined in is the all-hitter one
+# taken above, before the cut.
 far = df[df["far_off"]]
-league_cells = far.groupby(cell)["is_chase"].mean().rename("league_chase_rate")
 cells = (
     far.groupby(["batter"] + cell)
     .agg(

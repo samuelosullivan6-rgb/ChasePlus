@@ -44,7 +44,8 @@ THE PLAYER SURFACE
 
 import numpy as np
 
-HALF_PLATE_PLUS_BALL = 0.83     # ft; same zone edge as steps 02-04
+# ft; the zone edge every script draws, set once in chase_model.py
+from chase_model import HALF_PLATE_PLUS_BALL  # noqa: F401,E402
 
 # Card grid (ft). x spans both sides of the plate; z runs from the
 # ground to well above the tallest hitter's zone.
